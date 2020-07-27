@@ -34,9 +34,11 @@
             "@php vendor/bin/simple-phpunit"
         ],
         "phpstan": [
+            "@php vendor/bin/simple-phpunit --atleast-version 0",
             "@php vendor/bin/phpstan analyze --ansi"
         ],
         "psalm": [
+            "@php vendor/bin/simple-phpunit --atleast-version 0",
             "@php vendor/bin/psalm"
         ],
         "lint": [
