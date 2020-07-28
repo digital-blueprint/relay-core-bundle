@@ -5,7 +5,9 @@
     "require": {
         "php": "^7.2.24",
         "api-platform/core": "^2.4",
-        "symfony/framework-bundle": "^4.1.12"
+        "symfony/framework-bundle": "^4.1.12",
+        "symfony/security-core": "^4.4",
+        "guzzlehttp/guzzle": "^6.0"
     },
     "require-dev": {
         "symfony/phpunit-bridge": "^4.4",
