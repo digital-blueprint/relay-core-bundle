@@ -9,6 +9,5 @@ class DbpCoreBundle extends Bundle
 {
     public function build(ContainerBuilder $container)
     {
-        
     }
 }

@@ -1,1 +1,5 @@
 services:
+  DBP\API\CoreBundle\Service\GuzzleLogger:
+    public: true
+    autowire: true
+    autoconfigure: true
