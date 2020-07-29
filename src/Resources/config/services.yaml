@@ -8,3 +8,18 @@ services:
     public: false
     autowire: true
     autoconfigure: true
+
+  DBP\API\CoreBundle\DataProvider\OrganizationDataProvider:
+    tags: ['api_platform.item_data_provider']
+    autowire: true
+    autoconfigure: true
+
+  DBP\API\CoreBundle\DataProvider\PersonItemDataProvider:
+    tags: ['api_platform.item_data_provider']
+    autowire: true
+    autoconfigure: true
+
+  DBP\API\CoreBundle\DataProvider\PersonCollectionDataProvider:
+    tags: ['api_platform.collection_data_provider']
+    autowire: true
+    autoconfigure: true
