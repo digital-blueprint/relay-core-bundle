@@ -41,6 +41,15 @@ class Configuration implements ConfigurationInterface
             ->end();
         $treeBuilder->getRootNode()->append($coNode);
 
+        $coBuilder = new TreeBuilder('api_docs');
+        $coNode = $coBuilder->getRootNode()
+            ->children()
+            ->scalarNode('keycloak_client_id')->end()
+            ->scalarNode('build_info')->end()
+            ->scalarNode('build_info_url')->end()
+            ->end();
+        $treeBuilder->getRootNode()->append($coNode);
+
         return $treeBuilder;
     }
 }

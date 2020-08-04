@@ -5,10 +5,11 @@ namespace DBP\API\CoreBundle\DependencyInjection;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
-class DbpCoreExtension extends ConfigurableExtension
+class DbpCoreExtension extends ConfigurableExtension implements PrependExtensionInterface
 {
     public function loadInternal(array $configs, ContainerBuilder $container)
     {
@@ -47,5 +48,33 @@ class DbpCoreExtension extends ConfigurableExtension
         $oldValues = $container->getParameter($parameter);
         assert(is_array($oldValues));
         $container->setParameter($parameter, array_merge($oldValues, $values));
+    }
+
+    public function prepend(ContainerBuilder $container)
+    {
+        $container->loadFromExtension('twig', array(
+            'paths' => array(
+                __DIR__ . '/../Resources/ApiPlatformBundle' => 'ApiPlatform',
+            ),
+            'debug' => '%kernel.debug%',
+            'strict_variables' => '%kernel.debug%',
+            'exception_controller' => null,
+        ));
+
+        $configs = $container->getExtensionConfig($this->getAlias());
+        $keycloak = $configs[0]['keycloak'];
+        $api_docs = $configs[0]['api_docs'];
+
+        $container->loadFromExtension('twig', array(
+            'globals' => array(
+                'keycloak_server_url' => $keycloak['server_url'],
+                'keycloak_realm' => $keycloak['realm'],
+                'keycloak_frontend_client_id' => $api_docs['keycloak_client_id'],
+                'app_buildinfo' => $api_docs['build_info'],
+                'app_buildinfo_url' => $api_docs['build_info_url'],
+                'app_env' => '%kernel.environment%',
+                'app_debug' => '%kernel.debug%'
+            ),
+        ));
     }
 }
