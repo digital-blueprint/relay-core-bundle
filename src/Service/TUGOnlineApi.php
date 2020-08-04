@@ -72,7 +72,7 @@ class TUGOnlineApi
 
         $stack->push($this->guzzleLogger->getClientHandler());
 
-        $guzzeCachePool = $this->container->get('cache.dbp.guzzle');
+        $guzzeCachePool = $this->container->get('dbp_api.cache.core.campus_online');
         assert($guzzeCachePool instanceof CacheItemPoolInterface);
 
         $cacheMiddleWare = new CacheMiddleware(

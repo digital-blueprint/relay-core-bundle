@@ -44,7 +44,7 @@ class KeycloakBearerUserProvider implements UserProviderInterface
 
     public function loadUserByUsername($accessToken): UserInterface
     {
-        $guzzleCache = $this->container->get('cache.dbp.guzzle');
+        $guzzleCache = $this->container->get('dbp_api.cache.core.keycloak_cert');
         assert($guzzleCache instanceof CacheItemPoolInterface);
 
         $config = $this->config;
@@ -62,7 +62,7 @@ class KeycloakBearerUserProvider implements UserProviderInterface
             $validator::checkAudience($jwt, $config['audience']);
         }
 
-        $cache = $this->container->get('cache.dbp.auth_person');
+        $cache = $this->container->get('dbp_api.cache.core.auth_person');
         assert($cache instanceof CacheItemPoolInterface);
         $cachingPersonProvider = new CachingPersonProvider($this->personProvider, $cache, $jwt);
 
