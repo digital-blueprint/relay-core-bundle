@@ -1,0 +1,92 @@
+<?php
+
+namespace DBP\API\CoreBundle\Helpers;
+
+use DBP\API\CoreBundle\Service\LDAPApi;
+
+class TUGTools
+{
+    /**
+     * Generates role names from account types
+     *
+     * @param array $accountTypes
+     * @return array
+     */
+    public static function accountTypesToRoles(array $accountTypes): array
+    {
+        $roles = [];
+
+        if (in_array("BEDIENSTETE:OK", $accountTypes)) {
+            $roles[] = LDAPApi::ROLE_STAFF;
+        }
+
+        if (in_array("STUDENTEN:OK", $accountTypes)) {
+            $roles[] = LDAPApi::ROLE_STUDENT;
+        }
+
+        if (in_array("ALUMNI:OK", $accountTypes)) {
+            $roles[] = LDAPApi::ROLE_ALUMNI;
+        }
+
+        return $roles;
+    }
+
+    /**
+     * Generates role names from functions
+     * Function "F_EDV:F:95300:34886" will be role "ROLE_F_EDV_F"
+     *
+     * @param string[] $functions
+     * @return string[]
+     */
+    public static function functionsToRoles(array $functions): array
+    {
+        $roles = $functions;
+
+        array_walk($roles, function (&$item) {
+            $item = join("_", array_slice(preg_split('/:/', "ROLE_" . $item), 0, 2));
+        });
+
+        $roles = array_unique($roles);
+
+        return $roles;
+    }
+
+    /**
+     * Injects special permissions
+     *
+     * @param string $userId
+     * @param array $functions
+     */
+    public static function injectSpecialPermissions(string $userId, array &$functions) {
+        $DEVELOPERS = ['christoph_reiter', 'jfink', 'pbeke', 'eneuber', 'koeseoglu', 'tsteinwen13', 'riina'];
+        $DUMMY_USERS = ['woody007', 'koarl', 'muma', 'waldi08'];
+        $IBIB_TEST_USERS = ['wrussm', 'finkst', 'salzburg'];
+        $ESIGN_TEST_USERS = ['fipsi1505', 'joebch', 'dobnik', 'sascha_rossmann'];
+
+        // give special access to developers and test accounts
+        if (in_array($userId, $DEVELOPERS) || in_array($userId, $DUMMY_USERS) || in_array($userId, $IBIB_TEST_USERS)) {
+            $functions[] = "F_BIB:F:2190:1263";
+            $functions[] = "F_BIB:F:2050:1190";
+            $functions[] = "F_BIB:F:1490:681";
+            $functions[] = "F_BIB:F:2150:1231";
+            $functions[] = "F_BIB:F:4370:2322";
+            $functions[] = "F_BIB:F:5070:2374";
+            $functions[] = "F_BIB:F:3730:11072";
+        }
+
+        if (in_array($userId, $DEVELOPERS) || in_array($userId, $ESIGN_TEST_USERS)) {
+            // Until we get those scopes set up in auth-test.tugraz.at and auth.tugraz.at
+            $functions[] = "SCOPE_OFFICIAL-SIGNATURE";
+            $functions[] = "SCOPE_VERIFY-SIGNATURE";
+        }
+
+        // special handling for F2130 (Institut für Wasserbau und Wasserwirtschaft, id 1226) and
+        // F2150 (Institut für Siedlungswasserwirtschaft und Landschaftswasserbau, id 1231)
+        if (in_array("F_BIB:F:2130:1226", $functions) || in_array("F_BIB:F:2150:1231", $functions)) {
+            // add function for F2135 (Zentralbibliothek Wasser) which has no real id
+            $functions[] = "F_BIB:F:2135:1226_1231";
+        }
+
+        sort($functions);
+    }
+}

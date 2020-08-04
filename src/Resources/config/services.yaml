@@ -31,3 +31,14 @@ services:
   DBP\API\CoreBundle\Keycloak\KeycloakBearerAuthenticator:
     autowire: true
     autoconfigure: true
+
+  DBP\API\CoreBundle\Service\PersonProviderInterface:
+    factory: ['DBP\API\CoreBundle\Service\PersonProviderFactory', 'createPersonProvider']
+    autowire: true
+    autoconfigure: true
+
+  DBP\API\CoreBundle\Service\:
+    resource: '../../Service'
+    autowire: true
+    autoconfigure: true
+

@@ -3,7 +3,7 @@
 namespace DBP\API\CoreBundle\Keycloak;
 
 use DBP\API\CoreBundle\Entity\Person;
-use App\Service\PersonProviderInterface;
+use DBP\API\CoreBundle\Service\PersonProviderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class KeycloakBearerUser implements UserInterface

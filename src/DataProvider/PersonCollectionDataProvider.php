@@ -6,7 +6,7 @@ use ApiPlatform\Core\DataProvider\CollectionDataProviderInterface;
 use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
 use DBP\API\CoreBundle\Helpers\ArrayFullPaginator;
 use DBP\API\CoreBundle\Entity\Person;
-use App\Service\PersonProviderInterface;
+use DBP\API\CoreBundle\Service\PersonProviderInterface;
 
 final class PersonCollectionDataProvider implements CollectionDataProviderInterface, RestrictedDataProviderInterface
 {

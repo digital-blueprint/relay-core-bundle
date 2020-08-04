@@ -5,7 +5,7 @@ namespace DBP\API\CoreBundle\DataProvider;
 use ApiPlatform\Core\DataProvider\ItemDataProviderInterface;
 use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
 use DBP\API\CoreBundle\Entity\Person;
-use App\Service\PersonProviderInterface;
+use DBP\API\CoreBundle\Service\PersonProviderInterface;
 
 final class PersonItemDataProvider implements ItemDataProviderInterface, RestrictedDataProviderInterface
 {
