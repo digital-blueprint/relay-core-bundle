@@ -23,3 +23,11 @@ services:
     tags: ['api_platform.collection_data_provider']
     autowire: true
     autoconfigure: true
+
+  DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProvider:
+    autowire: true
+    autoconfigure: true
+
+  DBP\API\CoreBundle\Keycloak\KeycloakBearerAuthenticator:
+    autowire: true
+    autoconfigure: true
