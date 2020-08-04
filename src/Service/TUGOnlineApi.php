@@ -43,12 +43,15 @@ class TUGOnlineApi
 
     private $guzzleLogger;
 
+    private $config;
+
     private const CACHE_TTL = 3600;
 
     public function __construct(ContainerInterface $container, Security $security, GuzzleLogger $guzzleLogger)
     {
+        $this->config = $container->getParameter('dbp_api.core.co_config');
         $this->security = $security;
-        $this->token = $_ENV['KNOWLEDGE_BASE_API_TOKEN'];
+        $this->token = $this->config['api_token'];
         $this->container = $container;
         $this->guzzleLogger = $guzzleLogger;
     }
@@ -61,7 +64,7 @@ class TUGOnlineApi
     private function getClient() : Client
     {
         $stack = HandlerStack::create($this->clientHandler);
-        $base_uri = $_ENV['TU_ONLINE_ORGANIZATION_API_URL'];
+        $base_uri = $this->config['api_url_organization'];
         $client_options = [
             'base_uri' => $base_uri,
             'handler' => $stack,

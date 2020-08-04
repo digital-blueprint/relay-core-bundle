@@ -19,6 +19,10 @@ class DbpCoreExtension extends ConfigurableExtension
             new FileLocator(__DIR__.'/../Resources/config')
         );
         $loader->load('services.yaml');
+
+        $container->setParameter('dbp_api.core.keycloak_config', $configs['keycloak']);
+        $container->setParameter('dbp_api.core.ldap_config', $configs['ldap']);
+        $container->setParameter('dbp_api.core.co_config', $configs['campus_online']);
     }
 
     private function extendArrayParameter(ContainerBuilder $container, string $parameter, array $values) {

@@ -6,7 +6,7 @@ use DBP\API\CoreBundle\Service\GuzzleLogger;
 use DBP\API\CoreBundle\Service\PersonProviderInterface;
 
 use Psr\Cache\CacheItemPoolInterface;
-use Psr\Container\ContainerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
@@ -16,6 +16,7 @@ class KeycloakBearerUserProvider implements UserProviderInterface
     private $personProvider;
     private $guzzleLogger;
     private $container;
+    private $config;
 
     /**
      * Given a token returns if the token was generated through a client credential flow.
@@ -38,10 +39,7 @@ class KeycloakBearerUserProvider implements UserProviderInterface
         $this->personProvider = $personProvider;
         $this->guzzleLogger = $guzzleLogger;
         $this->container = $container;
-    }
-
-    private function useLocalValidation() {
-        return $_ENV['KEYCLOAK_LOCAL_VALIDATION'] === 'true';
+        $this->config = $container->getParameter('dbp_api.core.keycloak_config');
     }
 
     public function loadUserByUsername($accessToken): UserInterface
@@ -49,18 +47,19 @@ class KeycloakBearerUserProvider implements UserProviderInterface
         $guzzleCache = $this->container->get('cache.dbp.guzzle');
         assert($guzzleCache instanceof CacheItemPoolInterface);
 
+        $config = $this->config;
         $keycloak = new Keycloak(
-            $_ENV['KEYCLOAK_SERVER_URL'], $_ENV['KEYCLOAK_REALM'],
-            $_ENV['KEYCLOAK_CLIENT_ID'], $_ENV['KEYCLOAK_CLIENT_SECRET']);
+            $config['server_url'], $config['realm'],
+            $config['client_id'], $config['client_secret']);
 
         $validator = new KeycloakTokenValidator($keycloak, $guzzleCache, $this->guzzleLogger);
-        if ($this->useLocalValidation())
+        if ($config['local_validation'])
             $jwt = $validator->validateLocal($accessToken);
         else
             $jwt = $validator->validateRemoteIntrospect($accessToken);
 
-        if ($_ENV['KEYCLOAK_AUDIENCE'] ?? '' !== '') {
-            $validator::checkAudience($jwt, $_ENV['KEYCLOAK_AUDIENCE']);
+        if ($config['audience'] ?? '' !== '') {
+            $validator::checkAudience($jwt, $config['audience']);
         }
 
         $cache = $this->container->get('cache.dbp.auth_person');

@@ -11,6 +11,7 @@ use DBP\API\CoreBundle\Helpers\JsonException;
 use DBP\API\CoreBundle\Helpers\Tools as CoreTools;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\Security;
 use function GuzzleHttp\uri_template;
 
@@ -21,19 +22,21 @@ class KeycloakApi implements PersonProviderInterface
     private $realm;
     private $logger;
     private $security;
+    private $config;
 
-    public function __construct(LoggerInterface $logger, Security $security)
+    public function __construct(ContainerInterface $container, LoggerInterface $logger, Security $security)
     {
-        $this->clientId = $_ENV['KEYCLOAK_CLIENT_ID'];
-        $this->clientSecret = $_ENV['KEYCLOAK_CLIENT_SECRET'];
-        $this->realm = $_ENV['KEYCLOAK_REALM'];
+        $this->config = $container->getParameter('dbp_api.core.keycloak_config');
+        $this->clientId = $this->config['client_id'];
+        $this->clientSecret = $this->config['client_secret'];
+        $this->realm = $this->config['realm'];
         $this->logger = $logger;
         $this->security = $security;
     }
 
     private function getClient() : Client
     {
-        $base_uri = $_ENV['KEYCLOAK_SERVER_URL'];
+        $base_uri = $this->config['server_url'];
         if (substr($base_uri, -1) !== '/')
             $base_uri .= '/';
 

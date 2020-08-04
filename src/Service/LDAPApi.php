@@ -15,6 +15,7 @@ use Adldap\Models\User;
 use DBP\API\CoreBundle\Helpers\TUGTools;
 use DBP\API\CoreBundle\Helpers\Tools as CoreTools;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\Security;
 
 class LDAPApi implements PersonProviderInterface
@@ -46,17 +47,18 @@ class LDAPApi implements PersonProviderInterface
 
     private $security;
 
-    public function __construct(TUGOnlineApi $tugapi, Security $security, LoggerInterface $logger)
+    public function __construct(ContainerInterface $container, TUGOnlineApi $tugapi, Security $security, LoggerInterface $logger)
     {
+        $config = $container->getParameter('dbp_api.core.ldap_config');
         $this->ad = new Adldap();
         $this->logger = $logger;
         $this->security = $security;
 
         $config = [
-            'hosts'    => [$_ENV['LDAP_HOST']],
-            'base_dn'  => $_ENV['LDAP_BASE_DN'],
-            'username' => $_ENV['LDAP_USER'],
-            'password' => $_ENV['LDAP_PASS'],
+            'hosts'    => [$config['host']],
+            'base_dn'  => $config['base_dn'],
+            'username' => $config['username'],
+            'password' => $config['password'],
             'use_tls'  => true,
         ];
 
