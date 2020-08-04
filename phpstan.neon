@@ -11,6 +11,7 @@ parameters:
         - vendor/bin/.phpunit/phpunit-8-0/vendor/autoload.php
     excludes_analyse:
         - tests/bootstrap.php
+        - src/Swagger/DocumentationNormalizer.php
     ignoreErrors:
         - message: '#.*NodeDefinition::children.*#'
           path: ./src/DependencyInjection
