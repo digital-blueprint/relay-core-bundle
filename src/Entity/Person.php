@@ -105,7 +105,7 @@ class Person
     /**
      * @var DateTimeInterface
      * @ApiProperty(iri="http://schema.org/Date")
-     * @Groups({"current_user", "role_library"})
+     * @Groups({"current_user", "birthdate_access"})
      */
     private $birthDate;
 
