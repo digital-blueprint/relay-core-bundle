@@ -22,8 +22,7 @@
             clientId: "{{ keycloak_frontend_client_id }}"
         };
     </script>
-    <script type="module" id="vpu-auth-src" src="vpu-auth/vpu-auth.js"></script>
-    <script  type="module" src="usetoken.js"></script>
+    <script type="module" src="{{ asset('bundles/dbpcore/index.js') }}"></script>
 </head>
 
 <body>
