@@ -133,7 +133,7 @@ class TUGOnlineApi
             // tugonline sends back empty images with status==200 sometimes, we can detect those by
             // checking if it includes a content-length header or not
             $hasContent = !empty($response->getHeader('content-length'));
-            if ($response->getStatusCode() == 200 && $hasContent) {
+            if ($response->getStatusCode() === 200 && $hasContent) {
                 assert(isset($uris[$i]));
 
                 return $uris[$i];
@@ -209,7 +209,7 @@ class TUGOnlineApi
                 throw new ItemNotLoadedException(sprintf("Organization with id '%s' could not be loaded because result was no XML!", $identifier));
             }
         } catch (RequestException $e) {
-            if ($e->getCode() == 401) {
+            if ($e->getCode() === 401) {
                 $message = $this->getOrganizationRequestExceptionMessage($e);
 
                 switch ($message) {

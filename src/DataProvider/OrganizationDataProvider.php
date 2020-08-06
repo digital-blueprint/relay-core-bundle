@@ -32,10 +32,10 @@ final class OrganizationDataProvider implements ItemDataProviderInterface, Restr
         $lang = $filters['lang'] ?? 'de';
 
         // special handling for F2135 (Zentralbibliothek Wasser)
-        if ($id == '1226_1231-F2135') {
+        if ($id === '1226_1231-F2135') {
             $organization = new Organization();
             $organization->setIdentifier($id);
-            $organization->setName($lang == 'de' ? 'Zentralbibliothek Wasser' : 'Central library Water');
+            $organization->setName($lang === 'de' ? 'Zentralbibliothek Wasser' : 'Central library Water');
             $organization->setAlternateName('F2135');
 
             return $organization;

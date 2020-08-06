@@ -201,7 +201,7 @@ class LDAPApi implements PersonProviderInterface
 
         $birthDateString = trim($user->getFirstAttribute('DateOfBirth'));
 
-        if ($birthDateString != '') {
+        if ($birthDateString !== '') {
             $matches = [];
 
             // get birthday from LDAP DateOfBirth (e.g. 19810718)
