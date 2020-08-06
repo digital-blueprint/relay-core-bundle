@@ -66,7 +66,7 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
 
     public function prepend(ContainerBuilder $container)
     {
-        foreach (['api_platform', 'nelmio_cors', 'twig', 'security'] as $extKey) {
+        foreach (['api_platform', 'nelmio_cors', 'twig', 'security', 'framework'] as $extKey) {
             if (!$container->hasExtension($extKey)) {
                 throw new \Exception("'".$this->getAlias()."' requires the '$extKey' bundle to be loaded");
             }
@@ -117,6 +117,12 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
                 ],
             ],
             'exception_to_status' => $exceptionToStatus,
+        ]);
+
+        $container->loadFromExtension('framework', [
+            'router' => [
+                'utf8' => true,
+            ],
         ]);
 
         $container->loadFromExtension('security', [
