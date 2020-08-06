@@ -92,7 +92,7 @@ class TUGOnlineApi
         $accountTypes = $user->getAttribute('CO-ACCOUNTTYPE-STATUS-C') ?? [];
 
         $bdId = $user->getAttribute('CO-OBFUSCATED-C-BD');
-        if (in_array('BEDIENSTETE:OK', $accountTypes) && !empty($bdId)) {
+        if (in_array('BEDIENSTETE:OK', $accountTypes, true) && !empty($bdId)) {
             $uris[] = uri_template('https://online.tugraz.at/tug_online/visitenkarte.showImage?pPersonenGruppe={group}&pPersonenId={personId}', [
                 'group' => '3',
                 'personId' => $bdId[0],
@@ -100,7 +100,7 @@ class TUGOnlineApi
         }
 
         $stId = $user->getAttribute('CO-OBFUSCATED-C-ST');
-        if (in_array('STUDENTEN:OK', $accountTypes) && !empty($stId)) {
+        if (in_array('STUDENTEN:OK', $accountTypes, true) && !empty($stId)) {
             $uris[] = uri_template('https://online.tugraz.at/tug_online/visitenkarte.showImage?pPersonenGruppe={group}&pPersonenId={personId}', [
                 'group' => '5',
                 'personId' => $stId[0],
@@ -108,7 +108,7 @@ class TUGOnlineApi
         }
 
         $extId = $user->getAttribute('CO-OBFUSCATED-C-EXT');
-        if (in_array('ALUMNI:OK', $accountTypes) && !empty($extId)) {
+        if (in_array('ALUMNI:OK', $accountTypes, true) && !empty($extId)) {
             $uris[] = uri_template('https://online.tugraz.at/tug_online/visitenkarte.showImage?pPersonenGruppe={group}&pPersonenId={personId}', [
                 'group' => '6',
                 'personId' => $bdId[0],
@@ -273,7 +273,7 @@ class TUGOnlineApi
         $institute = $organization->getAlternateName();
 
         // check if current user has F_BIB permissions to the institute of the book offer
-        if (!in_array($institute, $institutes)) {
+        if (!in_array($institute, $institutes, true)) {
             // throw an exception if we want to
             if ($throwException) {
                 throw new AccessDeniedHttpException(sprintf("Person '%s' is not allowed to work with library '%s'!", $user->getUsername(), $institute));
