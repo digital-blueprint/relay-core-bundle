@@ -10,6 +10,8 @@ use ApiPlatform\Core\Exception\ItemNotFoundException;
 use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
 use DBP\API\CoreBundle\Exception\ItemNotStoredException;
 use DBP\API\CoreBundle\Exception\ItemNotUsableException;
+use DBP\API\CoreBundle\Keycloak\KeycloakBearerAuthenticator;
+use DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProvider;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -64,7 +66,7 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
 
     public function prepend(ContainerBuilder $container)
     {
-        foreach (['api_platform', 'nelmio_cors', 'twig'] as $extKey) {
+        foreach (['api_platform', 'nelmio_cors', 'twig', 'security'] as $extKey) {
             if (!$container->hasExtension($extKey)) {
                 throw new \Exception("'".$this->getAlias()."' requires the '$extKey' bundle to be loaded");
             }
@@ -115,6 +117,33 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
                 ],
             ],
             'exception_to_status' => $exceptionToStatus,
+        ]);
+
+        $container->loadFromExtension('security', [
+            'providers' => [
+                'keycloak_bearer_security_provider' => ['id' => KeycloakBearerUserProvider::class],
+            ],
+            'firewalls' => [
+                'dev' => [
+                    'pattern' => '^/(_(profiler|wdt)|css|images|js)/',
+                    'security' => false,
+                ],
+                'swagger_documentation' => [
+                    'pattern' => '^/$',
+                    'anonymous' => true,
+                ],
+                'docs_jsonld' => [
+                    'pattern' => '^/docs.jsonld',
+                    'anonymous' => true,
+                ],
+                'api' => [
+                    'pattern' => '^/',
+                    'guard' => [
+                        'provider' => 'keycloak_bearer_security_provider',
+                        'authenticator' => KeycloakBearerAuthenticator::class,
+                    ],
+                ],
+            ],
         ]);
 
         $container->loadFromExtension('nelmio_cors', [
