@@ -11,7 +11,7 @@ use Iterator;
 
 abstract class ArrayPaginator implements Iterator, PaginatorInterface
 {
-    const DEBUG = false;
+    public const DEBUG = false;
     protected $position = 0;
     protected $array = [];
     protected $perPage = 100;

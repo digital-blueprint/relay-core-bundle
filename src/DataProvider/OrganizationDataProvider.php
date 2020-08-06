@@ -28,8 +28,8 @@ final class OrganizationDataProvider implements ItemDataProviderInterface, Restr
      */
     public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []): ?Organization
     {
-        $filters = isset($context['filters']) ? $context['filters'] : [];
-        $lang = isset($filters['lang']) ? $filters['lang'] : 'de';
+        $filters = $context['filters'] ?? [];
+        $lang = $filters['lang'] ?? 'de';
 
         // special handling for F2135 (Zentralbibliothek Wasser)
         if ($id == '1226_1231-F2135') {

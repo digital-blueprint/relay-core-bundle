@@ -8,7 +8,7 @@ namespace DBP\API\CoreBundle\Helpers;
 
 class ArrayPartPaginator extends ArrayPaginator
 {
-    const DEBUG = false;
+    public const DEBUG = false;
     protected $totalItemCount = 0;
 
     public function __construct($items = [], $totalItemCount = 0, $page = 1, $perPage = 30)

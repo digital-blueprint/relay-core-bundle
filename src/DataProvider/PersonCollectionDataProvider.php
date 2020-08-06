@@ -10,7 +10,7 @@ use DBP\API\CoreBundle\Service\PersonProviderInterface;
 
 final class PersonCollectionDataProvider implements CollectionDataProviderInterface, RestrictedDataProviderInterface
 {
-    const ITEMS_PER_PAGE = 250;
+    public const ITEMS_PER_PAGE = 250;
 
     private $api;
 
@@ -32,7 +32,7 @@ final class PersonCollectionDataProvider implements CollectionDataProviderInterf
         $perPage = self::ITEMS_PER_PAGE;
         $page = 1;
         $api = $this->api;
-        $filters = isset($context['filters']) ? $context['filters'] : [];
+        $filters = $context['filters'] ?? [];
 
         if (isset($context['filters']['page'])) {
             $page = (int) $context['filters']['page'];

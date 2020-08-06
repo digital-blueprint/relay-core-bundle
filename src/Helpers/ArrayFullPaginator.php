@@ -8,5 +8,5 @@ namespace DBP\API\CoreBundle\Helpers;
 
 class ArrayFullPaginator extends ArrayPaginator
 {
-    const DEBUG = false;
+    public const DEBUG = false;
 }
