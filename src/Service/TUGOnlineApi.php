@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DBP\API\CoreBundle\Service;
 
 use Adldap\Models\User;
@@ -229,9 +231,10 @@ class TUGOnlineApi
     {
         $organization = new Organization();
         $organization->setIdentifier($identifier);
-        $organization->setName(trim($xmlElement->xpath('/CDM/orgUnit/orgUnitName/text')[0] ?? ''));
-        $organization->setAlternateName('F'.trim($xmlElement->xpath('/CDM/orgUnit/orgUnitCode')[0] ?? ''));
-        $organization->setUrl(trim($xmlElement->xpath('/CDM/orgUnit/infoBlock/webLink/href')[0] ?? ''));
+
+        $organization->setName(trim((string) ($xmlElement->xpath('/CDM/orgUnit/orgUnitName/text')[0] ?? '')));
+        $organization->setAlternateName('F'.trim((string) ($xmlElement->xpath('/CDM/orgUnit/orgUnitCode')[0] ?? '')));
+        $organization->setUrl(trim((string) ($xmlElement->xpath('/CDM/orgUnit/infoBlock/webLink/href')[0] ?? '')));
 
         return $organization;
     }

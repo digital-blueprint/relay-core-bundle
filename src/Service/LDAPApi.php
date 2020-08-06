@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * LDAP wrapper service.
  *
@@ -199,7 +201,7 @@ class LDAPApi implements PersonProviderInterface
         $person->setPhoneExtension($user->getFirstAttribute('phoneExtension'));
         $person->setEmail($user->getFirstAttribute('mail'));
 
-        $birthDateString = trim($user->getFirstAttribute('DateOfBirth'));
+        $birthDateString = trim($user->getFirstAttribute('DateOfBirth') ?? '');
 
         if ($birthDateString !== '') {
             $matches = [];

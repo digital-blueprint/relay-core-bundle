@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DBP\API\CoreBundle\Tests\Helpers;
 
 use DBP\API\CoreBundle\Helpers\TUGTools;

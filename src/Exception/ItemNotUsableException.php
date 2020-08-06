@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Exception if an item or items could not be used.
  */

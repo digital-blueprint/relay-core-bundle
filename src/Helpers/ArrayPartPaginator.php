@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This is a paginator for collection data providers to work with items from an array,
  * that only contains a part of the result set.

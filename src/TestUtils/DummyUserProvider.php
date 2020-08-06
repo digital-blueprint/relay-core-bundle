@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DBP\API\CoreBundle\TestUtils;
 
 use DBP\API\CoreBundle\Keycloak\KeycloakBearerUser;

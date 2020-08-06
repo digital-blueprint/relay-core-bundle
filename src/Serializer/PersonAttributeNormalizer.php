@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DBP\API\CoreBundle\Serializer;
 
 use DBP\API\CoreBundle\Entity\Person;

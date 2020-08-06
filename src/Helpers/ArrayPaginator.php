@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * This is an abstract paginator for collection data providers to work with items from an array,
  * that contains the full result set.
