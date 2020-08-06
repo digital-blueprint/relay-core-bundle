@@ -64,6 +64,12 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
 
     public function prepend(ContainerBuilder $container)
     {
+        foreach (['api_platform', 'nelmio_cors', 'twig'] as $extKey) {
+            if (!$container->hasExtension($extKey)) {
+                throw new \Exception("'".$this->getAlias()."' requires the '$extKey' bundle to be loaded");
+            }
+        }
+
         $packageVersion = json_decode(
             file_get_contents(__DIR__.'/../../composer.json'), true)['version'];
 
@@ -109,6 +115,20 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
                 ],
             ],
             'exception_to_status' => $exceptionToStatus,
+        ]);
+
+        $container->loadFromExtension('nelmio_cors', [
+            'paths' => [
+                '^/' => [
+                    'origin_regex' => true,
+                    'allow_origin' => ['^.+$'],
+                    'allow_methods' => ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE'],
+                    'allow_headers' => ['Content-Type', 'Authorization'],
+                    // FIXME: Get rid of 'X-Analytics-Update-Date'
+                    'expose_headers' => ['Link', 'X-Analytics-Update-Date'],
+                    'max_age' => 3600,
+                ],
+            ],
         ]);
 
         $container->loadFromExtension('twig', [
