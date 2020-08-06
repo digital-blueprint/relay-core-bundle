@@ -1,0 +1,27 @@
+body {
+    margin: 0;
+}
+
+header {
+    display: none;
+}
+
+.swagger-ui .topbar {
+    background-color: #245B78;
+}
+
+.topbar img {
+    display: none;
+}
+
+#swagger-ui.api-platform .info .title {
+    color: #555;
+}
+
+.swagger-ui .auth-wrapper .authorize {
+    display: none;
+}
+
+.swagger-ui .scheme-container {
+    padding: 10px 0;
+}
