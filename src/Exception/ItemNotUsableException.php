@@ -1,6 +1,6 @@
 <?php
 /**
- * Exception if an item or items could not be used
+ * Exception if an item or items could not be used.
  */
 
 namespace DBP\API\CoreBundle\Exception;

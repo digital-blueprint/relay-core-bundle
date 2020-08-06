@@ -38,7 +38,8 @@ class KeycloakBearerUser implements UserInterface
      */
     private $username;
 
-    public function __construct(string $username, string $accessToken, PersonProviderInterface $personProvider, bool $isServiceAccount, array $scopes) {
+    public function __construct(string $username, string $accessToken, PersonProviderInterface $personProvider, bool $isServiceAccount, array $scopes)
+    {
         $this->personProvider = $personProvider;
         $this->person = null;
         $this->isServiceAccount = $isServiceAccount;
@@ -49,19 +50,21 @@ class KeycloakBearerUser implements UserInterface
 
     /**
      * In case the user is a service account it isn't associated with a Person and getPerson() will fail.
-     *
-     * @return bool
      */
-    public function isServiceAccount(): bool {
+    public function isServiceAccount(): bool
+    {
         return $this->isServiceAccount;
     }
 
-    private function getPerson() {
-        if ($this->isServiceAccount())
-            throw new \RuntimeException("No person available for service accounts");
-
-        if (!$this->person)
+    private function getPerson()
+    {
+        if ($this->isServiceAccount()) {
+            throw new \RuntimeException('No person available for service accounts');
+        }
+        if (!$this->person) {
             $this->person = $this->personProvider->getPerson($this->getUsername(), false);
+        }
+
         return $this->person;
     }
 
@@ -74,13 +77,14 @@ class KeycloakBearerUser implements UserInterface
         }
 
         foreach ($this->scopes as $scope) {
-            $roles[] = 'ROLE_SCOPE_' . mb_strtoupper($scope);
+            $roles[] = 'ROLE_SCOPE_'.mb_strtoupper($scope);
         }
 
         return $roles;
     }
 
-    public function getInstitutesForGroup(string $group) {
+    public function getInstitutesForGroup(string $group)
+    {
         if ($this->isServiceAccount()) {
             return [];
         }

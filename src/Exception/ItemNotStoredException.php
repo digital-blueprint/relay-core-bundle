@@ -1,6 +1,6 @@
 <?php
 /**
- * Exception if an item could not be stored
+ * Exception if an item could not be stored.
  */
 
 namespace DBP\API\CoreBundle\Exception;

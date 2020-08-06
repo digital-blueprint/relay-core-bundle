@@ -46,6 +46,7 @@ class KeycloakBearerAuthenticator extends AbstractGuardAuthenticator
     public function checkCredentials($credentials, UserInterface $user)
     {
         assert($user instanceof KeycloakBearerUser);
+
         return $this->formatToken($credentials['token']) === $user->getAccessToken();
     }
 

@@ -1,7 +1,7 @@
 <?php
 
-
 namespace DBP\API\CoreBundle\Keycloak;
 
-
-class TokenValidationException extends \Exception {}
+class TokenValidationException extends \Exception
+{
+}

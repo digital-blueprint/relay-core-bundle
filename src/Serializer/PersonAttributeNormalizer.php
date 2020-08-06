@@ -1,4 +1,5 @@
 <?php
+
 namespace DBP\API\CoreBundle\Serializer;
 
 use DBP\API\CoreBundle\Entity\Person;
@@ -47,7 +48,6 @@ class PersonAttributeNormalizer implements ContextAwareNormalizerInterface, Norm
 
     /**
      * @param Person $object
-     * @return bool
      */
     private function isCurrentUser($object): bool
     {

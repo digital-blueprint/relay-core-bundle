@@ -9,7 +9,6 @@ use Psr\Log\LoggerInterface;
 
 class GuzzleLogger implements LoggerInterface
 {
-
     private $logger;
 
     public function __construct(LoggerInterface $guzzleLogger)
@@ -18,73 +17,73 @@ class GuzzleLogger implements LoggerInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
-    public function emergency($message, array $context = array())
+    public function emergency($message, array $context = [])
     {
         $this->logger->emergency($message, $context);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
-    public function alert($message, array $context = array())
+    public function alert($message, array $context = [])
     {
         $this->logger->alert($message, $context);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
-    public function critical($message, array $context = array())
+    public function critical($message, array $context = [])
     {
         $this->logger->critical($message, $context);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
-    public function error($message, array $context = array())
+    public function error($message, array $context = [])
     {
         $this->logger->error($message, $context);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
-    public function warning($message, array $context = array())
+    public function warning($message, array $context = [])
     {
         $this->logger->warning($message, $context);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
-    public function notice($message, array $context = array())
+    public function notice($message, array $context = [])
     {
         $this->logger->notice($message, $context);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
-    public function info($message, array $context = array())
+    public function info($message, array $context = [])
     {
         $this->logger->info($message, $context);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
-    public function debug($message, array $context = array())
+    public function debug($message, array $context = [])
     {
         $this->logger->debug($message, $context);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
-    public function log($level, $message, array $context = array())
+    public function log($level, $message, array $context = [])
     {
         $message = Tools::filterErrorMessage($message);
         $this->logger->log($level, $message, $context);

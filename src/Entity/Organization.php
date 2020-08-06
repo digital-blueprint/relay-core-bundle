@@ -4,8 +4,8 @@ namespace DBP\API\CoreBundle\Entity;
 
 use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Annotation\ApiResource;
-use DBP\API\AlmaBundle\Controller\GetLibraryBookOffersByOrganization;
 use DBP\API\AlmaBundle\Controller\GetLibraryBookLoansByOrganization;
+use DBP\API\AlmaBundle\Controller\GetLibraryBookOffersByOrganization;
 use DBP\API\AlmaBundle\Controller\GetLibraryBookOrdersByOrganization;
 use Symfony\Component\Serializer\Annotation\Groups;
 

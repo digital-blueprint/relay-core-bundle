@@ -1,32 +1,33 @@
 <?php
 /**
- * LDAP wrapper service
+ * LDAP wrapper service.
+ *
  * @see https://github.com/Adldap2/Adldap2
  */
 
 namespace DBP\API\CoreBundle\Service;
 
+use Adldap\Adldap;
+use Adldap\Models\User;
 use Adldap\Query\Builder;
 use ApiPlatform\Core\Exception\ItemNotFoundException;
 use DBP\API\CoreBundle\Entity\Person;
 use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
-use Adldap\Adldap;
-use Adldap\Models\User;
-use DBP\API\CoreBundle\Helpers\TUGTools;
 use DBP\API\CoreBundle\Helpers\Tools as CoreTools;
+use DBP\API\CoreBundle\Helpers\TUGTools;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\Security;
 
 class LDAPApi implements PersonProviderInterface
 {
-    const ROLE_STAFF = "ROLE_STAFF";
-    const ROLE_STUDENT = "ROLE_STUDENT";
-    const ROLE_ALUMNI = "ROLE_ALUMNI";
-    const ROLE_BIB = "ROLE_F_BIB_F";
+    const ROLE_STAFF = 'ROLE_STAFF';
+    const ROLE_STUDENT = 'ROLE_STUDENT';
+    const ROLE_ALUMNI = 'ROLE_ALUMNI';
+    const ROLE_BIB = 'ROLE_F_BIB_F';
 
     // singleton to cache fetched users by alma user id
-    static $USERS_BY_ALMA_USER_ID = [];
+    public static $USERS_BY_ALMA_USER_ID = [];
 
     private $PAGESIZE = 50;
 
@@ -55,11 +56,11 @@ class LDAPApi implements PersonProviderInterface
         $this->security = $security;
 
         $config = [
-            'hosts'    => [$config['host']],
-            'base_dn'  => $config['base_dn'],
+            'hosts' => [$config['host']],
+            'base_dn' => $config['base_dn'],
             'username' => $config['username'],
             'password' => $config['password'],
-            'use_tls'  => true,
+            'use_tls' => true,
         ];
 
         $this->ad->addProvider($config);
@@ -67,8 +68,6 @@ class LDAPApi implements PersonProviderInterface
     }
 
     /**
-     * @param array $filters
-     * @return array
      * @throws ItemNotLoadedException
      */
     private function getPeopleUserItems(array $filters): array
@@ -82,8 +81,8 @@ class LDAPApi implements PersonProviderInterface
             $search = $builder
                 ->where('objectClass', '=', $provider->getSchema()->person());
 
-            if (isset($filters["search"])) {
-                $items = explode(" ", $filters["search"]);
+            if (isset($filters['search'])) {
+                $items = explode(' ', $filters['search']);
 
                 // search for all substrings
                 foreach ($items as $item) {
@@ -94,13 +93,11 @@ class LDAPApi implements PersonProviderInterface
             return $search->sortBy('sn', 'asc')->paginate($this->PAGESIZE)->getResults();
         } catch (\Adldap\Auth\BindException $e) {
             // There was an issue binding / connecting to the server.
-            throw new ItemNotLoadedException(sprintf("People could not be loaded! Message: %s", CoreTools::filterErrorMessage($e->getMessage())));
+            throw new ItemNotLoadedException(sprintf('People could not be loaded! Message: %s', CoreTools::filterErrorMessage($e->getMessage())));
         }
     }
 
     /**
-     * @param array $filters
-     * @return array
      * @throws ItemNotLoadedException
      * @throws \Exception
      */
@@ -108,17 +105,15 @@ class LDAPApi implements PersonProviderInterface
     {
         $persons = [];
         $items = $this->getPeopleUserItems($filters);
-        foreach ($items as $item)
-        {
+        foreach ($items as $item) {
             $person = $this->personFromUserItem($item, false);
             $persons[] = $person;
         }
+
         return $persons;
     }
 
     /**
-     * @param string $identifier
-     * @return User|null
      * @throws ItemNotFoundException
      * @throws ItemNotLoadedException
      */
@@ -152,8 +147,6 @@ class LDAPApi implements PersonProviderInterface
     }
 
     /**
-     * @param string $almaUserId
-     * @return User|null
      * @throws ItemNotFoundException
      * @throws ItemNotLoadedException
      */
@@ -191,49 +184,48 @@ class LDAPApi implements PersonProviderInterface
     }
 
     /**
-     * @param User $user
-     * @param bool $full
-     * @return Person
      * @throws \Exception
      */
     public function personFromUserItem(User $user, bool $full = true): Person
     {
-        $identifier = $user->getFirstAttribute("cn");
+        $identifier = $user->getFirstAttribute('cn');
 
         $person = new Person();
         $person->setIdentifier($identifier);
-        $person->setGivenName($user->getFirstAttribute("givenName"));
-        $person->setFamilyName($user->getFirstAttribute("sn"));
-        $person->setHonorificSuffix($user->getFirstAttribute("title"));
-        $person->setTelephone($user->getFirstAttribute("telephoneNumber"));
-        $person->setPhoneExtension($user->getFirstAttribute("phoneExtension"));
-        $person->setEmail($user->getFirstAttribute("mail"));
+        $person->setGivenName($user->getFirstAttribute('givenName'));
+        $person->setFamilyName($user->getFirstAttribute('sn'));
+        $person->setHonorificSuffix($user->getFirstAttribute('title'));
+        $person->setTelephone($user->getFirstAttribute('telephoneNumber'));
+        $person->setPhoneExtension($user->getFirstAttribute('phoneExtension'));
+        $person->setEmail($user->getFirstAttribute('mail'));
 
-        $birthDateString = trim($user->getFirstAttribute("DateOfBirth"));
+        $birthDateString = trim($user->getFirstAttribute('DateOfBirth'));
 
-        if ($birthDateString != "") {
+        if ($birthDateString != '') {
             $matches = [];
 
             // get birthday from LDAP DateOfBirth (e.g. 19810718)
             if (preg_match('/^(\d{4})(\d{2})(\d{2})$/', $birthDateString, $matches)) {
                 $person->setBirthDate(new \DateTime("{$matches[1]}-{$matches[2]}-{$matches[3]}"));
             // sometimes also "1994-06-14 00:00:00"
-            } else if (preg_match('/^(\d{4})-(\d{2})-(\d{2}) .*$/', $birthDateString, $matches)) {
+            } elseif (preg_match('/^(\d{4})-(\d{2})-(\d{2}) .*$/', $birthDateString, $matches)) {
                 $person->setBirthDate(new \DateTime("{$matches[1]}-{$matches[2]}-{$matches[3]}"));
             }
         }
 
         // FIXME: How to make properties optional?
-        if ($full)
+        if ($full) {
             $imageURL = $this->tugapi->getImageURLforUser($user);
-        else
+        } else {
             $imageURL = '';
-        if (!empty($imageURL))
+        }
+        if (!empty($imageURL)) {
             $person->setImage($imageURL);
+        }
 
-        $accountTypes = $user->getAttribute("CO-ACCOUNTTYPE-STATUS-C") ?? [];
+        $accountTypes = $user->getAttribute('CO-ACCOUNTTYPE-STATUS-C') ?? [];
 
-        $functions = $user->getAttribute("CO-FUNKDE-C");
+        $functions = $user->getAttribute('CO-FUNKDE-C');
         $functions = is_array($functions) ? $functions : [];
 
         TUGTools::injectSpecialPermissions($identifier, $functions);
@@ -253,19 +245,17 @@ class LDAPApi implements PersonProviderInterface
 
         $person->setRoles($roles);
 
-        $person->setAlmaId($user->getFirstAttribute("CO-ALMA-PATRON-ID"));
+        $person->setAlmaId($user->getFirstAttribute('CO-ALMA-PATRON-ID'));
 
         return $person;
     }
 
     /**
-     * @param string $id
-     * @param bool $full
-     * @return Person
      * @throws ItemNotLoadedException
      */
-    public function getPerson(string $id, bool $full=true): Person {
-        $id = str_replace("/people/", "", $id);
+    public function getPerson(string $id, bool $full = true): Person
+    {
+        $id = str_replace('/people/', '', $id);
         $user = $this->getPersonUserItem($id);
         $person = $this->personFromUserItem($user, $full);
 
@@ -273,22 +263,24 @@ class LDAPApi implements PersonProviderInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function getCurrentPerson(): Person
     {
         $user = $this->security->getUser();
         $username = $user->getUsername();
+
         return $this->getPerson($username, true);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function getPersonForExternalService(string $service, string $serviceID): Person
     {
-        if ($service === "ALMA") {
+        if ($service === 'ALMA') {
             $user = $this->getPersonUserItemByAlmaUserId($serviceID);
+
             return $this->personFromUserItem($user);
         } else {
             throw new ItemNotFoundException("Unknown service: $service");

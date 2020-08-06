@@ -7,7 +7,7 @@ use DBP\API\CoreBundle\Service\PersonProviderInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
 /**
- * Caches the requested Person using the current JWT as a key
+ * Caches the requested Person using the current JWT as a key.
  */
 class CachingPersonProvider implements PersonProviderInterface
 {
@@ -31,7 +31,7 @@ class CachingPersonProvider implements PersonProviderInterface
     {
         assert($this->jwt['active']);
 
-        $cacheKey = hash('sha256', $id . '.' . $full . '.' . json_encode($this->jwt));
+        $cacheKey = hash('sha256', $id.'.'.$full.'.'.json_encode($this->jwt));
 
         $item = $this->cache->getItem($cacheKey);
         if ($item->isHit()) {
@@ -46,12 +46,13 @@ class CachingPersonProvider implements PersonProviderInterface
             $item->expiresAfter($expiresAfter);
 
             $this->cache->save($item);
+
             return $person;
         }
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function getCurrentPerson(): Person
     {
@@ -59,7 +60,7 @@ class CachingPersonProvider implements PersonProviderInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function getPersonForExternalService(string $service, string $serviceID): Person
     {

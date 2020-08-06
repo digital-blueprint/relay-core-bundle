@@ -7,9 +7,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 /**
  * Class SwaggerDecorator
- * see: https://api-platform.com/docs/core/swagger/#overriding-the-openapi-specification
- *
- * @package App\Swagger
+ * see: https://api-platform.com/docs/core/swagger/#overriding-the-openapi-specification.
  */
 final class SwaggerDecorator implements NormalizerInterface
 {
@@ -20,7 +18,6 @@ final class SwaggerDecorator implements NormalizerInterface
     {
         $this->decorated = $decorated;
         $this->container = $container;
-
     }
 
     public function normalize($object, $format = null, array $context = [])
@@ -33,7 +30,7 @@ final class SwaggerDecorator implements NormalizerInterface
         }
 
         foreach ($pathsToHide as $path) {
-            unset($docs["paths"][$path]);
+            unset($docs['paths'][$path]);
         }
 
         return $docs;

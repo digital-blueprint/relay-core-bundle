@@ -4,7 +4,6 @@ namespace DBP\API\CoreBundle\Keycloak;
 
 use DBP\API\CoreBundle\Service\GuzzleLogger;
 use DBP\API\CoreBundle\Service\PersonProviderInterface;
-
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
@@ -20,17 +19,17 @@ class KeycloakBearerUserProvider implements UserProviderInterface
 
     /**
      * Given a token returns if the token was generated through a client credential flow.
-     *
-     * @param array $jwt
-     * @return bool
      */
-    static function isServiceAccountToken(array $jwt) : bool {
-        if (!array_key_exists("scope", $jwt))
+    public static function isServiceAccountToken(array $jwt): bool
+    {
+        if (!array_key_exists('scope', $jwt)) {
             throw new \RuntimeException('Token missing scope key');
+        }
         $scope = $jwt['scope'];
         // XXX: This is the main difference I found compared to other flows, but that's a Keycloak
         // implementation detail I guess.
-        $has_openid_scope = in_array("openid", explode(" ", $scope), true);
+        $has_openid_scope = in_array('openid', explode(' ', $scope), true);
+
         return !$has_openid_scope;
     }
 
@@ -53,10 +52,11 @@ class KeycloakBearerUserProvider implements UserProviderInterface
             $config['client_id'], $config['client_secret']);
 
         $validator = new KeycloakTokenValidator($keycloak, $guzzleCache, $this->guzzleLogger);
-        if ($config['local_validation'])
+        if ($config['local_validation']) {
             $jwt = $validator->validateLocal($accessToken);
-        else
+        } else {
             $jwt = $validator->validateRemoteIntrospect($accessToken);
+        }
 
         if ($config['audience'] ?? '' !== '') {
             $validator::checkAudience($jwt, $config['audience']);

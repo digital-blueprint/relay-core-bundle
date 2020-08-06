@@ -7,12 +7,13 @@ use DBP\API\CoreBundle\Entity\Person;
 use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
 use DBP\API\CoreBundle\Service\PersonProviderInterface;
 
-class DummyPersonProvider implements PersonProviderInterface {
-
+class DummyPersonProvider implements PersonProviderInterface
+{
     /* @var Person */
     private $person;
 
-    public function __construct($person) {
+    public function __construct($person)
+    {
         $this->person = $person;
     }
 
@@ -23,8 +24,10 @@ class DummyPersonProvider implements PersonProviderInterface {
 
     public function getPerson(string $id, bool $full): Person
     {
-        if ($id !== $this->person->getIdentifier())
+        if ($id !== $this->person->getIdentifier()) {
             throw new ItemNotLoadedException();
+        }
+
         return $this->person;
     }
 

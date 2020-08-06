@@ -1,8 +1,6 @@
 <?php
 
-
 namespace DBP\API\CoreBundle\Service;
-
 
 use Adldap\Models\User;
 use ApiPlatform\Core\Exception\ItemNotFoundException;
@@ -10,13 +8,14 @@ use DBP\API\CoreBundle\Entity\Organization;
 use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
 use DBP\API\CoreBundle\Helpers\Tools;
 use DBP\API\CoreBundle\Keycloak\KeycloakBearerUser;
-use DBP\API\CoreBundle\Service\GuzzleLogger;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Promise;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Psr7\Response;
+use function GuzzleHttp\uri_template;
 use Kevinrob\GuzzleCache\CacheMiddleware;
 use Kevinrob\GuzzleCache\Storage\Psr6CacheStorage;
 use Kevinrob\GuzzleCache\Strategy\GreedyCacheStrategy;
@@ -25,8 +24,6 @@ use SimpleXMLElement;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Security\Core\Security;
-use function GuzzleHttp\uri_template;
-use GuzzleHttp\Promise;
 
 class TUGOnlineApi
 {
@@ -61,7 +58,7 @@ class TUGOnlineApi
         $this->token = $key;
     }
 
-    private function getClient() : Client
+    private function getClient(): Client
     {
         $stack = HandlerStack::create($this->clientHandler);
         $base_uri = $this->config['api_url_organization'];
@@ -85,13 +82,14 @@ class TUGOnlineApi
         $stack->push($cacheMiddleWare);
 
         $client = new Client($client_options);
+
         return $client;
     }
 
     public function getImageURLforUser(User $user): ?string
     {
         $uris = [];
-        $accountTypes = $user->getAttribute("CO-ACCOUNTTYPE-STATUS-C") ?? [];
+        $accountTypes = $user->getAttribute('CO-ACCOUNTTYPE-STATUS-C') ?? [];
 
         $bdId = $user->getAttribute('CO-OBFUSCATED-C-BD');
         if (in_array('BEDIENSTETE:OK', $accountTypes) && !empty($bdId)) {
@@ -127,8 +125,9 @@ class TUGOnlineApi
         $results = Promise\settle($promises)->wait();
 
         foreach ($results as $i => $result) {
-            if ($result['state'] !== PromiseInterface::FULFILLED)
+            if ($result['state'] !== PromiseInterface::FULFILLED) {
                 continue;
+            }
             /* @var Response $response */
             $response = $result['value'];
             // tugonline sends back empty images with status==200 sometimes, we can detect those by
@@ -136,6 +135,7 @@ class TUGOnlineApi
             $hasContent = !empty($response->getHeader('content-length'));
             if ($response->getStatusCode() == 200 && $hasContent) {
                 assert(isset($uris[$i]));
+
                 return $uris[$i];
             }
         }
@@ -143,12 +143,7 @@ class TUGOnlineApi
         return null;
     }
 
-    /**
-     * @param string $identifier
-     * @param string $lang
-     * @return string
-     */
-    public function getOrganizationUrlParameterString(string $identifier, string $lang = "de") : string
+    public function getOrganizationUrlParameterString(string $identifier, string $lang = 'de'): string
     {
         $orgUnitId = $this->extractOrganizationID($identifier);
 
@@ -156,29 +151,27 @@ class TUGOnlineApi
         return uri_template('?token={token}&orgUnitID={orgUnitID}&language={lang}', [
             'token' => $this->token,
             'orgUnitID' => $orgUnitId,
-            'lang' => $lang === "en" ? 'en' : 'de',
+            'lang' => $lang === 'en' ? 'en' : 'de',
         ]);
     }
 
     /**
-     * Returns orgUnitId
-     *
-     * @param string $identifier
-     * @return string
+     * Returns orgUnitId.
      */
-    private function extractOrganizationID(string $identifier) : string {
-        $list = explode("-", $identifier);
+    private function extractOrganizationID(string $identifier): string
+    {
+        $list = explode('-', $identifier);
 
         return $list[0];
     }
 
     /**
-     * @param string $identifier
-     * @param string $lang
      * @return Organization
+     *
      * @throws ItemNotLoadedException
      */
-    public function getOrganizationById(string $identifier, string $lang = "de") {
+    public function getOrganizationById(string $identifier, string $lang = 'de')
+    {
         $xmlElement = $this->getOrganizationXMLData($identifier, $lang);
         $organization = $this->organizationFromXMLElement($identifier, $xmlElement);
 
@@ -186,12 +179,11 @@ class TUGOnlineApi
     }
 
     /**
-     * @param string $identifier
-     * @param string $lang
      * @return SimpleXMLElement
+     *
      * @throws ItemNotLoadedException
      */
-    public function getOrganizationXMLData(string $identifier, string $lang = "de"): ?SimpleXMLElement
+    public function getOrganizationXMLData(string $identifier, string $lang = 'de'): ?SimpleXMLElement
     {
         $client = $this->getClient();
         $urlPath = $this->getOrganizationUrlParameterString($identifier, $lang);
@@ -200,10 +192,10 @@ class TUGOnlineApi
             // http://docs.guzzlephp.org/en/stable/quickstart.html?highlight=get#making-a-request
             $response = $client->request('GET', $urlPath);
 
-            $body = (string)$response->getBody();
+            $body = (string) $response->getBody();
 
             // try to handle xml errors
-            if (strpos($body, "<?xml") === 0) {
+            if (strpos($body, '<?xml') === 0) {
                 try {
                     $xml = new SimpleXMLElement($body);
 
@@ -211,70 +203,53 @@ class TUGOnlineApi
 
                     return $xml;
                 } catch (\Exception $e) {
-                    throw new ItemNotLoadedException(
-                        sprintf("Organization with id '%s' could not be loaded because of XML error! Message: %s", $identifier, Tools::filterErrorMessage($e->getMessage()))
-                    );
+                    throw new ItemNotLoadedException(sprintf("Organization with id '%s' could not be loaded because of XML error! Message: %s", $identifier, Tools::filterErrorMessage($e->getMessage())));
                 }
             } else {
-                throw new ItemNotLoadedException(
-                    sprintf("Organization with id '%s' could not be loaded because result was no XML!", $identifier)
-                );
+                throw new ItemNotLoadedException(sprintf("Organization with id '%s' could not be loaded because result was no XML!", $identifier));
             }
         } catch (RequestException $e) {
             if ($e->getCode() == 401) {
                 $message = $this->getOrganizationRequestExceptionMessage($e);
 
                 switch ($message) {
-                    case "unauthorized resource access":
-                        throw new ItemNotFoundException(
-                            sprintf("Organization with id '%s' could not be found!", $identifier)
-                        );
+                    case 'unauthorized resource access':
+                        throw new ItemNotFoundException(sprintf("Organization with id '%s' could not be found!", $identifier));
                         break;
                 }
             }
 
-            throw new ItemNotLoadedException(
-                sprintf("Organization with id '%s' could not be loaded! Message: %s", $identifier, Tools::filterErrorMessage($e->getMessage()))
-            );
+            throw new ItemNotLoadedException(sprintf("Organization with id '%s' could not be loaded! Message: %s", $identifier, Tools::filterErrorMessage($e->getMessage())));
         } catch (GuzzleException $e) {
-            throw new ItemNotLoadedException(
-                sprintf("Organization with id '%s' could not be loaded! Message: %s", $identifier, Tools::filterErrorMessage($e->getMessage()))
-            );
+            throw new ItemNotLoadedException(sprintf("Organization with id '%s' could not be loaded! Message: %s", $identifier, Tools::filterErrorMessage($e->getMessage())));
         }
     }
 
-    /**
-     * @param string $identifier
-     * @param SimpleXMLElement $xmlElement
-     * @return Organization
-     */
     public function organizationFromXMLElement(string $identifier, SimpleXMLElement $xmlElement): Organization
     {
         $organization = new Organization();
         $organization->setIdentifier($identifier);
-        $organization->setName(trim($xmlElement->xpath("/CDM/orgUnit/orgUnitName/text")[0] ?? ""));
-        $organization->setAlternateName("F" . trim($xmlElement->xpath("/CDM/orgUnit/orgUnitCode")[0] ?? ""));
-        $organization->setUrl(trim($xmlElement->xpath("/CDM/orgUnit/infoBlock/webLink/href")[0] ?? ""));
+        $organization->setName(trim($xmlElement->xpath('/CDM/orgUnit/orgUnitName/text')[0] ?? ''));
+        $organization->setAlternateName('F'.trim($xmlElement->xpath('/CDM/orgUnit/orgUnitCode')[0] ?? ''));
+        $organization->setUrl(trim($xmlElement->xpath('/CDM/orgUnit/infoBlock/webLink/href')[0] ?? ''));
 
         return $organization;
     }
 
     /**
-     * Handle json and xml Alma errors
-     *
-     * @param RequestException $e
-     * @return string
+     * Handle json and xml Alma errors.
      */
-    private function getOrganizationRequestExceptionMessage(RequestException $e) : string {
+    private function getOrganizationRequestExceptionMessage(RequestException $e): string
+    {
         $body = $e->getResponse()->getBody();
         $content = $body->getContents();
 
         // try to handle xml errors
-        if (strpos($content, "<?xml") === 0) {
+        if (strpos($content, '<?xml') === 0) {
             try {
                 $xml = new \SimpleXMLElement($content);
 
-                return Tools::filterErrorMessage((string)$xml->Message);
+                return Tools::filterErrorMessage((string) $xml->Message);
             } catch (\Exception $xmlException) {
                 return Tools::filterErrorMessage($content);
             }
@@ -284,27 +259,24 @@ class TUGOnlineApi
     }
 
     /**
-     * Checks if the current user has permissions to an organization
+     * Checks if the current user has permissions to an organization.
      *
-     * @param Organization $organization
      * @param bool $throwException
-     * @return bool
+     *
      * @throws AccessDeniedHttpException
      */
     public function checkOrganizationPermissions(Organization &$organization, $throwException = true): bool
     {
         /** @var KeycloakBearerUser $user */
         $user = $this->security->getUser();
-        $institutes = $user->getInstitutesForGroup("F_BIB");
+        $institutes = $user->getInstitutesForGroup('F_BIB');
         $institute = $organization->getAlternateName();
 
         // check if current user has F_BIB permissions to the institute of the book offer
         if (!in_array($institute, $institutes)) {
             // throw an exception if we want to
             if ($throwException) {
-                throw new AccessDeniedHttpException(
-                    sprintf("Person '%s' is not allowed to work with library '%s'!", $user->getUsername(), $institute)
-                );
+                throw new AccessDeniedHttpException(sprintf("Person '%s' is not allowed to work with library '%s'!", $user->getUsername(), $institute));
             }
         } else {
             // return true if we are not throwing an exception

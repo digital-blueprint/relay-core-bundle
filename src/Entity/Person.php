@@ -5,8 +5,8 @@ namespace DBP\API\CoreBundle\Entity;
 use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Annotation\ApiResource;
 use DateTimeInterface;
-use Symfony\Component\Serializer\Annotation\Groups;
 use DBP\API\AlmaBundle\Controller\GetLibraryBookLoansByPerson;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ApiResource(
@@ -214,23 +214,18 @@ class Person
     /**
      * @ApiProperty(iri="http://schema.org/name")
      * @Groups({"LDAPPerson:output", "LibraryBookLoanByOrganization"})
-     * @return string|null
      */
     public function getName(): ?string
     {
-        return $this->givenName . ' ' . $this->familyName;
+        return $this->givenName.' '.$this->familyName;
     }
 
-    /**
-     * @return array
-     */
     public function getFunctions(): array
     {
         return $this->functions;
     }
 
     /**
-     * @param array $functions
      * @return Person
      */
     public function setFunctions(array $functions): self
@@ -240,16 +235,12 @@ class Person
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function getRoles(): array
     {
         return $this->roles;
     }
 
     /**
-     * @param array $roles
      * @return Person
      */
     public function setRoles(array $roles): self
@@ -259,16 +250,12 @@ class Person
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function getAccountTypes(): array
     {
         return $this->accountTypes;
     }
 
     /**
-     * @param array $accountTypes
      * @return Person
      */
     public function setAccountTypes(array $accountTypes): self
@@ -278,17 +265,11 @@ class Person
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
     public function getImage(): ?string
     {
         return $this->image;
     }
 
-    /**
-     * @param string|null $image
-     */
     public function setImage(?string $image): void
     {
         $this->image = $image;
@@ -307,21 +288,23 @@ class Person
     }
 
     /**
-     * Returns the institutes for a group (e.g. "F_BIB")
+     * Returns the institutes for a group (e.g. "F_BIB").
      *
      * @param string $group
+     *
      * @return array
      */
-    public function getInstitutesForGroup($group) {
+    public function getInstitutesForGroup($group)
+    {
         $group = preg_quote($group);
         $results = [];
         $re = "/^$group:F:(\d+):[\d_]+$/i";
 
         $functions = $this->getFunctions();
 
-        foreach($functions as $function) {
+        foreach ($functions as $function) {
             if (preg_match($re, $function, $matches)) {
-                $results[] = "F" . $matches[1];
+                $results[] = 'F'.$matches[1];
             }
         }
 

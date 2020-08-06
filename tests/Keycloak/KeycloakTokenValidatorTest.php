@@ -9,37 +9,36 @@ use DBP\API\CoreBundle\Service\GuzzleLogger;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
-use Jose\Easy\JWSBuilder;
-use Monolog\Handler\NullHandler;
-use PHPUnit\Framework\TestCase;
-use Symfony\Component\Cache\Adapter\ArrayAdapter;
-use Monolog\Logger;
 use Jose\Component\Core\JWK;
 use Jose\Easy\Build;
-
+use Jose\Easy\JWSBuilder;
+use Monolog\Handler\NullHandler;
+use Monolog\Logger;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
 class KeycloakTokenValidatorTest extends TestCase
 {
-
     /* @var KeycloakTokenValidator */
     private $tokenValidator;
 
     /* @var Keycloak */
     private $keycloak;
 
-    protected function setUp() : void
+    protected function setUp(): void
     {
-        $keycloak = new Keycloak('https://auth.example.com/auth','tugraz');
+        $keycloak = new Keycloak('https://auth.example.com/auth', 'tugraz');
         $this->keycloak = $keycloak;
         $cache = new ArrayAdapter();
-        $nullLogger = new Logger("dummy", [new NullHandler()]);
+        $nullLogger = new Logger('dummy', [new NullHandler()]);
         $guzzleLogger = new GuzzleLogger($nullLogger);
 
         $this->tokenValidator = new KeycloakTokenValidator($keycloak, $cache, $guzzleLogger);
         $this->mockResponses([]);
     }
 
-    private function getJWK() {
+    private function getJWK()
+    {
         $jwk = new JWK([
             'kty' => 'RSA',
             'kid' => 'bilbo.baggins@hobbiton.example',
@@ -57,11 +56,13 @@ class KeycloakTokenValidatorTest extends TestCase
         return $jwk;
     }
 
-    private function getPublicJWKs() {
+    private function getPublicJWKs()
+    {
         return ['keys' => [$this->getJWK()->toPublic()->jsonSerialize()]];
     }
 
-    private function getJWT(array $options=[]) {
+    private function getJWT(array $options = [])
+    {
         $jwk = $this->getJWK();
 
         $time = $options['time'] ?? time();
@@ -80,7 +81,8 @@ class KeycloakTokenValidatorTest extends TestCase
         return $builder->sign($jwk);
     }
 
-    private function mockResponses(array $responses) {
+    private function mockResponses(array $responses)
+    {
         $stack = HandlerStack::create(new MockHandler($responses));
         $this->tokenValidator->setClientHandler($stack);
     }
@@ -89,7 +91,7 @@ class KeycloakTokenValidatorTest extends TestCase
     {
         $jwks = $this->getPublicJWKs();
         $this->mockResponses([
-            new Response(200, ["Content-Type" => "application/json"], json_encode($jwks)),
+            new Response(200, ['Content-Type' => 'application/json'], json_encode($jwks)),
         ]);
     }
 
@@ -120,7 +122,7 @@ class KeycloakTokenValidatorTest extends TestCase
     public function testLocalWrongUrl()
     {
         $this->mockResponses([
-            new Response(404, ["Content-Type" => "application/json"]),
+            new Response(404, ['Content-Type' => 'application/json']),
         ]);
         $this->expectException(TokenValidationException::class);
         $this->tokenValidator->validateLocal('foobar');
@@ -131,8 +133,8 @@ class KeycloakTokenValidatorTest extends TestCase
         $this->mockJWKResponse();
 
         $jwt = $this->getJWT();
-        $payload = explode(".", $jwt)[1];
-        $noneToken = base64_encode('{"alg":"none","typ":"JWT"}') . '.' . $payload . '.';
+        $payload = explode('.', $jwt)[1];
+        $noneToken = base64_encode('{"alg":"none","typ":"JWT"}').'.'.$payload.'.';
         $this->expectExceptionMessageMatches('/Unsupported algorithm/');
         $this->tokenValidator->validateLocal($noneToken);
     }
@@ -168,11 +170,11 @@ class KeycloakTokenValidatorTest extends TestCase
         $this->mockJWKResponse();
 
         $jwt = $this->getJWT();
-        $parts = explode(".", $jwt);
+        $parts = explode('.', $jwt);
         $parts[1] = 'REVBREJFRUY=';
 
         $this->expectExceptionMessageMatches('/Invalid signature/');
-        $this->tokenValidator->validateLocal(implode(".", $parts));
+        $this->tokenValidator->validateLocal(implode('.', $parts));
     }
 
     public function testLocalValid()

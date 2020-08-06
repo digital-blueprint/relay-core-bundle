@@ -33,7 +33,7 @@ use Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 /**
- * Generates our OpenAPI specification
+ * Generates our OpenAPI specification.
  *
  * This is a re-implementation of \ApiPlatform\Core\Swagger\Serializer\DocumentationNormalizer with more response codes
  */
@@ -793,16 +793,13 @@ final class DocumentationNormalizer implements NormalizerInterface, CacheableSup
     }
 
     /**
-     * Injects "add_responses" $pathOperation into "responses"
-     *
-     * @param \ArrayObject $pathOperation
+     * Injects "add_responses" $pathOperation into "responses".
      */
     private function injectResponses(\ArrayObject &$pathOperation)
     {
-        if (isset($pathOperation['add_responses']))
-        {
+        if (isset($pathOperation['add_responses'])) {
             // merge "add_responses" into "responses"
-            foreach($pathOperation['add_responses'] as $code => $data) {
+            foreach ($pathOperation['add_responses'] as $code => $data) {
                 $pathOperation['responses'][$code] = $data;
             }
         }

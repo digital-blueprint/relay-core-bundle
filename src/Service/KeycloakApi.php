@@ -1,19 +1,18 @@
 <?php
 
-
 namespace DBP\API\CoreBundle\Service;
 
 use ApiPlatform\Core\Exception\ItemNotFoundException;
 use DBP\API\CoreBundle\Entity\Person;
 use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
-use DBP\API\CoreBundle\Helpers\TUGTools;
 use DBP\API\CoreBundle\Helpers\JsonException;
 use DBP\API\CoreBundle\Helpers\Tools as CoreTools;
+use DBP\API\CoreBundle\Helpers\TUGTools;
 use GuzzleHttp\Client;
+use function GuzzleHttp\uri_template;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\Security;
-use function GuzzleHttp\uri_template;
 
 class KeycloakApi implements PersonProviderInterface
 {
@@ -34,26 +33,30 @@ class KeycloakApi implements PersonProviderInterface
         $this->security = $security;
     }
 
-    private function getClient() : Client
+    private function getClient(): Client
     {
         $base_uri = $this->config['server_url'];
-        if (substr($base_uri, -1) !== '/')
+        if (substr($base_uri, -1) !== '/') {
             $base_uri .= '/';
+        }
 
         $client_options = ['base_uri' => $base_uri];
         $client = new Client($client_options);
+
         return $client;
     }
 
-    private function getPersonForUser($user) {
+    private function getPersonForUser($user)
+    {
         $attributes = $user['attributes'];
 
         $person = new Person();
         $person->setIdentifier($user['username']);
         $person->setGivenName($user['firstName']);
         $person->setFamilyName($user['lastName']);
-        if(isset($user['email']))
+        if (isset($user['email'])) {
             $person->setEmail($user['email']);
+        }
 
         $accountTypes = $attributes['accountTypes'] ?? [];
         $functions = $attributes['functions'] ?? [];
@@ -67,14 +70,15 @@ class KeycloakApi implements PersonProviderInterface
 
 //        $almaID = LDAPApi::getAlmaPersonMappingHash($user['username'], true);
         // we have setup a mapper for LDAP CO-ALMA-PATRON-ID to almaId
-        $person->setAlmaId("nope-42-FIXME");
+        $person->setAlmaId('nope-42-FIXME');
 
         return $person;
     }
 
-    private function getToken() {
+    private function getToken()
+    {
         $client = $this->getClient();
-        $uri =  uri_template('realms/{realm}/protocol/openid-connect/token', [
+        $uri = uri_template('realms/{realm}/protocol/openid-connect/token', [
             'realm' => $this->realm,
         ]);
         $options = [
@@ -83,14 +87,13 @@ class KeycloakApi implements PersonProviderInterface
         ];
         $response = $client->request('POST', $uri, $options);
 
-        $body = (string)$response->getBody();
+        $body = (string) $response->getBody();
         $data = CoreTools::decodeJSON($body, true);
+
         return $data['access_token'];
     }
 
     /**
-     * @param array $filters
-     * @return array
      * @throws ItemNotLoadedException
      * @throws JsonException
      */
@@ -100,35 +103,33 @@ class KeycloakApi implements PersonProviderInterface
         $search = $filters['search'];
 
         $client = $this->getClient();
-        $uri =  uri_template('admin/realms/{realm}/users', [
+        $uri = uri_template('admin/realms/{realm}/users', [
             'realm' => $this->realm,
         ]);
         $options = [
             'headers' => [
-                'Accept'     => 'application/json',
-                'Authorization' => 'Bearer ' . $token,
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer '.$token,
             ],
             'query' => [
                 'username' => $search,
                 // TODO: remove limit
                 'max' => '50',
-            ]
+            ],
         ];
 
         $response = $client->request('GET', $uri, $options);
-        $body = (string)$response->getBody();
+        $body = (string) $response->getBody();
         $data = CoreTools::decodeJSON($body, true);
         $persons = [];
         foreach ($data as $user) {
             $persons[] = $this->getPersonForUser($user);
         }
+
         return $persons;
     }
 
     /**
-     * @param string $id
-     * @param bool $full
-     * @return Person
      * @throws ItemNotLoadedException
      * @throws JsonException
      */
@@ -136,45 +137,47 @@ class KeycloakApi implements PersonProviderInterface
     {
         $token = $this->getToken();
         $client = $this->getClient();
-        $uri =  uri_template('admin/realms/{realm}/users', [
+        $uri = uri_template('admin/realms/{realm}/users', [
             'realm' => $this->realm,
         ]);
         $options = [
             'headers' => [
-                'Accept'     => 'application/json',
-                'Authorization' => 'Bearer ' . $token,
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer '.$token,
             ],
             'query' => [
                 'username' => $id,
                 'max' => '1',
-            ]
+            ],
         ];
 
         $response = $client->request('GET', $uri, $options);
-        $body = (string)$response->getBody();
+        $body = (string) $response->getBody();
         $data = CoreTools::decodeJSON($body, true);
-        if (!count($data))
+        if (!count($data)) {
             throw new ItemNotFoundException();
+        }
         $user = $data[0];
 
         return $this->getPersonForUser($user);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function getCurrentPerson(): Person
     {
         $user = $this->security->getUser();
         $username = $user->getUsername();
+
         return $this->getPerson($username, true);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function getPersonForExternalService(string $service, string $serviceID): Person
     {
-        throw new ItemNotFoundException("No external mapping implemented");
+        throw new ItemNotFoundException('No external mapping implemented');
     }
 }

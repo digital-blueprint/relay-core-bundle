@@ -22,11 +22,8 @@ final class PersonItemDataProvider implements ItemDataProviderInterface, Restric
     }
 
     /**
-     * @param string $resourceClass
      * @param array|int|string $id
-     * @param string|null $operationName
-     * @param array $context
-     * @return Person|null
+     *
      * @throws \DBP\API\CoreBundle\Exception\ItemNotLoadedException
      */
     public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []): ?Person

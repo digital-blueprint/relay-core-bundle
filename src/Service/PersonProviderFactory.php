@@ -1,8 +1,6 @@
 <?php
 
-
 namespace DBP\API\CoreBundle\Service;
-
 
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
@@ -14,9 +12,10 @@ class PersonProviderFactory
 
     public static function createPersonProvider(ContainerInterface $container, TUGOnlineApi $tugapi, LoggerInterface $logger, Security $security)
     {
-        if (self::$LDAP)
+        if (self::$LDAP) {
             return new LDAPApi($container, $tugapi, $security, $logger);
-        else
+        } else {
             return new KeycloakApi($container, $logger, $security);
+        }
     }
 }
