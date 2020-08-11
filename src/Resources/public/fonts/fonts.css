@@ -1,0 +1,57 @@
+@font-face {
+    font-family: 'Source Sans Pro';
+    font-weight: 300;
+    src: url('SourceSansPro-Light.otf.woff2') format('woff2');
+    font-display: block;
+}
+
+@font-face {
+    font-family: 'Source Sans Pro';
+    font-weight: 400;
+    src: url('SourceSansPro-Regular.otf.woff2') format('woff2');
+    font-display: block;
+}
+
+@font-face {
+    font-family: 'Source Sans Pro';
+    font-weight: 600;
+    src: url('SourceSansPro-Semibold.otf.woff2') format('woff2');
+    font-display: block;
+}
+
+@font-face {
+    font-family: 'Source Sans Pro';
+    font-weight: 700;
+    src: url('SourceSansPro-Bold.otf.woff2') format('woff2');
+    font-display: block;
+}
+
+/* Alias Open Sans because the swagger docs use it for font-family with !important */
+
+@font-face {
+    font-family: 'Open Sans';
+    font-weight: 300;
+    src: url('SourceSansPro-Light.otf.woff2') format('woff2');
+    font-display: block;
+}
+
+@font-face {
+    font-family: 'Open Sans';
+    font-weight: 400;
+    src: url('SourceSansPro-Regular.otf.woff2') format('woff2');
+    font-display: block;
+}
+
+@font-face {
+    font-family: 'Open Sans';
+    font-weight: 600;
+    src: url('SourceSansPro-Semibold.otf.woff2') format('woff2');
+    font-display: block;
+}
+
+@font-face {
+    font-family: 'Open Sans';
+    font-weight: 700;
+    src: url('SourceSansPro-Bold.otf.woff2') format('woff2');
+    font-display: block;
+}

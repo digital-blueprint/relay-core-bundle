@@ -25,3 +25,7 @@ header {
 .swagger-ui .scheme-container {
     padding: 10px 0;
 }
+
+.swagger-ui .info .title, html, .swagger-ui table thead tr * {
+    font-family: 'Source Sans Pro', sans-serif !important;
+}
