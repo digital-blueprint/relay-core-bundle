@@ -1,0 +1,13 @@
+# Get information about one organization
+GET http://127.0.0.1:8000/organizations/1190-F2050?lang=de
+accept: application/ld+json
+Authorization: Bearer {{bearer_token}}
+
+###
+
+# Search for users with name "Hands"
+GET {{entry_point_url}}/people?search=Hans&page=1
+accept: application/ld+json
+Authorization: Bearer {{bearer_token}}
+
+###
