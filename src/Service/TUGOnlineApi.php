@@ -50,7 +50,7 @@ class TUGOnlineApi
     {
         $this->config = $container->getParameter('dbp_api.core.co_config');
         $this->security = $security;
-        $this->token = $this->config['api_token'];
+        $this->token = $this->config['api_token'] ?? '';
         $this->container = $container;
         $this->guzzleLogger = $guzzleLogger;
     }

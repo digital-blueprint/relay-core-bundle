@@ -58,10 +58,10 @@ class LDAPApi implements PersonProviderInterface
         $this->security = $security;
 
         $config = [
-            'hosts' => [$config['host']],
-            'base_dn' => $config['base_dn'],
-            'username' => $config['username'],
-            'password' => $config['password'],
+            'hosts' => [$config['host'] ?? ''],
+            'base_dn' => $config['base_dn'] ?? '',
+            'username' => $config['username'] ?? '',
+            'password' => $config['password'] ?? '',
             'use_tls' => true,
         ];
 

@@ -49,9 +49,9 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
         $def->setPublic(true);
         $def->addTag('cache.pool');
 
-        $container->setParameter('dbp_api.core.keycloak_config', $configs['keycloak']);
-        $container->setParameter('dbp_api.core.ldap_config', $configs['ldap']);
-        $container->setParameter('dbp_api.core.co_config', $configs['campus_online']);
+        $container->setParameter('dbp_api.core.keycloak_config', $configs['keycloak'] ?? []);
+        $container->setParameter('dbp_api.core.ldap_config', $configs['ldap'] ?? []);
+        $container->setParameter('dbp_api.core.co_config', $configs['campus_online'] ?? []);
     }
 
     private function extendArrayParameter(ContainerBuilder $container, string $parameter, array $values)
@@ -92,7 +92,7 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
             ItemNotUsableException::class => Response::HTTP_FAILED_DEPENDENCY,
         ];
 
-        $container->prependExtensionConfig('api_platform', [
+        $container->loadFromExtension('api_platform', [
             'version' => $packageVersion,
             'title' => 'DBP API Gateway',
             'http_cache' => [
@@ -175,17 +175,17 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
             'exception_controller' => null,
         ]);
 
-        $configs = $container->getExtensionConfig($this->getAlias());
-        $keycloak = $configs[0]['keycloak'];
-        $api_docs = $configs[0]['api_docs'];
+        $config = $container->getExtensionConfig($this->getAlias())[0];
+        $keycloak = $config['keycloak'] ?? [];
+        $api_docs = $config['api_docs'] ?? [];
 
         $container->loadFromExtension('twig', [
             'globals' => [
-                'keycloak_server_url' => $keycloak['server_url'],
-                'keycloak_realm' => $keycloak['realm'],
-                'keycloak_frontend_client_id' => $api_docs['keycloak_client_id'],
-                'app_buildinfo' => $api_docs['build_info'],
-                'app_buildinfo_url' => $api_docs['build_info_url'],
+                'keycloak_server_url' => $keycloak['server_url'] ?? '',
+                'keycloak_realm' => $keycloak['realm'] ?? '',
+                'keycloak_frontend_client_id' => $api_docs['keycloak_client_id'] ?? '',
+                'app_buildinfo' => $api_docs['build_info'] ?? '',
+                'app_buildinfo_url' => $api_docs['build_info_url'] ?? '',
                 'app_env' => '%kernel.environment%',
                 'app_debug' => '%kernel.debug%',
             ],

@@ -83,3 +83,14 @@ services:
       - "%api_platform.swagger.versions%"
     autoconfigure: false
     autowire: true
+
+
+  # This alias exist so we can replace the service during tests
+  test.App\Security\User\KeycloakBearerUserProvider:
+    alias: 'DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProvider'
+    public: true
+
+  # This alias exist so we can replace the service during tests
+  test.App\Service\PersonProviderInterface:
+    alias: 'DBP\API\CoreBundle\Service\PersonProviderInterface'
+    public: true
