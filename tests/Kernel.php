@@ -32,7 +32,7 @@ class Kernel extends BaseKernel
 
     protected function configureRoutes(RouteCollectionBuilder $routes)
     {
-        $routes->import($this->getProjectDir().'/../../config/routes/api_platform.yaml');
+        $routes->import('@DbpCoreBundle/Resources/config/routing.yaml');
     }
 
     protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
