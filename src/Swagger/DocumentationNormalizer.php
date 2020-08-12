@@ -328,14 +328,13 @@ final class DocumentationNormalizer implements NormalizerInterface, CacheableSup
         $pathOperation['summary'] ?? $pathOperation['summary'] = sprintf('Retrieves a %s resource.', $resourceShortName);
 
         $pathOperation = $this->addItemOperationParameters($v3, $pathOperation);
-
         $successResponse = ['description' => sprintf('%s resource response', $resourceShortName)];
         [$successResponse] = $this->addSchemas($v3, $successResponse, $definitions, $resourceClass, $operationType, $operationName, $mimeTypes);
 
         $pathOperation['responses'] ?? $pathOperation['responses'] = [
             $successStatus => $successResponse,
             '404' => ['description' => 'Resource not found'],
-            '424' => ['description' => 'Target api error'],
+            '502' => ['description' => 'Target api error'],
         ];
 
         $this->injectResponses($pathOperation);
@@ -490,7 +489,7 @@ final class DocumentationNormalizer implements NormalizerInterface, CacheableSup
             (string) $resourceMetadata->getTypedOperationAttribute($operationType, $operationName, 'status', '201') => $successResponse,
             '400' => ['description' => 'Invalid input'],
             '404' => ['description' => 'Resource not found'],
-            '424' => ['description' => 'Target api error'],
+            '502' => ['description' => 'Target api error'],
             '503' => ['description' => 'Service unavailable'],
         ];
 
@@ -517,7 +516,7 @@ final class DocumentationNormalizer implements NormalizerInterface, CacheableSup
             (string) $resourceMetadata->getTypedOperationAttribute($operationType, $operationName, 'status', '200') => $successResponse,
             '400' => ['description' => 'Invalid input'],
             '404' => ['description' => 'Resource not found'],
-            '424' => ['description' => 'Target api error'],
+            '502' => ['description' => 'Target api error'],
         ];
 
         $this->injectResponses($pathOperation);
@@ -571,7 +570,7 @@ final class DocumentationNormalizer implements NormalizerInterface, CacheableSup
         $pathOperation['responses'] ?? $pathOperation['responses'] = [
             (string) $resourceMetadata->getTypedOperationAttribute($operationType, $operationName, 'status', '204') => ['description' => sprintf('%s resource deleted', $resourceShortName)],
             '404' => ['description' => 'Resource not found'],
-            '424' => ['description' => 'Target api error'],
+            '502' => ['description' => 'Target api error'],
         ];
 
         $this->injectResponses($pathOperation);
