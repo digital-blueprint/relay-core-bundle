@@ -1,4 +1,9 @@
 services:
+  DBP\API\CoreBundle\Serializer\ApiErrorNormalizer:
+    autowire: true
+    autoconfigure: false
+    tags: [{'name' : 'serializer.normalizer', priority: '-700'}]
+
   DBP\API\CoreBundle\Service\GuzzleLogger:
     public: false
     autowire: true
