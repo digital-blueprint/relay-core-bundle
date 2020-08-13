@@ -29,7 +29,9 @@
         "web-token/jwt-signature-algorithm-rsa": "^2.1"
     },
     "require-dev": {
+        "composer/semver": "^1.5",
         "doctrine/doctrine-bundle": "^2.1.0",
+        "friendsofphp/php-cs-fixer": "^2.16",
         "mockery/mockery": "^1.2",
         "phpstan/phpstan": "^0.12.33",
         "phpstan/phpstan-phpunit": "^0.12.13",
@@ -67,8 +69,15 @@
             "@php vendor/bin/psalm"
         ],
         "lint": [
+            "@composer run cs",
             "@composer run phpstan",
             "@composer run psalm"
+        ],
+        "cs-fix": [
+            "@php vendor/bin/php-cs-fixer --ansi fix"
+        ],
+        "cs": [
+            "@php vendor/bin/php-cs-fixer --ansi fix --dry-run --diff --diff-format=udiff"
         ]
     }
 }
