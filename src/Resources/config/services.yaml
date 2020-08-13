@@ -16,6 +16,10 @@ services:
     autoconfigure: true
     tags: [{name: monolog.logger, channel: dbp.audit}]
 
+  DBP\API\CoreBundle\Command\CronCommand:
+    autowire: true
+    autoconfigure: true
+
   DBP\API\CoreBundle\Service\TUGOnlineApi:
     autowire: true
     autoconfigure: true
