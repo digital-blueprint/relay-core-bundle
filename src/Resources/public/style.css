@@ -29,3 +29,23 @@ header {
 .swagger-ui .info .title, html, .swagger-ui table thead tr * {
     font-family: 'Source Sans Pro', sans-serif !important;
 }
+
+#swagger-ui.api-platform .opblock.opblock-get .opblock-summary-method {
+    background-color: rgb(36,91,120);
+}
+
+#swagger-ui.api-platform .opblock.opblock-post .opblock-summary-method {
+    background-color: #159359;
+}
+
+#swagger-ui.api-platform .opblock.opblock-put .opblock-summary-method {
+    background-color: #d58727;
+}
+
+#swagger-ui.api-platform .information-container.wrapper {
+    margin-bottom: 20px;
+}
+
+.swagger-ui .info .title small {
+    display: none;
+}

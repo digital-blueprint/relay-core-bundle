@@ -10,6 +10,15 @@
         <link rel="stylesheet" href="{{ asset('bundles/apiplatform/style.css') }}">
         <link rel="stylesheet" href="{{ asset('bundles/dbpcore/fonts/fonts.css') }}">
         <link rel="stylesheet" href="{{ asset('bundles/dbpcore/style.css') }}">
+
+        <style>
+            #swagger-ui.api-platform .info .title {
+                background-image: url({{ asset('bundles/dbpcore/logo.png') }});
+                background-repeat: no-repeat;
+                background-size: auto 100%;
+                padding-left: 60px
+            }
+        </style>
     {% endblock %}
 
     {% set oauth_data = {'oauth': swagger_data.oauth|merge({'redirectUrl' : absolute_url(asset('bundles/apiplatform/swagger-ui/oauth2-redirect.html')) })} %}
