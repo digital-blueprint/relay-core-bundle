@@ -8,9 +8,23 @@ services:
     public: false
     autowire: true
     autoconfigure: true
+    tags: [{name: monolog.logger, channel: dbp.guzzle}]
 
   DBP\API\CoreBundle\Service\AuditLogger:
     public: false
+    autowire: true
+    autoconfigure: true
+    tags: [{name: monolog.logger, channel: dbp.audit}]
+
+  DBP\API\CoreBundle\Service\TUGOnlineApi:
+    autowire: true
+    autoconfigure: true
+
+  DBP\API\CoreBundle\Service\KeycloakApi:
+    autowire: true
+    autoconfigure: true
+
+  DBP\API\CoreBundle\Service\LDAPApi:
     autowire: true
     autoconfigure: true
 
@@ -39,11 +53,6 @@ services:
 
   DBP\API\CoreBundle\Service\PersonProviderInterface:
     factory: ['DBP\API\CoreBundle\Service\PersonProviderFactory', 'createPersonProvider']
-    autowire: true
-    autoconfigure: true
-
-  DBP\API\CoreBundle\Service\:
-    resource: '../../Service'
     autowire: true
     autoconfigure: true
 
