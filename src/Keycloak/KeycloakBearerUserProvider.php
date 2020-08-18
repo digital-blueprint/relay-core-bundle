@@ -53,12 +53,13 @@ class KeycloakBearerUserProvider implements UserProviderInterface
             $config['server_url'], $config['realm'],
             $config['client_id'], $config['client_secret']);
 
-        $validator = new KeycloakTokenValidator($keycloak, $guzzleCache, $this->guzzleLogger);
         if ($config['local_validation']) {
-            $jwt = $validator->validateLocal($accessToken);
+            $validator = new KeycloakLocalTokenValidator($keycloak, $guzzleCache, $this->guzzleLogger);
         } else {
-            $jwt = $validator->validateRemoteIntrospect($accessToken);
+            $validator = new KeycloakRemoteTokenValidator($keycloak, $this->guzzleLogger);
         }
+
+        $jwt = $validator->validate($accessToken);
 
         if ($config['audience'] ?? '' !== '') {
             $validator::checkAudience($jwt, $config['audience']);

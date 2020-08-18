@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace DBP\API\CoreBundle\Tests\Keycloak;
 
 use DBP\API\CoreBundle\Keycloak\Keycloak;
-use DBP\API\CoreBundle\Keycloak\KeycloakTokenValidator;
+use DBP\API\CoreBundle\Keycloak\KeycloakLocalTokenValidator;
 use DBP\API\CoreBundle\Keycloak\TokenValidationException;
 use DBP\API\CoreBundle\Service\GuzzleLogger;
 use GuzzleHttp\Handler\MockHandler;
@@ -19,9 +19,9 @@ use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
-class KeycloakTokenValidatorTest extends TestCase
+class KeycloakLocalTokenValidatorTest extends TestCase
 {
-    /* @var KeycloakTokenValidator */
+    /* @var KeycloakLocalTokenValidator */
     private $tokenValidator;
 
     /* @var Keycloak */
@@ -35,7 +35,7 @@ class KeycloakTokenValidatorTest extends TestCase
         $nullLogger = new Logger('dummy', [new NullHandler()]);
         $guzzleLogger = new GuzzleLogger($nullLogger);
 
-        $this->tokenValidator = new KeycloakTokenValidator($keycloak, $cache, $guzzleLogger);
+        $this->tokenValidator = new KeycloakLocalTokenValidator($keycloak, $cache, $guzzleLogger);
         $this->mockResponses([]);
     }
 
@@ -100,17 +100,17 @@ class KeycloakTokenValidatorTest extends TestCase
     public function testCheckAudienceBad()
     {
         $this->mockJWKResponse();
-        $result = $this->tokenValidator->validateLocal($this->getJWT());
+        $result = $this->tokenValidator->validate($this->getJWT());
         $this->expectExceptionMessageMatches('/Bad audience/');
-        KeycloakTokenValidator::checkAudience($result, 'foo');
+        KeycloakLocalTokenValidator::checkAudience($result, 'foo');
     }
 
     public function testCheckAudienceGood()
     {
         $this->mockJWKResponse();
-        $result = $this->tokenValidator->validateLocal($this->getJWT());
-        KeycloakTokenValidator::checkAudience($result, 'audience2');
-        KeycloakTokenValidator::checkAudience($result, 'audience1');
+        $result = $this->tokenValidator->validate($this->getJWT());
+        KeycloakLocalTokenValidator::checkAudience($result, 'audience2');
+        KeycloakLocalTokenValidator::checkAudience($result, 'audience1');
         $this->assertTrue(true);
     }
 
@@ -118,7 +118,7 @@ class KeycloakTokenValidatorTest extends TestCase
     {
         $this->mockResponses([]);
         $this->expectException(TokenValidationException::class);
-        $this->tokenValidator->validateLocal('foobar');
+        $this->tokenValidator->validate('foobar');
     }
 
     public function testLocalWrongUrl()
@@ -127,7 +127,7 @@ class KeycloakTokenValidatorTest extends TestCase
             new Response(404, ['Content-Type' => 'application/json']),
         ]);
         $this->expectException(TokenValidationException::class);
-        $this->tokenValidator->validateLocal('foobar');
+        $this->tokenValidator->validate('foobar');
     }
 
     public function testLocalNoneAlgo()
@@ -138,7 +138,7 @@ class KeycloakTokenValidatorTest extends TestCase
         $payload = explode('.', $jwt)[1];
         $noneToken = base64_encode('{"alg":"none","typ":"JWT"}').'.'.$payload.'.';
         $this->expectExceptionMessageMatches('/Unsupported algorithm/');
-        $this->tokenValidator->validateLocal($noneToken);
+        $this->tokenValidator->validate($noneToken);
     }
 
     public function testLocalExpired()
@@ -147,7 +147,7 @@ class KeycloakTokenValidatorTest extends TestCase
 
         $jwt = $this->getJWT(['time' => 42]);
         $this->expectExceptionMessageMatches('/expired/');
-        $this->tokenValidator->validateLocal($jwt);
+        $this->tokenValidator->validate($jwt);
     }
 
     public function testLocalFutureIssued()
@@ -156,7 +156,7 @@ class KeycloakTokenValidatorTest extends TestCase
 
         $jwt = $this->getJWT(['time' => time() + 3600]);
         $this->expectExceptionMessageMatches('/future/');
-        $this->tokenValidator->validateLocal($jwt);
+        $this->tokenValidator->validate($jwt);
     }
 
     public function testLocalWrongRealm()
@@ -164,7 +164,7 @@ class KeycloakTokenValidatorTest extends TestCase
         $this->mockJWKResponse();
 
         $this->expectExceptionMessageMatches('/Unknown issuer/');
-        $this->tokenValidator->validateLocal($this->getJWT(['issuer' => 'foobar']));
+        $this->tokenValidator->validate($this->getJWT(['issuer' => 'foobar']));
     }
 
     public function testLocalInvalidSig()
@@ -176,7 +176,7 @@ class KeycloakTokenValidatorTest extends TestCase
         $parts[1] = 'REVBREJFRUY=';
 
         $this->expectExceptionMessageMatches('/Invalid signature/');
-        $this->tokenValidator->validateLocal(implode('.', $parts));
+        $this->tokenValidator->validate(implode('.', $parts));
     }
 
     public function testLocalValid()
@@ -184,14 +184,14 @@ class KeycloakTokenValidatorTest extends TestCase
         $this->mockJWKResponse();
 
         $jwt = $this->getJWT();
-        $result = $this->tokenValidator->validateLocal($jwt);
+        $result = $this->tokenValidator->validate($jwt);
         $this->assertEquals('subject', $result['sub']);
     }
 
     public function testMissingUser()
     {
         $this->mockJWKResponse();
-        $result = $this->tokenValidator->validateLocal($this->getJWT());
+        $result = $this->tokenValidator->validate($this->getJWT());
         $this->assertEquals(null, $result['username']);
     }
 }

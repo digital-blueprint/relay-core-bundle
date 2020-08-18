@@ -17,13 +17,7 @@ use Kevinrob\GuzzleCache\Storage\Psr6CacheStorage;
 use Kevinrob\GuzzleCache\Strategy\GreedyCacheStrategy;
 use Psr\Cache\CacheItemPoolInterface;
 
-/**
- * Helper class for validating access tokens. Either by asking the keycloak server or by locally
- * checking if the JWT is signed correctly, isn't expired etc.
- *
- * If you don't know what you are doing don't use the local validation.
- */
-class KeycloakTokenValidator
+class KeycloakLocalTokenValidator extends KeycloakTokenValidatorBase
 {
     private $keycloak;
     private $cachePool;
@@ -42,32 +36,6 @@ class KeycloakTokenValidator
         $this->cachePool = $cachePool;
         $this->guzzleLogger = $guzzleLogger;
         $this->clientHandler = null;
-    }
-
-    /**
-     * Verifies that the token was created for the given audience.
-     * If not then throws TokenValidationException.
-     *
-     * @param array  $jwt      The access token
-     * @param string $audience The audience string
-     *
-     * @throws TokenValidationException
-     */
-    public static function checkAudience(array $jwt, string $audience): void
-    {
-        $value = $jwt['aud'] ?? [];
-
-        if (\is_string($value)) {
-            if ($value !== $audience) {
-                throw new TokenValidationException('Bad audience');
-            }
-        } elseif (\is_array($value)) {
-            if (!\in_array($audience, $value, true)) {
-                throw new TokenValidationException('Bad audience');
-            }
-        } else {
-            throw new TokenValidationException('Bad audience');
-        }
     }
 
     /**
@@ -133,7 +101,7 @@ class KeycloakTokenValidator
      *
      * @throws TokenValidationException
      */
-    public function validateLocal(string $accessToken): array
+    public function validate(string $accessToken): array
     {
         $jwks = $this->fetchJWKs();
         $issuer = $this->keycloak->getBaseUrlWithRealm();
@@ -173,60 +141,6 @@ class KeycloakTokenValidator
             $jwt['client_id'] = $jwt['azp'];
         }
         $jwt['active'] = true;
-
-        return $jwt;
-    }
-
-    /**
-     * Validates the token with the Keycloak introspection endpoint.
-     *
-     * @return array the token
-     *
-     * @throws TokenValidationException
-     */
-    public function validateRemoteIntrospect(string $accessToken): array
-    {
-        $stack = HandlerStack::create($this->clientHandler);
-        $options = [
-            'handler' => $stack,
-            'headers' => [
-                'Accept' => 'application/json',
-            ],
-        ];
-
-        $client = new Client($options);
-        $stack->push($this->guzzleLogger->getClientHandler());
-
-        $provider = $this->keycloak;
-        $client_secret = $provider->getClientSecret();
-        $client_id = $provider->getClientId();
-
-        if (!$client_secret || !$client_id) {
-            throw new TokenValidationException('Keycloak client ID or secret not set!');
-        }
-
-        try {
-            // keep in mind that even if we are doing this request with a different client id the data returned will be
-            // from the client id of token $accessToken (that's important for mapped attributes)
-            $response = $client->request('POST', $provider->getTokenIntrospectionUrl(), [
-                'auth' => [$client_id, $client_secret],
-                'form_params' => [
-                    'token' => $accessToken,
-                ],
-            ]);
-        } catch (\Exception $e) {
-            throw new TokenValidationException('Keycloak introspection failed');
-        }
-
-        try {
-            $jwt = Tools::decodeJSON((string) $response->getBody(), true);
-        } catch (JsonException $e) {
-            throw new TokenValidationException('Cert fetching, invalid json: '.$e->getMessage());
-        }
-
-        if (!$jwt['active']) {
-            throw new TokenValidationException('The token does not exist or is not valid anymore');
-        }
 
         return $jwt;
     }
