@@ -23,7 +23,7 @@ use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 class DbpCoreExtension extends ConfigurableExtension implements PrependExtensionInterface
 {
-    public function loadInternal(array $configs, ContainerBuilder $container)
+    public function loadInternal(array $mergedConfig, ContainerBuilder $container)
     {
         $this->extendArrayParameter(
             $container, 'api_platform.resource_class_directories', [__DIR__.'/../Entity']);
@@ -49,9 +49,9 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
         $def->setPublic(true);
         $def->addTag('cache.pool');
 
-        $container->setParameter('dbp_api.core.keycloak_config', $configs['keycloak'] ?? []);
-        $container->setParameter('dbp_api.core.ldap_config', $configs['ldap'] ?? []);
-        $container->setParameter('dbp_api.core.co_config', $configs['campus_online'] ?? []);
+        $container->setParameter('dbp_api.core.keycloak_config', $mergedConfig['keycloak'] ?? []);
+        $container->setParameter('dbp_api.core.ldap_config', $mergedConfig['ldap'] ?? []);
+        $container->setParameter('dbp_api.core.co_config', $mergedConfig['campus_online'] ?? []);
     }
 
     private function extendArrayParameter(ContainerBuilder $container, string $parameter, array $values)
