@@ -187,4 +187,11 @@ class KeycloakTokenValidatorTest extends TestCase
         $result = $this->tokenValidator->validateLocal($jwt);
         $this->assertEquals('subject', $result['sub']);
     }
+
+    public function testMissingUser()
+    {
+        $this->mockJWKResponse();
+        $result = $this->tokenValidator->validateLocal($this->getJWT());
+        $this->assertEquals(null, $result['username']);
+    }
 }

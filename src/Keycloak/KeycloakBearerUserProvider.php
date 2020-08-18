@@ -68,14 +68,17 @@ class KeycloakBearerUserProvider implements UserProviderInterface
         assert($cache instanceof CacheItemPoolInterface);
         $cachingPersonProvider = new CachingPersonProvider($this->personProvider, $cache, $jwt);
 
-        $username = $jwt['username'];
+        if (self::isServiceAccountToken($jwt)) {
+            $username = null;
+        } else {
+            $username = $jwt['username'] ?? null;
+        }
         $scopes = explode(' ', $jwt['scope']);
 
         return new KeycloakBearerUser(
             $username,
             $accessToken,
             $cachingPersonProvider,
-            self::isServiceAccountToken($jwt),
             $scopes
         );
     }

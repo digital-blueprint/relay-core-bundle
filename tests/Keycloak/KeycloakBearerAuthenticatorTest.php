@@ -24,7 +24,7 @@ class KeycloakBearerAuthenticatorTest extends TestCase
     {
         $auth = new KeycloakBearerAuthenticator();
 
-        $user = new KeycloakBearerUser('something', 'foobar', new DummyPersonProvider(new Person()), false, []);
+        $user = new KeycloakBearerUser('something', 'foobar', new DummyPersonProvider(new Person()), []);
         $provider = new DummyUserProvider($user);
         $credentials = ['token' => 'foobar'];
         $user = $auth->getUser($credentials, $provider);
@@ -34,9 +34,18 @@ class KeycloakBearerAuthenticatorTest extends TestCase
     public function testGetUserNoCred()
     {
         $auth = new KeycloakBearerAuthenticator();
-        $user = new KeycloakBearerUser('something', 'foobar', new DummyPersonProvider(new Person()), false, []);
+        $user = new KeycloakBearerUser('something', 'foobar', new DummyPersonProvider(new Person()), []);
         $provider = new DummyUserProvider($user);
         $this->expectException(BadCredentialsException::class);
         $auth->getUser([], $provider);
+    }
+
+    public function testRolesWithNoRealUser()
+    {
+        $user = new KeycloakBearerUser(null, 'foobar', new DummyPersonProvider(new Person()), []);
+        $this->assertSame([], $user->getRoles());
+
+        $user = new KeycloakBearerUser(null, 'foobar', new DummyPersonProvider(new Person()), ['some']);
+        $this->assertSame(['ROLE_SCOPE_SOME'], $user->getRoles());
     }
 }

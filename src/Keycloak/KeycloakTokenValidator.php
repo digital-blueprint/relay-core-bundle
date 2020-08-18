@@ -160,11 +160,14 @@ class KeycloakTokenValidator
 
         $jwt = $jwtResult->claims->all();
 
-        // XXX: Keycloak will add extra data to the token retuend by introspection, mirror this behaviour here
+        // XXX: Keycloak will add extra data to the token returned by introspection, mirror this behaviour here
         // to avoid breakage when switching between local/remote validation.
         // https://github.com/keycloak/keycloak/blob/8225157a1cecef30034530aa/services/src/main/java/org/keycloak/protocol/oidc/AccessTokenIntrospectionProvider.java#L59
         if (isset($jwt['preferred_username'])) {
             $jwt['username'] = $jwt['preferred_username'];
+        }
+        if (!isset($jwt['username'])) {
+            $jwt['username'] = null;
         }
         if (isset($jwt['azp'])) {
             $jwt['client_id'] = $jwt['azp'];

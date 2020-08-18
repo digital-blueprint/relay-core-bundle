@@ -21,11 +21,6 @@ class KeycloakBearerUser implements UserInterface
     private $person;
 
     /**
-     * @var bool
-     */
-    private $isServiceAccount;
-
-    /**
      * @var string[]
      */
     private $scopes;
@@ -36,31 +31,30 @@ class KeycloakBearerUser implements UserInterface
     private $accessToken;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $username;
 
-    public function __construct(string $username, string $accessToken, PersonProviderInterface $personProvider, bool $isServiceAccount, array $scopes)
+    public function __construct(?string $username, string $accessToken, PersonProviderInterface $personProvider, array $scopes)
     {
         $this->personProvider = $personProvider;
         $this->person = null;
-        $this->isServiceAccount = $isServiceAccount;
         $this->scopes = $scopes;
         $this->accessToken = $accessToken;
         $this->username = $username;
     }
 
     /**
-     * In case the user is a service account it isn't associated with a Person and getPerson() will fail.
+     * In case the user is a service account it isn't associated with a real User/Person and getPerson() will fail.
      */
-    public function isServiceAccount(): bool
+    private function hasRealUser(): bool
     {
-        return $this->isServiceAccount;
+        return $this->username !== null;
     }
 
     private function getPerson()
     {
-        if ($this->isServiceAccount()) {
+        if (!$this->hasRealUser()) {
             throw new \RuntimeException('No person available for service accounts');
         }
         if (!$this->person) {
@@ -72,7 +66,7 @@ class KeycloakBearerUser implements UserInterface
 
     public function getRoles()
     {
-        if ($this->isServiceAccount()) {
+        if (!$this->hasRealUser()) {
             $roles = [];
         } else {
             $roles = $this->getPerson()->getRoles();
@@ -87,7 +81,7 @@ class KeycloakBearerUser implements UserInterface
 
     public function getInstitutesForGroup(string $group)
     {
-        if ($this->isServiceAccount()) {
+        if (!$this->hasRealUser()) {
             return [];
         }
 
@@ -111,7 +105,7 @@ class KeycloakBearerUser implements UserInterface
 
     public function getUsername()
     {
-        return $this->username;
+        return $this->username ?? '';
     }
 
     public function eraseCredentials()

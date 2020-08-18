@@ -29,6 +29,7 @@ class ExtTest extends ApiTestCase
 
         if ($isServiceAccount) {
             $person = null;
+            $id = null;
         } else {
             $person = new Person();
             $person->setIdentifier($id);
@@ -38,7 +39,7 @@ class ExtTest extends ApiTestCase
         }
         $personProvider = new DummyPersonProvider($person);
 
-        $user = new KeycloakBearerUser($id, $token, $personProvider, $isServiceAccount, $scopes);
+        $user = new KeycloakBearerUser($id, $token, $personProvider, $scopes);
         $userProvider = new DummyUserProvider($user);
         $container->set("test.App\Security\User\KeycloakBearerUserProvider", $userProvider);
         $container->set("test.App\Service\PersonProviderInterface", $personProvider);
