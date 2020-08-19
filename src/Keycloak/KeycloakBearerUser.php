@@ -79,15 +79,6 @@ class KeycloakBearerUser implements UserInterface
         return $roles;
     }
 
-    public function getInstitutesForGroup(string $group)
-    {
-        if (!$this->hasRealUser()) {
-            return [];
-        }
-
-        return $this->getPerson()->getInstitutesForGroup($group);
-    }
-
     public function getAccessToken(): ?string
     {
         return $this->accessToken;

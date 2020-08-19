@@ -32,7 +32,7 @@ class LDAPApiTest extends ApiTestCase
         $security = new Security($client->getContainer());
         $nullLogger = new Logger('dummy', [new NullHandler()]);
         $guzzleLogger = new GuzzleLogger($nullLogger);
-        $tugapi = new TUGOnlineApi($client->getContainer(), $security, $guzzleLogger);
+        $tugapi = new TUGOnlineApi($client->getContainer(), $guzzleLogger);
 
         $this->api = new LDAPApi($client->getContainer(), $tugapi, $security, $nullLogger);
     }

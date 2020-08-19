@@ -9,7 +9,6 @@ use ApiPlatform\Core\Exception\ItemNotFoundException;
 use DBP\API\CoreBundle\Entity\Organization;
 use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
 use DBP\API\CoreBundle\Helpers\Tools;
-use DBP\API\CoreBundle\Keycloak\KeycloakBearerUser;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
@@ -24,16 +23,9 @@ use Kevinrob\GuzzleCache\Strategy\GreedyCacheStrategy;
 use Psr\Cache\CacheItemPoolInterface;
 use SimpleXMLElement;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\Security\Core\Security;
 
 class TUGOnlineApi
 {
-    /**
-     * @var Security
-     */
-    private $security;
-
     private $clientHandler;
 
     private $token;
@@ -46,10 +38,9 @@ class TUGOnlineApi
 
     private const CACHE_TTL = 3600;
 
-    public function __construct(ContainerInterface $container, Security $security, GuzzleLogger $guzzleLogger)
+    public function __construct(ContainerInterface $container, GuzzleLogger $guzzleLogger)
     {
         $this->config = $container->getParameter('dbp_api.core.co_config');
-        $this->security = $security;
         $this->token = $this->config['api_token'] ?? '';
         $this->container = $container;
         $this->guzzleLogger = $guzzleLogger;
@@ -259,36 +250,5 @@ class TUGOnlineApi
         }
 
         return Tools::filterErrorMessage($e->getMessage());
-    }
-
-    /**
-     * Checks if the current user has permissions to an organization.
-     *
-     * @param bool $throwException
-     *
-     * @throws AccessDeniedHttpException
-     */
-    public function checkOrganizationPermissions(Organization &$organization, $throwException = true): bool
-    {
-        /** @var KeycloakBearerUser $user */
-        $user = $this->security->getUser();
-        $institutes = $user->getInstitutesForGroup('F_BIB');
-        $institute = $organization->getAlternateName();
-
-        // check if current user has F_BIB permissions to the institute of the book offer
-        if (!in_array($institute, $institutes, true)) {
-            // throw an exception if we want to
-            if ($throwException) {
-                throw new AccessDeniedHttpException(sprintf("Person '%s' is not allowed to work with library '%s'!", $user->getUsername(), $institute));
-            }
-        } else {
-            // return true if we are not throwing an exception
-            if (!$throwException) {
-                return true;
-            }
-        }
-
-        // return false if we are not throwing an exception, otherwise true
-        return $throwException;
     }
 }
