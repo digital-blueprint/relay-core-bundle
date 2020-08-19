@@ -26,7 +26,6 @@ class LDAPApi implements PersonProviderInterface
     public const ROLE_STAFF = 'ROLE_STAFF';
     public const ROLE_STUDENT = 'ROLE_STUDENT';
     public const ROLE_ALUMNI = 'ROLE_ALUMNI';
-    public const ROLE_BIB = 'ROLE_F_BIB_F';
 
     // singleton to cache fetched users by alma user id
     public static $USERS_BY_ALMA_USER_ID = [];
