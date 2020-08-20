@@ -8,78 +8,17 @@ use DBP\API\CoreBundle\Helpers\Tools;
 use GuzzleHttp\MessageFormatter;
 use GuzzleHttp\Middleware;
 use Psr\Log\LoggerInterface;
+use Psr\Log\LoggerTrait;
 
 class GuzzleLogger implements LoggerInterface
 {
+    use LoggerTrait;
+
     private $logger;
 
     public function __construct(LoggerInterface $guzzleLogger)
     {
         $this->logger = $guzzleLogger;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function emergency($message, array $context = [])
-    {
-        $this->logger->emergency($message, $context);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function alert($message, array $context = [])
-    {
-        $this->logger->alert($message, $context);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function critical($message, array $context = [])
-    {
-        $this->logger->critical($message, $context);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function error($message, array $context = [])
-    {
-        $this->logger->error($message, $context);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function warning($message, array $context = [])
-    {
-        $this->logger->warning($message, $context);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function notice($message, array $context = [])
-    {
-        $this->logger->notice($message, $context);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function info($message, array $context = [])
-    {
-        $this->logger->info($message, $context);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function debug($message, array $context = [])
-    {
-        $this->logger->debug($message, $context);
     }
 
     /**
