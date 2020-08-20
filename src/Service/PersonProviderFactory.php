@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace DBP\API\CoreBundle\Service;
 
-use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\Security;
 
 class PersonProviderFactory
