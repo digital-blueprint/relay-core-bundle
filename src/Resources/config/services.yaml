@@ -24,13 +24,12 @@ services:
     autowire: true
     autoconfigure: true
 
-  DBP\API\CoreBundle\Service\KeycloakApi:
-    autowire: true
-    autoconfigure: true
-
   DBP\API\CoreBundle\Service\LDAPApi:
     autowire: true
     autoconfigure: true
+
+  DBP\API\CoreBundle\Service\PersonProviderInterface:
+    '@DBP\API\CoreBundle\Service\LDAPApi'
 
   DBP\API\CoreBundle\DataProvider\OrganizationDataProvider:
     tags: ['api_platform.item_data_provider']
@@ -52,11 +51,6 @@ services:
     autoconfigure: true
 
   DBP\API\CoreBundle\Keycloak\KeycloakBearerAuthenticator:
-    autowire: true
-    autoconfigure: true
-
-  DBP\API\CoreBundle\Service\PersonProviderInterface:
-    factory: ['DBP\API\CoreBundle\Service\PersonProviderFactory', 'createPersonProvider']
     autowire: true
     autoconfigure: true
 
