@@ -26,7 +26,9 @@ class CronCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $command = $this->getApplication()->find('cache:pool:prune');
+        $app = $this->getApplication();
+        assert($app !== null);
+        $command = $app->find('cache:pool:prune');
         $pruneInput = new ArrayInput([]);
         $pruneOutput = new BufferedOutput();
 

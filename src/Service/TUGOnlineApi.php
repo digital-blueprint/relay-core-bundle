@@ -206,7 +206,6 @@ class TUGOnlineApi implements OrganizationProviderInterface
                 switch ($message) {
                     case 'unauthorized resource access':
                         throw new ItemNotFoundException(sprintf("Organization with id '%s' could not be found!", $identifier));
-                        break;
                 }
             }
 

@@ -30,6 +30,7 @@ final class PersonItemDataProvider implements ItemDataProviderInterface, Restric
      */
     public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []): ?Person
     {
+        assert(is_string($id));
         $person = null;
         $api = $this->api;
         $person = $api->getPerson($id, true);

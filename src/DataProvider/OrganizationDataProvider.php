@@ -30,6 +30,7 @@ final class OrganizationDataProvider implements ItemDataProviderInterface, Restr
      */
     public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []): ?Organization
     {
+        assert(is_string($id));
         $filters = $context['filters'] ?? [];
         $lang = $filters['lang'] ?? 'de';
 

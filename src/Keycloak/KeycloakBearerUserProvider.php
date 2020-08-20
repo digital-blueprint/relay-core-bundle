@@ -61,7 +61,7 @@ class KeycloakBearerUserProvider implements UserProviderInterface
 
         $jwt = $validator->validate($accessToken);
 
-        if ($config['audience'] ?? '' !== '') {
+        if (($config['audience'] ?? '') !== '') {
             $validator::checkAudience($jwt, $config['audience']);
         }
 
