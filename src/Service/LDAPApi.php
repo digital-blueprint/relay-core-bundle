@@ -11,7 +11,6 @@ namespace DBP\API\CoreBundle\Service;
 
 use Adldap\Adldap;
 use Adldap\Models\User;
-use Adldap\Query\Builder;
 use ApiPlatform\Core\Exception\ItemNotFoundException;
 use DBP\API\CoreBundle\Entity\Person;
 use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
@@ -78,7 +77,7 @@ class LDAPApi implements PersonProviderInterface
             $provider = $this->ad->connect();
 
             $builder = $provider->search();
-            assert($builder instanceof Builder);
+
             $search = $builder
                 ->where('objectClass', '=', $provider->getSchema()->person());
 
@@ -128,7 +127,6 @@ class LDAPApi implements PersonProviderInterface
             $provider = $this->ad->connect();
 
             $builder = $provider->search();
-            assert($builder instanceof Builder);
 
             /** @var User $user */
             $user = $builder
@@ -158,7 +156,6 @@ class LDAPApi implements PersonProviderInterface
             $provider = $this->ad->connect();
 
             $builder = $provider->search();
-            assert($builder instanceof Builder);
 
             // if we already have fetched the user by alma user id in this request we will use the cached version
             if (array_key_exists($almaUserId, self::$USERS_BY_ALMA_USER_ID)) {
