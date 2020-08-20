@@ -24,7 +24,7 @@ use Psr\Cache\CacheItemPoolInterface;
 use SimpleXMLElement;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class TUGOnlineApi
+class TUGOnlineApi implements OrganizationProviderInterface
 {
     private $clientHandler;
 
@@ -159,11 +159,9 @@ class TUGOnlineApi
     }
 
     /**
-     * @return Organization
-     *
      * @throws ItemNotLoadedException
      */
-    public function getOrganizationById(string $identifier, string $lang = 'de')
+    public function getOrganizationById(string $identifier, string $lang): Organization
     {
         $xmlElement = $this->getOrganizationXMLData($identifier, $lang);
         $organization = $this->organizationFromXMLElement($identifier, $xmlElement);

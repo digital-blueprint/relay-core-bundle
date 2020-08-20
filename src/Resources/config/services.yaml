@@ -24,6 +24,9 @@ services:
     autowire: true
     autoconfigure: true
 
+  DBP\API\CoreBundle\Service\OrganizationProviderInterface:
+    '@DBP\API\CoreBundle\Service\TUGOnlineApi'
+
   DBP\API\CoreBundle\Service\LDAPApi:
     autowire: true
     autoconfigure: true

@@ -7,13 +7,13 @@ namespace DBP\API\CoreBundle\DataProvider;
 use ApiPlatform\Core\DataProvider\ItemDataProviderInterface;
 use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
 use DBP\API\CoreBundle\Entity\Organization;
-use DBP\API\CoreBundle\Service\TUGOnlineApi;
+use DBP\API\CoreBundle\Service\OrganizationProviderInterface;
 
 final class OrganizationDataProvider implements ItemDataProviderInterface, RestrictedDataProviderInterface
 {
     private $api;
 
-    public function __construct(TUGOnlineApi $api)
+    public function __construct(OrganizationProviderInterface $api)
     {
         $this->api = $api;
     }
