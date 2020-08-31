@@ -32,7 +32,7 @@ final class SwaggerDecorator implements NormalizerInterface
         }
 
         foreach ($pathsToHide as $path) {
-            unset($docs['paths'][$path]);
+            unset($docs['paths'][$path]['get']);
         }
 
         return $docs;
