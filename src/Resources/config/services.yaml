@@ -1,10 +1,111 @@
 services:
+  DBP\API\CoreBundle\Serializer\ApiErrorNormalizer:
+    autowire: true
+    autoconfigure: false
+    tags: [{'name' : 'serializer.normalizer', priority: '-700'}]
+
   DBP\API\CoreBundle\Service\GuzzleLogger:
     public: false
     autowire: true
     autoconfigure: true
+    tags: [{name: monolog.logger, channel: dbp.guzzle}]
 
   DBP\API\CoreBundle\Service\AuditLogger:
     public: false
     autowire: true
     autoconfigure: true
+    tags: [{name: monolog.logger, channel: dbp.audit}]
+
+  DBP\API\CoreBundle\Command\CronCommand:
+    autowire: true
+    autoconfigure: true
+
+  DBP\API\CoreBundle\Service\TUGOnlineApi:
+    autowire: true
+    autoconfigure: true
+
+  DBP\API\CoreBundle\Service\OrganizationProviderInterface:
+    '@DBP\API\CoreBundle\Service\TUGOnlineApi'
+
+  DBP\API\CoreBundle\Service\LDAPApi:
+    autowire: true
+    autoconfigure: true
+
+  DBP\API\CoreBundle\Service\PersonProviderInterface:
+    '@DBP\API\CoreBundle\Service\LDAPApi'
+
+  DBP\API\CoreBundle\DataProvider\OrganizationDataProvider:
+    tags: ['api_platform.item_data_provider']
+    autowire: true
+    autoconfigure: true
+
+  DBP\API\CoreBundle\DataProvider\PersonItemDataProvider:
+    tags: ['api_platform.item_data_provider']
+    autowire: true
+    autoconfigure: true
+
+  DBP\API\CoreBundle\DataProvider\PersonCollectionDataProvider:
+    tags: ['api_platform.collection_data_provider']
+    autowire: true
+    autoconfigure: true
+
+  DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProvider:
+    autowire: true
+    autoconfigure: true
+
+  DBP\API\CoreBundle\Keycloak\KeycloakBearerAuthenticator:
+    autowire: true
+    autoconfigure: true
+
+  DBP\API\CoreBundle\Serializer\PersonAttributeNormalizer:
+    autowire: true
+    autoconfigure: true
+
+  DBP\API\CoreBundle\Swagger\SwaggerDecorator:
+    decorates: 'api_platform.swagger.normalizer.api_gateway'
+    autowire: true
+    autoconfigure: false
+
+  DBP\API\CoreBundle\Swagger\DocumentationNormalizer:
+    decorates: 'api_platform.swagger.normalizer.documentation'
+    # arguments were taken from service definition of ApiPlatform\Core\Swagger\Serializer\DocumentationNormalizer
+    # from vendor/api-platform/core/src/Bridge/Symfony/Bundle/Resources/config/swagger.xml and translated to yaml
+    arguments:
+      - "@api_platform.metadata.resource.metadata_factory"
+      - "@api_platform.metadata.property.name_collection_factory"
+      - "@api_platform.metadata.property.metadata_factory"
+      - "@api_platform.json_schema.schema_factory"
+      - "@api_platform.json_schema.type_factory"
+      - "@api_platform.operation_path_resolver"
+      - null
+      - "@api_platform.filter_locator"
+      - null
+      - "%api_platform.oauth.enabled%"
+      - "%api_platform.oauth.type%"
+      - "%api_platform.oauth.flow%"
+      - "%api_platform.oauth.tokenUrl%"
+      - "%api_platform.oauth.authorizationUrl%"
+      - "%api_platform.oauth.scopes%"
+      - "%api_platform.swagger.api_keys%"
+      - "@api_platform.subresource_operation_factory"
+      - "%api_platform.collection.pagination.enabled%"
+      - "%api_platform.collection.pagination.page_parameter_name%"
+      - "%api_platform.collection.pagination.client_items_per_page%"
+      - "%api_platform.collection.pagination.items_per_page_parameter_name%"
+      - "%api_platform.formats%"
+      - "%api_platform.collection.pagination.client_enabled%"
+      - "%api_platform.collection.pagination.enabled_parameter_name%"
+      - "%api_platform.swagger.versions%"
+    autoconfigure: false
+    autowire: true
+
+
+  # This alias exist so we can replace the service during tests
+  test.App\Security\User\KeycloakBearerUserProvider:
+    alias: 'DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProvider'
+    public: true
+
+  # This alias exist so we can replace the service during tests
+  test.App\Service\PersonProviderInterface:
+    alias: 'DBP\API\CoreBundle\Service\PersonProviderInterface'
+    public: true

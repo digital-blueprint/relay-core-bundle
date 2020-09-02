@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DBP\API\CoreBundle\Service;
 
 use Psr\Log\LoggerInterface;
@@ -19,7 +21,7 @@ class AuditLogger
     public function log($service, $message, $data = null)
     {
         $user = $this->security->getUser();
-        $dataString = $data != null ? ": " . json_encode($data) : "";
+        $dataString = $data !== null ? ': '.json_encode($data) : '';
         $this->logger->notice("[{$service}] [{$user->getUsername()}] {$message}{$dataString}");
     }
 }
