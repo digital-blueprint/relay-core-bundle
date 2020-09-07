@@ -49,3 +49,7 @@ header {
 .swagger-ui .info .title small {
     display: none;
 }
+
+.swagger-ui .svg-assets {
+    display: none;
+}
