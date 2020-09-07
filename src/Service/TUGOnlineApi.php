@@ -19,6 +19,7 @@ use GuzzleHttp\Psr7\Response;
 use Kevinrob\GuzzleCache\CacheMiddleware;
 use Kevinrob\GuzzleCache\Storage\Psr6CacheStorage;
 use Kevinrob\GuzzleCache\Strategy\GreedyCacheStrategy;
+use League\Uri\Contracts\UriException;
 use League\Uri\UriTemplate;
 use Psr\Cache\CacheItemPoolInterface;
 use SimpleXMLElement;
@@ -135,7 +136,7 @@ class TUGOnlineApi implements OrganizationProviderInterface
             if ($response->getStatusCode() === 200 && $hasContent) {
                 assert(isset($uris[$i]));
 
-                return $uris[$i];
+                return (string)$uris[$i];
             }
         }
 
@@ -154,12 +155,13 @@ class TUGOnlineApi implements OrganizationProviderInterface
         $orgUnitId = $this->extractOrganizationID($identifier);
 
         // token is a mandatory url parameter, token via header doesn't work
-        $uriTemplate = UriTemplate('?token={token}&orgUnitID={orgUnitID}&language={lang}')->expand([
+        $uriTemplate = new UriTemplate('?token={token}&orgUnitID={orgUnitID}&language={lang}');
+
+        return (string)$uriTemplate->expand([
             'token' => $this->token,
             'orgUnitID' => $orgUnitId,
             'lang' => $lang === 'en' ? 'en' : 'de',
         ]);
-        return $uriTemplate->getTemplate();
     }
 
     /**
