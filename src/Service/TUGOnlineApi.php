@@ -91,7 +91,7 @@ class TUGOnlineApi implements OrganizationProviderInterface
         $bdId = $user->getAttribute('CO-OBFUSCATED-C-BD');
         if (in_array('BEDIENSTETE:OK', $accountTypes, true) && !empty($bdId)) {
             $uriTemplate = new UriTemplate('https://online.tugraz.at/tug_online/visitenkarte.showImage?pPersonenGruppe={group}&pPersonenId={personId}');
-            $uris[] = $uriTemplate->expand([
+            $uris[] = (string) $uriTemplate->expand([
                 'group' => '3',
                 'personId' => $bdId[0],
             ]);
@@ -100,7 +100,7 @@ class TUGOnlineApi implements OrganizationProviderInterface
         $stId = $user->getAttribute('CO-OBFUSCATED-C-ST');
         if (in_array('STUDENTEN:OK', $accountTypes, true) && !empty($stId)) {
             $uriTemplate = new UriTemplate('https://online.tugraz.at/tug_online/visitenkarte.showImage?pPersonenGruppe={group}&pPersonenId={personId}');
-            $uris[] = $uriTemplate->expand([
+            $uris[] = (string) $uriTemplate->expand([
                 'group' => '5',
                 'personId' => $stId[0],
             ]);
@@ -109,7 +109,7 @@ class TUGOnlineApi implements OrganizationProviderInterface
         $extId = $user->getAttribute('CO-OBFUSCATED-C-EXT');
         if (in_array('ALUMNI:OK', $accountTypes, true) && !empty($extId)) {
             $uriTemplate = new UriTemplate('https://online.tugraz.at/tug_online/visitenkarte.showImage?pPersonenGruppe={group}&pPersonenId={personId}');
-            $uris[] = $uriTemplate->expand([
+            $uris[] = (string) $uriTemplate->expand([
                 'group' => '6',
                 'personId' => $bdId[0],
             ]);
@@ -136,7 +136,7 @@ class TUGOnlineApi implements OrganizationProviderInterface
             if ($response->getStatusCode() === 200 && $hasContent) {
                 assert(isset($uris[$i]));
 
-                return (string)$uris[$i];
+                return (string) $uris[$i];
             }
         }
 
@@ -144,10 +144,6 @@ class TUGOnlineApi implements OrganizationProviderInterface
     }
 
     /**
-     * @param string $identifier
-     * @param string $lang
-     * @return string
-     *
      * @throws UriException
      */
     public function getOrganizationUrlParameterString(string $identifier, string $lang = 'de'): string
@@ -157,7 +153,7 @@ class TUGOnlineApi implements OrganizationProviderInterface
         // token is a mandatory url parameter, token via header doesn't work
         $uriTemplate = new UriTemplate('?token={token}&orgUnitID={orgUnitID}&language={lang}');
 
-        return (string)$uriTemplate->expand([
+        return (string) $uriTemplate->expand([
             'token' => $this->token,
             'orgUnitID' => $orgUnitId,
             'lang' => $lang === 'en' ? 'en' : 'de',
