@@ -23,7 +23,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *         "method"="GET",
  *         "path"="/people/{id}/library-book-loans",
  *         "controller"=GetLibraryBookLoansByPerson::class,
- *         "normalization_context"={"groups"={"LibraryBookLoanByPerson"}},
+ *         "normalization_context"={"jsonld_embed_context"=true, "groups"={"LibraryBookLoan:output", "Person:output", "LibraryBookOffer:output", "LibraryBook:output"}},
  *         "openapi_context"=
  *           {"summary"="Get the library book loans of a person.",
  *            "parameters"={{"name"="id", "in"="path", "description"="Id of person", "required"="true", "type"="string", "example"="vlts01"}}},
@@ -31,51 +31,65 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *   },
  *   iri="http://schema.org/Person",
  *   description="A person of the LDAP system",
- *   normalizationContext={"groups"={"LDAPPerson:output"}, "jsonld_embed_context"=true}
+ *   normalizationContext={"groups"={"Person:output"}, "jsonld_embed_context"=true}
  * )
  */
 class Person
 {
     /**
      * @ApiProperty(identifier=true)
-     * @Groups({"LDAPPerson:output"})
+     * @Groups({"Person:output"})
+     *
+     * @var string
      */
     private $identifier;
 
     /**
      * @ApiProperty(iri="http://schema.org/givenName")
-     * @Groups({"LDAPPerson:output", "LibraryBookLoan", "LibraryBookLoanByOrganization"})
+     * @Groups({"Person:output"})
+     *
+     * @var string
      */
     private $givenName;
 
     /**
      * @var string
      * @ApiProperty(iri="http://schema.org/familyName")
-     * @Groups({"LDAPPerson:output", "LibraryBookLoan", "LibraryBookLoanByOrganization"})
+     * @Groups({"Person:output"})
+     *
+     * @var string
      */
     private $familyName;
 
     /**
      * @ApiProperty(iri="http://schema.org/honorificSuffix")
-     * @Groups({"LDAPPerson:output"})
+     * @Groups({"Person:output"})
+     *
+     * @var string
      */
     private $honorificSuffix;
 
     /**
      * @ApiProperty(iri="http://schema.org/telephone")
-     * @Groups({"LDAPPerson:output"})
+     * @Groups({"Person:output"})
+     *
+     * @var string
      */
     private $telephone;
 
     /**
      * @var string
-     * @Groups({"LDAPPerson:output"})
+     * @Groups({"Person:output"})
+     *
+     * @var string
      */
     private $phoneExtension;
 
     /**
      * @ApiProperty(iri="http://schema.org/email")
-     * @Groups({"LDAPPerson:output", "LibraryBookLoan"})
+     * @Groups({"Person:output"})
+     *
+     * @var string
      */
     private $email;
 
@@ -88,7 +102,9 @@ class Person
 
     /**
      * @var string
-     * @Groups({"current_user", "LibraryBookLoanByOrganization"})
+     * @Groups({"current_user"})
+     *
+     * @var string
      */
     private $almaId;
 
@@ -215,7 +231,7 @@ class Person
 
     /**
      * @ApiProperty(iri="http://schema.org/name")
-     * @Groups({"LDAPPerson:output", "LibraryBookLoanByOrganization"})
+     * @Groups({"Person:output"})
      */
     public function getName(): ?string
     {
