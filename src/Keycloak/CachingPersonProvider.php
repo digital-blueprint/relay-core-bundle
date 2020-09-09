@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DBP\API\CoreBundle\Keycloak;
 
+use ApiPlatform\Core\Exception\ItemNotFoundException;
 use DBP\API\CoreBundle\Entity\Person;
 use DBP\API\CoreBundle\Service\PersonProviderInterface;
 use Psr\Cache\CacheItemPoolInterface;
@@ -37,9 +38,18 @@ class CachingPersonProvider implements PersonProviderInterface
 
         $item = $this->cache->getItem($cacheKey);
         if ($item->isHit()) {
-            return $item->get();
+            $person = $item->get();
+            if ($person === null) {
+                throw new ItemNotFoundException();
+            }
+
+            return $person;
         } else {
-            $person = $this->provider->getPerson($id, $full);
+            try {
+                $person = $this->provider->getPerson($id, $full);
+            } catch (ItemNotFoundException $e) {
+                $person = null;
+            }
             $item->set($person);
 
             // Just use the time the token is valid plus a bit more, this makes sure the cache is valid
@@ -48,6 +58,10 @@ class CachingPersonProvider implements PersonProviderInterface
             $item->expiresAfter($expiresAfter);
 
             $this->cache->save($item);
+
+            if ($person === null) {
+                throw new ItemNotFoundException();
+            }
 
             return $person;
         }
