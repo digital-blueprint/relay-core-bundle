@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DBP\API\CoreBundle\Keycloak;
 
+use ApiPlatform\Core\Exception\ItemNotFoundException;
 use DBP\API\CoreBundle\Entity\Person;
 use DBP\API\CoreBundle\Service\PersonProviderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -35,6 +36,11 @@ class KeycloakBearerUser implements UserInterface
      */
     private $username;
 
+    /**
+     * @var bool
+     */
+    private $isRealUser;
+
     public function __construct(?string $username, string $accessToken, PersonProviderInterface $personProvider, array $scopes)
     {
         $this->personProvider = $personProvider;
@@ -42,34 +48,29 @@ class KeycloakBearerUser implements UserInterface
         $this->scopes = $scopes;
         $this->accessToken = $accessToken;
         $this->username = $username;
+        $this->isRealUser = ($this->username !== null);
     }
 
-    /**
-     * In case the user is a service account it isn't associated with a real User/Person and getPerson() will fail.
-     */
-    private function hasRealUser(): bool
+    private function ensurePerson()
     {
-        return $this->username !== null;
-    }
-
-    private function getPerson()
-    {
-        if (!$this->hasRealUser()) {
-            throw new \RuntimeException('No person available for service accounts');
+        if (!$this->person && $this->isRealUser) {
+            try {
+                $this->person = $this->personProvider->getPerson($this->getUsername(), false);
+            } catch (ItemNotFoundException $e) {
+                // XXX: In case of EID we have no good way right now to see if we should have to user in LDAP
+                $this->isRealUser = false;
+            }
         }
-        if (!$this->person) {
-            $this->person = $this->personProvider->getPerson($this->getUsername(), false);
-        }
-
-        return $this->person;
     }
 
     public function getRoles()
     {
-        if (!$this->hasRealUser()) {
+        $this->ensurePerson();
+
+        if (!$this->isRealUser) {
             $roles = [];
         } else {
-            $roles = $this->getPerson()->getRoles();
+            $roles = $this->person->getRoles();
         }
 
         foreach ($this->scopes as $scope) {
