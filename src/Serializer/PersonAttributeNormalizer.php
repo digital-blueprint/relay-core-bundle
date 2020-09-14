@@ -28,9 +28,9 @@ class PersonAttributeNormalizer implements ContextAwareNormalizerInterface, Norm
 
     public function normalize($object, $format = null, array $context = [])
     {
-        // set the group "current_user" for the current user
+        // set the group "Person:current-user" for the current user
         if ($this->isCurrentUser($object)) {
-            $context['groups'][] = 'current_user';
+            $context['groups'][] = 'Person:current-user';
         }
 
         $context[self::ALREADY_CALLED] = true;

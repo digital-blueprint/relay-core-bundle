@@ -96,13 +96,13 @@ class Person
     /**
      * @var string|null
      * @ApiProperty(iri="http://schema.org/image", required=false)
-     * @Groups({"current_user"})
+     * @Groups({"Person:current-user"})
      */
     private $image;
 
     /**
      * @var string
-     * @Groups({"current_user"})
+     * @Groups({"Person:current-user"})
      *
      * @var string
      */
@@ -110,26 +110,26 @@ class Person
 
     /**
      * @var array
-     * @Groups({"current_user"})
+     * @Groups({"Person:current-user"})
      */
     private $functions;
 
     /**
      * @var array
-     * @Groups({"current_user"})
+     * @Groups({"Person:current-user"})
      */
     private $roles;
 
     /**
      * @var DateTimeInterface
      * @ApiProperty(iri="http://schema.org/Date")
-     * @Groups({"current_user", "birthdate_access"})
+     * @Groups({"Person:current-user", "Person:birthdate-access"})
      */
     private $birthDate;
 
     /**
      * @var array
-     * @Groups({"current_user"})
+     * @Groups({"Person:current-user"})
      */
     private $accountTypes;
 
