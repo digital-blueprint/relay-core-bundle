@@ -32,7 +32,7 @@ class TUGTools
 
     /**
      * Generates role names from functions
-     * Function "F_EDV:F:95300:34886" will be role "ROLE_F_EDV_F".
+     * Function "F_BIB:F:1490:681" will be role "ROLE_LIBRARY_MANAGER".
      *
      * @param string[] $functions
      *
@@ -40,12 +40,15 @@ class TUGTools
      */
     public static function functionsToRoles(array $functions): array
     {
-        $roles = $functions;
-
-        array_walk($roles, function (&$item) {
-            $item = join('_', array_slice(preg_split('/:/', 'ROLE_'.$item), 0, 2));
-        });
-
+        $roles = [];
+        foreach ($functions as $function) {
+            $match = 'F_BIB:F:';
+            if (substr($function, 0, strlen($match)) === $match) {
+                $roles[] = 'ROLE_LIBRARY_MANAGER';
+                // Backwards compat only, remove
+                $roles[] = 'ROLE_F_BIB_F';
+            }
+        }
         $roles = array_unique($roles);
 
         return $roles;

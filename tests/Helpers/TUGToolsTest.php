@@ -12,7 +12,8 @@ class TUGToolsTest extends TestCase
     public function testFunctionsToRoles()
     {
         $this->assertEquals([], TUGTools::functionsToRoles([]));
-        $this->assertEquals(['ROLE_F_EDV_F'], TUGTools::functionsToRoles(['F_EDV:F:95300:34886']));
+        $this->assertEquals(['ROLE_LIBRARY_MANAGER', 'ROLE_F_BIB_F'], TUGTools::functionsToRoles(['F_BIB:F:1490:681']));
+        $this->assertEquals([], TUGTools::functionsToRoles(['F_FOO:D:1490:681']));
     }
 
     public function testAccountTypesToRoles()
