@@ -102,8 +102,6 @@ class Person
 
     /**
      * @var string
-     * @Groups({"Person:current-user"})
-     *
      * @var string
      */
     private $almaId;
@@ -126,12 +124,6 @@ class Person
      * @Groups({"Person:current-user", "Person:birthdate-access"})
      */
     private $birthDate;
-
-    /**
-     * @var array
-     * @Groups({"Person:current-user"})
-     */
-    private $accountTypes;
 
     public function setIdentifier(string $identifier): self
     {
@@ -264,21 +256,6 @@ class Person
     public function setRoles(array $roles): self
     {
         $this->roles = $roles;
-
-        return $this;
-    }
-
-    public function getAccountTypes(): array
-    {
-        return $this->accountTypes;
-    }
-
-    /**
-     * @return Person
-     */
-    public function setAccountTypes(array $accountTypes): self
-    {
-        $this->accountTypes = $accountTypes;
 
         return $this;
     }

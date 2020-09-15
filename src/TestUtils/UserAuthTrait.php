@@ -25,7 +25,6 @@ trait UserAuthTrait
             $person->setIdentifier($id);
             $person->setFunctions($functions);
             $person->setRoles($roles);
-            $person->setAccountTypes([]);
         }
         $personProvider = new DummyPersonProvider($person);
 

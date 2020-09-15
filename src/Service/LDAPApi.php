@@ -228,7 +228,6 @@ class LDAPApi implements PersonProviderInterface
 
         TUGTools::injectSpecialPermissions($identifier, $functions);
 
-        $person->setAccountTypes($accountTypes);
         $person->setFunctions($functions);
 
         $currentUser = $this->security->getUser();
