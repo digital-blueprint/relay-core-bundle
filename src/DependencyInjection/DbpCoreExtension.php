@@ -158,7 +158,8 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
                     'origin_regex' => true,
                     'allow_origin' => ['^.+$'],
                     'allow_methods' => ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE'],
-                    'allow_headers' => ['Content-Type', 'Authorization'],
+                    // FIXME: 'Token' used for the authentic document bundle
+                    'allow_headers' => ['Content-Type', 'Authorization', 'Token'],
                     // FIXME: Get rid of 'X-Analytics-Update-Date'
                     'expose_headers' => ['Link', 'X-Analytics-Update-Date'],
                     'max_age' => 3600,
