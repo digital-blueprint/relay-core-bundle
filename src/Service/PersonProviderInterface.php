@@ -16,6 +16,15 @@ interface PersonProviderInterface
     public function getPersons(array $filters): array;
 
     /**
+     * @param string $firstName
+     * @param string $lastName
+     * @param \DateTime $birthDay
+     * @return Person[]
+     * @throws ItemNotLoadedException
+     */
+    public function getPersonsByNameAndBirthday(string $givenName, string $familyName, \DateTime $birthDay): array;
+
+    /**
      * @throws ItemNotLoadedException
      */
     public function getPerson(string $id, bool $full): Person;

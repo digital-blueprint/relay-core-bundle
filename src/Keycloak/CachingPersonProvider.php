@@ -30,6 +30,18 @@ class CachingPersonProvider implements PersonProviderInterface
         return $this->provider->getPersons($filters);
     }
 
+    /**
+     * @param string $firstName
+     * @param string $lastName
+     * @param \DateTime $birthDay
+     * @return Person[]
+     * @throws \DBP\API\CoreBundle\Exception\ItemNotLoadedException
+     */
+    public function getPersonsByNameAndBirthday(string $givenName, string $familyName, \DateTime $birthDay): array
+    {
+        return $this->provider->getPersonsByNameAndBirthday($firstName, $lastName, $birthDay);
+    }
+
     public function getPerson(string $id, bool $full): Person
     {
         assert($this->jwt['active']);

@@ -114,6 +114,46 @@ class LDAPApi implements PersonProviderInterface
     }
 
     /**
+     * @param string $givenName
+     * @param string $familyName
+     * @param \DateTime $birthDay
+     * @return Person[]
+     */
+    public function getPersonsByNameAndBirthday(string $givenName, string $familyName, \DateTime $birthDay): array
+    {
+        try {
+            // If a successful connection is made to your server, the provider will be returned.
+            $provider = $this->ad->connect();
+
+            $builder = $provider->search();
+
+            // TODO: remove test user
+            $givenName = "Max";
+            $familyName = "Mustermann";
+            $birthDay = new \DateTime("2000-02-02");
+
+            /** @var User[] $users */
+            $users = $builder
+                ->where('objectClass', '=', $provider->getSchema()->person())
+                ->whereEquals('givenName', $givenName)
+                ->whereEquals('sn', $familyName)
+                ->whereEquals('DateOfBirth', $birthDay->format("Ymd")) // (e.g. 19810718)
+                ->sortBy('sn', 'asc')->paginate($this->PAGESIZE)->getResults();
+
+            $people = [];
+
+            foreach($users as $user) {
+                $people[] = $this->personFromUserItem($user);
+            }
+
+            return $people;
+        } catch (\Adldap\Auth\BindException $e) {
+            // There was an issue binding / connecting to the server.
+            throw new ItemNotLoadedException(sprintf("Persons could not be loaded! Message: %s", CoreTools::filterErrorMessage($e->getMessage())));
+        }
+    }
+
+    /**
      * @throws ItemNotFoundException
      * @throws ItemNotLoadedException
      */
