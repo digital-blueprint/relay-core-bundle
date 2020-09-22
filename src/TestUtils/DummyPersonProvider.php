@@ -42,4 +42,9 @@ class DummyPersonProvider implements PersonProviderInterface
     {
         throw new ItemNotFoundException();
     }
+
+    public function getPersonsByNameAndBirthday(string $givenName, string $familyName, \DateTime $birthDay): array
+    {
+        return [];
+    }
 }
