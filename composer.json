@@ -4,7 +4,7 @@
     "license": "AGPL-3.0-or-later",
     "version": "dev-master",
     "require": {
-        "php": "^7.2.24",
+        "php": "^7.3",
         "adldap2/adldap2": "^10.0",
         "api-platform/core": "^2.4",
         "doctrine/annotations": "^1.0",
@@ -54,7 +54,7 @@
     "config": {
         "sort-packages": true,
         "platform": {
-          "php": "7.2.24"
+          "php": "7.3"
         }
     },
     "scripts": {
