@@ -62,7 +62,7 @@ class TUGTools
         $DEVELOPERS = ['christoph_reiter', 'jfink', 'pbeke', 'eneuber', 'koeseoglu', 'tsteinwen13', 'riina'];
         $DUMMY_USERS = ['woody007', 'koarl', 'muma', 'waldi08'];
         $IBIB_TEST_USERS = ['wrussm', 'finkst', 'salzburg'];
-        $ESIGN_TEST_USERS = ['fipsi1505', 'joebch', 'dobnik', 'sascha_rossmann'];
+        $ESIGN_TEST_USERS = ['fipsi1505', 'joebch', 'dobnik', 'sascha_rossmann', 'hurli', 'mschrei'];
 
         // give special access to developers and test accounts
         if (in_array($userId, $DEVELOPERS, true) || in_array($userId, $DUMMY_USERS, true) || in_array($userId, $IBIB_TEST_USERS, true)) {
