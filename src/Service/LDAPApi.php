@@ -266,7 +266,8 @@ class LDAPApi implements PersonProviderInterface
         $functions = $user->getAttribute('CO-FUNKDE-C');
         $functions = is_array($functions) ? $functions : [];
 
-        TUGTools::injectSpecialPermissions($identifier, $functions);
+        $specialRoles = [];
+        TUGTools::injectSpecialPermissions($identifier, $functions, $specialRoles);
 
         $person->setFunctions($functions);
 
@@ -275,6 +276,7 @@ class LDAPApi implements PersonProviderInterface
             $roles = $currentUser->getRoles();
         } else {
             $roles = array_merge(TUGTools::functionsToRoles($functions), TUGTools::accountTypesToRoles($accountTypes));
+            $roles = array_merge($roles, $specialRoles);
         }
 
         $roles = array_unique($roles);

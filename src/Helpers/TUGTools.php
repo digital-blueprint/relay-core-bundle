@@ -57,12 +57,13 @@ class TUGTools
     /**
      * Injects special permissions.
      */
-    public static function injectSpecialPermissions(string $userId, array &$functions)
+    public static function injectSpecialPermissions(string $userId, array &$functions, array &$roles)
     {
         $DEVELOPERS = ['christoph_reiter', 'jfink', 'pbeke', 'eneuber', 'koeseoglu', 'tsteinwen13', 'riina'];
         $DUMMY_USERS = ['woody007', 'koarl', 'muma', 'waldi08'];
         $IBIB_TEST_USERS = ['wrussm', 'finkst', 'salzburg'];
-        $ESIGN_TEST_USERS = ['fipsi1505', 'joebch', 'dobnik', 'sascha_rossmann', 'hurli', 'mschrei'];
+        $ESIGN_TEST_USERS = ['fipsi1505', 'joebch', 'dobnik', 'sascha_rossmann'];
+        $ESIGN_DEVELOPERS = ['hurli', 'mschrei'];
 
         // give special access to developers and test accounts
         if (in_array($userId, $DEVELOPERS, true) || in_array($userId, $DUMMY_USERS, true) || in_array($userId, $IBIB_TEST_USERS, true)) {
@@ -77,8 +78,12 @@ class TUGTools
 
         if (in_array($userId, $DEVELOPERS, true) || in_array($userId, $ESIGN_TEST_USERS, true)) {
             // Until we get those scopes set up in auth-test.tugraz.at and auth.tugraz.at
-            $functions[] = 'SCOPE_OFFICIAL-SIGNATURE';
-            $functions[] = 'SCOPE_VERIFY-SIGNATURE';
+            $roles[] = 'ROLE_SCOPE_VERIFY-SIGNATURE';
+        }
+
+        if (in_array($userId, $DEVELOPERS, true) || in_array($userId, $ESIGN_DEVELOPERS, true)) {
+            // Until we get those scopes set up in auth-test.tugraz.at and auth.tugraz.at
+            $roles[] = 'ROLE_SCOPE_OFFICIAL-SIGNATURE';
         }
 
         // special handling for F2130 (Institut für Wasserbau und Wasserwirtschaft, id 1226) and
