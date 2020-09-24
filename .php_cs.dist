@@ -10,6 +10,7 @@ return PhpCsFixer\Config::create()
         '@Symfony' => true,
         '@PHP70Migration' => true,
         '@PHP71Migration' => true,
+        '@PHP73Migration' => true,
         'array_syntax' => ['syntax' => 'short'],
         'yoda_style' => false,
         'strict_comparison' => true,
