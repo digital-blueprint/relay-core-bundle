@@ -63,12 +63,12 @@ class TUGOnlineApi implements OrganizationProviderInterface
 
         $stack->push($this->guzzleLogger->getClientHandler());
 
-        $guzzeCachePool = $this->container->get('dbp_api.cache.core.campus_online');
-        assert($guzzeCachePool instanceof CacheItemPoolInterface);
+        $guzzleCachePool = $this->container->get('dbp_api.cache.core.campus_online');
+        assert($guzzleCachePool instanceof CacheItemPoolInterface);
 
         $cacheMiddleWare = new CacheMiddleware(
             new GreedyCacheStrategy(
-                new Psr6CacheStorage($guzzeCachePool),
+                new Psr6CacheStorage($guzzleCachePool),
                 self::CACHE_TTL
             )
         );
