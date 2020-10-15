@@ -43,6 +43,25 @@ class KeycloakBearerUserProvider implements UserProviderInterface
         $this->config = $container->getParameter('dbp_api.core.keycloak_config');
     }
 
+    public function createLoggingID(array $jwt): string
+    {
+        // We want to know where the request is coming from and which requests likely belong together for debugging
+        // purposes while still preserving the privacy of the user.
+        // The session ID gets logged in the Keycloak event log under 'code_id' and stays the same during a login
+        // session. When the event in keycloak expires it's no longer possible to map the ID to a user.
+        // The keycloak client ID is in azp, so add that too, and hash it with the user ID so we get different
+        // user ids for different clients for the same session.
+
+        $client = $jwt['azp'] ?? 'unknown';
+        if (!isset($jwt['session_state'])) {
+            $user = 'unknown';
+        } else {
+            // TODO: If we'd have an app secret we could hash that in too
+            $user = substr(hash('sha256', $client.$jwt['session_state']),0, 6);
+        }
+        return $client.'-'.$user;
+    }
+
     public function loadUserByUsername($accessToken): UserInterface
     {
         $guzzleCache = $this->container->get('dbp_api.cache.core.keycloak_cert');
@@ -68,7 +87,6 @@ class KeycloakBearerUserProvider implements UserProviderInterface
         $cache = $this->container->get('dbp_api.cache.core.auth_person');
         assert($cache instanceof CacheItemPoolInterface);
         $cachingPersonProvider = new CachingPersonProvider($this->personProvider, $cache, $jwt);
-
         if (self::isServiceAccountToken($jwt)) {
             $username = null;
         } else {
@@ -76,12 +94,15 @@ class KeycloakBearerUserProvider implements UserProviderInterface
         }
         $scopes = explode(' ', $jwt['scope']);
 
-        return new KeycloakBearerUser(
+        $user = new KeycloakBearerUser(
             $username,
             $accessToken,
             $cachingPersonProvider,
             $scopes
         );
+        $user->setLoggingID($this->createLoggingID($jwt));
+
+        return $user;
     }
 
     public function refreshUser(UserInterface $user)

@@ -7,9 +7,8 @@ namespace DBP\API\CoreBundle\Keycloak;
 use ApiPlatform\Core\Exception\ItemNotFoundException;
 use DBP\API\CoreBundle\Entity\Person;
 use DBP\API\CoreBundle\Service\PersonProviderInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
 
-class KeycloakBearerUser implements UserInterface
+class KeycloakBearerUser implements DBPUserInterface
 {
     /**
      * @var PersonProviderInterface
@@ -41,6 +40,8 @@ class KeycloakBearerUser implements UserInterface
      */
     private $isRealUser;
 
+    private $loggingID;
+
     public function __construct(?string $username, string $accessToken, PersonProviderInterface $personProvider, array $scopes)
     {
         $this->personProvider = $personProvider;
@@ -49,6 +50,11 @@ class KeycloakBearerUser implements UserInterface
         $this->accessToken = $accessToken;
         $this->username = $username;
         $this->isRealUser = ($this->username !== null);
+        $this->loggingID = null;
+    }
+
+    public function setLoggingID(string $loggingID) {
+        $this->loggingID = $loggingID;
     }
 
     private function ensurePerson()
@@ -126,5 +132,10 @@ class KeycloakBearerUser implements UserInterface
 
     public function eraseCredentials()
     {
+    }
+
+    public function getLoggingID(): string
+    {
+        return $this->loggingID ?? "unknown";
     }
 }
