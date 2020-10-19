@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DBP\API\CoreBundle\Keycloak;
 
+use DBP\API\CoreBundle\Helpers\GuzzleTools;
 use DBP\API\CoreBundle\Helpers\JsonException;
 use DBP\API\CoreBundle\Helpers\Tools;
 use DBP\API\CoreBundle\Service\GuzzleLogger;
@@ -59,7 +60,7 @@ class KeycloakLocalTokenValidator extends KeycloakTokenValidatorBase
         $certsUrl = sprintf('%s/protocol/openid-connect/certs', $provider->getBaseUrlWithRealm());
 
         $stack = HandlerStack::create($this->clientHandler);
-        $stack->push($this->guzzleLogger->getClientHandler());
+        $stack->push(GuzzleTools::createLoggerMiddleware($this->guzzleLogger));
         $options = [
             'handler' => $stack,
             'headers' => [

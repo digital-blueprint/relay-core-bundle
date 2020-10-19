@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DBP\API\CoreBundle\Keycloak;
 
+use DBP\API\CoreBundle\Helpers\GuzzleTools;
 use DBP\API\CoreBundle\Helpers\JsonException;
 use DBP\API\CoreBundle\Helpers\Tools;
 use DBP\API\CoreBundle\Service\GuzzleLogger;
@@ -51,7 +52,7 @@ class KeycloakRemoteTokenValidator extends KeycloakTokenValidatorBase
         ];
 
         $client = new Client($options);
-        $stack->push($this->guzzleLogger->getClientHandler());
+        $stack->push(GuzzleTools::createLoggerMiddleware($this->guzzleLogger));
 
         $provider = $this->keycloak;
         $client_secret = $provider->getClientSecret();

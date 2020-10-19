@@ -8,6 +8,7 @@ use Adldap\Models\User;
 use ApiPlatform\Core\Exception\ItemNotFoundException;
 use DBP\API\CoreBundle\Entity\Organization;
 use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
+use DBP\API\CoreBundle\Helpers\GuzzleTools;
 use DBP\API\CoreBundle\Helpers\Tools;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
@@ -61,7 +62,7 @@ class TUGOnlineApi implements OrganizationProviderInterface
             'handler' => $stack,
         ];
 
-        $stack->push($this->guzzleLogger->getClientHandler());
+        $stack->push(GuzzleTools::createLoggerMiddleware($this->guzzleLogger));
 
         $guzzleCachePool = $this->container->get('dbp_api.cache.core.campus_online');
         assert($guzzleCachePool instanceof CacheItemPoolInterface);
