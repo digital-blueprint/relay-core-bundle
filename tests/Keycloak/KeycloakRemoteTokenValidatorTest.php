@@ -7,7 +7,7 @@ namespace DBP\API\CoreBundle\Tests\Keycloak;
 use DBP\API\CoreBundle\Keycloak\Keycloak;
 use DBP\API\CoreBundle\Keycloak\KeycloakRemoteTokenValidator;
 use DBP\API\CoreBundle\Keycloak\TokenValidationException;
-use DBP\API\CoreBundle\Service\GuzzleLogger;
+use DBP\API\CoreBundle\Service\DBPLogger;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
@@ -24,9 +24,9 @@ class KeycloakRemoteTokenValidatorTest extends TestCase
     {
         $keycloak = new Keycloak('https://auth.example.com/auth', 'tugraz', 'client', 'secret');
         $nullLogger = new Logger('dummy', [new NullHandler()]);
-        $guzzleLogger = new GuzzleLogger($nullLogger);
+        $logger = new DBPLogger($nullLogger);
 
-        $this->tokenValidator = new KeycloakRemoteTokenValidator($keycloak, $guzzleLogger);
+        $this->tokenValidator = new KeycloakRemoteTokenValidator($keycloak, $logger);
         $this->mockResponses([]);
     }
 

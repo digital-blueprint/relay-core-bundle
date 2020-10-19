@@ -7,7 +7,7 @@ namespace DBP\API\CoreBundle\Keycloak;
 use DBP\API\CoreBundle\Helpers\GuzzleTools;
 use DBP\API\CoreBundle\Helpers\JsonException;
 use DBP\API\CoreBundle\Helpers\Tools;
-use DBP\API\CoreBundle\Service\GuzzleLogger;
+use DBP\API\CoreBundle\Service\DBPLogger;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 use Jose\Component\Core\JWKSet;
@@ -22,7 +22,7 @@ class KeycloakLocalTokenValidator extends KeycloakTokenValidatorBase
 {
     private $keycloak;
     private $cachePool;
-    private $guzzleLogger;
+    private $logger;
     private $clientHandler;
 
     /* The duration the public keycloak cert is cached */
@@ -31,11 +31,11 @@ class KeycloakLocalTokenValidator extends KeycloakTokenValidatorBase
     /* The leeway given for time based checks for token validation, in case the clocks of the server are out of sync */
     private const LOCAL_LEEWAY_SECONDS = 120;
 
-    public function __construct(Keycloak $keycloak, CacheItemPoolInterface $cachePool, GuzzleLogger $guzzleLogger)
+    public function __construct(Keycloak $keycloak, CacheItemPoolInterface $cachePool, DBPLogger $logger)
     {
         $this->keycloak = $keycloak;
         $this->cachePool = $cachePool;
-        $this->guzzleLogger = $guzzleLogger;
+        $this->logger = $logger;
         $this->clientHandler = null;
     }
 
@@ -60,7 +60,7 @@ class KeycloakLocalTokenValidator extends KeycloakTokenValidatorBase
         $certsUrl = sprintf('%s/protocol/openid-connect/certs', $provider->getBaseUrlWithRealm());
 
         $stack = HandlerStack::create($this->clientHandler);
-        $stack->push(GuzzleTools::createLoggerMiddleware($this->guzzleLogger));
+        $stack->push(GuzzleTools::createLoggerMiddleware($this->logger));
         $options = [
             'handler' => $stack,
             'headers' => [

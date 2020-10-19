@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace DBP\API\CoreBundle\Keycloak;
 
-use DBP\API\CoreBundle\Service\GuzzleLogger;
+use DBP\API\CoreBundle\Service\DBPLogger;
 use DBP\API\CoreBundle\Service\PersonProviderInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -15,7 +15,7 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 class KeycloakBearerUserProvider implements UserProviderInterface
 {
     private $personProvider;
-    private $guzzleLogger;
+    private $logger;
     private $container;
     private $config;
 
@@ -35,10 +35,10 @@ class KeycloakBearerUserProvider implements UserProviderInterface
         return !$has_openid_scope;
     }
 
-    public function __construct(ContainerInterface $container, PersonProviderInterface $personProvider, GuzzleLogger $guzzleLogger)
+    public function __construct(ContainerInterface $container, PersonProviderInterface $personProvider, DBPLogger $logger)
     {
         $this->personProvider = $personProvider;
-        $this->guzzleLogger = $guzzleLogger;
+        $this->logger = $logger;
         $this->container = $container;
         $this->config = $container->getParameter('dbp_api.core.keycloak_config');
     }
@@ -73,9 +73,9 @@ class KeycloakBearerUserProvider implements UserProviderInterface
             $config['client_id'], $config['client_secret']);
 
         if ($config['local_validation']) {
-            $validator = new KeycloakLocalTokenValidator($keycloak, $guzzleCache, $this->guzzleLogger);
+            $validator = new KeycloakLocalTokenValidator($keycloak, $guzzleCache, $this->logger);
         } else {
-            $validator = new KeycloakRemoteTokenValidator($keycloak, $this->guzzleLogger);
+            $validator = new KeycloakRemoteTokenValidator($keycloak, $this->logger);
         }
 
         $jwt = $validator->validate($accessToken);

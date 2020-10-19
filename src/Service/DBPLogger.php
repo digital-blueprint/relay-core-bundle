@@ -20,7 +20,7 @@ class DBPLogger implements LoggerInterface
     private $logger;
     private $security;
 
-    public function __construct(Security $security, LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger, ?Security $security = null)
     {
         $this->logger = $logger;
         $this->security = $security;
@@ -32,11 +32,14 @@ class DBPLogger implements LoggerInterface
         $message = Tools::filterErrorMessage($message);
 
         // Add some default context (session ID etc)
-        $user = $this->security->getUser();
-        assert ($user instanceof DBPUserInterface);
-        $context['dbp'] = [
-            'id' => $user->getLoggingID(),
-        ];
+        if ($this->security !== null) {
+            $user = $this->security->getUser();
+            // XXX: not the case during some tests
+            if ($user instanceof DBPUserInterface) {
+                assert($user instanceof DBPUserInterface);
+                $context['dbp-id'] = $user->getLoggingID();
+            }
+        }
 
         $this->logger->log($level, $message, $context);
     }

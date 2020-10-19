@@ -4,12 +4,6 @@ services:
     autoconfigure: false
     tags: [{'name' : 'serializer.normalizer', priority: '-700'}]
 
-  DBP\API\CoreBundle\Service\GuzzleLogger:
-    public: false
-    autowire: true
-    autoconfigure: true
-    tags: [{name: monolog.logger, channel: dbp.guzzle}]
-
   DBP\API\CoreBundle\Service\DBPLogger:
     public: false
     autowire: true

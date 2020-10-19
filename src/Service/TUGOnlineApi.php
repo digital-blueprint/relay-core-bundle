@@ -34,18 +34,18 @@ class TUGOnlineApi implements OrganizationProviderInterface
 
     private $container;
 
-    private $guzzleLogger;
+    private $logger;
 
     private $config;
 
     private const CACHE_TTL = 3600;
 
-    public function __construct(ContainerInterface $container, GuzzleLogger $guzzleLogger)
+    public function __construct(ContainerInterface $container, DBPLogger $logger)
     {
         $this->config = $container->getParameter('dbp_api.core.co_config');
         $this->token = $this->config['api_token'] ?? '';
         $this->container = $container;
-        $this->guzzleLogger = $guzzleLogger;
+        $this->logger = $logger;
     }
 
     public function setApiKey(string $key)
@@ -62,7 +62,7 @@ class TUGOnlineApi implements OrganizationProviderInterface
             'handler' => $stack,
         ];
 
-        $stack->push(GuzzleTools::createLoggerMiddleware($this->guzzleLogger));
+        $stack->push(GuzzleTools::createLoggerMiddleware($this->logger));
 
         $guzzleCachePool = $this->container->get('dbp_api.cache.core.campus_online');
         assert($guzzleCachePool instanceof CacheItemPoolInterface);
