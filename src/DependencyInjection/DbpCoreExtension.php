@@ -191,5 +191,20 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
                 'app_debug' => '%kernel.debug%',
             ],
         ]);
+
+        // https://symfony.com/doc/4.4/messenger.html#transports-async-queued-messages
+        if ($container->hasParameter('dbp_api.messenger_routing')) {
+            $routing = [];
+            $routing = array_merge($routing, $container->getParameter('dbp_api.messenger_routing'));
+
+            $container->loadFromExtension('framework', [
+                'messenger' => [
+                    'transports' => [
+                        'async' => '%env(MESSENGER_TRANSPORT_DSN)%',
+                    ],
+                    'routing' => $routing,
+                ],
+            ]);
+        }
     }
 }
