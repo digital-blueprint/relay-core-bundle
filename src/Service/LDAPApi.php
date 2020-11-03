@@ -17,6 +17,7 @@ use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
 use DBP\API\CoreBundle\Helpers\Tools as CoreTools;
 use DBP\API\CoreBundle\Helpers\TUGTools;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\Security;
 
@@ -48,6 +49,9 @@ class LDAPApi implements PersonProviderInterface
 
     private $security;
 
+    /* @var Person|null */
+    private $cachedPerson;
+
     public function __construct(ContainerInterface $container, TUGOnlineApi $tugapi, Security $security, LoggerInterface $logger)
     {
         $config = $container->getParameter('dbp_api.core.ldap_config');
@@ -65,6 +69,9 @@ class LDAPApi implements PersonProviderInterface
 
         $this->ad->addProvider($config);
         $this->tugapi = $tugapi;
+
+        // We cache the last fully fetched Person object to speed up repeated calls to getCurrentPerson()
+        $this->cachedPerson = null;
     }
 
     /**
@@ -295,8 +302,17 @@ class LDAPApi implements PersonProviderInterface
     public function getPerson(string $id, bool $full = true): Person
     {
         $id = str_replace('/people/', '', $id);
+
+        if ($this->cachedPerson !== null && $this->cachedPerson->getIdentifier() === $id && $full) {
+            return $this->cachedPerson;
+        }
+
         $user = $this->getPersonUserItem($id);
         $person = $this->personFromUserItem($user, $full);
+
+        if ($full) {
+            $this->cachedPerson = $person;
+        }
 
         return $person;
     }
