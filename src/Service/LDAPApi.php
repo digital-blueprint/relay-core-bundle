@@ -17,7 +17,6 @@ use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
 use DBP\API\CoreBundle\Helpers\Tools as CoreTools;
 use DBP\API\CoreBundle\Helpers\TUGTools;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\Security;
 
@@ -121,9 +120,6 @@ class LDAPApi implements PersonProviderInterface
     }
 
     /**
-     * @param string $givenName
-     * @param string $familyName
-     * @param \DateTime $birthDay
      * @return Person[]
      */
     public function getPersonsByNameAndBirthday(string $givenName, string $familyName, \DateTime $birthDay): array
@@ -135,28 +131,28 @@ class LDAPApi implements PersonProviderInterface
             $builder = $provider->search();
 
             // TODO: remove test user
-            $givenName = "Max";
-            $familyName = "Mustermann";
-            $birthDay = new \DateTime("2000-02-02");
+            $givenName = 'Max';
+            $familyName = 'Mustermann';
+            $birthDay = new \DateTime('2000-02-02');
 
             /** @var User[] $users */
             $users = $builder
                 ->where('objectClass', '=', $provider->getSchema()->person())
                 ->whereEquals('givenName', $givenName)
                 ->whereEquals('sn', $familyName)
-                ->whereEquals('DateOfBirth', $birthDay->format("Ymd")) // (e.g. 19810718)
+                ->whereEquals('DateOfBirth', $birthDay->format('Ymd')) // (e.g. 19810718)
                 ->sortBy('sn', 'asc')->paginate($this->PAGESIZE)->getResults();
 
             $people = [];
 
-            foreach($users as $user) {
+            foreach ($users as $user) {
                 $people[] = $this->personFromUserItem($user);
             }
 
             return $people;
         } catch (\Adldap\Auth\BindException $e) {
             // There was an issue binding / connecting to the server.
-            throw new ItemNotLoadedException(sprintf("Persons could not be loaded! Message: %s", CoreTools::filterErrorMessage($e->getMessage())));
+            throw new ItemNotLoadedException(sprintf('Persons could not be loaded! Message: %s', CoreTools::filterErrorMessage($e->getMessage())));
         }
     }
 

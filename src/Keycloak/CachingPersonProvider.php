@@ -33,8 +33,9 @@ class CachingPersonProvider implements PersonProviderInterface
     /**
      * @param string $firstName
      * @param string $lastName
-     * @param \DateTime $birthDay
+     *
      * @return Person[]
+     *
      * @throws \DBP\API\CoreBundle\Exception\ItemNotLoadedException
      */
     public function getPersonsByNameAndBirthday(string $givenName, string $familyName, \DateTime $birthDay): array
