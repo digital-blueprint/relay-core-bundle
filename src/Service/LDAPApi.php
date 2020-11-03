@@ -48,7 +48,9 @@ class LDAPApi implements PersonProviderInterface
 
     private $security;
 
-    /* @var Person|null */
+    /**
+     * @var ?Person
+     */
     private $cachedPerson;
 
     public function __construct(ContainerInterface $container, TUGOnlineApi $tugapi, Security $security, LoggerInterface $logger)

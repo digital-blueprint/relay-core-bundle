@@ -16,9 +16,6 @@ interface PersonProviderInterface
     public function getPersons(array $filters): array;
 
     /**
-     * @param string $firstName
-     * @param string $lastName
-     *
      * @return Person[]
      *
      * @throws ItemNotLoadedException
