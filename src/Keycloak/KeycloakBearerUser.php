@@ -60,7 +60,25 @@ class KeycloakBearerUser implements UserInterface
                 // XXX: In case of EID we have no good way right now to see if we should have to user in LDAP
                 $this->isRealUser = false;
             }
+
+            // Inject the roles coming from the access token
+            if ($this->isRealUser) {
+                $roles = $this->person->getRoles();
+                $roles = array_merge($roles, $this->getScopeRoles());
+                $roles = array_unique($roles);
+                sort($roles, SORT_STRING);
+                $this->person->setRoles($roles);
+            }
         }
+    }
+
+    private function getScopeRoles()
+    {
+        $roles = [];
+        foreach ($this->scopes as $scope) {
+            $roles[] = 'ROLE_SCOPE_'.mb_strtoupper($scope);
+        }
+        return $roles;
     }
 
     public function getRoles()
@@ -68,16 +86,10 @@ class KeycloakBearerUser implements UserInterface
         $this->ensurePerson();
 
         if (!$this->isRealUser) {
-            $roles = [];
+            return $this->getScopeRoles();
         } else {
-            $roles = $this->person->getRoles();
+            return $this->person->getRoles();
         }
-
-        foreach ($this->scopes as $scope) {
-            $roles[] = 'ROLE_SCOPE_'.mb_strtoupper($scope);
-        }
-
-        return $roles;
     }
 
     public function getAccessToken(): ?string
