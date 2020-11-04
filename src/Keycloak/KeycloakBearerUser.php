@@ -72,12 +72,24 @@ class KeycloakBearerUser implements UserInterface
         }
     }
 
+    public function getPerson(): ?Person
+    {
+        $this->ensurePerson();
+        if (!$this->isRealUser) {
+            return null;
+        }
+
+        return $this->person;
+    }
+
     private function getScopeRoles()
     {
         $roles = [];
         foreach ($this->scopes as $scope) {
             $roles[] = 'ROLE_SCOPE_'.mb_strtoupper($scope);
         }
+        sort($roles, SORT_STRING);
+
         return $roles;
     }
 

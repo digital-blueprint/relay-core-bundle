@@ -30,7 +30,7 @@ class ExtTest extends ApiTestCase
         $container = $client->getContainer();
         $userProvider = $container->get("test.App\Security\User\KeycloakBearerUserProvider");
         $user = $userProvider->loadUserByUsername('42');
-        $this->assertEquals($user->getRoles(), ['SOMEROLE', 'ROLE_SCOPE_SCOPE1', 'ROLE_SCOPE_SCOPE2']);
+        $this->assertEquals($user->getRoles(), ['ROLE_SCOPE_SCOPE1', 'ROLE_SCOPE_SCOPE2', 'SOMEROLE']);
     }
 
     public function testIsServiceAccountToken()
