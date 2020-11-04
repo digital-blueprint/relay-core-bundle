@@ -148,7 +148,7 @@ class LDAPApi implements PersonProviderInterface
             $people = [];
 
             foreach ($users as $user) {
-                $people[] = $this->personFromUserItem($user);
+                $people[] = $this->personFromUserItem($user, true);
             }
 
             return $people;
@@ -229,7 +229,7 @@ class LDAPApi implements PersonProviderInterface
     /**
      * @throws \Exception
      */
-    public function personFromUserItem(User $user, bool $full = true): Person
+    public function personFromUserItem(User $user, bool $full): Person
     {
         $identifier = $user->getFirstAttribute('cn');
 
@@ -297,20 +297,18 @@ class LDAPApi implements PersonProviderInterface
     /**
      * @throws ItemNotLoadedException
      */
-    public function getPerson(string $id, bool $full = true): Person
+    public function getPerson(string $id): Person
     {
         $id = str_replace('/people/', '', $id);
 
-        if ($this->cachedPerson !== null && $this->cachedPerson->getIdentifier() === $id && $full) {
+        if ($this->cachedPerson !== null && $this->cachedPerson->getIdentifier() === $id) {
             return $this->cachedPerson;
         }
 
         $user = $this->getPersonUserItem($id);
-        $person = $this->personFromUserItem($user, $full);
+        $person = $this->personFromUserItem($user, true);
 
-        if ($full) {
-            $this->cachedPerson = $person;
-        }
+        $this->cachedPerson = $person;
 
         return $person;
     }
@@ -323,7 +321,7 @@ class LDAPApi implements PersonProviderInterface
         $user = $this->security->getUser();
         $username = $user->getUsername();
 
-        return $this->getPerson($username, true);
+        return $this->getPerson($username);
     }
 
     /**
@@ -334,7 +332,7 @@ class LDAPApi implements PersonProviderInterface
         if ($service === 'ALMA') {
             $user = $this->getPersonUserItemByAlmaUserId($serviceID);
 
-            return $this->personFromUserItem($user);
+            return $this->personFromUserItem($user, true);
         } else {
             throw new ItemNotFoundException("Unknown service: $service");
         }

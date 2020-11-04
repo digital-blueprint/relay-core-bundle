@@ -25,7 +25,7 @@ interface PersonProviderInterface
     /**
      * @throws ItemNotLoadedException
      */
-    public function getPerson(string $id, bool $full): Person;
+    public function getPerson(string $id): Person;
 
     /**
      * @throws ItemNotLoadedException

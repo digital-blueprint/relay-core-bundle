@@ -40,11 +40,11 @@ class CachingPersonProvider implements PersonProviderInterface
         return $this->provider->getPersonsByNameAndBirthday($givenName, $familyName, $birthDay);
     }
 
-    public function getPerson(string $id, bool $full): Person
+    public function getPerson(string $id): Person
     {
         assert($this->jwt['active']);
 
-        $cacheKey = hash('sha256', $id.'.'.$full.'.'.json_encode($this->jwt));
+        $cacheKey = hash('sha256', $id.'.'.json_encode($this->jwt));
 
         $item = $this->cache->getItem($cacheKey);
         if ($item->isHit()) {
@@ -56,7 +56,7 @@ class CachingPersonProvider implements PersonProviderInterface
             return $person;
         } else {
             try {
-                $person = $this->provider->getPerson($id, $full);
+                $person = $this->provider->getPerson($id);
             } catch (ItemNotFoundException $e) {
                 $person = null;
             }

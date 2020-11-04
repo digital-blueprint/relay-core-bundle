@@ -55,7 +55,7 @@ class KeycloakBearerUser implements UserInterface
     {
         if (!$this->person && $this->isRealUser) {
             try {
-                $this->person = $this->personProvider->getPerson($this->getUsername(), false);
+                $this->person = $this->personProvider->getPerson($this->getUsername());
             } catch (ItemNotFoundException $e) {
                 // XXX: In case of EID we have no good way right now to see if we should have to user in LDAP
                 $this->isRealUser = false;

@@ -33,7 +33,7 @@ final class PersonItemDataProvider implements ItemDataProviderInterface, Restric
         assert(is_string($id));
         $person = null;
         $api = $this->api;
-        $person = $api->getPerson($id, true);
+        $person = $api->getPerson($id);
 
         return $person;
     }

@@ -24,7 +24,7 @@ class DummyPersonProvider implements PersonProviderInterface
         return [$this->person];
     }
 
-    public function getPerson(string $id, bool $full): Person
+    public function getPerson(string $id): Person
     {
         if ($id !== $this->person->getIdentifier()) {
             throw new ItemNotLoadedException();
