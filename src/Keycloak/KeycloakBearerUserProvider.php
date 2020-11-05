@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace DBP\API\CoreBundle\Keycloak;
 
-use DBP\API\CoreBundle\Service\DBPLogger;
 use DBP\API\CoreBundle\Service\PersonProviderInterface;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -35,7 +35,7 @@ class KeycloakBearerUserProvider implements UserProviderInterface
         return !$has_openid_scope;
     }
 
-    public function __construct(ContainerInterface $container, PersonProviderInterface $personProvider, DBPLogger $logger)
+    public function __construct(ContainerInterface $container, PersonProviderInterface $personProvider, LoggerInterface $logger)
     {
         $this->personProvider = $personProvider;
         $this->logger = $logger;

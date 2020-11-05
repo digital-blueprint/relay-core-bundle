@@ -9,7 +9,6 @@ use Adldap\Models\User as AdldapUser;
 use Adldap\Query\Builder;
 use Adldap\Query\Grammar;
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
-use DBP\API\CoreBundle\Service\DBPLogger;
 use DBP\API\CoreBundle\Service\LDAPApi;
 use DBP\API\CoreBundle\Service\TUGOnlineApi;
 use Mockery;
@@ -31,8 +30,7 @@ class LDAPApiTest extends ApiTestCase
         $client = static::createClient();
         $security = new Security($client->getContainer());
         $nullLogger = new Logger('dummy', [new NullHandler()]);
-        $logger = new DBPLogger($nullLogger, $security);
-        $tugapi = new TUGOnlineApi($client->getContainer(), $logger);
+        $tugapi = new TUGOnlineApi($client->getContainer(), $nullLogger);
 
         $this->api = new LDAPApi($client->getContainer(), $tugapi, $security, $nullLogger);
     }

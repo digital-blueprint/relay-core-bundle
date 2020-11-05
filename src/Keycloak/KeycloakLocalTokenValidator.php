@@ -7,7 +7,6 @@ namespace DBP\API\CoreBundle\Keycloak;
 use DBP\API\CoreBundle\Helpers\GuzzleTools;
 use DBP\API\CoreBundle\Helpers\JsonException;
 use DBP\API\CoreBundle\Helpers\Tools;
-use DBP\API\CoreBundle\Service\DBPLogger;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 use Jose\Component\Core\JWKSet;
@@ -17,6 +16,7 @@ use Kevinrob\GuzzleCache\CacheMiddleware;
 use Kevinrob\GuzzleCache\Storage\Psr6CacheStorage;
 use Kevinrob\GuzzleCache\Strategy\GreedyCacheStrategy;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Log\LoggerInterface;
 
 class KeycloakLocalTokenValidator extends KeycloakTokenValidatorBase
 {
@@ -31,7 +31,7 @@ class KeycloakLocalTokenValidator extends KeycloakTokenValidatorBase
     /* The leeway given for time based checks for token validation, in case the clocks of the server are out of sync */
     private const LOCAL_LEEWAY_SECONDS = 120;
 
-    public function __construct(Keycloak $keycloak, CacheItemPoolInterface $cachePool, DBPLogger $logger)
+    public function __construct(Keycloak $keycloak, CacheItemPoolInterface $cachePool, LoggerInterface $logger)
     {
         $this->keycloak = $keycloak;
         $this->cachePool = $cachePool;

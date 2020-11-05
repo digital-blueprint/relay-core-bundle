@@ -23,6 +23,7 @@ use Kevinrob\GuzzleCache\Strategy\GreedyCacheStrategy;
 use League\Uri\Contracts\UriException;
 use League\Uri\UriTemplate;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Log\LoggerInterface;
 use SimpleXMLElement;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -40,7 +41,7 @@ class TUGOnlineApi implements OrganizationProviderInterface
 
     private const CACHE_TTL = 3600;
 
-    public function __construct(ContainerInterface $container, DBPLogger $logger)
+    public function __construct(ContainerInterface $container, LoggerInterface $logger)
     {
         $this->config = $container->getParameter('dbp_api.core.co_config');
         $this->token = $this->config['api_token'] ?? '';

@@ -7,7 +7,6 @@ namespace DBP\API\CoreBundle\Tests\Keycloak;
 use DBP\API\CoreBundle\Keycloak\Keycloak;
 use DBP\API\CoreBundle\Keycloak\KeycloakLocalTokenValidator;
 use DBP\API\CoreBundle\Keycloak\TokenValidationException;
-use DBP\API\CoreBundle\Service\DBPLogger;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
@@ -33,9 +32,8 @@ class KeycloakLocalTokenValidatorTest extends TestCase
         $this->keycloak = $keycloak;
         $cache = new ArrayAdapter();
         $nullLogger = new Logger('dummy', [new NullHandler()]);
-        $logger = new DBPLogger($nullLogger);
 
-        $this->tokenValidator = new KeycloakLocalTokenValidator($keycloak, $cache, $logger);
+        $this->tokenValidator = new KeycloakLocalTokenValidator($keycloak, $cache, $nullLogger);
         $this->mockResponses([]);
     }
 

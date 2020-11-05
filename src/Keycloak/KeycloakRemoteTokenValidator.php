@@ -7,9 +7,9 @@ namespace DBP\API\CoreBundle\Keycloak;
 use DBP\API\CoreBundle\Helpers\GuzzleTools;
 use DBP\API\CoreBundle\Helpers\JsonException;
 use DBP\API\CoreBundle\Helpers\Tools;
-use DBP\API\CoreBundle\Service\DBPLogger;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
+use Psr\Log\LoggerInterface;
 
 class KeycloakRemoteTokenValidator extends KeycloakTokenValidatorBase
 {
@@ -17,7 +17,7 @@ class KeycloakRemoteTokenValidator extends KeycloakTokenValidatorBase
     private $logger;
     private $clientHandler;
 
-    public function __construct(Keycloak $keycloak, DBPLogger $logger)
+    public function __construct(Keycloak $keycloak, LoggerInterface $logger)
     {
         $this->keycloak = $keycloak;
         $this->logger = $logger;
