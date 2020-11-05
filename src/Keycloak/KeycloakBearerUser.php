@@ -53,7 +53,8 @@ class KeycloakBearerUser implements DBPUserInterface
         $this->loggingID = null;
     }
 
-    public function setLoggingID(string $loggingID) {
+    public function setLoggingID(string $loggingID)
+    {
         $this->loggingID = $loggingID;
     }
 
@@ -136,6 +137,6 @@ class KeycloakBearerUser implements DBPUserInterface
 
     public function getLoggingID(): string
     {
-        return $this->loggingID ?? "unknown";
+        return $this->loggingID ?? 'unknown';
     }
 }

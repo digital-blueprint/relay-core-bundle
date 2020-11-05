@@ -57,8 +57,9 @@ class KeycloakBearerUserProvider implements UserProviderInterface
             $user = 'unknown';
         } else {
             // TODO: If we'd have an app secret we could hash that in too
-            $user = substr(hash('sha256', $client.$jwt['session_state']),0, 6);
+            $user = substr(hash('sha256', $client.$jwt['session_state']), 0, 6);
         }
+
         return $client.'-'.$user;
     }
 

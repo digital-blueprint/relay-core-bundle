@@ -20,7 +20,7 @@ class LoggingProcessor
     public function __invoke(array $record)
     {
         // Try to avoid information leaks (users should still not log sensitive information though...)
-        $record["message"] = Tools::filterErrorMessage($record["message"]);
+        $record['message'] = Tools::filterErrorMessage($record['message']);
 
         // Add some default context (session ID etc)
         $user = $this->security->getUser();
@@ -31,5 +31,4 @@ class LoggingProcessor
 
         return $record;
     }
-
 }

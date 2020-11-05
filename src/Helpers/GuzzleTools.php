@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace DBP\API\CoreBundle\Helpers;
 
-
 use GuzzleHttp\MessageFormatter;
 use GuzzleHttp\Middleware;
 use Psr\Log\LoggerInterface;
