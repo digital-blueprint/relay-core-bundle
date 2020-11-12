@@ -206,5 +206,20 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
                 ],
             ]);
         }
+
+        $container->loadFromExtension('framework', [
+            'lock' => '%env(LOCK_DSN)%',
+        ]);
+
+//        $container->loadFromExtension('framework', [
+//            'lock' =>
+//                ['default.retry_till_save.store' =>
+//                            [
+//                                'class' => 'Symfony\Component\Lock\Store\RetryTillSaveStore',
+//                                'decorates' => 'lock.default.store',
+//                                'arguments' => "['@lock.default.retry_till_save.store.inner', 100, 50]"
+//                            ]
+//                ]
+//        ]);
     }
 }
