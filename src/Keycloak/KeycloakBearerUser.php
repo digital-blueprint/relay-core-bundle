@@ -40,6 +40,9 @@ class KeycloakBearerUser implements DBPUserInterface
      */
     private $isRealUser;
 
+    /**
+     * @var string|null
+     */
     private $loggingID;
 
     public function __construct(?string $username, string $accessToken, PersonProviderInterface $personProvider, array $scopes)
