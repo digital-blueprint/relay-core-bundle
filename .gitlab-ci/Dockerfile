@@ -69,4 +69,12 @@ RUN sudo update-alternatives --set phar.phar /usr/bin/phar.phar7.3
 RUN useradd -u 1000 -ms /bin/bash user
 RUN echo 'user ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 USER user
+
+# Install a newer composer
+RUN mkdir -p /home/user/.local/bin
+WORKDIR /home/user/.local/bin
+RUN wget https://raw.githubusercontent.com/composer/getcomposer.org/bfd95e2a4383ee9cf7c058c2df29d7acb5f86d77/web/installer  -O - -q | php --
+RUN mv composer.phar composer
+ENV PATH "/home/user/.local/bin:$PATH"
+
 WORKDIR /home/user
