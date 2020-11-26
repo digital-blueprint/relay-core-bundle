@@ -79,6 +79,9 @@
         ],
         "cs": [
             "@php vendor/bin/php-cs-fixer --ansi fix --dry-run --diff --diff-format=udiff"
+        ],
+        "coverage": [
+            "@php vendor/bin/simple-phpunit --coverage-html _coverage"
         ]
     }
 }
