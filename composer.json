@@ -28,7 +28,6 @@
         "web-token/jwt-signature-algorithm-rsa": "^2.1"
     },
     "require-dev": {
-        "composer/semver": "^1.5",
         "friendsofphp/php-cs-fixer": "^2.16",
         "mockery/mockery": "^1.2",
         "phpstan/phpstan": "^0.12.33",

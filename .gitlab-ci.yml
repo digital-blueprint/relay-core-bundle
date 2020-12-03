@@ -33,7 +33,6 @@ test-php7.4:
   <<: *test_defaults
 
 test-php8.0:
-  allow_failure: true
   stage: test
   variables:
     PHP: "php8.0"
