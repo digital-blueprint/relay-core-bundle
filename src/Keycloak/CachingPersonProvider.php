@@ -92,4 +92,9 @@ class CachingPersonProvider implements PersonProviderInterface
     {
         return $this->provider->getPersonForExternalService($service, $serviceID);
     }
+
+    public function getRolesForScopes(array $scopes): array
+    {
+        return $this->provider->getRolesForScopes($scopes);
+    }
 }

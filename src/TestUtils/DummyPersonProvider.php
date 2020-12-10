@@ -47,4 +47,14 @@ class DummyPersonProvider implements PersonProviderInterface
     {
         return [];
     }
+
+    public function getRolesForScopes(array $scopes): array
+    {
+        $roles = [];
+        foreach ($scopes as $scope) {
+            $roles[] = 'ROLE_SCOPE_'.mb_strtoupper($scope);
+        }
+
+        return $roles;
+    }
 }

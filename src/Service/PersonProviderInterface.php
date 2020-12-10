@@ -37,4 +37,10 @@ interface PersonProviderInterface
      * @throws ItemNotFoundException
      */
     public function getPersonForExternalService(string $service, string $serviceID): Person;
+
+    /**
+     * Given list of scopes extracted from an auth token, return a list of symfony roles
+     * that should be applied for the current user.
+     */
+    public function getRolesForScopes(array $scopes): array;
 }

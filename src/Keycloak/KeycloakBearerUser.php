@@ -74,7 +74,7 @@ class KeycloakBearerUser implements DBPUserInterface
             // Inject the roles coming from the access token
             if ($this->isRealUser) {
                 $roles = $this->person->getRoles();
-                $roles = array_merge($roles, $this->getScopeRoles());
+                $roles = array_merge($roles, $this->personProvider->getRolesForScopes($this->scopes));
                 $roles = array_unique($roles);
                 sort($roles, SORT_STRING);
                 $this->person->setRoles($roles);
@@ -92,23 +92,12 @@ class KeycloakBearerUser implements DBPUserInterface
         return $this->person;
     }
 
-    private function getScopeRoles()
-    {
-        $roles = [];
-        foreach ($this->scopes as $scope) {
-            $roles[] = 'ROLE_SCOPE_'.mb_strtoupper($scope);
-        }
-        sort($roles, SORT_STRING);
-
-        return $roles;
-    }
-
     public function getRoles()
     {
         $this->ensurePerson();
 
         if (!$this->isRealUser) {
-            return $this->getScopeRoles();
+            return $this->personProvider->getRolesForScopes($this->scopes);
         } else {
             return $this->person->getRoles();
         }
