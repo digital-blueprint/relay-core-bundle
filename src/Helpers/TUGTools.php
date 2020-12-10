@@ -59,6 +59,10 @@ class TUGTools
      */
     public static function injectSpecialPermissions(string $userId, array &$functions, array &$roles)
     {
+        $depEnv = $_ENV['APP_DEPLOYMENT_ENV'] ?? 'local';
+        if ($depEnv !== 'local' && $depEnv !== 'development' && $depEnv !== 'demo')
+            return;
+
         $DEVELOPERS = ['christoph_reiter', 'jfink', 'pbeke', 'eneuber', 'koeseoglu', 'tsteinwen13', 'riina'];
         $DUMMY_USERS = ['woody007', 'koarl', 'muma', 'waldi08'];
         $IBIB_TEST_USERS = ['wrussm', 'finkst', 'salzburg'];
