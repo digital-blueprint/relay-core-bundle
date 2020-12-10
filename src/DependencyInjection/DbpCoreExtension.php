@@ -152,16 +152,28 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
             ],
         ]);
 
+        $exposeHeaders = ['Link'];
+        $exposeHeadersKey = 'dbp_api.expose_headers';
+        // Allow other bundles to add more exposed headers
+        if ($container->hasParameter($exposeHeadersKey)) {
+            $exposeHeaders = array_merge($exposeHeaders, $container->getParameter($exposeHeadersKey));
+        }
+
+        $allowHeaders = ['Content-Type', 'Authorization'];
+        $allowHeadersKey = 'dbp_api.allow_headers';
+        // Allow other bundles to add more allowed headers
+        if ($container->hasParameter($allowHeadersKey)) {
+            $allowHeaders = array_merge($allowHeaders, $container->getParameter($allowHeadersKey));
+        }
+
         $container->loadFromExtension('nelmio_cors', [
             'paths' => [
                 '^/' => [
                     'origin_regex' => true,
                     'allow_origin' => ['^.+$'],
                     'allow_methods' => ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE'],
-                    // FIXME: 'Token' used for the authentic document bundle
-                    'allow_headers' => ['Content-Type', 'Authorization', 'Token'],
-                    // FIXME: Get rid of 'X-Analytics-Update-Date'
-                    'expose_headers' => ['Link', 'X-Analytics-Update-Date'],
+                    'allow_headers' => $allowHeaders,
+                    'expose_headers' => $exposeHeaders,
                     'max_age' => 3600,
                 ],
             ],
