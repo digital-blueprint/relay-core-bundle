@@ -135,11 +135,11 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
                     'security' => false,
                 ],
                 'swagger_documentation' => [
-                    'pattern' => '^/$',
+                    'pattern' => '^/($|index.(json|jsonld|html)$)',
                     'anonymous' => true,
                 ],
                 'docs_jsonld' => [
-                    'pattern' => '^/docs.jsonld',
+                    'pattern' => '^/docs.(json|jsonld)$',
                     'anonymous' => true,
                 ],
                 'api' => [
