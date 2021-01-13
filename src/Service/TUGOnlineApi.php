@@ -177,6 +177,16 @@ class TUGOnlineApi implements OrganizationProviderInterface
      */
     public function getOrganizationById(string $identifier, string $lang): Organization
     {
+        // special handling for F2135 (Zentralbibliothek Wasser)
+        if ($identifier === '1226_1231-F2135') {
+            $organization = new Organization();
+            $organization->setIdentifier($identifier);
+            $organization->setName($lang === 'de' ? 'Zentralbibliothek Wasser' : 'Central library Water');
+            $organization->setAlternateName('F2135');
+
+            return $organization;
+        }
+
         $xmlElement = $this->getOrganizationXMLData($identifier, $lang);
         $organization = $this->organizationFromXMLElement($identifier, $xmlElement);
 
