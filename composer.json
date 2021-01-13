@@ -6,7 +6,7 @@
     "require": {
         "php": "^7.3",
         "adldap2/adldap2": "^10.0",
-        "api-platform/core": "^2.4",
+        "api-platform/core": "^2.5",
         "doctrine/annotations": "^1.0",
         "guzzlehttp/guzzle": "^7.0",
         "kevinrob/guzzle-cache-middleware": "^3.3",
@@ -28,7 +28,7 @@
         "web-token/jwt-signature-algorithm-rsa": "^2.1"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^2.16",
+        "friendsofphp/php-cs-fixer": "^2.17",
         "mockery/mockery": "^1.2",
         "phpstan/phpstan": "^0.12.33",
         "phpstan/phpstan-phpunit": "^0.12.13",
