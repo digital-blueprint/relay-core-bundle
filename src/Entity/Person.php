@@ -295,28 +295,4 @@ class Person
 
         return $this;
     }
-
-    /**
-     * Returns the institutes for a group (e.g. "F_BIB").
-     *
-     * @param string $group
-     *
-     * @return array
-     */
-    public function getInstitutesForGroup($group)
-    {
-        $group = preg_quote($group);
-        $results = [];
-        $re = "/^$group:F:(\d+):[\d_]+$/i";
-
-        $functions = $this->getFunctions();
-
-        foreach ($functions as $function) {
-            if (preg_match($re, $function, $matches)) {
-                $results[] = 'F'.$matches[1];
-            }
-        }
-
-        return $results;
-    }
 }
