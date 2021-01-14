@@ -7,6 +7,7 @@ namespace DBP\API\CoreBundle\Service;
 use Adldap\Models\User;
 use ApiPlatform\Core\Exception\ItemNotFoundException;
 use DBP\API\CoreBundle\Entity\Organization;
+use DBP\API\CoreBundle\Entity\Person;
 use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
 use DBP\API\CoreBundle\Helpers\GuzzleTools;
 use DBP\API\CoreBundle\Helpers\Tools;
@@ -271,5 +272,39 @@ class TUGOnlineApi implements OrganizationProviderInterface
         }
 
         return Tools::filterErrorMessage($e->getMessage());
+    }
+
+    private function getOrganizationIDsByPerson(Person $person, string $context): array
+    {
+        if ($context === 'library-manager') {
+            $group = 'F_BIB';
+        } else {
+            return [];
+        }
+
+        $group = preg_quote($group);
+        $results = [];
+        $re = "/^$group:F:(\d+):([\d_]+)$/i";
+
+        $functions = $person->getFunctions();
+
+        foreach ($functions as $function) {
+            if (preg_match($re, $function, $matches)) {
+                $results[] = $matches[2].'-F'.$matches[1];
+            }
+        }
+
+        return $results;
+    }
+
+    public function getOrganizationsByPerson(Person $person, string $context, string $lang): array
+    {
+        $orgs = [];
+        $ids = $this->getOrganizationIDsByPerson($person, $context);
+        foreach ($ids as $id) {
+            $orgs[] = $this->getOrganizationById($id, $lang);
+        }
+
+        return $orgs;
     }
 }

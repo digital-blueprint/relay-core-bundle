@@ -4,6 +4,11 @@ services:
     autoconfigure: false
     tags: [{'name' : 'serializer.normalizer', priority: '-700'}]
 
+  DBP\API\CoreBundle\Controller\:
+    resource: '../../Controller'
+    tags: ['controller.service_arguments']
+    autowire: true
+
   DBP\API\CoreBundle\Service\LoggingProcessor:
     autowire: true
     autoconfigure: true
