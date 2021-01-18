@@ -8,6 +8,7 @@ use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Annotation\ApiResource;
 use DateTimeInterface;
 use DBP\API\AlmaBundle\Controller\GetLibraryBookLoansByPerson;
+use DBP\API\CoreBundle\Controller\GetOrganizationsByPerson;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
@@ -27,6 +28,19 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *         "openapi_context"=
  *           {"summary"="Get the library book loans of a person.",
  *            "parameters"={{"name"="id", "in"="path", "description"="Id of person", "required"="true", "type"="string", "example"="vlts01"}}},
+ *      },
+ *      "get_orgs"={
+ *         "method"="GET",
+ *         "path"="/people/{id}/organizations",
+ *         "controller"=GetOrganizationsByPerson::class,
+ *         "normalization_context"={"jsonld_embed_context"=true, "groups"={"Organization:output"}},
+ *         "openapi_context"=
+ *           {"summary"="Get the organizations related to a person.",
+ *            "parameters"={
+ *              {"name"="id", "in"="path", "description"="Id of person", "required"="true", "type"="string", "example"="vlts01"},
+ *              {"name"="context", "in"="query", "description"="type of relation", "required"="true", "type"="string", "example"="library-manager"},
+ *              {"name"="lang", "in"="query", "description"="language", "type"="string", "example"="en"},
+ *           }},
  *      }
  *   },
  *   iri="http://schema.org/Person",
@@ -280,29 +294,5 @@ class Person
         $this->birthDate = $birthDate;
 
         return $this;
-    }
-
-    /**
-     * Returns the institutes for a group (e.g. "F_BIB").
-     *
-     * @param string $group
-     *
-     * @return array
-     */
-    public function getInstitutesForGroup($group)
-    {
-        $group = preg_quote($group);
-        $results = [];
-        $re = "/^$group:F:(\d+):[\d_]+$/i";
-
-        $functions = $this->getFunctions();
-
-        foreach ($functions as $function) {
-            if (preg_match($re, $function, $matches)) {
-                $results[] = 'F'.$matches[1];
-            }
-        }
-
-        return $results;
     }
 }
