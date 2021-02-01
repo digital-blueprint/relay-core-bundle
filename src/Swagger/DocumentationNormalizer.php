@@ -442,7 +442,7 @@ final class DocumentationNormalizer implements NormalizerInterface, CacheableSup
         // Avoid duplicates parameters when there is a filter on a subresource identifier
         $parametersMemory = [];
         $pathOperation['parameters'] = [];
-        foreach ($subresourceOperation['identifiers'] as list($identifier, , $hasIdentifier)) {
+        foreach ($subresourceOperation['identifiers'] as [$identifier, , $hasIdentifier]) {
             if (true === $hasIdentifier) {
                 $parameter = ['name' => $identifier, 'in' => 'path', 'required' => true];
                 $v3 ? $parameter['schema'] = ['type' => 'string'] : $parameter['type'] = 'string';
