@@ -115,12 +115,6 @@ class Person
     private $image;
 
     /**
-     * @var string
-     * @var string
-     */
-    private $almaId;
-
-    /**
      * @var array
      * @Groups({"Person:current-user"})
      */
@@ -138,6 +132,16 @@ class Person
      * @Groups({"Person:current-user", "Person:birthdate-access"})
      */
     private $birthDate;
+
+    /**
+     * @var array
+     */
+    private $extraData;
+
+    public function __construct()
+    {
+        $this->extraData = [];
+    }
 
     public function setIdentifier(string $identifier): self
     {
@@ -223,16 +227,23 @@ class Person
         return $this;
     }
 
-    public function getAlmaId(): ?string
+    /**
+     * Allows attaching extra information to a Person object with
+     * some random key. You can get the value back via getExtraData().
+     *
+     * @param ?mixed $value
+     */
+    public function setExtraData(string $key, $value): void
     {
-        return $this->almaId;
+        $this->extraData[$key] = $value;
     }
 
-    public function setAlmaId(?string $almaId): self
+    /**
+     * @return ?mixed
+     */
+    public function getExtraData(string $key)
     {
-        $this->almaId = $almaId;
-
-        return $this;
+        return $this->extraData[$key] ?? null;
     }
 
     /**
