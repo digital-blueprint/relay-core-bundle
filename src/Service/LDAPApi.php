@@ -282,7 +282,7 @@ class LDAPApi implements PersonProviderInterface
 
         $person->setRoles($roles);
 
-        $person->setAlmaId($user->getFirstAttribute('CO-ALMA-PATRON-ID'));
+        $person->setExtraData('alma-id', $user->getFirstAttribute('CO-ALMA-PATRON-ID'));
 
         return $person;
     }
