@@ -142,6 +142,7 @@ class Person
     {
         $this->extraData = [];
         $this->roles = [];
+        $this->functions = [];
     }
 
     public function setIdentifier(string $identifier): self
