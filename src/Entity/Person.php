@@ -141,6 +141,7 @@ class Person
     public function __construct()
     {
         $this->extraData = [];
+        $this->roles = [];
     }
 
     public function setIdentifier(string $identifier): self
