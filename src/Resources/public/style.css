@@ -22,6 +22,10 @@ header {
     display: none;
 }
 
+.swagger-ui .scheme-container .servers, .swagger-ui .scheme-container .servers-title {
+    display: none;
+}
+
 .swagger-ui .scheme-container {
     padding: 10px 0;
 }
