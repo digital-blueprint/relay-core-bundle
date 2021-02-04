@@ -69,14 +69,13 @@ class ExtTest extends ApiTestCase
         $this->assertEquals('/people/foobar', $data['@id']);
     }
 
-    public function testGetPersonRolesFunctions()
+    public function testGetPersonRoles()
     {
-        [$client, $user] = $this->withUser('foobar', '42', ['roles' => ['ROLE'], 'functions' => ['FUNC']]);
+        [$client, $user] = $this->withUser('foobar', '42', ['roles' => ['ROLE']]);
         $response = $client->request('GET', '/people/foobar', ['headers' => [
             'Authorization' => 'Bearer 42',
         ]]);
         $data = json_decode($response->getContent(), true);
         $this->assertEquals(['ROLE'], $data['roles']);
-        $this->assertEquals(['FUNC'], $data['functions']);
     }
 }
