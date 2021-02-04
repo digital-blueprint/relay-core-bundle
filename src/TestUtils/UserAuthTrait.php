@@ -15,7 +15,6 @@ trait UserAuthTrait
         $client = ApiTestCase::createClient();
         $container = $client->getContainer();
         $roles = $options['roles'] ?? [];
-        $functions = $options['functions'] ?? [];
         $scopes = $options['scopes'] ?? [];
 
         if ($id === null) {
@@ -23,7 +22,6 @@ trait UserAuthTrait
         } else {
             $person = new Person();
             $person->setIdentifier($id);
-            $person->setFunctions($functions);
             $person->setRoles($roles);
         }
         $personProvider = new DummyPersonProvider($person);

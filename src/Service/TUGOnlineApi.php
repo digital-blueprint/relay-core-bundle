@@ -286,7 +286,7 @@ class TUGOnlineApi implements OrganizationProviderInterface
         $results = [];
         $re = "/^$group:F:(\d+):([\d_]+)$/i";
 
-        $functions = $person->getFunctions();
+        $functions = $person->getExtraData('tug-functions');
 
         foreach ($functions as $function) {
             if (preg_match($re, $function, $matches)) {

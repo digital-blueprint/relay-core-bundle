@@ -257,21 +257,6 @@ class Person
         return $this->givenName.' '.$this->familyName;
     }
 
-    public function getFunctions(): array
-    {
-        return $this->functions;
-    }
-
-    /**
-     * @return Person
-     */
-    public function setFunctions(array $functions): self
-    {
-        $this->functions = $functions;
-
-        return $this;
-    }
-
     public function getRoles(): array
     {
         return $this->roles;

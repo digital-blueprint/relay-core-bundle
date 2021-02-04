@@ -267,7 +267,7 @@ class LDAPApi implements PersonProviderInterface
         $specialRoles = [];
         TUGTools::injectSpecialPermissions($identifier, $functions, $specialRoles);
 
-        $person->setFunctions($functions);
+        $person->setExtraData('tug-functions', $functions);
 
         $currentUser = $this->security->getUser();
         if ($full && $currentUser !== null && $currentUser->getUsername() === $identifier) {
