@@ -27,7 +27,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *         "normalization_context"={"jsonld_embed_context"=true, "groups"={"LibraryBookLoan:output", "Person:output", "LibraryBookOffer:output", "LibraryBook:output"}},
  *         "openapi_context"=
  *           {"summary"="Get the library book loans of a person.",
- *            "parameters"={{"name"="id", "in"="path", "description"="Id of person", "required"="true", "type"="string", "example"="vlts01"}}},
+ *            "parameters"={{"name"="id", "in"="path", "description"="Id of person", "required"=true, "type"="string", "example"="vlts01"}}},
  *      },
  *      "get_orgs"={
  *         "method"="GET",
@@ -37,8 +37,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *         "openapi_context"=
  *           {"summary"="Get the organizations related to a person.",
  *            "parameters"={
- *              {"name"="id", "in"="path", "description"="Id of person", "required"="true", "type"="string", "example"="vlts01"},
- *              {"name"="context", "in"="query", "description"="type of relation", "required"="true", "type"="string", "example"="library-manager"},
+ *              {"name"="id", "in"="path", "description"="Id of person", "required"=true, "type"="string", "example"="vlts01"},
+ *              {"name"="context", "in"="query", "description"="type of relation", "required"=true, "type"="string", "example"="library-manager"},
  *              {"name"="lang", "in"="query", "description"="language", "type"="string", "example"="en"},
  *           }},
  *      }

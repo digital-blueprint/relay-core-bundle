@@ -16,7 +16,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *     collectionOperations={"get"},
  *     itemOperations={
  *       "get"={"openapi_context"={"parameters"={
- *         {"name"="id", "in"="path", "description"="orgUnitID of organization", "required"="true", "type"="string", "example"="1190-F2050"},
+ *         {"name"="id", "in"="path", "description"="orgUnitID of organization", "required"=true, "type"="string", "example"="1190-F2050"},
  *         {"name"="lang", "in"="query", "description"="Language of result", "type"="string", "enum"={"de", "en"}, "example"="de"}}}},
  *       "get_library_book_offers"={
  *         "method"="GET",
@@ -25,7 +25,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *         "normalization_context"={"jsonld_embed_context"=true, "groups"={"LibraryBook:output", "LibraryBookOffer:output"}},
  *         "openapi_context"=
  *           {"summary"="Get the library book offers of an organization.",
- *            "parameters"={{"name"="id", "in"="path", "description"="Id of organization", "required"="true", "type"="string", "example"="1190-F2050"}}},
+ *            "parameters"={{"name"="id", "in"="path", "description"="Id of organization", "required"=true, "type"="string", "example"="1190-F2050"}}},
  *       },
  *       "get_library_book_loans"={
  *         "method"="GET",
@@ -34,7 +34,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *         "normalization_context"={"jsonld_embed_context"=true, "groups"={"LibraryBookLoan:output", "Person:output", "LibraryBookOffer:output", "LibraryBook:output"}},
  *         "openapi_context"=
  *           {"summary"="Get the library book loans of an organization.",
- *            "parameters"={{"name"="id", "in"="path", "description"="Id of organization", "required"="true", "type"="string", "example"="1190-F2050"}}},
+ *            "parameters"={{"name"="id", "in"="path", "description"="Id of organization", "required"=true, "type"="string", "example"="1190-F2050"}}},
  *       },
  *       "get_library_book_orders"={
  *         "method"="GET",
@@ -43,7 +43,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *         "normalization_context"={"groups"={"LibraryBookOrder:output", "LibraryBookOrderItem:output", "ParcelDelivery:output", "DeliveryStatus:output", "DeliveryEvent:output", "LibraryBook:output", "EventStatusType:output"}},
  *         "openapi_context"=
  *           {"summary"="Get the library book orders of an organization.",
- *            "parameters"={{"name"="id", "in"="path", "description"="Id of organization", "required"="true", "type"="string", "example"="1190-F2050"}}},
+ *            "parameters"={{"name"="id", "in"="path", "description"="Id of organization", "required"=true, "type"="string", "example"="1190-F2050"}}},
  *       }
  *     },
  *     iri="http://schema.org/Organization",
