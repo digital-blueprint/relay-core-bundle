@@ -55,12 +55,14 @@ class TUGOnlineApi implements OrganizationProviderInterface
         $this->token = $key;
     }
 
-    private function getClient(): Client
+    private function getClient(string $baseUrl): Client
     {
         $stack = HandlerStack::create($this->clientHandler);
-        $base_uri = $this->config['api_url_organization'];
+        if (substr($baseUrl, -1) !== '/') {
+            $baseUrl .= '/';
+        }
         $client_options = [
-            'base_uri' => $base_uri,
+            'base_uri' => $baseUrl,
             'handler' => $stack,
         ];
 
@@ -93,7 +95,7 @@ class TUGOnlineApi implements OrganizationProviderInterface
 
         $bdId = $user->getAttribute('CO-OBFUSCATED-C-BD');
         if (in_array('BEDIENSTETE:OK', $accountTypes, true) && !empty($bdId)) {
-            $uriTemplate = new UriTemplate('https://online.tugraz.at/tug_online/visitenkarte.showImage?pPersonenGruppe={group}&pPersonenId={personId}');
+            $uriTemplate = new UriTemplate('visitenkarte.showImage?pPersonenGruppe={group}&pPersonenId={personId}');
             $uris[] = (string) $uriTemplate->expand([
                 'group' => '3',
                 'personId' => $bdId[0],
@@ -102,7 +104,7 @@ class TUGOnlineApi implements OrganizationProviderInterface
 
         $stId = $user->getAttribute('CO-OBFUSCATED-C-ST');
         if (in_array('STUDENTEN:OK', $accountTypes, true) && !empty($stId)) {
-            $uriTemplate = new UriTemplate('https://online.tugraz.at/tug_online/visitenkarte.showImage?pPersonenGruppe={group}&pPersonenId={personId}');
+            $uriTemplate = new UriTemplate('visitenkarte.showImage?pPersonenGruppe={group}&pPersonenId={personId}');
             $uris[] = (string) $uriTemplate->expand([
                 'group' => '5',
                 'personId' => $stId[0],
@@ -111,7 +113,7 @@ class TUGOnlineApi implements OrganizationProviderInterface
 
         $extId = $user->getAttribute('CO-OBFUSCATED-C-EXT');
         if (in_array('ALUMNI:OK', $accountTypes, true) && !empty($extId)) {
-            $uriTemplate = new UriTemplate('https://online.tugraz.at/tug_online/visitenkarte.showImage?pPersonenGruppe={group}&pPersonenId={personId}');
+            $uriTemplate = new UriTemplate('visitenkarte.showImage?pPersonenGruppe={group}&pPersonenId={personId}');
             $uris[] = (string) $uriTemplate->expand([
                 'group' => '6',
                 'personId' => $bdId[0],
@@ -119,7 +121,11 @@ class TUGOnlineApi implements OrganizationProviderInterface
         }
 
         // Try out all URLs and return the first working one
-        $client = $this->getClient();
+        $webUrl = $this->config['web_url'];
+        if (substr($webUrl, -1) !== '/') {
+            $webUrl .= '/';
+        }
+        $client = $this->getClient($webUrl);
         $promises = [];
         foreach ($uris as $uri) {
             $promises[] = $client->headAsync($uri);
@@ -139,7 +145,7 @@ class TUGOnlineApi implements OrganizationProviderInterface
             if ($response->getStatusCode() === 200 && $hasContent) {
                 assert(isset($uris[$i]));
 
-                return (string) $uris[$i];
+                return $webUrl.(string) $uris[$i];
             }
         }
 
@@ -154,7 +160,7 @@ class TUGOnlineApi implements OrganizationProviderInterface
         $orgUnitId = $this->extractOrganizationID($identifier);
 
         // token is a mandatory url parameter, token via header doesn't work
-        $uriTemplate = new UriTemplate('?token={token}&orgUnitID={orgUnitID}&language={lang}');
+        $uriTemplate = new UriTemplate('ws/webservice_v1.0/cdm/organization/xml?token={token}&orgUnitID={orgUnitID}&language={lang}');
 
         return (string) $uriTemplate->expand([
             'token' => $this->token,
@@ -201,7 +207,7 @@ class TUGOnlineApi implements OrganizationProviderInterface
      */
     public function getOrganizationXMLData(string $identifier, string $lang = 'de'): ?SimpleXMLElement
     {
-        $client = $this->getClient();
+        $client = $this->getClient($this->config['api_url']);
         $urlPath = $this->getOrganizationUrlParameterString($identifier, $lang);
 
         try {

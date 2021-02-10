@@ -38,7 +38,8 @@ class Configuration implements ConfigurationInterface
         $coBuilder = new TreeBuilder('campus_online');
         $coNode = $coBuilder->getRootNode()
             ->children()
-            ->scalarNode('api_url_organization')->end()
+            ->scalarNode('web_url')->end()
+            ->scalarNode('api_url')->end()
             ->scalarNode('api_token')->end()
             ->end();
         $treeBuilder->getRootNode()->append($coNode);
