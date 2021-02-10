@@ -17,6 +17,7 @@ use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
 use DBP\API\CoreBundle\Helpers\Tools as CoreTools;
 use DBP\API\CoreBundle\Helpers\TUGTools;
 use DBP\API\CoreBundle\Keycloak\KeycloakBearerUser;
+use DBP\API\CoreBundle\Service\CampusOnline\UserImageApi;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\Security;
@@ -43,13 +44,13 @@ class LDAPApi implements PersonProviderInterface
     private $logger;
 
     /**
-     * @var TUGOnlineApi
+     * @var UserImageApi
      */
     private $tugapi;
 
     private $security;
 
-    public function __construct(ContainerInterface $container, TUGOnlineApi $tugapi, Security $security, LoggerInterface $logger)
+    public function __construct(ContainerInterface $container, UserImageApi $tugapi, Security $security, LoggerInterface $logger)
     {
         $config = $container->getParameter('dbp_api.core.ldap_config');
         $this->ad = new Adldap();

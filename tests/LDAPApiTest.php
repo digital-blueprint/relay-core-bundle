@@ -9,8 +9,8 @@ use Adldap\Models\User as AdldapUser;
 use Adldap\Query\Builder;
 use Adldap\Query\Grammar;
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
+use DBP\API\CoreBundle\Service\CampusOnline\UserImageApi;
 use DBP\API\CoreBundle\Service\LDAPApi;
-use DBP\API\CoreBundle\Service\TUGOnlineApi;
 use Mockery;
 use Monolog\Handler\NullHandler;
 use Monolog\Logger;
@@ -30,7 +30,7 @@ class LDAPApiTest extends ApiTestCase
         $client = static::createClient();
         $security = new Security($client->getContainer());
         $nullLogger = new Logger('dummy', [new NullHandler()]);
-        $tugapi = new TUGOnlineApi($client->getContainer(), $nullLogger);
+        $tugapi = new UserImageApi($client->getContainer(), $nullLogger);
 
         $this->api = new LDAPApi($client->getContainer(), $tugapi, $security, $nullLogger);
     }
