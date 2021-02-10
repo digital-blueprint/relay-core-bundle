@@ -38,17 +38,30 @@ class OrganizationApi
 
     private const CACHE_TTL = 3600;
 
+    private $cache;
+
     public function __construct(ContainerInterface $container, LoggerInterface $logger)
     {
         $this->config = $container->getParameter('dbp_api.core.co_config');
         $this->token = $this->config['api_token'] ?? '';
         $this->container = $container;
         $this->logger = $logger;
+        $this->cache = true;
     }
 
     public function setApiKey(string $key)
     {
         $this->token = $key;
+    }
+
+    public function setClientHandler(?object $handler)
+    {
+        $this->clientHandler = $handler;
+    }
+
+    public function enableCache(bool $enable)
+    {
+        $this->cache = $enable;
     }
 
     private function getClient(string $baseUrl): Client
@@ -74,7 +87,9 @@ class OrganizationApi
             )
         );
         $cacheMiddleWare->setHttpMethods(['GET' => true, 'HEAD' => true]);
-        $stack->push($cacheMiddleWare);
+        if ($this->cache) {
+            $stack->push($cacheMiddleWare);
+        }
 
         $client = new Client($client_options);
 
@@ -136,7 +151,7 @@ class OrganizationApi
      */
     public function getOrganizationXMLData(string $identifier, string $lang = 'de'): ?SimpleXMLElement
     {
-        $client = $this->getClient($this->config['api_url']);
+        $client = $this->getClient($this->config['api_url'] ?? '');
         $urlPath = $this->getOrganizationUrlParameterString($identifier, $lang);
 
         try {
