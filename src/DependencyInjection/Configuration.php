@@ -25,16 +25,6 @@ class Configuration implements ConfigurationInterface
             ->end();
         $treeBuilder->getRootNode()->append($keycloakNode);
 
-        $ldapBuilder = new TreeBuilder('ldap');
-        $ldapNode = $ldapBuilder->getRootNode()
-            ->children()
-            ->scalarNode('host')->end()
-            ->scalarNode('base_dn')->end()
-            ->scalarNode('username')->end()
-            ->scalarNode('password')->end()
-            ->end();
-        $treeBuilder->getRootNode()->append($ldapNode);
-
         $coBuilder = new TreeBuilder('campus_online');
         $coNode = $coBuilder->getRootNode()
             ->children()

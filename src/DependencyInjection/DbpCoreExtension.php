@@ -50,7 +50,6 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
         $def->addTag('cache.pool');
 
         $container->setParameter('dbp_api.core.keycloak_config', $mergedConfig['keycloak'] ?? []);
-        $container->setParameter('dbp_api.core.ldap_config', $mergedConfig['ldap'] ?? []);
         $container->setParameter('dbp_api.core.co_config', $mergedConfig['campus_online'] ?? []);
     }
 

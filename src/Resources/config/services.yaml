@@ -27,12 +27,12 @@ services:
   DBP\API\CoreBundle\Service\OrganizationProviderInterface:
     '@DBP\API\CoreBundle\Service\CampusOnline\CampusOnlineOrgProvider'
 
-  DBP\API\CoreBundle\Service\LDAPApi:
+  DBP\API\CoreBundle\Service\DummyPersonProvider:
     autowire: true
     autoconfigure: true
 
   DBP\API\CoreBundle\Service\PersonProviderInterface:
-    '@DBP\API\CoreBundle\Service\LDAPApi'
+    '@DBP\API\CoreBundle\Service\DummyPersonProvider'
 
   DBP\API\CoreBundle\DataProvider\OrganizationDataProvider:
     tags: ['api_platform.item_data_provider']
