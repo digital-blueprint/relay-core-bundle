@@ -19,13 +19,12 @@ services:
     autowire: true
     autoconfigure: true
 
-  DBP\API\CoreBundle\Service\CampusOnline\:
-    resource: '../../Service/CampusOnline'
+  DBP\API\CoreBundle\Service\OrganizationProviderInterface:
+    '@DBP\API\CoreBundle\Service\DummyOrganizationProvider'
+
+  DBP\API\CoreBundle\Service\DummyOrganizationProvider:
     autowire: true
     autoconfigure: true
-
-  DBP\API\CoreBundle\Service\OrganizationProviderInterface:
-    '@DBP\API\CoreBundle\Service\CampusOnline\CampusOnlineOrgProvider'
 
   DBP\API\CoreBundle\Service\DummyPersonProvider:
     autowire: true

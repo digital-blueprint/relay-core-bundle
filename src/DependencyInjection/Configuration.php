@@ -25,15 +25,6 @@ class Configuration implements ConfigurationInterface
             ->end();
         $treeBuilder->getRootNode()->append($keycloakNode);
 
-        $coBuilder = new TreeBuilder('campus_online');
-        $coNode = $coBuilder->getRootNode()
-            ->children()
-            ->scalarNode('web_url')->end()
-            ->scalarNode('api_url')->end()
-            ->scalarNode('api_token')->end()
-            ->end();
-        $treeBuilder->getRootNode()->append($coNode);
-
         $coBuilder = new TreeBuilder('api_docs');
         $coNode = $coBuilder->getRootNode()
             ->children()
