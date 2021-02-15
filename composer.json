@@ -5,7 +5,7 @@
     "version": "dev-master",
     "require": {
         "php": "^7.3",
-        "api-platform/core": "^2.5",
+        "api-platform/core": "<2.6",
         "doctrine/annotations": "^1.0",
         "guzzlehttp/guzzle": "^7.0",
         "kevinrob/guzzle-cache-middleware": "^3.3",
