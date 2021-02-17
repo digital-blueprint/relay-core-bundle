@@ -14,12 +14,18 @@ use Symfony\Component\Serializer\Annotation\Groups;
 /**
  * @ApiResource(
  *     attributes={"security"="is_granted('IS_AUTHENTICATED_FULLY')"},
- *     collectionOperations={"get"},
+ *     collectionOperations={
+ *       "get"={"security"="is_granted('IS_AUTHENTICATED_FULLY')"},
+ *     },
  *     itemOperations={
- *       "get"={"openapi_context"={"parameters"={
- *         {"name"="id", "in"="path", "description"="orgUnitID of organization", "required"=true, "type"="string", "example"="1190-F2050"},
- *         {"name"="lang", "in"="query", "description"="Language of result", "type"="string", "enum"={"de", "en"}, "example"="de"}}}},
+ *       "get"={
+ *         "security"="is_granted('IS_AUTHENTICATED_FULLY')",
+ *         "openapi_context"={"parameters"={
+ *           {"name"="id", "in"="path", "description"="orgUnitID of organization", "required"=true, "type"="string", "example"="1190-F2050"},
+ *           {"name"="lang", "in"="query", "description"="Language of result", "type"="string", "enum"={"de", "en"}, "example"="de"}}}
+ *       },
  *       "get_library_book_offers"={
+ *         "security"="is_granted('IS_AUTHENTICATED_FULLY')",
  *         "method"="GET",
  *         "path"="/organizations/{id}/library-book-offers",
  *         "controller"=GetLibraryBookOffersByOrganization::class,
@@ -29,6 +35,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *            "parameters"={{"name"="id", "in"="path", "description"="Id of organization", "required"=true, "type"="string", "example"="1190-F2050"}}},
  *       },
  *       "get_library_book_loans"={
+ *         "security"="is_granted('IS_AUTHENTICATED_FULLY')",
  *         "method"="GET",
  *         "path"="/organizations/{id}/library-book-loans",
  *         "controller"=GetLibraryBookLoansByOrganization::class,
@@ -38,6 +45,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *            "parameters"={{"name"="id", "in"="path", "description"="Id of organization", "required"=true, "type"="string", "example"="1190-F2050"}}},
  *       },
  *       "get_library_book_orders"={
+ *         "security"="is_granted('IS_AUTHENTICATED_FULLY')",
  *         "method"="GET",
  *         "path"="/organizations/{id}/library-book-orders",
  *         "controller"=GetLibraryBookOrdersByOrganization::class,

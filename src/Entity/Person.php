@@ -15,13 +15,16 @@ use Symfony\Component\Serializer\Annotation\Groups;
  * @ApiResource(
  *   attributes={"security"="is_granted('IS_AUTHENTICATED_FULLY')"},
  *   collectionOperations={
- *     "get"={"openapi_context"={
- *       "parameters"={{"name"="search", "in"="query", "description"="Search for a person name", "type"="string", "example"="woody007"}
+ *     "get"={
+ *          "security"="is_granted('IS_AUTHENTICATED_FULLY')",
+ *          "openapi_context"={
+ *              "parameters"={{"name"="search", "in"="query", "description"="Search for a person name", "type"="string", "example"="woody007"}
  *     }}},
  *   },
  *   itemOperations={
- *      "get",
+ *      "get"={"security"="is_granted('IS_AUTHENTICATED_FULLY')"},
  *      "get_loans"={
+ *         "security"="is_granted('IS_AUTHENTICATED_FULLY')",
  *         "method"="GET",
  *         "path"="/people/{id}/library-book-loans",
  *         "controller"=GetLibraryBookLoansByPerson::class,
@@ -31,6 +34,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *            "parameters"={{"name"="id", "in"="path", "description"="Id of person", "required"=true, "type"="string", "example"="vlts01"}}},
  *      },
  *      "get_orgs"={
+ *         "security"="is_granted('IS_AUTHENTICATED_FULLY')",
  *         "method"="GET",
  *         "path"="/people/{id}/organizations",
  *         "controller"=GetOrganizationsByPerson::class,
