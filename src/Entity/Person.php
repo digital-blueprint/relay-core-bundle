@@ -13,6 +13,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ApiResource(
+ *   attributes={"security"="is_granted('IS_AUTHENTICATED_FULLY')"},
  *   collectionOperations={
  *     "get"={"openapi_context"={
  *       "parameters"={{"name"="search", "in"="query", "description"="Search for a person name", "type"="string", "example"="woody007"}
