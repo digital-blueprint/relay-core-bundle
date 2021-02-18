@@ -13,45 +13,61 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ApiResource(
- *   attributes={"security"="is_granted('IS_AUTHENTICATED_FULLY')"},
- *   collectionOperations={
- *     "get"={
- *          "security"="is_granted('IS_AUTHENTICATED_FULLY')",
- *          "openapi_context"={
- *              "parameters"={{"name"="search", "in"="query", "description"="Search for a person name", "type"="string", "example"="woody007"}
- *     }}},
- *   },
- *   itemOperations={
- *      "get"={"security"="is_granted('IS_AUTHENTICATED_FULLY')"},
- *      "get_loans"={
- *         "security"="is_granted('IS_AUTHENTICATED_FULLY')",
- *         "method"="GET",
- *         "path"="/people/{id}/library-book-loans",
- *         "controller"=GetLibraryBookLoansByPerson::class,
- *         "normalization_context"={"jsonld_embed_context"=true, "groups"={"LibraryBookLoan:output", "Person:output", "LibraryBookOffer:output", "LibraryBook:output"}},
- *         "openapi_context"=
- *           {"summary"="Get the library book loans of a person.",
- *            "parameters"={{"name"="id", "in"="path", "description"="Id of person", "required"=true, "type"="string", "example"="vlts01"}}},
- *      },
- *      "get_orgs"={
- *         "security"="is_granted('IS_AUTHENTICATED_FULLY')",
- *         "method"="GET",
- *         "path"="/people/{id}/organizations",
- *         "controller"=GetOrganizationsByPerson::class,
- *         "normalization_context"={"jsonld_embed_context"=true, "groups"={"Organization:output"}},
- *         "openapi_context"=
- *           {"summary"="Get the organizations related to a person.",
- *            "parameters"={
- *              {"name"="id", "in"="path", "description"="Id of person", "required"=true, "type"="string", "example"="vlts01"},
- *              {"name"="context", "in"="query", "description"="type of relation", "required"=true, "type"="string", "example"="library-manager"},
- *              {"name"="lang", "in"="query", "description"="language", "type"="string", "example"="en"},
- *           }},
- *      }
- *   },
- *   iri="http://schema.org/Person",
- *   description="A person of the LDAP system",
- *   normalizationContext={"groups"={"Person:output"}, "jsonld_embed_context"=true}
- * )
+ *     attributes={
+ *         "security" = "is_granted('IS_AUTHENTICATED_FULLY')"
+ *     },
+ *     collectionOperations={
+ *         "get" = {
+ *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
+ *             "openapi_context" = {"parameters" = {
+ *                 {"name" = "search", "in" = "query", "description" = "Search for a person name", "type" = "string", "example" = "woody007"}
+ *             }}
+ *         },
+ *     },
+ *     itemOperations={
+ *         "get" = {
+ *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')"
+ *         },
+ *         "get_loans" = {
+ *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
+ *             "method" = "GET",
+ *             "path" = "/people/{id}/library-book-loans",
+ *             "controller" = GetLibraryBookLoansByPerson::class,
+ *             "normalization_context" = {
+ *                 "jsonld_embed_context" = true,
+ *                 "groups" = {"LibraryBookLoan:output", "Person:output", "LibraryBookOffer:output", "LibraryBook:output"}
+ *             },
+ *             "openapi_context" = {"summary" = "Get the library book loans of a person.",
+ *                 "parameters" = {
+ *                     {"name" = "id", "in" = "path", "description" = "Id of person", "required" = true, "type" = "string", "example" = "vlts01"}
+ *                 }},
+ *             },
+ *             "get_orgs" = {
+ *                 "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
+ *                 "method" = "GET",
+ *                 "path" = "/people/{id}/organizations",
+ *                 "controller" = GetOrganizationsByPerson::class,
+ *                 "normalization_context" = {
+ *                     "jsonld_embed_context" = true,
+ *                     "groups" = {"Organization:output"}
+ *                 },
+ *                 "openapi_context" = {
+ *                     "summary" = "Get the organizations related to a person.",
+ *                     "parameters" = {
+ *                         {"name" = "id", "in" = "path", "description" = "Id of person", "required" = true, "type" = "string", "example" = "vlts01"},
+ *                         {"name" = "context", "in" = "query", "description" = "type of relation", "required" = true, "type" = "string", "example" = "library-manager"},
+ *                         {"name" = "lang", "in" = "query", "description" = "language", "type" = "string", "example" = "en"},
+ *                     }
+ *                 },
+ *             }
+ *         },
+ *         iri="http://schema.org/Person",
+ *         description="A person of the LDAP system",
+ *         normalizationContext={"
+ *              groups" = {"Person:output"},
+ *             "jsonld_embed_context" = true,
+ *         }
+ *     )
  */
 class Person
 {
