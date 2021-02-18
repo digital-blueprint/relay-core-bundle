@@ -63,8 +63,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *         },
  *         iri="http://schema.org/Person",
  *         description="A person of the LDAP system",
- *         normalizationContext={"
- *              groups" = {"Person:output"},
+ *         normalizationContext={
+ *             "groups" = {"Person:output"},
  *             "jsonld_embed_context" = true,
  *         }
  *     )
