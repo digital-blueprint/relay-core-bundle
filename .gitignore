@@ -5,3 +5,5 @@
 /.phpunit.result.cache
 /_coverage
 /.idea
+/src/Resources/public/auth/unit.js*
+/src/Resources/public/auth/index.html
