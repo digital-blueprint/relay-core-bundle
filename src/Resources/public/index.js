@@ -1,4 +1,4 @@
-import './dbp-auth/dbp-auth.js';
+import './auth/api-platform-auth.js';
 
 function log(message) {
     console.log('API docs: ' + message);
@@ -41,24 +41,21 @@ function insertDBPContainer() {
     if (target === undefined)
         return;
 
-    var element = document.createElement('dbp-auth-keycloak');
-    element.setAttribute('lang', 'en');
-
+    // see ../auth/README.md
+    var element = document.createElement('api-platform-auth');
     let config = window.keycloakConfig;
+
+    element.setAttribute('lang', 'en');
     element.setAttribute('url', config.url);
     element.setAttribute('realm', config.realm);
     element.setAttribute('client-id', config.clientId);
-    element.setAttribute('silent-check-sso-redirect-uri', new URL("silent-check-sso.html", import.meta.url).href);
+    element.setAttribute('silent-check-sso-redirect-uri', new URL("auth/silent-check-sso.html", import.meta.url).href);
     element.setAttribute('entry-point-url', new URL('../..', import.meta.url).href);
-    element.setAttribute('try-login', '');
-    element.setAttribute('load-person', '');
-
-    let button = document.createElement('dbp-login-button');
-    button.setAttribute('lang', 'en');
+    element.setAttribute('auth', '');
+    element.setAttribute('requested-login-status', '');
 
     var section = target.children[0];
     section.insertBefore(element, section.children[0]);
-    section.insertBefore(button, section.children[0]);
     window.clearInterval(delayInsertTimer);
     log('insertDBPContainer done');
 }
@@ -70,7 +67,7 @@ function delayInsert() {
 document.addEventListener('DOMContentLoaded', delayInsert);
 
 function onAuthUpdate(e) {
-    useToken(e.target.token);
+    useToken(e.detail.token);
 }
 
-window.addEventListener("dbp-auth-keycloak-data-update", onAuthUpdate);
+window.addEventListener("api-platform-auth-update", onAuthUpdate);
