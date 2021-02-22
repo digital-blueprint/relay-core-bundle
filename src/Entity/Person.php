@@ -29,7 +29,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')"
  *         },
  *         "get_loans" = {
- *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
+ *             "security" = "is_granted('IS_AUTHENTICATED_FULLY') and is_granted('ROLE_LIBRARY_MANAGER')",
  *             "method" = "GET",
  *             "path" = "/people/{id}/library-book-loans",
  *             "controller" = GetLibraryBookLoansByPerson::class,

@@ -32,7 +32,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *             }
  *         },
  *         "get_library_book_offers" = {
- *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
+ *             "security" = "is_granted('IS_AUTHENTICATED_FULLY') and is_granted('ROLE_LIBRARY_MANAGER')",
  *             "method" = "GET",
  *             "path" = "/organizations/{id}/library-book-offers",
  *             "controller" = GetLibraryBookOffersByOrganization::class,
@@ -47,7 +47,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *             },
  *         },
  *         "get_library_book_loans" = {
- *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
+ *             "security" = "is_granted('IS_AUTHENTICATED_FULLY') and is_granted('ROLE_LIBRARY_MANAGER')",
  *             "method" = "GET",
  *             "path" = "/organizations/{id}/library-book-loans",
  *             "controller" = GetLibraryBookLoansByOrganization::class,
@@ -63,7 +63,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *             },
  *         },
  *         "get_library_book_orders" = {
- *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
+ *             "security" = "is_granted('IS_AUTHENTICATED_FULLY') and is_granted('ROLE_LIBRARY_MANAGER')",
  *             "method" = "GET",
  *             "path" = "/organizations/{id}/library-book-orders",
  *             "controller" = GetLibraryBookOrdersByOrganization::class,
