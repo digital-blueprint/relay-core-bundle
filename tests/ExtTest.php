@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace DBP\API\CoreBundle\Tests;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
+use DBP\API\CoreBundle\Entity\Person;
 use DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProvider;
 use DBP\API\CoreBundle\TestUtils\UserAuthTrait;
 use Symfony\Component\HttpFoundation\Response;
@@ -60,13 +61,17 @@ class ExtTest extends ApiTestCase
 
     public function testGetPerson()
     {
-        [$client, $user] = $this->withUser('foobar', '42');
+        $person = new Person();
+        $person->setEmail('foo@bar.com');
+        [$client, $user] = $this->withUser('foobar', '42', ['person' => $person]);
         $response = $client->request('GET', '/people/foobar', ['headers' => [
             'Authorization' => 'Bearer 42',
         ]]);
         $this->assertJson($response->getContent(false));
         $data = json_decode($response->getContent(false), true);
         $this->assertEquals('/people/foobar', $data['@id']);
+        $this->assertEquals('foobar', $data['identifier']);
+        $this->assertEquals('foo@bar.com', $data['email']);
     }
 
     public function testGetPersonRoles()

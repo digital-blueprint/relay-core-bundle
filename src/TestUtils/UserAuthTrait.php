@@ -16,11 +16,11 @@ trait UserAuthTrait
         $container = $client->getContainer();
         $roles = $options['roles'] ?? [];
         $scopes = $options['scopes'] ?? [];
+        $person = $options['person'] ?? new Person();
 
         if ($id === null) {
             $person = null;
         } else {
-            $person = new Person();
             $person->setIdentifier($id);
             $person->setRoles($roles);
         }
