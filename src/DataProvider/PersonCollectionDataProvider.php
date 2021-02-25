@@ -9,8 +9,9 @@ use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
 use DBP\API\CoreBundle\Entity\Person;
 use DBP\API\CoreBundle\Helpers\ArrayFullPaginator;
 use DBP\API\CoreBundle\Service\PersonProviderInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-final class PersonCollectionDataProvider implements CollectionDataProviderInterface, RestrictedDataProviderInterface
+final class PersonCollectionDataProvider extends AbstractController implements CollectionDataProviderInterface, RestrictedDataProviderInterface
 {
     public const ITEMS_PER_PAGE = 250;
 
@@ -31,6 +32,8 @@ final class PersonCollectionDataProvider implements CollectionDataProviderInterf
      */
     public function getCollection(string $resourceClass, string $operationName = null, array $context = []): ArrayFullPaginator
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
         $perPage = self::ITEMS_PER_PAGE;
         $page = 1;
         $api = $this->api;

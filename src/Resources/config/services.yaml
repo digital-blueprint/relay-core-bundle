@@ -6,8 +6,8 @@ services:
 
   DBP\API\CoreBundle\Controller\:
     resource: '../../Controller'
-    tags: ['controller.service_arguments']
     autowire: true
+    autoconfigure: true
 
   DBP\API\CoreBundle\Service\LoggingProcessor:
     autowire: true
@@ -33,18 +33,8 @@ services:
   DBP\API\CoreBundle\Service\PersonProviderInterface:
     '@DBP\API\CoreBundle\Service\DummyPersonProvider'
 
-  DBP\API\CoreBundle\DataProvider\OrganizationDataProvider:
-    tags: ['api_platform.item_data_provider']
-    autowire: true
-    autoconfigure: true
-
-  DBP\API\CoreBundle\DataProvider\PersonItemDataProvider:
-    tags: ['api_platform.item_data_provider']
-    autowire: true
-    autoconfigure: true
-
-  DBP\API\CoreBundle\DataProvider\PersonCollectionDataProvider:
-    tags: ['api_platform.collection_data_provider']
+  DBP\API\CoreBundle\DataProvider\:
+    resource: '../../DataProvider'
     autowire: true
     autoconfigure: true
 

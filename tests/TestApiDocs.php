@@ -8,7 +8,7 @@ use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\Client;
 use Symfony\Component\HttpFoundation\Response;
 
-class Test extends ApiTestCase
+class TestApiDocs extends ApiTestCase
 {
     /** @var Client */
     protected $client;

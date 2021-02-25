@@ -8,8 +8,9 @@ use ApiPlatform\Core\DataProvider\ItemDataProviderInterface;
 use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
 use DBP\API\CoreBundle\Entity\Person;
 use DBP\API\CoreBundle\Service\PersonProviderInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-final class PersonItemDataProvider implements ItemDataProviderInterface, RestrictedDataProviderInterface
+final class PersonItemDataProvider extends AbstractController implements ItemDataProviderInterface, RestrictedDataProviderInterface
 {
     private $api;
 
@@ -30,7 +31,8 @@ final class PersonItemDataProvider implements ItemDataProviderInterface, Restric
      */
     public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []): ?Person
     {
-        assert(is_string($id));
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
         $person = null;
         $api = $this->api;
         $person = $api->getPerson($id);

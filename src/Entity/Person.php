@@ -13,23 +13,16 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ApiResource(
- *     attributes={
- *         "security" = "is_granted('IS_AUTHENTICATED_FULLY')"
- *     },
  *     collectionOperations={
  *         "get" = {
- *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
  *             "openapi_context" = {"parameters" = {
  *                 {"name" = "search", "in" = "query", "description" = "Search for a person name", "type" = "string", "example" = "woody007"}
  *             }}
  *         },
  *     },
  *     itemOperations={
- *         "get" = {
- *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')"
- *         },
+ *         "get",
  *         "get_loans" = {
- *             "security" = "is_granted('IS_AUTHENTICATED_FULLY') and is_granted('ROLE_LIBRARY_MANAGER')",
  *             "method" = "GET",
  *             "path" = "/people/{id}/library-book-loans",
  *             "controller" = GetLibraryBookLoansByPerson::class,
@@ -43,7 +36,6 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *                 }},
  *             },
  *             "get_orgs" = {
- *                 "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
  *                 "method" = "GET",
  *                 "path" = "/people/{id}/organizations",
  *                 "controller" = GetOrganizationsByPerson::class,

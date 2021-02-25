@@ -83,4 +83,20 @@ class ExtTest extends ApiTestCase
         $data = json_decode($response->getContent(), true);
         $this->assertEquals(['ROLE'], $data['roles']);
     }
+
+    public function testAuthChecks()
+    {
+        $client = self::createClient();
+        $endpoints = [
+            '/people',
+            '/people/foo',
+            '/people/foo/organizations',
+            '/organizations',
+            '/organizations/foo',
+        ];
+        foreach ($endpoints as $path) {
+            $response = $client->request('GET', $path);
+            $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
+        }
+    }
 }

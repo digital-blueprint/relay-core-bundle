@@ -13,17 +13,11 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ApiResource(
- *     attributes={
- *         "security" = "is_granted('IS_AUTHENTICATED_FULLY')"
- *     },
  *     collectionOperations={
- *         "get" = {
- *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')"
- *         },
+ *         "get",
  *     },
  *     itemOperations={
  *         "get" = {
- *             "security" = "is_granted('IS_AUTHENTICATED_FULLY')",
  *             "openapi_context" = {
  *                 "parameters" = {
  *                     {"name" = "id", "in" = "path", "description" = "orgUnitID of organization", "required" = true, "type" = "string", "example" = "1190-F2050"},
@@ -32,7 +26,6 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *             }
  *         },
  *         "get_library_book_offers" = {
- *             "security" = "is_granted('IS_AUTHENTICATED_FULLY') and is_granted('ROLE_LIBRARY_MANAGER')",
  *             "method" = "GET",
  *             "path" = "/organizations/{id}/library-book-offers",
  *             "controller" = GetLibraryBookOffersByOrganization::class,
@@ -47,7 +40,6 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *             },
  *         },
  *         "get_library_book_loans" = {
- *             "security" = "is_granted('IS_AUTHENTICATED_FULLY') and is_granted('ROLE_LIBRARY_MANAGER')",
  *             "method" = "GET",
  *             "path" = "/organizations/{id}/library-book-loans",
  *             "controller" = GetLibraryBookLoansByOrganization::class,
@@ -63,7 +55,6 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *             },
  *         },
  *         "get_library_book_orders" = {
- *             "security" = "is_granted('IS_AUTHENTICATED_FULLY') and is_granted('ROLE_LIBRARY_MANAGER')",
  *             "method" = "GET",
  *             "path" = "/organizations/{id}/library-book-orders",
  *             "controller" = GetLibraryBookOrdersByOrganization::class,

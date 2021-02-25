@@ -8,8 +8,9 @@ use ApiPlatform\Core\DataProvider\ItemDataProviderInterface;
 use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
 use DBP\API\CoreBundle\Entity\Organization;
 use DBP\API\CoreBundle\Service\OrganizationProviderInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-final class OrganizationDataProvider implements ItemDataProviderInterface, RestrictedDataProviderInterface
+final class OrganizationDataProvider extends AbstractController implements ItemDataProviderInterface, RestrictedDataProviderInterface
 {
     private $api;
 
@@ -30,6 +31,8 @@ final class OrganizationDataProvider implements ItemDataProviderInterface, Restr
      */
     public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []): ?Organization
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
         assert(is_string($id));
         $filters = $context['filters'] ?? [];
         $lang = $filters['lang'] ?? 'de';
