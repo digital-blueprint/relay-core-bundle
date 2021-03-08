@@ -131,12 +131,6 @@ class Person
      * @var array
      * @Groups({"Person:current-user"})
      */
-    private $functions;
-
-    /**
-     * @var array
-     * @Groups({"Person:current-user"})
-     */
     private $roles;
 
     /**
@@ -155,7 +149,6 @@ class Person
     {
         $this->extraData = [];
         $this->roles = [];
-        $this->functions = [];
     }
 
     public function setIdentifier(string $identifier): self
