@@ -26,11 +26,11 @@ class GetOrganizationsByPerson extends AbstractController
         $this->personProvider = $personProvider;
     }
 
-    public function __invoke(string $id, Request $request): PaginatorInterface
+    public function __invoke(string $identifier, Request $request): PaginatorInterface
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
-        $person = $this->personProvider->getPerson($id);
+        $person = $this->personProvider->getPerson($identifier);
 
         // Users can only fetch this for themselves
         $user = $this->getUser();

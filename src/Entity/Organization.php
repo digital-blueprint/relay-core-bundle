@@ -21,13 +21,13 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *         },
  *         "get_orgs" = {
  *             "method" = "GET",
- *             "path" = "/people/{id}/organizations",
+ *             "path" = "/people/{identifier}/organizations",
  *             "controller" = GetOrganizationsByPerson::class,
  *             "read" = false,
  *             "openapi_context" = {
  *                 "summary" = "Get the organizations related to a person.",
  *                 "parameters" = {
- *                     {"name" = "id", "in" = "path", "description" = "Id of person", "required" = true, "type" = "string", "example" = "vlts01"},
+ *                     {"name" = "identifier", "in" = "path", "description" = "Id of person", "required" = true, "type" = "string", "example" = "vlts01"},
  *                     {"name" = "context", "in" = "query", "description" = "type of relation", "required" = false, "type" = "string", "example" = "library-manager"},
  *                     {"name" = "lang", "in" = "query", "description" = "language", "type" = "string", "example" = "en"},
  *                 }
@@ -38,7 +38,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *         "get" = {
  *             "openapi_context" = {
  *                 "parameters" = {
- *                     {"name" = "id", "in" = "path", "description" = "orgUnitID of organization", "required" = true, "type" = "string", "example" = "1190-F2050"},
+ *                     {"name" = "identifier", "in" = "path", "description" = "orgUnitID of organization", "required" = true, "type" = "string", "example" = "1190-F2050"},
  *                     {"name" = "lang", "in" = "query", "description" = "Language of result", "type" = "string", "enum" = {"de", "en"}, "example" = "de"}
  *                 }
  *             }

@@ -25,8 +25,6 @@ final class PersonItemDataProvider extends AbstractController implements ItemDat
     }
 
     /**
-     * @param array|int|string $id
-     *
      * @throws \DBP\API\CoreBundle\Exception\ItemNotLoadedException
      */
     public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []): ?Person

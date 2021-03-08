@@ -55,6 +55,11 @@ services:
     autowire: true
     autoconfigure: false
 
+  DBP\API\CoreBundle\Swagger\OpenApiDecorator:
+    decorates: 'api_platform.openapi.factory'
+    autowire: true
+    autoconfigure: false
+
   DBP\API\CoreBundle\Swagger\DocumentationNormalizer:
     decorates: 'api_platform.swagger.normalizer.documentation'
     # arguments were taken from service definition of ApiPlatform\Core\Swagger\Serializer\DocumentationNormalizer

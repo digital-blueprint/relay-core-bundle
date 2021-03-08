@@ -6,7 +6,6 @@
   ],
   "ignorePresets": [":prHourlyLimit2"],
   "rangeStrategy": "update-lockfile",
-  "ignoreDeps": ["api-platform/core"],
   "packageRules": [
     {
       "matchPackagePrefixes": [
