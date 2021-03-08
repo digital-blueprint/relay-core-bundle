@@ -114,7 +114,7 @@ class Person
 
     /**
      * @ApiProperty(iri="http://schema.org/email")
-     * @Groups({"Person:output"})
+     * @Groups({"Person:current-user", "Person:extended-access"})
      *
      * @var string
      */
@@ -136,7 +136,8 @@ class Person
     /**
      * @var DateTimeInterface
      * @ApiProperty(iri="http://schema.org/Date")
-     * @Groups({"Person:current-user", "Person:birthdate-access"})
+     * TODO: remove birthdate-access, only for backwards compat
+     * @Groups({"Person:current-user", "Person:birthdate-access", "Person:extended-access"})
      */
     private $birthDate;
 
