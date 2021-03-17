@@ -47,7 +47,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *                     "summary" = "Get the organizations related to a person.",
  *                     "parameters" = {
  *                         {"name" = "id", "in" = "path", "description" = "Id of person", "required" = true, "type" = "string", "example" = "vlts01"},
- *                         {"name" = "context", "in" = "query", "description" = "type of relation", "required" = true, "type" = "string", "example" = "library-manager"},
+ *                         {"name" = "context", "in" = "query", "description" = "type of relation", "required" = false, "type" = "string", "example" = "library-manager"},
  *                         {"name" = "lang", "in" = "query", "description" = "language", "type" = "string", "example" = "en"},
  *                     }
  *                 },

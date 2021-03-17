@@ -32,10 +32,7 @@ class GetOrganizationsByPerson extends AbstractController
             throw new ApiError(Response::HTTP_FORBIDDEN, 'Not allowed');
         }
 
-        $context = $request->query->get('context');
-        if ($context === null) {
-            throw new ApiError(Response::HTTP_BAD_REQUEST, 'missing type parameter');
-        }
+        $context = $request->query->get('context', '');
         $lang = $request->query->get('lang', 'en');
 
         return $this->api->getOrganizationsByPerson($data, $context, $lang);
