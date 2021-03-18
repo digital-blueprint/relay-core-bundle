@@ -19,5 +19,5 @@ interface OrganizationProviderInterface
     /**
      * @return Organization[]
      */
-    public function getAllOrganizations(string $lang): array;
+    public function getOrganizations(string $lang): array;
 }

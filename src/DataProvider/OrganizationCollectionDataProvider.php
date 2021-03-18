@@ -46,7 +46,7 @@ final class OrganizationCollectionDataProvider extends AbstractController implem
         if (isset($context['filters']['perPage'])) {
             $perPage = (int) $context['filters']['perPage'];
         }
-        $orgs = $this->api->getAllOrganizations($lang);
+        $orgs = $this->api->getOrganizations($lang);
 
         return new ArrayFullPaginator($orgs, $page, $perPage);
     }

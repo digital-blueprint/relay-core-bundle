@@ -27,7 +27,7 @@ class DummyOrganizationProvider implements OrganizationProviderInterface
         return [$org];
     }
 
-    public function getAllOrganizations(string $lang): array
+    public function getOrganizations(string $lang): array
     {
         $org = $this->getOrganizationById('1234', $lang);
 
