@@ -4,37 +4,48 @@ declare(strict_types=1);
 
 namespace DBP\API\CoreBundle\Controller;
 
-use DBP\API\CoreBundle\Entity\Person;
+use ApiPlatform\Core\DataProvider\PaginatorInterface;
 use DBP\API\CoreBundle\Exception\ApiError;
+use DBP\API\CoreBundle\Helpers\ArrayFullPaginator;
 use DBP\API\CoreBundle\Service\OrganizationProviderInterface;
+use DBP\API\CoreBundle\Service\PersonProviderInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class GetOrganizationsByPerson extends AbstractController
 {
-    protected $api;
-    protected $security;
+    public const ITEMS_PER_PAGE = 250;
 
-    public function __construct(OrganizationProviderInterface $api)
+    protected $orgProvider;
+    protected $personProvider;
+
+    public function __construct(OrganizationProviderInterface $orgProvider, PersonProviderInterface $personProvider)
     {
-        $this->api = $api;
+        $this->orgProvider = $orgProvider;
+        $this->personProvider = $personProvider;
     }
 
-    public function __invoke(Person $data, Request $request): array
+    public function __invoke(string $id, Request $request): PaginatorInterface
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
+        $person = $this->personProvider->getPerson($id);
+
         // Users can only fetch this for themselves
         $user = $this->getUser();
-        $isCurrentUser = $user ? $user->getUsername() === $data->getIdentifier() : false;
+        $isCurrentUser = $user ? $user->getUsername() === $person->getIdentifier() : false;
         if (!$isCurrentUser) {
             throw new ApiError(Response::HTTP_FORBIDDEN, 'Not allowed');
         }
 
         $context = $request->query->get('context', '');
         $lang = $request->query->get('lang', 'en');
+        $orgs = $this->orgProvider->getOrganizationsByPerson($person, $context, $lang);
 
-        return $this->api->getOrganizationsByPerson($data, $context, $lang);
+        $page = (int) $request->query->get('page', 1);
+        $perPage = (int) $request->query->get('perPage', self::ITEMS_PER_PAGE);
+
+        return new ArrayFullPaginator($orgs, $page, $perPage);
     }
 }

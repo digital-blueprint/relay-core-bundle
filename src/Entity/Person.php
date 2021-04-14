@@ -8,7 +8,6 @@ use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Annotation\ApiResource;
 use DateTimeInterface;
 use DBP\API\AlmaBundle\Controller\GetLibraryBookLoansByPerson;
-use DBP\API\CoreBundle\Controller\GetOrganizationsByPerson;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
@@ -39,23 +38,6 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *                 }
  *             },
  *         },
- *         "get_orgs" = {
- *             "method" = "GET",
- *             "path" = "/people/{id}/organizations",
- *             "controller" = GetOrganizationsByPerson::class,
- *             "normalization_context" = {
- *                 "jsonld_embed_context" = true,
- *                 "groups" = {"Organization:output"}
- *             },
- *             "openapi_context" = {
- *                 "summary" = "Get the organizations related to a person.",
- *                 "parameters" = {
- *                     {"name" = "id", "in" = "path", "description" = "Id of person", "required" = true, "type" = "string", "example" = "vlts01"},
- *                     {"name" = "context", "in" = "query", "description" = "type of relation", "required" = false, "type" = "string", "example" = "library-manager"},
- *                     {"name" = "lang", "in" = "query", "description" = "language", "type" = "string", "example" = "en"},
- *                 }
- *             },
- *         }
  *     },
  *     iri="http://schema.org/Person",
  *     description="A person of the LDAP system",
