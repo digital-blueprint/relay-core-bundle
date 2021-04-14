@@ -7,7 +7,6 @@ namespace DBP\API\CoreBundle\Entity;
 use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Annotation\ApiResource;
 use DateTimeInterface;
-use DBP\API\AlmaBundle\Controller\GetLibraryBookLoansByPerson;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
@@ -23,21 +22,6 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *     },
  *     itemOperations={
  *         "get",
- *         "get_loans" = {
- *             "method" = "GET",
- *             "path" = "/people/{id}/library-book-loans",
- *             "controller" = GetLibraryBookLoansByPerson::class,
- *             "normalization_context" = {
- *                 "jsonld_embed_context" = true,
- *                 "groups" = {"LibraryBookLoan:output", "Person:output", "LibraryBookOffer:output", "LibraryBook:output"}
- *             },
- *             "openapi_context" = {
- *                 "summary" = "Get the library book loans of a person.",
- *                 "parameters" = {
- *                     {"name" = "id", "in" = "path", "description" = "Id of person", "required" = true, "type" = "string", "example" = "vlts01"}
- *                 }
- *             },
- *         },
  *     },
  *     iri="http://schema.org/Person",
  *     description="A person of the LDAP system",

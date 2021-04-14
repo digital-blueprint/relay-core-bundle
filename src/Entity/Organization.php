@@ -6,9 +6,6 @@ namespace DBP\API\CoreBundle\Entity;
 
 use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Annotation\ApiResource;
-use DBP\API\AlmaBundle\Controller\GetLibraryBookLoansByOrganization;
-use DBP\API\AlmaBundle\Controller\GetLibraryBookOffersByOrganization;
-use DBP\API\AlmaBundle\Controller\GetLibraryBookOrdersByOrganization;
 use DBP\API\CoreBundle\Controller\GetOrganizationsByPerson;
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -46,49 +43,6 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *                 }
  *             }
  *         },
- *         "get_library_book_offers" = {
- *             "method" = "GET",
- *             "path" = "/organizations/{id}/library-book-offers",
- *             "controller" = GetLibraryBookOffersByOrganization::class,
- *             "normalization_context" = {
- *                 "jsonld_embed_context" = true,
- *                 "groups" = {"LibraryBook:output", "LibraryBookOffer:output"}
- *             },
- *             "openapi_context" = {"summary" = "Get the library book offers of an organization.",
- *                 "parameters" = {
- *                     {"name" = "id", "in" = "path", "description" = "Id of organization", "required" = true, "type" = "string", "example" = "1190-F2050"}
- *                 }
- *             },
- *         },
- *         "get_library_book_loans" = {
- *             "method" = "GET",
- *             "path" = "/organizations/{id}/library-book-loans",
- *             "controller" = GetLibraryBookLoansByOrganization::class,
- *             "normalization_context" = {
- *                 "jsonld_embed_context" = true,
- *                 "groups" = {"LibraryBookLoan:output", "Person:output", "LibraryBookOffer:output", "LibraryBook:output"}
- *             },
- *             "openapi_context" = {
- *                 "summary" = "Get the library book loans of an organization.",
- *                 "parameters" = {
- *                     {"name" = "id", "in" = "path", "description" = "Id of organization", "required" = true, "type" = "string", "example" = "1190-F2050"}
- *                 }
- *             },
- *         },
- *         "get_library_book_orders" = {
- *             "method" = "GET",
- *             "path" = "/organizations/{id}/library-book-orders",
- *             "controller" = GetLibraryBookOrdersByOrganization::class,
- *             "normalization_context" = {
- *                 "groups" = {"LibraryBookOrder:output", "LibraryBookOrderItem:output", "ParcelDelivery:output", "DeliveryStatus:output", "DeliveryEvent:output", "LibraryBook:output", "EventStatusType:output"}
- *             },
- *             "openapi_context" = {
- *                 "summary" = "Get the library book orders of an organization.",
- *                 "parameters" = {
- *                     {"name" = "id", "in" = "path", "description" = "Id of organization", "required" = true, "type" = "string", "example" = "1190-F2050"}
- *                 }
- *             },
- *         }
  *     },
  *     iri="http://schema.org/Organization",
  *     description="An organization",
