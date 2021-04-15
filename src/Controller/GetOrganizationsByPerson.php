@@ -43,8 +43,8 @@ class GetOrganizationsByPerson extends AbstractController
         $lang = $request->query->get('lang', 'en');
         $orgs = $this->orgProvider->getOrganizationsByPerson($person, $context, $lang);
 
-        $page = (int) $request->query->get('page', 1);
-        $perPage = (int) $request->query->get('perPage', self::ITEMS_PER_PAGE);
+        $page = (int) $request->query->get('page', '1');
+        $perPage = (int) $request->query->get('perPage', (string) self::ITEMS_PER_PAGE);
 
         return new ArrayFullPaginator($orgs, $page, $perPage);
     }
