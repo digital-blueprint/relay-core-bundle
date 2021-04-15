@@ -50,11 +50,6 @@ services:
     autowire: true
     autoconfigure: true
 
-  DBP\API\CoreBundle\Swagger\SwaggerDecorator:
-    decorates: 'api_platform.swagger.normalizer.api_gateway'
-    autowire: true
-    autoconfigure: false
-
   DBP\API\CoreBundle\Swagger\OpenApiDecorator:
     decorates: 'api_platform.openapi.factory'
     autowire: true
