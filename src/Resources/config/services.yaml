@@ -60,40 +60,6 @@ services:
     autowire: true
     autoconfigure: false
 
-  DBP\API\CoreBundle\Swagger\DocumentationNormalizer:
-    decorates: 'api_platform.swagger.normalizer.documentation'
-    # arguments were taken from service definition of ApiPlatform\Core\Swagger\Serializer\DocumentationNormalizer
-    # from vendor/api-platform/core/src/Bridge/Symfony/Bundle/Resources/config/swagger.xml and translated to yaml
-    arguments:
-      - "@api_platform.metadata.resource.metadata_factory"
-      - "@api_platform.metadata.property.name_collection_factory"
-      - "@api_platform.metadata.property.metadata_factory"
-      - "@api_platform.json_schema.schema_factory"
-      - "@api_platform.json_schema.type_factory"
-      - "@api_platform.operation_path_resolver"
-      - null
-      - "@api_platform.filter_locator"
-      - null
-      - "%api_platform.oauth.enabled%"
-      - "%api_platform.oauth.type%"
-      - "%api_platform.oauth.flow%"
-      - "%api_platform.oauth.tokenUrl%"
-      - "%api_platform.oauth.authorizationUrl%"
-      - "%api_platform.oauth.scopes%"
-      - "%api_platform.swagger.api_keys%"
-      - "@api_platform.subresource_operation_factory"
-      - "%api_platform.collection.pagination.enabled%"
-      - "%api_platform.collection.pagination.page_parameter_name%"
-      - "%api_platform.collection.pagination.client_items_per_page%"
-      - "%api_platform.collection.pagination.items_per_page_parameter_name%"
-      - "%api_platform.formats%"
-      - "%api_platform.collection.pagination.client_enabled%"
-      - "%api_platform.collection.pagination.enabled_parameter_name%"
-      - "%api_platform.swagger.versions%"
-    autoconfigure: false
-    autowire: true
-
-
   # This alias exist so we can replace the service during tests
   test.App\Security\User\KeycloakBearerUserProvider:
     alias: 'DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProvider'
