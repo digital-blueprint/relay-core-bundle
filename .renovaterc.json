@@ -13,5 +13,8 @@
       ],
       "allowedVersions": "<5"
     }
-  ]
+  ],
+  "js": {
+    "enabled": false
+  }
 }
