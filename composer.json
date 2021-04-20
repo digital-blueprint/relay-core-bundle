@@ -5,7 +5,6 @@
     "version": "dev-master",
     "require": {
         "php": "^7.3",
-        "psr/link": "1.0",
         "api-platform/core": "^2.6.3",
         "doctrine/annotations": "^1.0",
         "guzzlehttp/guzzle": "^7.0",
