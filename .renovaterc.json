@@ -14,8 +14,8 @@
       "allowedVersions": "<5"
     },
     {
-      "matchPackageNames": ["php"],
-      "allowedVersions": "<7.4"
+      "matchPackageNames": ["psr/cache"],
+      "allowedVersions": "<2"
     }
   ],
   "js": {
