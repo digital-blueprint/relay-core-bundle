@@ -12,6 +12,10 @@
         "symfony/"
       ],
       "allowedVersions": "<5"
+    },
+    {
+      "matchPackageNames": ["php"],
+      "allowedVersions": "<7.4"
     }
   ],
   "js": {
