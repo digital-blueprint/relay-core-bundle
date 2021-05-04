@@ -11,11 +11,7 @@
       "matchPackagePrefixes": [
         "symfony/"
       ],
-      "allowedVersions": "<5"
-    },
-    {
-      "matchPackageNames": ["psr/cache"],
-      "allowedVersions": "<2"
+      "allowedVersions": "<6"
     }
   ],
   "js": {
