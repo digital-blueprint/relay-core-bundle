@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace DBP\API\CoreBundle\Serializer;
 
 use DBP\API\CoreBundle\Exception\ApiError;
-use Symfony\Component\Debug\Exception\FlattenException as LegacyFlattenException;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Symfony\Component\Serializer\Normalizer\ContextAwareNormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
@@ -58,6 +57,6 @@ class ApiErrorNormalizer implements ContextAwareNormalizerInterface, NormalizerA
 
         return
             ($format === 'jsonld' || $format === 'jsonproblem') &&
-            ($data instanceof FlattenException || $data instanceof LegacyFlattenException);
+            ($data instanceof FlattenException);
     }
 }
