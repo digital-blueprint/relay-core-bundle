@@ -142,7 +142,8 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
                 ],
                 'api' => [
                     'pattern' => '^/',
-                    'anonymous' => 'lazy',
+                    'anonymous' => true,
+                    'lazy' => true,
                     'guard' => [
                         'provider' => 'keycloak_bearer_security_provider',
                         'authenticator' => KeycloakBearerAuthenticator::class,
