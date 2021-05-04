@@ -74,6 +74,25 @@ class ExtTest extends ApiTestCase
         $this->assertEquals('foo@bar.com', $data['email']);
     }
 
+    public function testResponseHeaders()
+    {
+        [$client, $user] = $this->withUser('foobar', '42');
+        $response = $client->request('GET', '/people/foobar', ['headers' => [
+            'Authorization' => 'Bearer 42',
+        ]]);
+        $header = $response->getHeaders();
+
+        // We extend the defaults with CORS related headers
+        $this->assertArrayHasKey('vary', $header);
+        $this->assertContains('Accept', $header['vary']);
+        $this->assertContains('Origin', $header['vary']);
+        $this->assertContains('Access-Control-Request-Headers', $header['vary']);
+        $this->assertContains('Access-Control-Request-Method', $header['vary']);
+
+        // Make sure we have etag caching enabled
+        $this->assertArrayHasKey('etag', $header);
+    }
+
     public function testGetPersonRoles()
     {
         [$client, $user] = $this->withUser('foobar', '42', ['roles' => ['ROLE']]);

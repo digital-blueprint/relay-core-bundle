@@ -93,14 +93,16 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
         $container->loadFromExtension('api_platform', [
             'version' => $packageVersion,
             'title' => 'DBP API Gateway',
-            'http_cache' => [
-                'etag' => true,
-                'vary' => [
-                    'Accept',
-                    // Accept is default, Origin/ACRH/ACRM are for CORS requests
-                    'Origin',
-                    'Access-Control-Request-Headers',
-                    'Access-Control-Request-Method',
+            'defaults' => [
+                'cache_headers' => [
+                    'etag' => true,
+                    'vary' => [
+                        'Accept',
+                        // Accept is default, Origin/ACRH/ACRM are for CORS requests
+                        'Origin',
+                        'Access-Control-Request-Headers',
+                        'Access-Control-Request-Method',
+                    ],
                 ],
             ],
             'show_webby' => false,
