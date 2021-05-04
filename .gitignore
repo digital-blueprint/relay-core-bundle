@@ -1,8 +1,7 @@
 /vendor
 /var
 /.php_cs
-/.php_cs.cache
-/.phpunit.result.cache
+/.*.cache
 /_coverage
 /.idea
 /src/Resources/public/auth/unit.js*

@@ -27,7 +27,7 @@
         "ext-json": "*"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^2.17",
+        "friendsofphp/php-cs-fixer": "^3.0",
         "phpstan/phpstan": "^0.12.33",
         "phpstan/phpstan-phpunit": "^0.12.13",
         "symfony/browser-kit": "^5.2",
@@ -72,7 +72,7 @@
             "@php vendor/bin/php-cs-fixer --ansi fix"
         ],
         "cs": [
-            "@php vendor/bin/php-cs-fixer --ansi fix --dry-run --diff --diff-format=udiff"
+            "@php vendor/bin/php-cs-fixer --ansi fix --dry-run --diff"
         ],
         "coverage": [
             "@php vendor/bin/simple-phpunit --coverage-html _coverage"
