@@ -34,11 +34,6 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
         );
         $loader->load('services.yaml');
 
-        $def = $container->register('dbp_api.cache.core.campus_online', FilesystemAdapter::class);
-        $def->setArguments(['core-campus-online', 60, '%kernel.cache_dir%/dbp/core-campus-online']);
-        $def->setPublic(true);
-        $def->addTag('cache.pool');
-
         $def = $container->register('dbp_api.cache.core.keycloak_cert', FilesystemAdapter::class);
         $def->setArguments(['core-keycloak-cert', 60, '%kernel.cache_dir%/dbp/core-keycloak-cert']);
         $def->setPublic(true);
