@@ -28,6 +28,9 @@ header {
 
 .swagger-ui .scheme-container {
     padding: 10px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 .swagger-ui .info .title, html, .swagger-ui table thead tr * {
