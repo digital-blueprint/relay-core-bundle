@@ -50,6 +50,12 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
         $def->addTag('cache.pool');
 
         $container->setParameter('dbp_api.core.keycloak_config', $mergedConfig['keycloak'] ?? []);
+
+        // Pass the collected paths that need to be hidden to the OpenApiDecorator
+        $definition = $container->getDefinition('DBP\API\CoreBundle\Swagger\OpenApiDecorator');
+        if ($container->hasParameter('dbp_api.paths_to_hide')) {
+            $definition->addMethodCall('setPathsToHide', [$container->getParameter('dbp_api.paths_to_hide')]);
+        }
     }
 
     private function extendArrayParameter(ContainerBuilder $container, string $parameter, array $values)

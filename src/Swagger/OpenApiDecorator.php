@@ -7,7 +7,6 @@ namespace DBP\API\CoreBundle\Swagger;
 use ApiPlatform\Core\OpenApi\Factory\OpenApiFactoryInterface;
 use ApiPlatform\Core\OpenApi\Model\Paths;
 use ApiPlatform\Core\OpenApi\OpenApi;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * see: https://api-platform.com/docs/core/openapi/.
@@ -15,23 +14,23 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 final class OpenApiDecorator implements OpenApiFactoryInterface
 {
     private $decorated;
-    private $container;
+    private $pathsToHide;
 
-    public function __construct(OpenApiFactoryInterface $decorated, ContainerInterface $container)
+    public function __construct(OpenApiFactoryInterface $decorated)
     {
         $this->decorated = $decorated;
-        $this->container = $container;
+        $this->pathsToHide = [];
+    }
+
+    public function setPathsToHide(array $pathsToHide)
+    {
+        $this->pathsToHide = $pathsToHide;
     }
 
     public function __invoke(array $context = []): OpenApi
     {
         $openApi = $this->decorated->__invoke($context);
-
-        $pathsToHide = [];
-        if ($this->container->hasParameter('dbp_api.paths_to_hide')) {
-            $pathsToHide = array_merge($pathsToHide, $this->container->getParameter('dbp_api.paths_to_hide'));
-        }
-
+        $pathsToHide = $this->pathsToHide;
         $paths = $openApi->getPaths();
         $newPaths = new Paths();
         foreach ($paths->getPaths() as $path => $pathItem) {
