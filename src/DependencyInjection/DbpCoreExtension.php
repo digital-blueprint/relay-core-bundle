@@ -118,6 +118,7 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
                 ],
             ],
             'exception_to_status' => $exceptionToStatus,
+            'path_segment_name_generator' => 'api_platform.path_segment_name_generator.dash',
         ]);
 
         $container->loadFromExtension('framework', [
