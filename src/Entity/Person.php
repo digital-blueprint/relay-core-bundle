@@ -14,6 +14,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *     collectionOperations={
  *         "get" = {
  *             "openapi_context" = {
+ *                 "tags" = {"Core"},
  *                 "parameters" = {
  *                     {"name" = "search", "in" = "query", "description" = "Search for a person name", "type" = "string", "example" = "woody007"}
  *                 }
@@ -21,7 +22,12 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *         },
  *     },
  *     itemOperations={
- *         "get",
+ *         "get" = {
+ *             "openapi_context" = {
+ *                 "tags" = {"Core"},
+ *             }
+ *
+ *         },
  *     },
  *     iri="http://schema.org/Person",
  *     description="A person of the LDAP system",

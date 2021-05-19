@@ -14,6 +14,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *     collectionOperations={
  *         "get" = {
  *             "openapi_context" = {
+ *                 "tags" = {"Core"},
  *                 "parameters" = {
  *                     {"name" = "lang", "in" = "query", "description" = "Language of result", "type" = "string", "enum" = {"de", "en"}, "example" = "de"}
  *                 }
@@ -25,6 +26,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *             "controller" = GetOrganizationsByPerson::class,
  *             "read" = false,
  *             "openapi_context" = {
+ *                 "tags" = {"Core"},
  *                 "summary" = "Get the organizations related to a person.",
  *                 "parameters" = {
  *                     {"name" = "identifier", "in" = "path", "description" = "Id of person", "required" = true, "type" = "string", "example" = "vlts01"},
@@ -37,6 +39,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *     itemOperations={
  *         "get" = {
  *             "openapi_context" = {
+ *                 "tags" = {"Core"},
  *                 "parameters" = {
  *                     {"name" = "identifier", "in" = "path", "description" = "orgUnitID of organization", "required" = true, "type" = "string", "example" = "1190-F2050"},
  *                     {"name" = "lang", "in" = "query", "description" = "Language of result", "type" = "string", "enum" = {"de", "en"}, "example" = "de"}
