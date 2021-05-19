@@ -13,6 +13,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  * @ApiResource(
  *     collectionOperations={
  *         "get" = {
+ *             "path" = "/organizations",
  *             "openapi_context" = {
  *                 "tags" = {"Core"},
  *                 "parameters" = {
@@ -38,6 +39,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *     },
  *     itemOperations={
  *         "get" = {
+ *             "path" = "/organizations/{identifier}",
  *             "openapi_context" = {
  *                 "tags" = {"Core"},
  *                 "parameters" = {
