@@ -63,8 +63,9 @@ class KeycloakBearerUserProvider implements UserProviderInterface
         return $client.'-'.$user;
     }
 
-    public function loadUserByUsername($accessToken): UserInterface
+    public function loadUserByUsername($username): UserInterface
     {
+        $accessToken = $username;
         $guzzleCache = $this->container->get('dbp_api.cache.core.keycloak_cert');
         assert($guzzleCache instanceof CacheItemPoolInterface);
 

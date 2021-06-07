@@ -40,7 +40,6 @@ test-php8.0:
 
 psalm:
   stage: test
-  allow_failure: true
   script:
     - sudo update-alternatives --set php /usr/bin/php7.4
     - composer install
@@ -48,7 +47,6 @@ psalm:
 
 phpstan:
   stage: test
-  allow_failure: true
   script:
     - sudo update-alternatives --set php /usr/bin/php7.4
     - composer install

@@ -39,8 +39,8 @@ class GetOrganizationsByPerson extends AbstractController
             throw new ApiError(Response::HTTP_FORBIDDEN, 'Not allowed');
         }
 
-        $context = $request->query->get('context', '');
-        $lang = $request->query->get('lang', 'en');
+        $context = (string) $request->query->get('context', '');
+        $lang = (string) $request->query->get('lang', 'en');
         $orgs = $this->orgProvider->getOrganizationsByPerson($person, $context, $lang);
 
         $page = (int) $request->query->get('page', '1');
