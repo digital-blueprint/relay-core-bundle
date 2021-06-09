@@ -4,48 +4,38 @@ declare(strict_types=1);
 
 namespace DBP\API\CoreBundle\Tests\Keycloak;
 
-use DBP\API\CoreBundle\Entity\Person;
+use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use DBP\API\CoreBundle\Keycloak\KeycloakBearerAuthenticator;
-use DBP\API\CoreBundle\Keycloak\KeycloakBearerUser;
-use DBP\API\CoreBundle\TestUtils\DummyPersonProvider;
 use DBP\API\CoreBundle\TestUtils\DummyUserProvider;
-use PHPUnit\Framework\TestCase;
+use DBP\API\CoreBundle\TestUtils\UserAuthTrait;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 
-class KeycloakBearerAuthenticatorTest extends TestCase
+class KeycloakBearerAuthenticatorTest extends ApiTestCase
 {
-    public function testSupportsRememberMe()
-    {
-        $auth = new KeycloakBearerAuthenticator();
-        $this->assertFalse($auth->supportsRememberMe());
-    }
+    use UserAuthTrait;
 
-    public function testGetUser()
+    public function testAuthenticateNoHeader()
     {
-        $auth = new KeycloakBearerAuthenticator();
-
-        $user = new KeycloakBearerUser('something', 'foobar', new DummyPersonProvider(new Person()), []);
+        [$client, $user] = $this->withUser('foo', 'bar');
         $provider = new DummyUserProvider($user);
-        $credentials = ['token' => 'foobar'];
-        $user = $auth->getUser($credentials, $provider);
-        $this->assertNotNull($user);
-    }
+        $auth = new KeycloakBearerAuthenticator($provider);
 
-    public function testGetUserNoCred()
-    {
-        $auth = new KeycloakBearerAuthenticator();
-        $user = new KeycloakBearerUser('something', 'foobar', new DummyPersonProvider(new Person()), []);
-        $provider = new DummyUserProvider($user);
+        $req = new Request();
         $this->expectException(BadCredentialsException::class);
-        $auth->getUser([], $provider);
+        $auth->authenticate($req);
     }
 
-    public function testRolesWithNoRealUser()
+    public function testSupports()
     {
-        $user = new KeycloakBearerUser(null, 'foobar', new DummyPersonProvider(new Person()), []);
-        $this->assertSame([], $user->getRoles());
+        [$client, $user] = $this->withUser('foo', 'bar');
+        $provider = new DummyUserProvider($user);
+        $auth = new KeycloakBearerAuthenticator($provider);
 
-        $user = new KeycloakBearerUser(null, 'foobar', new DummyPersonProvider(new Person()), ['some']);
-        $this->assertSame(['ROLE_SCOPE_SOME'], $user->getRoles());
+        $this->assertFalse($auth->supports(new Request()));
+
+        $r = new Request();
+        $r->headers->set('Authorization', 'foobar');
+        $this->assertTrue($auth->supports($r));
     }
 }

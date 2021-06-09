@@ -13,8 +13,6 @@ use GuzzleHttp\Psr7\Response;
 use Jose\Component\Core\JWK;
 use Jose\Easy\Build;
 use Jose\Easy\JWSBuilder;
-use Monolog\Handler\NullHandler;
-use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
@@ -31,9 +29,8 @@ class KeycloakLocalTokenValidatorTest extends TestCase
         $keycloak = new Keycloak('https://auth.example.com/auth', 'tugraz');
         $this->keycloak = $keycloak;
         $cache = new ArrayAdapter();
-        $nullLogger = new Logger('dummy', [new NullHandler()]);
 
-        $this->tokenValidator = new KeycloakLocalTokenValidator($keycloak, $cache, $nullLogger);
+        $this->tokenValidator = new KeycloakLocalTokenValidator($keycloak, $cache);
         $this->mockResponses([]);
     }
 

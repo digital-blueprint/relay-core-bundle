@@ -120,6 +120,11 @@ class KeycloakBearerUser implements DBPUserInterface
 
     public function getUsername()
     {
+        return $this->getUserIdentifier();
+    }
+
+    public function getUserIdentifier()
+    {
         return $this->username ?? '';
     }
 

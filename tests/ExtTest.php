@@ -6,42 +6,12 @@ namespace DBP\API\CoreBundle\Tests;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use DBP\API\CoreBundle\Entity\Person;
-use DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProvider;
 use DBP\API\CoreBundle\TestUtils\UserAuthTrait;
 use Symfony\Component\HttpFoundation\Response;
 
 class ExtTest extends ApiTestCase
 {
     use UserAuthTrait;
-
-    public function testServiceAccountRoles()
-    {
-        [$client, $user] = $this->withUser(null, '42', ['scopes' => ['SCOPE1', 'SCOPE2']]);
-        $this->assertEquals(['ROLE_SCOPE_SCOPE1', 'ROLE_SCOPE_SCOPE2'], $user->getRoles());
-    }
-
-    public function testScopeToRolesMapping()
-    {
-        [$client, $user] = $this->withUser('foobar', '42', [
-            'roles' => ['SOMEROLE'],
-            'functions' => ['FUNC'],
-            'scopes' => ['SCOPE1', 'SCOPE2'],
-        ]);
-
-        $container = $client->getContainer();
-        $userProvider = $container->get("test.App\Security\User\KeycloakBearerUserProvider");
-        $user = $userProvider->loadUserByUsername('42');
-        $this->assertEquals($user->getRoles(), ['ROLE_SCOPE_SCOPE1', 'ROLE_SCOPE_SCOPE2', 'SOMEROLE']);
-    }
-
-    public function testIsServiceAccountToken()
-    {
-        $this->assertTrue(KeycloakBearerUserProvider::isServiceAccountToken(['scope' => 'foo bar']));
-        $this->assertFalse(KeycloakBearerUserProvider::isServiceAccountToken(['scope' => 'openid foo bar']));
-        $this->assertFalse(KeycloakBearerUserProvider::isServiceAccountToken(['scope' => 'openid']));
-        $this->assertFalse(KeycloakBearerUserProvider::isServiceAccountToken(['scope' => 'foo openid bar']));
-        $this->assertFalse(KeycloakBearerUserProvider::isServiceAccountToken(['scope' => 'foo bar openid']));
-    }
 
     public function testGetPersonNoAuth()
     {
@@ -106,6 +76,7 @@ class ExtTest extends ApiTestCase
     public function testAuthChecks()
     {
         $client = self::createClient();
+
         $endpoints = [
             '/people',
             '/people/foo',

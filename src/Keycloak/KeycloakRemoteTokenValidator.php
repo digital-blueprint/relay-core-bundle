@@ -9,18 +9,15 @@ use DBP\API\CoreBundle\Helpers\JsonException;
 use DBP\API\CoreBundle\Helpers\Tools;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
-use Psr\Log\LoggerInterface;
 
 class KeycloakRemoteTokenValidator extends KeycloakTokenValidatorBase
 {
     private $keycloak;
-    private $logger;
     private $clientHandler;
 
-    public function __construct(Keycloak $keycloak, LoggerInterface $logger)
+    public function __construct(Keycloak $keycloak)
     {
         $this->keycloak = $keycloak;
-        $this->logger = $logger;
         $this->clientHandler = null;
     }
 
@@ -52,7 +49,9 @@ class KeycloakRemoteTokenValidator extends KeycloakTokenValidatorBase
         ];
 
         $client = new Client($options);
-        $stack->push(GuzzleTools::createLoggerMiddleware($this->logger));
+        if ($this->logger !== null) {
+            $stack->push(GuzzleTools::createLoggerMiddleware($this->logger));
+        }
 
         $provider = $this->keycloak;
         $client_secret = $provider->getClientSecret();

@@ -13,7 +13,6 @@ trait UserAuthTrait
     public function withUser(?string $id, string $token, array $options = []): array
     {
         $client = ApiTestCase::createClient();
-        $container = $client->getContainer();
         $roles = $options['roles'] ?? [];
         $scopes = $options['scopes'] ?? [];
         $person = $options['person'] ?? new Person();
@@ -25,11 +24,12 @@ trait UserAuthTrait
             $person->setRoles($roles);
         }
         $personProvider = new DummyPersonProvider($person);
-
         $user = new KeycloakBearerUser($id, $token, $personProvider, $scopes);
         $userProvider = new DummyUserProvider($user);
-        $container->set("test.App\Security\User\KeycloakBearerUserProvider", $userProvider);
-        $container->set("test.App\Service\PersonProviderInterface", $personProvider);
+
+        $container = $client->getContainer();
+        $container->set('test.UserProviderInterface', $userProvider);
+        $container->set('test.PersonProviderInterface', $personProvider);
 
         return [$client, $user];
     }
