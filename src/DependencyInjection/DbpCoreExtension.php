@@ -34,23 +34,24 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
         );
         $loader->load('services.yaml');
 
-        $def = $container->register('dbp_api.cache.core.keycloak_cert', FilesystemAdapter::class);
-        $def->setArguments(['core-keycloak-cert', 60, '%kernel.cache_dir%/dbp/core-keycloak-cert']);
-        $def->setPublic(true);
-        $def->addTag('cache.pool');
+        $certCacheDef = $container->register('dbp_api.cache.core.keycloak_cert', FilesystemAdapter::class);
+        $certCacheDef->setArguments(['core-keycloak-cert', 60, '%kernel.cache_dir%/dbp/core-keycloak-cert']);
+        $certCacheDef->addTag('cache.pool');
 
-        $def = $container->register('dbp_api.cache.core.auth_person', FilesystemAdapter::class);
-        $def->setArguments(['core-auth-person', 60, '%kernel.cache_dir%/dbp/core-auth-person']);
-        $def->setPublic(true);
-        $def->addTag('cache.pool');
-
-        $container->setParameter('dbp_api.core.keycloak_config', $mergedConfig['keycloak'] ?? []);
+        $personCacheDef = $container->register('dbp_api.cache.core.auth_person', FilesystemAdapter::class);
+        $personCacheDef->setArguments(['core-auth-person', 60, '%kernel.cache_dir%/dbp/core-auth-person']);
+        $personCacheDef->addTag('cache.pool');
 
         // Pass the collected paths that need to be hidden to the OpenApiDecorator
         $definition = $container->getDefinition('DBP\API\CoreBundle\Swagger\OpenApiDecorator');
         if ($container->hasParameter('dbp_api.paths_to_hide')) {
             $definition->addMethodCall('setPathsToHide', [$container->getParameter('dbp_api.paths_to_hide')]);
         }
+
+        $definition = $container->getDefinition('DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProvider');
+        $definition->addMethodCall('setConfig', [$mergedConfig['keycloak'] ?? []]);
+        $definition->addMethodCall('setCertCache', [$certCacheDef]);
+        $definition->addMethodCall('setPersonCache', [$personCacheDef]);
     }
 
     private function extendArrayParameter(ContainerBuilder $container, string $parameter, array $values)

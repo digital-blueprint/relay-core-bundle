@@ -7,7 +7,6 @@ namespace DBP\API\CoreBundle\Keycloak;
 use DBP\API\CoreBundle\Service\PersonProviderInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
@@ -16,8 +15,9 @@ class KeycloakBearerUserProvider implements UserProviderInterface
 {
     private $personProvider;
     private $logger;
-    private $container;
     private $config;
+    private $certCachePool;
+    private $personCachePool;
 
     /**
      * Given a token returns if the token was generated through a client credential flow.
@@ -35,12 +35,26 @@ class KeycloakBearerUserProvider implements UserProviderInterface
         return !$has_openid_scope;
     }
 
-    public function __construct(ContainerInterface $container, PersonProviderInterface $personProvider, LoggerInterface $logger)
+    public function __construct(PersonProviderInterface $personProvider, LoggerInterface $logger)
     {
         $this->personProvider = $personProvider;
         $this->logger = $logger;
-        $this->container = $container;
-        $this->config = $container->getParameter('dbp_api.core.keycloak_config');
+        $this->config = [];
+    }
+
+    public function setConfig(array $config)
+    {
+        $this->config = $config;
+    }
+
+    public function setCertCache(?CacheItemPoolInterface $cachePool)
+    {
+        $this->certCachePool = $cachePool;
+    }
+
+    public function setPersonCache(?CacheItemPoolInterface $cachePool)
+    {
+        $this->personCachePool = $cachePool;
     }
 
     public function createLoggingID(array $jwt): string
@@ -66,8 +80,6 @@ class KeycloakBearerUserProvider implements UserProviderInterface
     public function loadUserByUsername($username): UserInterface
     {
         $accessToken = $username;
-        $guzzleCache = $this->container->get('dbp_api.cache.core.keycloak_cert');
-        assert($guzzleCache instanceof CacheItemPoolInterface);
 
         $config = $this->config;
         $keycloak = new Keycloak(
@@ -75,7 +87,7 @@ class KeycloakBearerUserProvider implements UserProviderInterface
             $config['client_id'], $config['client_secret']);
 
         if ($config['local_validation']) {
-            $validator = new KeycloakLocalTokenValidator($keycloak, $guzzleCache, $this->logger);
+            $validator = new KeycloakLocalTokenValidator($keycloak, $this->certCachePool, $this->logger);
         } else {
             $validator = new KeycloakRemoteTokenValidator($keycloak, $this->logger);
         }
@@ -86,9 +98,7 @@ class KeycloakBearerUserProvider implements UserProviderInterface
             $validator::checkAudience($jwt, $config['audience']);
         }
 
-        $cache = $this->container->get('dbp_api.cache.core.auth_person');
-        assert($cache instanceof CacheItemPoolInterface);
-        $cachingPersonProvider = new CachingPersonProvider($this->personProvider, $cache, $jwt);
+        $cachingPersonProvider = new CachingPersonProvider($this->personProvider, $this->personCachePool, $jwt);
         if (self::isServiceAccountToken($jwt)) {
             $username = null;
         } else {

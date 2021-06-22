@@ -31,7 +31,7 @@ class KeycloakLocalTokenValidator extends KeycloakTokenValidatorBase
     /* The leeway given for time based checks for token validation, in case the clocks of the server are out of sync */
     private const LOCAL_LEEWAY_SECONDS = 120;
 
-    public function __construct(Keycloak $keycloak, CacheItemPoolInterface $cachePool, LoggerInterface $logger)
+    public function __construct(Keycloak $keycloak, ?CacheItemPoolInterface $cachePool, LoggerInterface $logger)
     {
         $this->keycloak = $keycloak;
         $this->cachePool = $cachePool;
@@ -69,13 +69,15 @@ class KeycloakLocalTokenValidator extends KeycloakTokenValidatorBase
         ];
         $client = new Client($options);
 
-        $cacheMiddleWare = new CacheMiddleware(
-            new GreedyCacheStrategy(
-                new Psr6CacheStorage($this->cachePool),
-                self::CERT_CACHE_TTL_SECONDS
-            )
-        );
-        $stack->push($cacheMiddleWare);
+        if ($this->cachePool !== null) {
+            $cacheMiddleWare = new CacheMiddleware(
+                new GreedyCacheStrategy(
+                    new Psr6CacheStorage($this->cachePool),
+                    self::CERT_CACHE_TTL_SECONDS
+                )
+            );
+            $stack->push($cacheMiddleWare);
+        }
 
         try {
             $response = $client->request('GET', $certsUrl);
