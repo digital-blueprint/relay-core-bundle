@@ -5,42 +5,25 @@ declare(strict_types=1);
 namespace DBP\API\CoreBundle\TestUtils;
 
 use DBP\API\CoreBundle\Keycloak\KeycloakBearerUser;
-use Symfony\Component\Security\Core\Exception\BadCredentialsException;
-use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
+use DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProviderInterface;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
 
-class DummyUserProvider implements UserProviderInterface
+class DummyUserProvider implements KeycloakBearerUserProviderInterface
 {
-    /* @var KeycloakBearerUser */
     private $user;
 
-    public function __construct($user)
+    public function __construct(KeycloakBearerUser $user)
     {
         $this->user = $user;
     }
 
-    public function loadUserByUsername($username)
+    public function loadUserByIdentifier(string $identifier): UserInterface
     {
-        $token = $this->user->getAccessToken();
-        if ($token !== $username) {
-            throw new BadCredentialsException('invalid token');
+        if ($this->user->getAccessToken() !== $identifier) {
+            throw new AuthenticationException('invalid token');
         }
 
         return $this->user;
-    }
-
-    public function refreshUser(UserInterface $user)
-    {
-        if ($user !== $this->user) {
-            throw new UnsupportedUserException();
-        }
-
-        return $user;
-    }
-
-    public function supportsClass($class)
-    {
-        return true;
     }
 }

@@ -10,8 +10,6 @@ use DBP\API\CoreBundle\Keycloak\TokenValidationException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
-use Monolog\Handler\NullHandler;
-use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 
 class KeycloakRemoteTokenValidatorTest extends TestCase
@@ -22,9 +20,8 @@ class KeycloakRemoteTokenValidatorTest extends TestCase
     protected function setUp(): void
     {
         $keycloak = new Keycloak('https://auth.example.com/auth', 'tugraz', 'client', 'secret');
-        $nullLogger = new Logger('dummy', [new NullHandler()]);
 
-        $this->tokenValidator = new KeycloakRemoteTokenValidator($keycloak, $nullLogger);
+        $this->tokenValidator = new KeycloakRemoteTokenValidator($keycloak);
         $this->mockResponses([]);
     }
 

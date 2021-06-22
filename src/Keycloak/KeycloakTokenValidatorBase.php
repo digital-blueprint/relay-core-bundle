@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace DBP\API\CoreBundle\Keycloak;
 
-abstract class KeycloakTokenValidatorBase
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
+
+abstract class KeycloakTokenValidatorBase implements LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     /**
      * Validates the token and returns the parsed token.
      *

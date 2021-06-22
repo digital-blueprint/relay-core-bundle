@@ -16,13 +16,11 @@ use Kevinrob\GuzzleCache\CacheMiddleware;
 use Kevinrob\GuzzleCache\Storage\Psr6CacheStorage;
 use Kevinrob\GuzzleCache\Strategy\GreedyCacheStrategy;
 use Psr\Cache\CacheItemPoolInterface;
-use Psr\Log\LoggerInterface;
 
 class KeycloakLocalTokenValidator extends KeycloakTokenValidatorBase
 {
     private $keycloak;
     private $cachePool;
-    private $logger;
     private $clientHandler;
 
     /* The duration the public keycloak cert is cached */
@@ -31,11 +29,10 @@ class KeycloakLocalTokenValidator extends KeycloakTokenValidatorBase
     /* The leeway given for time based checks for token validation, in case the clocks of the server are out of sync */
     private const LOCAL_LEEWAY_SECONDS = 120;
 
-    public function __construct(Keycloak $keycloak, ?CacheItemPoolInterface $cachePool, LoggerInterface $logger)
+    public function __construct(Keycloak $keycloak, ?CacheItemPoolInterface $cachePool)
     {
         $this->keycloak = $keycloak;
         $this->cachePool = $cachePool;
-        $this->logger = $logger;
         $this->clientHandler = null;
     }
 
@@ -60,7 +57,9 @@ class KeycloakLocalTokenValidator extends KeycloakTokenValidatorBase
         $certsUrl = sprintf('%s/protocol/openid-connect/certs', $provider->getBaseUrlWithRealm());
 
         $stack = HandlerStack::create($this->clientHandler);
-        $stack->push(GuzzleTools::createLoggerMiddleware($this->logger));
+        if ($this->logger !== null) {
+            $stack->push(GuzzleTools::createLoggerMiddleware($this->logger));
+        }
         $options = [
             'handler' => $stack,
             'headers' => [

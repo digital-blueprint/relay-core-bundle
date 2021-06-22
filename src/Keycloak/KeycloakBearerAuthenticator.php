@@ -4,80 +4,56 @@ declare(strict_types=1);
 
 namespace DBP\API\CoreBundle\Keycloak;
 
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
+use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 
-class KeycloakBearerAuthenticator extends AbstractGuardAuthenticator
+class KeycloakBearerAuthenticator extends AbstractAuthenticator implements LoggerAwareInterface
 {
-    public function supports(Request $request)
+    use LoggerAwareTrait;
+
+    private $userProvider;
+
+    public function __construct(KeycloakBearerUserProviderInterface $userProvider)
+    {
+        $this->userProvider = $userProvider;
+    }
+
+    public function supports(Request $request): ?bool
     {
         return $request->headers->has('Authorization');
     }
 
-    public function getCredentials(Request $request)
-    {
-        return [
-            'token' => $request->headers->get('Authorization'),
-        ];
-    }
-
-    public function getUser($credentials, UserProviderInterface $userProvider)
-    {
-        $token = $credentials['token'] ?? '';
-
-        if (!$token) {
-            throw new BadCredentialsException('Token is not present in the request headers');
-        }
-
-        try {
-            $user = $userProvider->loadUserByUsername($this->formatToken($token));
-        } catch (\Exception $e) {
-            throw new BadCredentialsException(sprintf('Error when introspecting the token: %s', $e->getMessage()));
-        }
-
-        return $user;
-    }
-
-    public function checkCredentials($credentials, UserInterface $user)
-    {
-        assert($user instanceof KeycloakBearerUser);
-
-        return $this->formatToken($credentials['token']) === $user->getAccessToken();
-    }
-
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         return null;
     }
 
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
+    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
         return new JsonResponse(['error' => $exception->getMessage()], Response::HTTP_FORBIDDEN);
     }
 
-    public function start(Request $request, AuthenticationException $authException = null)
+    public function authenticate(Request $request): PassportInterface
     {
-        $data = [
-            'message' => 'Authentication Required',
-        ];
+        $auth = $request->headers->get('Authorization', '');
+        if ($auth === '') {
+            throw new BadCredentialsException('Token is not present in the request headers');
+        }
 
-        return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
-    }
+        $token = trim(preg_replace('/^(?:\s+)?Bearer\s/', '', $auth));
 
-    public function supportsRememberMe()
-    {
-        return false;
-    }
-
-    protected function formatToken(string $token): string
-    {
-        return trim(preg_replace('/^(?:\s+)?Bearer\s/', '', $token));
+        return new SelfValidatingPassport(new UserBadge($token, function ($userIdentifier) {
+            return $this->userProvider->loadUserByIdentifier($userIdentifier);
+        }));
     }
 }

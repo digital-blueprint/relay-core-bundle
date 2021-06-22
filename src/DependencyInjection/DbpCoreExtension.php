@@ -11,7 +11,6 @@ use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
 use DBP\API\CoreBundle\Exception\ItemNotStoredException;
 use DBP\API\CoreBundle\Exception\ItemNotUsableException;
 use DBP\API\CoreBundle\Keycloak\KeycloakBearerAuthenticator;
-use DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProvider;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -129,9 +128,7 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
         ]);
 
         $container->loadFromExtension('security', [
-            'providers' => [
-                'keycloak_bearer_security_provider' => ['id' => KeycloakBearerUserProvider::class],
-            ],
+            'enable_authenticator_manager' => true,
             'firewalls' => [
                 'dev' => [
                     'pattern' => '^/(_(profiler|wdt)|css|images|js)/',
@@ -139,19 +136,15 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
                 ],
                 'swagger_documentation' => [
                     'pattern' => '^/($|index.(json|jsonld|html)$)',
-                    'anonymous' => true,
                 ],
                 'docs_jsonld' => [
                     'pattern' => '^/docs.(json|jsonld)$',
-                    'anonymous' => true,
                 ],
                 'api' => [
                     'pattern' => '^/',
-                    'anonymous' => true,
                     'lazy' => true,
-                    'guard' => [
-                        'provider' => 'keycloak_bearer_security_provider',
-                        'authenticator' => KeycloakBearerAuthenticator::class,
+                    'custom_authenticators' => [
+                        KeycloakBearerAuthenticator::class,
                     ],
                 ],
             ],

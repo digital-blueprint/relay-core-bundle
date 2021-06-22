@@ -6,39 +6,22 @@ namespace DBP\API\CoreBundle\Keycloak;
 
 use DBP\API\CoreBundle\Service\PersonProviderInterface;
 use Psr\Cache\CacheItemPoolInterface;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
 
-class KeycloakBearerUserProvider implements UserProviderInterface
+class KeycloakBearerUserProvider implements KeycloakBearerUserProviderInterface, LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     private $personProvider;
-    private $logger;
     private $config;
     private $certCachePool;
     private $personCachePool;
 
-    /**
-     * Given a token returns if the token was generated through a client credential flow.
-     */
-    public static function isServiceAccountToken(array $jwt): bool
-    {
-        if (!array_key_exists('scope', $jwt)) {
-            throw new \RuntimeException('Token missing scope key');
-        }
-        $scope = $jwt['scope'];
-        // XXX: This is the main difference I found compared to other flows, but that's a Keycloak
-        // implementation detail I guess.
-        $has_openid_scope = in_array('openid', explode(' ', $scope), true);
-
-        return !$has_openid_scope;
-    }
-
-    public function __construct(PersonProviderInterface $personProvider, LoggerInterface $logger)
+    public function __construct(PersonProviderInterface $personProvider)
     {
         $this->personProvider = $personProvider;
-        $this->logger = $logger;
         $this->config = [];
     }
 
@@ -55,6 +38,22 @@ class KeycloakBearerUserProvider implements UserProviderInterface
     public function setPersonCache(?CacheItemPoolInterface $cachePool)
     {
         $this->personCachePool = $cachePool;
+    }
+
+    /**
+     * Given a token returns if the token was generated through a client credential flow.
+     */
+    public static function isServiceAccountToken(array $jwt): bool
+    {
+        if (!array_key_exists('scope', $jwt)) {
+            throw new \RuntimeException('Token missing scope key');
+        }
+        $scope = $jwt['scope'];
+        // XXX: This is the main difference I found compared to other flows, but that's a Keycloak
+        // implementation detail I guess.
+        $has_openid_scope = in_array('openid', explode(' ', $scope), true);
+
+        return !$has_openid_scope;
     }
 
     public function createLoggingID(array $jwt): string
@@ -77,9 +76,9 @@ class KeycloakBearerUserProvider implements UserProviderInterface
         return $client.'-'.$user;
     }
 
-    public function loadUserByUsername($username): UserInterface
+    public function loadUserByIdentifier(string $identifier): UserInterface
     {
-        $accessToken = $username;
+        $accessToken = $identifier;
 
         $config = $this->config;
         $keycloak = new Keycloak(
@@ -87,10 +86,11 @@ class KeycloakBearerUserProvider implements UserProviderInterface
             $config['client_id'], $config['client_secret']);
 
         if ($config['local_validation']) {
-            $validator = new KeycloakLocalTokenValidator($keycloak, $this->certCachePool, $this->logger);
+            $validator = new KeycloakLocalTokenValidator($keycloak, $this->certCachePool);
         } else {
-            $validator = new KeycloakRemoteTokenValidator($keycloak, $this->logger);
+            $validator = new KeycloakRemoteTokenValidator($keycloak);
         }
+        $validator->setLogger($this->logger);
 
         $jwt = $validator->validate($accessToken);
 
@@ -115,15 +115,5 @@ class KeycloakBearerUserProvider implements UserProviderInterface
         $user->setLoggingID($this->createLoggingID($jwt));
 
         return $user;
-    }
-
-    public function refreshUser(UserInterface $user)
-    {
-        throw new UnsupportedUserException();
-    }
-
-    public function supportsClass($class)
-    {
-        return KeycloakBearerUser::class === $class;
     }
 }

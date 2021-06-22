@@ -38,13 +38,16 @@ services:
     autowire: true
     autoconfigure: true
 
+  DBP\API\CoreBundle\Keycloak\KeycloakBearerAuthenticator:
+    autowire: true
+    autoconfigure: true
+
   DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProvider:
     autowire: true
     autoconfigure: true
 
-  DBP\API\CoreBundle\Keycloak\KeycloakBearerAuthenticator:
-    autowire: true
-    autoconfigure: true
+  DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProviderInterface:
+    '@DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProvider'
 
   DBP\API\CoreBundle\Serializer\PersonAttributeNormalizer:
     autowire: true
@@ -56,11 +59,14 @@ services:
     autoconfigure: false
 
   # This alias exist so we can replace the service during tests
-  test.App\Security\User\KeycloakBearerUserProvider:
-    alias: 'DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProvider'
+  test.UserProviderInterface:
+    alias: 'DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProviderInterface'
     public: true
 
   # This alias exist so we can replace the service during tests
-  test.App\Service\PersonProviderInterface:
+  test.PersonProviderInterface:
     alias: 'DBP\API\CoreBundle\Service\PersonProviderInterface'
     public: true
+
+
+
