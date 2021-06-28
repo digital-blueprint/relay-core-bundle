@@ -19,7 +19,7 @@ services:
     autowire: true
     autoconfigure: true
 
-  DBP\API\CoreBundle\Service\OrganizationProviderInterface:
+  DBP\API\CoreBundle\API\OrganizationProviderInterface:
     '@DBP\API\CoreBundle\Service\DummyOrganizationProvider'
 
   DBP\API\CoreBundle\Service\DummyOrganizationProvider:
@@ -30,8 +30,15 @@ services:
     autowire: true
     autoconfigure: true
 
-  DBP\API\CoreBundle\Service\PersonProviderInterface:
+  DBP\API\CoreBundle\API\PersonProviderInterface:
     '@DBP\API\CoreBundle\Service\DummyPersonProvider'
+
+  DBP\API\CoreBundle\Service\DefaultUserSession:
+    autowire: true
+    autoconfigure: true
+
+  DBP\API\CoreBundle\API\UserSessionInterface:
+    '@DBP\API\CoreBundle\Service\DefaultUserSession'
 
   DBP\API\CoreBundle\DataProvider\:
     resource: '../../DataProvider'
@@ -65,8 +72,5 @@ services:
 
   # This alias exist so we can replace the service during tests
   test.PersonProviderInterface:
-    alias: 'DBP\API\CoreBundle\Service\PersonProviderInterface'
+    alias: 'DBP\API\CoreBundle\API\PersonProviderInterface'
     public: true
-
-
-

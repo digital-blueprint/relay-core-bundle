@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DBP\API\CoreBundle\Service;
+namespace DBP\API\CoreBundle\API;
 
 use DBP\API\CoreBundle\Entity\Organization;
 use DBP\API\CoreBundle\Entity\Person;

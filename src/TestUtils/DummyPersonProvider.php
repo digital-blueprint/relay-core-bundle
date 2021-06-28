@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace DBP\API\CoreBundle\TestUtils;
 
 use ApiPlatform\Core\Exception\ItemNotFoundException;
+use DBP\API\CoreBundle\API\PersonProviderInterface;
 use DBP\API\CoreBundle\Entity\Person;
 use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
-use DBP\API\CoreBundle\Service\PersonProviderInterface;
 
 class DummyPersonProvider implements PersonProviderInterface
 {
@@ -48,13 +48,18 @@ class DummyPersonProvider implements PersonProviderInterface
         return [];
     }
 
-    public function getRolesForScopes(array $scopes): array
+    public function setCurrentIdentifier(string $identifier): void
     {
-        $roles = [];
-        foreach ($scopes as $scope) {
-            $roles[] = 'ROLE_SCOPE_'.mb_strtoupper($scope);
-        }
+        $this->person->setIdentifier($identifier);
+    }
 
-        return $roles;
+    public function getRolesForCurrentPerson(): array
+    {
+        return $this->person->getRoles();
+    }
+
+    public function setRolesForCurrentPerson(array $roles): void
+    {
+        $this->person->setRoles($roles);
     }
 }

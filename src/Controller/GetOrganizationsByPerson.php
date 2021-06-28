@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace DBP\API\CoreBundle\Controller;
 
 use ApiPlatform\Core\DataProvider\PaginatorInterface;
+use DBP\API\CoreBundle\API\OrganizationProviderInterface;
+use DBP\API\CoreBundle\API\PersonProviderInterface;
 use DBP\API\CoreBundle\Exception\ApiError;
 use DBP\API\CoreBundle\Helpers\ArrayFullPaginator;
-use DBP\API\CoreBundle\Service\OrganizationProviderInterface;
-use DBP\API\CoreBundle\Service\PersonProviderInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

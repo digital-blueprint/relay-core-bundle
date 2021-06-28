@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DBP\API\CoreBundle\Service;
 
+use DBP\API\CoreBundle\API\OrganizationProviderInterface;
 use DBP\API\CoreBundle\Entity\Organization;
 use DBP\API\CoreBundle\Entity\Person;
 

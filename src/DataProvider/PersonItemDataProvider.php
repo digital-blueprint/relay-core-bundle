@@ -6,8 +6,8 @@ namespace DBP\API\CoreBundle\DataProvider;
 
 use ApiPlatform\Core\DataProvider\ItemDataProviderInterface;
 use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
+use DBP\API\CoreBundle\API\PersonProviderInterface;
 use DBP\API\CoreBundle\Entity\Person;
-use DBP\API\CoreBundle\Service\PersonProviderInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class PersonItemDataProvider extends AbstractController implements ItemDataProviderInterface, RestrictedDataProviderInterface

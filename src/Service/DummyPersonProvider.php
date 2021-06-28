@@ -4,21 +4,29 @@ declare(strict_types=1);
 
 namespace DBP\API\CoreBundle\Service;
 
+use DBP\API\CoreBundle\API\PersonProviderInterface;
 use DBP\API\CoreBundle\Entity\Person;
-use Symfony\Component\Security\Core\Security;
 
 class DummyPersonProvider implements PersonProviderInterface
 {
-    private $security;
+    /**
+     * @var string|null
+     */
+    private $currentIdentifier;
 
-    public function __construct(Security $security)
+    public function __construct()
     {
-        $this->security = $security;
+        $this->currentIdentifier = null;
     }
 
     public function getPersons(array $filters): array
     {
-        return [$this->getCurrentPerson()];
+        $person = $this->getCurrentPerson();
+        if ($person !== null) {
+            return [$person];
+        }
+
+        return [];
     }
 
     public function getPersonsByNameAndBirthday(string $givenName, string $familyName, \DateTime $birthDay): array
@@ -37,11 +45,13 @@ class DummyPersonProvider implements PersonProviderInterface
         return $person;
     }
 
-    public function getCurrentPerson(): Person
+    public function getCurrentPerson(): ?Person
     {
-        $user = $this->security->getUser();
+        if ($this->currentIdentifier === null) {
+            return null;
+        }
 
-        return $this->getPerson($user->getUsername());
+        return $this->getPerson($this->currentIdentifier);
     }
 
     public function getPersonForExternalService(string $service, string $serviceID): Person
@@ -49,8 +59,25 @@ class DummyPersonProvider implements PersonProviderInterface
         return new Person();
     }
 
-    public function getRolesForScopes(array $scopes): array
+    public function setCurrentIdentifier(string $identifier): void
     {
-        return [];
+        $this->currentIdentifier = $identifier;
+    }
+
+    public function getRolesForCurrentPerson(): array
+    {
+        if ($this->currentIdentifier === null) {
+            return [];
+        }
+
+        return $this->getCurrentPerson()->getRoles();
+    }
+
+    public function setRolesForCurrentPerson(array $roles): void
+    {
+        if ($this->currentIdentifier === null) {
+            return;
+        }
+        $this->getCurrentPerson()->setRoles($roles);
     }
 }

@@ -8,5 +8,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 interface KeycloakBearerUserProviderInterface
 {
-    public function loadUserByIdentifier(string $identifier): UserInterface;
+    public function loadUserByToken(string $accessToken): UserInterface;
+
+    public function loadUserByValidatedToken(array $jwt): UserInterface;
 }

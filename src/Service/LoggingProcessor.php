@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace DBP\API\CoreBundle\Service;
 
+use DBP\API\CoreBundle\API\UserSessionInterface;
 use DBP\API\CoreBundle\Helpers\Tools;
-use DBP\API\CoreBundle\Keycloak\DBPUserInterface;
-use Symfony\Component\Security\Core\Security;
 
 class LoggingProcessor
 {
-    private $security;
+    private $userDataProvider;
 
-    public function __construct(Security $security)
+    public function __construct(UserSessionInterface $userDataProvider)
     {
-        $this->security = $security;
+        $this->userDataProvider = $userDataProvider;
     }
 
     public function __invoke(array $record)
@@ -23,11 +22,7 @@ class LoggingProcessor
         $record['message'] = Tools::filterErrorMessage($record['message']);
 
         // Add some default context (session ID etc)
-        $user = $this->security->getUser();
-        if ($user !== null) {
-            assert($user instanceof DBPUserInterface);
-            $record['context']['dbp-id'] = $user->getLoggingID();
-        }
+        $record['context']['dbp-id'] = $this->userDataProvider->getSessionLoggingId();
 
         return $record;
     }

@@ -3,19 +3,17 @@
 declare(strict_types=1);
 
 use DBP\API\CoreBundle\Service\LoggingProcessor;
+use DBP\API\CoreBundle\TestUtils\DummyUserSession;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\Security\Core\Security;
 
 class LoggingProcessorTest extends WebTestCase
 {
     public function testFilter()
     {
-        $client = static::createClient();
-        $sec = new Security($client->getContainer());
-        $processor = new LoggingProcessor($sec);
+        $processor = new LoggingProcessor(new DummyUserSession());
 
         $record = ['message' => 'http://foo.bar?token=secret'];
         $record = $processor->__invoke($record);
-        $this->assertSame(['message' => 'http://foo.bar?token=hidden'], $record);
+        $this->assertSame(['message' => 'http://foo.bar?token=hidden', 'context' => ['dbp-id' => 'logging-id']], $record);
     }
 }

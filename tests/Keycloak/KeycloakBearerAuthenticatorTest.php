@@ -18,7 +18,7 @@ class KeycloakBearerAuthenticatorTest extends ApiTestCase
     public function testAuthenticateNoHeader()
     {
         [$client, $user] = $this->withUser('foo', 'bar');
-        $provider = new DummyUserProvider($user);
+        $provider = new DummyUserProvider($user, 'nope');
         $auth = new KeycloakBearerAuthenticator($provider);
 
         $req = new Request();
@@ -29,7 +29,7 @@ class KeycloakBearerAuthenticatorTest extends ApiTestCase
     public function testSupports()
     {
         [$client, $user] = $this->withUser('foo', 'bar');
-        $provider = new DummyUserProvider($user);
+        $provider = new DummyUserProvider($user, 'bar');
         $auth = new KeycloakBearerAuthenticator($provider);
 
         $this->assertFalse($auth->supports(new Request()));

@@ -4,108 +4,29 @@ declare(strict_types=1);
 
 namespace DBP\API\CoreBundle\Keycloak;
 
-use ApiPlatform\Core\Exception\ItemNotFoundException;
-use DBP\API\CoreBundle\Entity\Person;
-use DBP\API\CoreBundle\Service\PersonProviderInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
-class KeycloakBearerUser implements DBPUserInterface
+class KeycloakBearerUser implements UserInterface
 {
-    /**
-     * @var PersonProviderInterface
-     */
-    private $personProvider;
-
-    /**
-     * @var Person|null
-     */
-    private $person;
-
     /**
      * @var string[]
      */
-    private $scopes;
-
-    /**
-     * @var string
-     */
-    private $accessToken;
+    private $roles;
 
     /**
      * @var string|null
      */
-    private $username;
+    private $identifier;
 
-    /**
-     * @var bool
-     */
-    private $isRealUser;
-
-    /**
-     * @var string|null
-     */
-    private $loggingID;
-
-    public function __construct(?string $username, string $accessToken, PersonProviderInterface $personProvider, array $scopes)
+    public function __construct(?string $identifier, array $roles)
     {
-        $this->personProvider = $personProvider;
-        $this->person = null;
-        $this->scopes = $scopes;
-        $this->accessToken = $accessToken;
-        $this->username = $username;
-        $this->isRealUser = ($this->username !== null);
-        $this->loggingID = null;
+        $this->roles = $roles;
+        $this->identifier = $identifier;
     }
 
-    public function setLoggingID(string $loggingID)
+    public function getRoles(): array
     {
-        $this->loggingID = $loggingID;
-    }
-
-    private function ensurePerson()
-    {
-        if (!$this->person && $this->isRealUser) {
-            try {
-                $this->person = $this->personProvider->getPerson($this->getUsername());
-            } catch (ItemNotFoundException $e) {
-                // XXX: In case of EID we have no good way right now to see if we should have to user in LDAP
-                $this->isRealUser = false;
-            }
-
-            // Inject the roles coming from the access token
-            if ($this->isRealUser) {
-                $roles = $this->person->getRoles();
-                $roles = array_merge($roles, $this->personProvider->getRolesForScopes($this->scopes));
-                $roles = array_unique($roles);
-                sort($roles, SORT_STRING);
-                $this->person->setRoles($roles);
-            }
-        }
-    }
-
-    public function getPerson(): ?Person
-    {
-        $this->ensurePerson();
-        if (!$this->isRealUser) {
-            return null;
-        }
-
-        return $this->person;
-    }
-
-    public function getRoles()
-    {
-        $this->ensurePerson();
-
-        if (!$this->isRealUser) {
-            return $this->personProvider->getRolesForScopes($this->scopes);
-        } else {
-            return $this->person->getRoles();
-        }
-    }
-
-    public function getAccessToken(): ?string
-    {
-        return $this->accessToken;
+        return $this->roles;
     }
 
     public function getPassword()
@@ -118,22 +39,17 @@ class KeycloakBearerUser implements DBPUserInterface
         return null;
     }
 
-    public function getUsername()
+    public function getUsername(): string
     {
         return $this->getUserIdentifier();
     }
 
-    public function getUserIdentifier()
+    public function getUserIdentifier(): string
     {
-        return $this->username ?? '';
+        return $this->identifier ?? '';
     }
 
     public function eraseCredentials()
     {
-    }
-
-    public function getLoggingID(): string
-    {
-        return $this->loggingID ?? 'unknown';
     }
 }

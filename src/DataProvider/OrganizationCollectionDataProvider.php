@@ -6,9 +6,9 @@ namespace DBP\API\CoreBundle\DataProvider;
 
 use ApiPlatform\Core\DataProvider\ContextAwareCollectionDataProviderInterface;
 use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
+use DBP\API\CoreBundle\API\OrganizationProviderInterface;
 use DBP\API\CoreBundle\Entity\Organization;
 use DBP\API\CoreBundle\Helpers\ArrayFullPaginator;
-use DBP\API\CoreBundle\Service\OrganizationProviderInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class OrganizationCollectionDataProvider extends AbstractController implements ContextAwareCollectionDataProviderInterface, RestrictedDataProviderInterface

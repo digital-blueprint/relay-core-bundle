@@ -14,7 +14,6 @@ trait UserAuthTrait
     {
         $client = ApiTestCase::createClient();
         $roles = $options['roles'] ?? [];
-        $scopes = $options['scopes'] ?? [];
         $person = $options['person'] ?? new Person();
 
         if ($id === null) {
@@ -24,8 +23,8 @@ trait UserAuthTrait
             $person->setRoles($roles);
         }
         $personProvider = new DummyPersonProvider($person);
-        $user = new KeycloakBearerUser($id, $token, $personProvider, $scopes);
-        $userProvider = new DummyUserProvider($user);
+        $user = new KeycloakBearerUser($id, $roles);
+        $userProvider = new DummyUserProvider($user, $token);
 
         $container = $client->getContainer();
         $container->set('test.UserProviderInterface', $userProvider);

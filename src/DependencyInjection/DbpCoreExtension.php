@@ -37,10 +37,6 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
         $certCacheDef->setArguments(['core-keycloak-cert', 60, '%kernel.cache_dir%/dbp/core-keycloak-cert']);
         $certCacheDef->addTag('cache.pool');
 
-        $personCacheDef = $container->register('dbp_api.cache.core.auth_person', FilesystemAdapter::class);
-        $personCacheDef->setArguments(['core-auth-person', 60, '%kernel.cache_dir%/dbp/core-auth-person']);
-        $personCacheDef->addTag('cache.pool');
-
         // Pass the collected paths that need to be hidden to the OpenApiDecorator
         $definition = $container->getDefinition('DBP\API\CoreBundle\Swagger\OpenApiDecorator');
         if ($container->hasParameter('dbp_api.paths_to_hide')) {
@@ -50,7 +46,6 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
         $definition = $container->getDefinition('DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProvider');
         $definition->addMethodCall('setConfig', [$mergedConfig['keycloak'] ?? []]);
         $definition->addMethodCall('setCertCache', [$certCacheDef]);
-        $definition->addMethodCall('setPersonCache', [$personCacheDef]);
     }
 
     private function extendArrayParameter(ContainerBuilder $container, string $parameter, array $values)

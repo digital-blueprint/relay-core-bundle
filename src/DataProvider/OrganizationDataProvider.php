@@ -6,8 +6,8 @@ namespace DBP\API\CoreBundle\DataProvider;
 
 use ApiPlatform\Core\DataProvider\ItemDataProviderInterface;
 use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
+use DBP\API\CoreBundle\API\OrganizationProviderInterface;
 use DBP\API\CoreBundle\Entity\Organization;
-use DBP\API\CoreBundle\Service\OrganizationProviderInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class OrganizationDataProvider extends AbstractController implements ItemDataProviderInterface, RestrictedDataProviderInterface

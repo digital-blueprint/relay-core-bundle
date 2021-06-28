@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace DBP\API\CoreBundle\Keycloak;
 
-use DBP\API\CoreBundle\Service\PersonProviderInterface;
+use DBP\API\CoreBundle\API\PersonProviderInterface;
+use DBP\API\CoreBundle\API\UserSessionInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -18,10 +19,12 @@ class KeycloakBearerUserProvider implements KeycloakBearerUserProviderInterface,
     private $config;
     private $certCachePool;
     private $personCachePool;
+    private $userSession;
 
-    public function __construct(PersonProviderInterface $personProvider)
+    public function __construct(PersonProviderInterface $personProvider, UserSessionInterface $userSession)
     {
         $this->personProvider = $personProvider;
+        $this->userSession = $userSession;
         $this->config = [];
     }
 
@@ -35,51 +38,8 @@ class KeycloakBearerUserProvider implements KeycloakBearerUserProviderInterface,
         $this->certCachePool = $cachePool;
     }
 
-    public function setPersonCache(?CacheItemPoolInterface $cachePool)
+    public function loadUserByToken(string $accessToken): UserInterface
     {
-        $this->personCachePool = $cachePool;
-    }
-
-    /**
-     * Given a token returns if the token was generated through a client credential flow.
-     */
-    public static function isServiceAccountToken(array $jwt): bool
-    {
-        if (!array_key_exists('scope', $jwt)) {
-            throw new \RuntimeException('Token missing scope key');
-        }
-        $scope = $jwt['scope'];
-        // XXX: This is the main difference I found compared to other flows, but that's a Keycloak
-        // implementation detail I guess.
-        $has_openid_scope = in_array('openid', explode(' ', $scope), true);
-
-        return !$has_openid_scope;
-    }
-
-    public function createLoggingID(array $jwt): string
-    {
-        // We want to know where the request is coming from and which requests likely belong together for debugging
-        // purposes while still preserving the privacy of the user.
-        // The session ID gets logged in the Keycloak event log under 'code_id' and stays the same during a login
-        // session. When the event in keycloak expires it's no longer possible to map the ID to a user.
-        // The keycloak client ID is in azp, so add that too, and hash it with the user ID so we get different
-        // user ids for different clients for the same session.
-
-        $client = $jwt['azp'] ?? 'unknown';
-        if (!isset($jwt['session_state'])) {
-            $user = 'unknown';
-        } else {
-            // TODO: If we'd have an app secret we could hash that in too
-            $user = substr(hash('sha256', $client.$jwt['session_state']), 0, 6);
-        }
-
-        return $client.'-'.$user;
-    }
-
-    public function loadUserByIdentifier(string $identifier): UserInterface
-    {
-        $accessToken = $identifier;
-
         $config = $this->config;
         $keycloak = new Keycloak(
             $config['server_url'], $config['realm'],
@@ -98,22 +58,30 @@ class KeycloakBearerUserProvider implements KeycloakBearerUserProviderInterface,
             $validator::checkAudience($jwt, $config['audience']);
         }
 
-        $cachingPersonProvider = new CachingPersonProvider($this->personProvider, $this->personCachePool, $jwt);
-        if (self::isServiceAccountToken($jwt)) {
-            $username = null;
+        return $this->loadUserByValidatedToken($jwt);
+    }
+
+    public function loadUserByValidatedToken(array $jwt): UserInterface
+    {
+        $userDataProvider = $this->userSession;
+        $userDataProvider->setSessionToken($jwt);
+        $identifier = $userDataProvider->getUserIdentifier();
+        $userRoles = $userDataProvider->getUserRoles();
+
+        if ($identifier !== null) {
+            $this->personProvider->setCurrentIdentifier($identifier);
+            $personRoles = $this->personProvider->getRolesForCurrentPerson();
+            $roles = array_merge($userRoles, $personRoles);
+            $roles = array_unique($roles);
+            sort($roles, SORT_STRING);
+            $this->personProvider->setRolesForCurrentPerson($roles);
         } else {
-            $username = $jwt['username'] ?? null;
+            $roles = $userRoles;
         }
-        $scopes = explode(' ', $jwt['scope']);
 
-        $user = new KeycloakBearerUser(
-            $username,
-            $accessToken,
-            $cachingPersonProvider,
-            $scopes
+        return new KeycloakBearerUser(
+            $identifier,
+            $roles
         );
-        $user->setLoggingID($this->createLoggingID($jwt));
-
-        return $user;
     }
 }

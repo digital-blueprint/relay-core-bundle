@@ -52,8 +52,8 @@ class KeycloakBearerAuthenticator extends AbstractAuthenticator implements Logge
 
         $token = trim(preg_replace('/^(?:\s+)?Bearer\s/', '', $auth));
 
-        return new SelfValidatingPassport(new UserBadge($token, function ($userIdentifier) {
-            return $this->userProvider->loadUserByIdentifier($userIdentifier);
+        return new SelfValidatingPassport(new UserBadge($token, function ($token) {
+            return $this->userProvider->loadUserByToken($token);
         }));
     }
 }
