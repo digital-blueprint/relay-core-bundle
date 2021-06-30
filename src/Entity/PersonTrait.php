@@ -81,7 +81,7 @@ trait PersonTrait
 
     /**
      * @var string
-     * @ApiProperty(iri="http://schema.org/Date")
+     * @ApiProperty(iri="http://schema.org/birthDate")
      * @Groups({"Person:current-user"})
      */
     private $birthDate;
