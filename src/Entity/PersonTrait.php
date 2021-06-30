@@ -82,8 +82,7 @@ trait PersonTrait
     /**
      * @var \DateTimeInterface
      * @ApiProperty(iri="http://schema.org/Date")
-     * TODO: remove birthdate-access, only for backwards compat
-     * @Groups({"Person:current-user", "Person:birthdate-access", "Person:extended-access"})
+     * @Groups({"Person:current-user"})
      */
     private $birthDate;
 
