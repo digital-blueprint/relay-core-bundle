@@ -80,7 +80,7 @@ trait PersonTrait
     private $roles;
 
     /**
-     * @var \DateTimeInterface
+     * @var string
      * @ApiProperty(iri="http://schema.org/Date")
      * @Groups({"Person:current-user"})
      */
@@ -234,12 +234,12 @@ trait PersonTrait
         $this->image = $image;
     }
 
-    public function getBirthDate(): ?\DateTimeInterface
+    public function getBirthDate(): ?string
     {
         return $this->birthDate;
     }
 
-    public function setBirthDate(\DateTimeInterface $birthDate): self
+    public function setBirthDate(string $birthDate): self
     {
         $this->birthDate = $birthDate;
 
