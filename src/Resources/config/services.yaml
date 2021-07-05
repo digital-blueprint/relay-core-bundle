@@ -33,12 +33,12 @@ services:
   DBP\API\CoreBundle\API\PersonProviderInterface:
     '@DBP\API\CoreBundle\Service\DummyPersonProvider'
 
-  DBP\API\CoreBundle\Service\DefaultUserSession:
+  DBP\API\CoreBundle\Service\DummyUserSession:
     autowire: true
     autoconfigure: true
 
   DBP\API\CoreBundle\API\UserSessionInterface:
-    '@DBP\API\CoreBundle\Service\DefaultUserSession'
+    '@DBP\API\CoreBundle\Service\DummyUserSession'
 
   DBP\API\CoreBundle\DataProvider\:
     resource: '../../DataProvider'
