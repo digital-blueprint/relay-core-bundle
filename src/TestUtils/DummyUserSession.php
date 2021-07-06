@@ -33,12 +33,12 @@ class DummyUserSession implements UserSessionInterface
         return $this->roles;
     }
 
-    public function getSessionLoggingId(): string
+    public function getSessionLoggingId(): ?string
     {
         return 'logging-id';
     }
 
-    public function getSessionCacheKey(): string
+    public function getSessionCacheKey(): ?string
     {
         return 'cache';
     }

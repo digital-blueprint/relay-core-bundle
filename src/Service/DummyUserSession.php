@@ -26,12 +26,12 @@ class DummyUserSession implements UserSessionInterface
     {
     }
 
-    public function getSessionLoggingId(): string
+    public function getSessionLoggingId(): ?string
     {
         return 'session-logging-id';
     }
 
-    public function getSessionCacheKey(): string
+    public function getSessionCacheKey(): ?string
     {
         return 'session-cache-key';
     }

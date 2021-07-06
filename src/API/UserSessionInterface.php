@@ -31,8 +31,10 @@ interface UserSessionInterface
      * This is useful for connecting various requests together for logging while not exposing details about the user.
      *
      * Can be derived from long running session IDs embedded in the token for example.
+     *
+     * Return null in case no logging ID exists
      */
-    public function getSessionLoggingId(): string;
+    public function getSessionLoggingId(): ?string;
 
     /**
      * Returns a unique caching key that can be used to cache metadata related to the current user session like
@@ -41,8 +43,10 @@ interface UserSessionInterface
      * change regularly (after a logout/login or a key refresh for example).
      *
      * For example a hashed version of the token.
+     *
+     * Return null in case no appropriate cache key exists to disable any caching.
      */
-    public function getSessionCacheKey(): string;
+    public function getSessionCacheKey(): ?string;
 
     /**
      * Should return the duration the session is valid (as a whole, not from now) in seconds.
@@ -51,6 +55,8 @@ interface UserSessionInterface
      * This is mostly useful for limiting the cache.
      *
      * For example the lifespan of the token.
+     *
+     * Return <0 in case that information isn't available.
      */
     public function getSessionTTL(): int;
 }

@@ -22,7 +22,10 @@ class LoggingProcessor
         $record['message'] = Tools::filterErrorMessage($record['message']);
 
         // Add some default context (session ID etc)
-        $record['context']['dbp-id'] = $this->userDataProvider->getSessionLoggingId();
+        $loggingId = $this->userDataProvider->getSessionLoggingId();
+        if ($loggingId !== null) {
+            $record['context']['dbp-id'] = $loggingId;
+        }
 
         return $record;
     }
