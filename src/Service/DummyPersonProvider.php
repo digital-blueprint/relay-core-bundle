@@ -29,7 +29,7 @@ class DummyPersonProvider implements PersonProviderInterface
         return [];
     }
 
-    public function getPersonsByNameAndBirthday(string $givenName, string $familyName, \DateTime $birthDay): array
+    public function getPersonsByNameAndBirthDate(string $givenName, string $familyName, string $birthDate): array
     {
         return [];
     }
