@@ -40,7 +40,7 @@
         // we don't have access to it here. So wait until they appear and click on the toggle button.
         window.addEventListener("load", () => {
             new MutationObserver(function (mutations, self) {
-                const models = document.querySelector(`.models.is-open > h4`);
+                const models = document.querySelector(`.models.is-open > h4 > button.models-control`);
                 if (models) {
                     self.disconnect();
                     models.click();
