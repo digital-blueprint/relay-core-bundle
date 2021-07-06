@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace DBP\API\CoreBundle\Keycloak;
 
-use DBP\API\CoreBundle\API\PersonProviderInterface;
 use DBP\API\CoreBundle\API\UserSessionInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerAwareInterface;
@@ -15,15 +14,13 @@ class KeycloakBearerUserProvider implements KeycloakBearerUserProviderInterface,
 {
     use LoggerAwareTrait;
 
-    private $personProvider;
     private $config;
     private $certCachePool;
     private $personCachePool;
     private $userSession;
 
-    public function __construct(PersonProviderInterface $personProvider, UserSessionInterface $userSession)
+    public function __construct(UserSessionInterface $userSession)
     {
-        $this->personProvider = $personProvider;
         $this->userSession = $userSession;
         $this->config = [];
     }
@@ -63,25 +60,14 @@ class KeycloakBearerUserProvider implements KeycloakBearerUserProviderInterface,
 
     public function loadUserByValidatedToken(array $jwt): UserInterface
     {
-        $userDataProvider = $this->userSession;
-        $userDataProvider->setSessionToken($jwt);
-        $identifier = $userDataProvider->getUserIdentifier();
-        $userRoles = $userDataProvider->getUserRoles();
-
-        if ($identifier !== null) {
-            $this->personProvider->setCurrentIdentifier($identifier);
-            $personRoles = $this->personProvider->getRolesForCurrentPerson();
-            $roles = array_merge($userRoles, $personRoles);
-            $roles = array_unique($roles);
-            sort($roles, SORT_STRING);
-            $this->personProvider->setRolesForCurrentPerson($roles);
-        } else {
-            $roles = $userRoles;
-        }
+        $session = $this->userSession;
+        $session->setSessionToken($jwt);
+        $identifier = $session->getUserIdentifier();
+        $userRoles = $session->getUserRoles();
 
         return new KeycloakBearerUser(
             $identifier,
-            $roles
+            $userRoles
         );
     }
 }
