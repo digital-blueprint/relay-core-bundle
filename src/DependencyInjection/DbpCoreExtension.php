@@ -66,9 +66,6 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
             }
         }
 
-        $packageVersion = json_decode(
-            file_get_contents(__DIR__.'/../../composer.json'), true)['version'];
-
         // FIXME: We need to get rid of our custom exceptions here and throw them manually in the controllers/providers
         $exceptionToStatus = [
             ItemNotFoundException::class => Response::HTTP_NOT_FOUND,
@@ -87,7 +84,6 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
         ];
 
         $container->loadFromExtension('api_platform', [
-            'version' => $packageVersion,
             'title' => 'DBP API Gateway',
             'defaults' => [
                 'cache_headers' => [
