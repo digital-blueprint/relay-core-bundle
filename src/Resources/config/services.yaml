@@ -4,11 +4,6 @@ services:
     autoconfigure: false
     tags: [{'name' : 'serializer.normalizer', priority: '-700'}]
 
-  DBP\API\CoreBundle\Controller\:
-    resource: '../../Controller'
-    autowire: true
-    autoconfigure: true
-
   DBP\API\CoreBundle\Service\LoggingProcessor:
     autowire: true
     autoconfigure: true
@@ -19,31 +14,12 @@ services:
     autowire: true
     autoconfigure: true
 
-  DBP\API\CoreBundle\API\OrganizationProviderInterface:
-    '@DBP\API\CoreBundle\Service\DummyOrganizationProvider'
-
-  DBP\API\CoreBundle\Service\DummyOrganizationProvider:
-    autowire: true
-    autoconfigure: true
-
-  DBP\API\CoreBundle\Service\DummyPersonProvider:
-    autowire: true
-    autoconfigure: true
-
-  DBP\API\CoreBundle\API\PersonProviderInterface:
-    '@DBP\API\CoreBundle\Service\DummyPersonProvider'
-
   DBP\API\CoreBundle\Service\DummyUserSession:
     autowire: true
     autoconfigure: true
 
   DBP\API\CoreBundle\API\UserSessionInterface:
     '@DBP\API\CoreBundle\Service\DummyUserSession'
-
-  DBP\API\CoreBundle\DataProvider\:
-    resource: '../../DataProvider'
-    autowire: true
-    autoconfigure: true
 
   DBP\API\CoreBundle\Keycloak\KeycloakBearerAuthenticator:
     autowire: true
@@ -56,10 +32,6 @@ services:
   DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProviderInterface:
     '@DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProvider'
 
-  DBP\API\CoreBundle\Serializer\PersonAttributeNormalizer:
-    autowire: true
-    autoconfigure: true
-
   DBP\API\CoreBundle\Swagger\OpenApiDecorator:
     decorates: 'api_platform.openapi.factory'
     autowire: true
@@ -68,9 +40,4 @@ services:
   # This alias exist so we can replace the service during tests
   test.UserProviderInterface:
     alias: 'DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProviderInterface'
-    public: true
-
-  # This alias exist so we can replace the service during tests
-  test.PersonProviderInterface:
-    alias: 'DBP\API\CoreBundle\API\PersonProviderInterface'
     public: true

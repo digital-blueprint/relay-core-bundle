@@ -6,18 +6,16 @@ namespace DBP\API\CoreBundle\Tests\Keycloak;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use DBP\API\CoreBundle\Keycloak\KeycloakBearerAuthenticator;
+use DBP\API\CoreBundle\Keycloak\KeycloakBearerUser;
 use DBP\API\CoreBundle\TestUtils\DummyUserProvider;
-use DBP\API\CoreBundle\TestUtils\UserAuthTrait;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 
 class KeycloakBearerAuthenticatorTest extends ApiTestCase
 {
-    use UserAuthTrait;
-
     public function testAuthenticateNoHeader()
     {
-        [$client, $user] = $this->withUser('foo', 'bar');
+        $user = new KeycloakBearerUser('foo', ['role']);
         $provider = new DummyUserProvider($user, 'nope');
         $auth = new KeycloakBearerAuthenticator($provider);
 
@@ -28,7 +26,7 @@ class KeycloakBearerAuthenticatorTest extends ApiTestCase
 
     public function testSupports()
     {
-        [$client, $user] = $this->withUser('foo', 'bar');
+        $user = new KeycloakBearerUser('foo', ['role']);
         $provider = new DummyUserProvider($user, 'bar');
         $auth = new KeycloakBearerAuthenticator($provider);
 

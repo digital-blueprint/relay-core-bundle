@@ -24,9 +24,6 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
 {
     public function loadInternal(array $mergedConfig, ContainerBuilder $container)
     {
-        $this->extendArrayParameter(
-            $container, 'api_platform.resource_class_directories', [__DIR__.'/../Entity']);
-
         $loader = new YamlFileLoader(
             $container,
             new FileLocator(__DIR__.'/../Resources/config')
@@ -46,16 +43,6 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
         $definition = $container->getDefinition('DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProvider');
         $definition->addMethodCall('setConfig', [$mergedConfig['keycloak'] ?? []]);
         $definition->addMethodCall('setCertCache', [$certCacheDef]);
-    }
-
-    private function extendArrayParameter(ContainerBuilder $container, string $parameter, array $values)
-    {
-        if (!$container->hasParameter($parameter)) {
-            $container->setParameter($parameter, []);
-        }
-        $oldValues = $container->getParameter($parameter);
-        assert(is_array($oldValues));
-        $container->setParameter($parameter, array_merge($oldValues, $values));
     }
 
     public function prepend(ContainerBuilder $container)
