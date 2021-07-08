@@ -27,9 +27,9 @@
     "rollup-plugin-terser": "^7.0.2"
   },
   "dependencies": {
-    "@dbp-toolkit/auth": "^0.2.1",
-    "@dbp-toolkit/common": "^0.2.1",
-    "@dbp-toolkit/provider": "^0.2.1",
+    "@dbp-toolkit/auth": "dev-master as 0.2.5",
+    "@dbp-toolkit/common": "dev-master as 0.2.12",
+    "@dbp-toolkit/provider": "dev-master as 0.2.5",
     "@open-wc/scoped-elements": "^1.3.2",
     "event-target-shim": "^6.0.0",
     "lit-element": "^2.4.0"

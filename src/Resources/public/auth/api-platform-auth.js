@@ -1181,13 +1181,13 @@ const getOptions = (o) => o &&
  * result.type and result.strings.
  */
 function templateFactory(result) {
-    let templateCache = templateCaches.get(result.type);
+    let templateCache = templateCaches$1.get(result.type);
     if (templateCache === undefined) {
         templateCache = {
             stringsArray: new WeakMap(),
             keyString: new Map()
         };
-        templateCaches.set(result.type, templateCache);
+        templateCaches$1.set(result.type, templateCache);
     }
     let template = templateCache.stringsArray.get(result.strings);
     if (template !== undefined) {
@@ -1208,7 +1208,7 @@ function templateFactory(result) {
     templateCache.stringsArray.set(result.strings, template);
     return template;
 }
-const templateCaches = new Map();
+const templateCaches$1 = new Map();
 
 /**
  * @license
@@ -1239,7 +1239,7 @@ const parts = new WeakMap();
  *     container. Render options must *not* change between renders to the same
  *     container, as those changes will not effect previously rendered DOM.
  */
-const render = (result, container, options) => {
+const render$1 = (result, container, options) => {
     let part = parts.get(container);
     if (part === undefined) {
         removeNodes(container, container.firstChild);
@@ -1340,30 +1340,30 @@ const html = (strings, ...values) => new TemplateResult(strings, values, 'html',
  * http://polymer.github.io/PATENTS.txt
  */
 // Get a key to lookup in `templateCaches`.
-const getTemplateCacheKey = (type, scopeName) => `${type}--${scopeName}`;
-let compatibleShadyCSSVersion = true;
+const getTemplateCacheKey$1 = (type, scopeName) => `${type}--${scopeName}`;
+let compatibleShadyCSSVersion$1 = true;
 if (typeof window.ShadyCSS === 'undefined') {
-    compatibleShadyCSSVersion = false;
+    compatibleShadyCSSVersion$1 = false;
 }
 else if (typeof window.ShadyCSS.prepareTemplateDom === 'undefined') {
     console.warn(`Incompatible ShadyCSS version detected. ` +
         `Please update to at least @webcomponents/webcomponentsjs@2.0.2 and ` +
         `@webcomponents/shadycss@1.3.1.`);
-    compatibleShadyCSSVersion = false;
+    compatibleShadyCSSVersion$1 = false;
 }
 /**
  * Template factory which scopes template DOM using ShadyCSS.
  * @param scopeName {string}
  */
-const shadyTemplateFactory = (scopeName) => (result) => {
-    const cacheKey = getTemplateCacheKey(result.type, scopeName);
-    let templateCache = templateCaches.get(cacheKey);
+const shadyTemplateFactory$1 = (scopeName) => (result) => {
+    const cacheKey = getTemplateCacheKey$1(result.type, scopeName);
+    let templateCache = templateCaches$1.get(cacheKey);
     if (templateCache === undefined) {
         templateCache = {
             stringsArray: new WeakMap(),
             keyString: new Map()
         };
-        templateCaches.set(cacheKey, templateCache);
+        templateCaches$1.set(cacheKey, templateCache);
     }
     let template = templateCache.stringsArray.get(result.strings);
     if (template !== undefined) {
@@ -1373,7 +1373,7 @@ const shadyTemplateFactory = (scopeName) => (result) => {
     template = templateCache.keyString.get(key);
     if (template === undefined) {
         const element = result.getTemplateElement();
-        if (compatibleShadyCSSVersion) {
+        if (compatibleShadyCSSVersion$1) {
             window.ShadyCSS.prepareTemplateDom(element, scopeName);
         }
         template = new Template(result, element);
@@ -1388,7 +1388,7 @@ const TEMPLATE_TYPES = ['html', 'svg'];
  */
 const removeStylesFromLitTemplates = (scopeName) => {
     TEMPLATE_TYPES.forEach((type) => {
-        const templates = templateCaches.get(getTemplateCacheKey(type, scopeName));
+        const templates = templateCaches$1.get(getTemplateCacheKey$1(type, scopeName));
         if (templates !== undefined) {
             templates.keyString.forEach((template) => {
                 const { element: { content } } = template;
@@ -1544,13 +1544,13 @@ const prepareTemplateStyles = (scopeName, renderedDOM, template) => {
  * non-shorthand names (for example `border` and `border-width`) is not
  * supported.
  */
-const render$1 = (result, container, options) => {
+const render = (result, container, options) => {
     if (!options || typeof options !== 'object' || !options.scopeName) {
         throw new Error('The `scopeName` option is required.');
     }
     const scopeName = options.scopeName;
     const hasRendered = parts.has(container);
-    const needsScoping = compatibleShadyCSSVersion &&
+    const needsScoping = compatibleShadyCSSVersion$1 &&
         container.nodeType === 11 /* Node.DOCUMENT_FRAGMENT_NODE */ &&
         !!container.host;
     // Handle first render to a scope specially...
@@ -1558,7 +1558,7 @@ const render$1 = (result, container, options) => {
     // On first scope render, render into a fragment; this cannot be a single
     // fragment that is reused since nested renders can occur synchronously.
     const renderContainer = firstScopeRender ? document.createDocumentFragment() : container;
-    render(result, renderContainer, Object.assign({ templateFactory: shadyTemplateFactory(scopeName) }, options));
+    render$1(result, renderContainer, Object.assign({ templateFactory: shadyTemplateFactory$1(scopeName) }, options));
     // When performing first scope render,
     // (1) We've rendered into a fragment so that there's a chance to
     // `prepareTemplateStyles` before sub-elements hit the DOM
@@ -2569,7 +2569,7 @@ LitElement['finalized'] = true;
  *
  * @nocollapse
  */
-LitElement.render = render$1;
+LitElement.render = render;
 
 const appliedClassMixins = new WeakMap();
 
@@ -2668,14 +2668,14 @@ let counter = Math.round(Math.random() * 100000);
  *
  * @type {string}
  */
-const chars = `-|\\.|[0-9]|[a-z]`;
+const chars$1 = `-|\\.|[0-9]|[a-z]`;
 
 /**
  * Regular expression to check if a value is a valid tag name
  *
  * @type {RegExp}
  */
-const tagRegExp = new RegExp(`[a-z](${chars})*-(${chars})*`);
+const tagRegExp = new RegExp(`[a-z](${chars$1})*-(${chars$1})*`);
 
 /**
  * Checks if the tag name is valid
@@ -2866,14 +2866,14 @@ function defineScopedElement(tagName, klass, tagsCache) {
  *
  * @type {string}
  */
-const chars$1 = `-|\\.|[0-9]|[a-z]`;
+const chars = `-|\\.|[0-9]|[a-z]`;
 
 /**
  * Regular Expression to find a custom element tag
  *
  * @type {RegExp}
  */
-const re = new RegExp(`<\\/?([a-z](${chars$1})*-(${chars$1})*)`, 'g');
+const re = new RegExp(`<\\/?([a-z](${chars})*-(${chars})*)`, 'g');
 
 /**
  * The global cache of processed string arrays
@@ -2908,7 +2908,7 @@ const matchAll = str => {
  * @param {Cache<string, string>} tagsCache
  * @returns {TemplateStringsArray}
  */
-const transformTemplate = (strings, scopedElements, templateCache, tagsCache) => {
+const transformTemplate$1 = (strings, scopedElements, templateCache, tagsCache) => {
   const transformedStrings = strings.map(str => {
     let acc = str;
     const matches = matchAll(str);
@@ -2952,36 +2952,36 @@ const transformTemplate = (strings, scopedElements, templateCache, tagsCache) =>
 function transform(strings, scopedElements, templateCache = globalCache, tagsCache) {
   return (
     templateCache.get(strings) ||
-    transformTemplate(strings, scopedElements, templateCache, tagsCache)
+    transformTemplate$1(strings, scopedElements, templateCache, tagsCache)
   );
 }
 
-const getTemplateCacheKey$1 = (type, scopeName) => `${type}--${scopeName}`;
+const getTemplateCacheKey = (type, scopeName) => `${type}--${scopeName}`;
 
-let compatibleShadyCSSVersion$1 = true;
+let compatibleShadyCSSVersion = true;
 
 // @ts-ignore
 const { ShadyCSS } = window;
 
 if (typeof ShadyCSS === 'undefined') {
-  compatibleShadyCSSVersion$1 = false;
+  compatibleShadyCSSVersion = false;
 } else if (typeof ShadyCSS.prepareTemplateDom === 'undefined') {
-  compatibleShadyCSSVersion$1 = false;
+  compatibleShadyCSSVersion = false;
 }
 
 /**
  * Template factory which scopes template DOM using ShadyCSS.
  * @param scopeName {string}
  */
-const shadyTemplateFactory$1 = scopeName => result => {
-  const cacheKey = getTemplateCacheKey$1(result.type, scopeName);
-  let templateCache = templateCaches.get(cacheKey);
+const shadyTemplateFactory = scopeName => result => {
+  const cacheKey = getTemplateCacheKey(result.type, scopeName);
+  let templateCache = templateCaches$1.get(cacheKey);
   if (templateCache === undefined) {
     templateCache = {
       stringsArray: new WeakMap(),
       keyString: new Map(),
     };
-    templateCaches.set(cacheKey, templateCache);
+    templateCaches$1.set(cacheKey, templateCache);
   }
   let template = templateCache.stringsArray.get(result.strings);
   if (template !== undefined) {
@@ -2991,7 +2991,7 @@ const shadyTemplateFactory$1 = scopeName => result => {
   template = templateCache.keyString.get(key);
   if (template === undefined) {
     const element = result.getTemplateElement();
-    if (compatibleShadyCSSVersion$1) {
+    if (compatibleShadyCSSVersion) {
       ShadyCSS.prepareTemplateDom(element, scopeName);
     }
     template = new Template(result, element);
@@ -3016,7 +3016,7 @@ const shadyTemplateFactory$1 = scopeName => result => {
  *
  * @type {WeakMap<Function, Cache<TemplateStringsArray, TemplateStringsArray>>}
  */
-const templateCaches$1 = new WeakMap();
+const templateCaches = new WeakMap();
 
 /**
  * Retrieves or creates a templateCache for a specific key
@@ -3025,12 +3025,12 @@ const templateCaches$1 = new WeakMap();
  * @returns {Cache<TemplateStringsArray, TemplateStringsArray>}
  */
 const getTemplateCache = key => {
-  if (!templateCaches$1.has(key)) {
+  if (!templateCaches.has(key)) {
     // @ts-ignore
-    templateCaches$1.set(key, new Cache(templateCaches$1.get(key.constructor)));
+    templateCaches.set(key, new Cache(templateCaches.get(key.constructor)));
   }
 
-  return templateCaches$1.get(key);
+  return templateCaches.get(key);
 };
 
 /**
@@ -3065,7 +3065,7 @@ const getTagsCache = key => {
 const transformArray = (items, scopedElements, templateCache, tagsCache) =>
   items.map(value => {
     if (value instanceof TemplateResult) {
-      return transformTemplate$1(value, scopedElements, templateCache, tagsCache);
+      return transformTemplate(value, scopedElements, templateCache, tagsCache);
     }
 
     if (Array.isArray(value)) {
@@ -3084,7 +3084,7 @@ const transformArray = (items, scopedElements, templateCache, tagsCache) =>
  * @param {Cache<string, string>} tagsCache
  * @returns {TemplateResult}
  */
-const transformTemplate$1 = (template, scopedElements, templateCache, tagsCache) =>
+const transformTemplate = (template, scopedElements, templateCache, tagsCache) =>
   new TemplateResult(
     transform(template.strings, scopedElements, templateCache, tagsCache),
     transformArray(template.values, scopedElements, templateCache, tagsCache),
@@ -3107,9 +3107,9 @@ const scopedElementsTemplateFactory = (
   templateCache,
   tagsCache,
 ) => template => {
-  const newTemplate = transformTemplate$1(template, scopedElements, templateCache, tagsCache);
+  const newTemplate = transformTemplate(template, scopedElements, templateCache, tagsCache);
 
-  return shadyTemplateFactory$1(scopeName)(newTemplate);
+  return shadyTemplateFactory(scopeName)(newTemplate);
 };
 
 /** @type {ScopedElementsMixin} */
@@ -3326,7 +3326,7 @@ var consoleLogger = {
   }
 };
 
-var Logger = function () {
+var Logger$1 = function () {
   function Logger(concreteLogger) {
     var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
@@ -3404,7 +3404,7 @@ var Logger = function () {
   return Logger;
 }();
 
-var baseLogger = new Logger();
+var baseLogger = new Logger$1();
 
 var EventEmitter = function () {
   function EventEmitter() {
@@ -3589,6 +3589,43 @@ function escape(data) {
 }
 var isIE10 = typeof window !== 'undefined' && window.navigator && window.navigator.userAgent && window.navigator.userAgent.indexOf('MSIE') > -1;
 
+function deepFind(obj, path) {
+  var keySeparator = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '.';
+  if (!obj) return undefined;
+  if (obj[path]) return obj[path];
+  var paths = path.split(keySeparator);
+  var current = obj;
+
+  for (var i = 0; i < paths.length; ++i) {
+    if (typeof current[paths[i]] === 'string' && i + 1 < paths.length) {
+      return undefined;
+    }
+
+    if (current[paths[i]] === undefined) {
+      var j = 2;
+      var p = paths.slice(i, i + j).join(keySeparator);
+      var mix = current[p];
+
+      while (mix === undefined && paths.length > i + j) {
+        j++;
+        p = paths.slice(i, i + j).join(keySeparator);
+        mix = current[p];
+      }
+
+      if (mix === undefined) return undefined;
+      if (typeof mix === 'string') return mix;
+      if (p && typeof mix[p] === 'string') return mix[p];
+      var joinedPath = paths.slice(i + j).join(keySeparator);
+      if (joinedPath) return deepFind(mix, joinedPath, keySeparator);
+      return undefined;
+    }
+
+    current = current[paths[i]];
+  }
+
+  return current;
+}
+
 var ResourceStore = function (_EventEmitter) {
   _inherits(ResourceStore, _EventEmitter);
 
@@ -3615,6 +3652,10 @@ var ResourceStore = function (_EventEmitter) {
       _this.options.keySeparator = '.';
     }
 
+    if (_this.options.ignoreJSONStructure === undefined) {
+      _this.options.ignoreJSONStructure = true;
+    }
+
     return _this;
   }
 
@@ -3639,6 +3680,7 @@ var ResourceStore = function (_EventEmitter) {
     value: function getResource(lng, ns, key) {
       var options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
       var keySeparator = options.keySeparator !== undefined ? options.keySeparator : this.options.keySeparator;
+      var ignoreJSONStructure = options.ignoreJSONStructure !== undefined ? options.ignoreJSONStructure : this.options.ignoreJSONStructure;
       var path = [lng, ns];
       if (key && typeof key !== 'string') path = path.concat(key);
       if (key && typeof key === 'string') path = path.concat(keySeparator ? key.split(keySeparator) : key);
@@ -3647,7 +3689,9 @@ var ResourceStore = function (_EventEmitter) {
         path = lng.split('.');
       }
 
-      return getPath(this.data, path);
+      var result = getPath(this.data, path);
+      if (result || !ignoreJSONStructure || typeof key !== 'string') return result;
+      return deepFind(this.data && this.data[lng] && this.data[lng][ns], key, keySeparator);
     }
   }, {
     key: "addResource",
@@ -3879,8 +3923,13 @@ var Translator = function (_EventEmitter) {
 
       if (handleAsObjectInI18nFormat && res && handleAsObject && noObject.indexOf(resType) < 0 && !(typeof joinArrays === 'string' && resType === '[object Array]')) {
         if (!options.returnObjects && !this.options.returnObjects) {
-          this.logger.warn('accessing an object - but returnObjects options is not enabled!');
-          return this.options.returnedObjectHandler ? this.options.returnedObjectHandler(resUsedKey, res, options) : "key '".concat(key, " (").concat(this.language, ")' returned an object instead of string.");
+          if (!this.options.returnedObjectHandler) {
+            this.logger.warn('accessing an object - but returnObjects options is not enabled!');
+          }
+
+          return this.options.returnedObjectHandler ? this.options.returnedObjectHandler(resUsedKey, res, _objectSpread({}, options, {
+            ns: namespaces
+          })) : "key '".concat(key, " (").concat(this.language, ")' returned an object instead of string.");
         }
 
         if (keySeparator) {
@@ -3907,16 +3956,14 @@ var Translator = function (_EventEmitter) {
       } else {
         var usedDefault = false;
         var usedKey = false;
+        var needsPluralHandling = options.count !== undefined && typeof options.count !== 'string';
+        var hasDefaultValue = Translator.hasDefaultValue(options);
+        var defaultValueSuffix = needsPluralHandling ? this.pluralResolver.getSuffix(lng, options.count) : '';
+        var defaultValue = options["defaultValue".concat(defaultValueSuffix)] || options.defaultValue;
 
-        if (!this.isValidLookup(res) && options.defaultValue !== undefined) {
+        if (!this.isValidLookup(res) && hasDefaultValue) {
           usedDefault = true;
-
-          if (options.count !== undefined) {
-            var suffix = this.pluralResolver.getSuffix(lng, options.count);
-            res = options["defaultValue".concat(suffix)];
-          }
-
-          if (!res) res = options.defaultValue;
+          res = defaultValue;
         }
 
         if (!this.isValidLookup(res)) {
@@ -3924,10 +3971,10 @@ var Translator = function (_EventEmitter) {
           res = key;
         }
 
-        var updateMissing = options.defaultValue && options.defaultValue !== res && this.options.updateMissing;
+        var updateMissing = hasDefaultValue && defaultValue !== res && this.options.updateMissing;
 
         if (usedKey || usedDefault || updateMissing) {
-          this.logger.log(updateMissing ? 'updateKey' : 'missingKey', lng, namespace, key, updateMissing ? options.defaultValue : res);
+          this.logger.log(updateMissing ? 'updateKey' : 'missingKey', lng, namespace, key, updateMissing ? defaultValue : res);
 
           if (keySeparator) {
             var fk = this.resolve(key, _objectSpread({}, options, {
@@ -3949,29 +3996,25 @@ var Translator = function (_EventEmitter) {
             lngs.push(options.lng || this.language);
           }
 
-          var send = function send(l, k) {
+          var send = function send(l, k, fallbackValue) {
             if (_this2.options.missingKeyHandler) {
-              _this2.options.missingKeyHandler(l, namespace, k, updateMissing ? options.defaultValue : res, updateMissing, options);
+              _this2.options.missingKeyHandler(l, namespace, k, updateMissing ? fallbackValue : res, updateMissing, options);
             } else if (_this2.backendConnector && _this2.backendConnector.saveMissing) {
-              _this2.backendConnector.saveMissing(l, namespace, k, updateMissing ? options.defaultValue : res, updateMissing, options);
+              _this2.backendConnector.saveMissing(l, namespace, k, updateMissing ? fallbackValue : res, updateMissing, options);
             }
 
             _this2.emit('missingKey', l, namespace, k, res);
           };
 
           if (this.options.saveMissing) {
-            var needsPluralHandling = options.count !== undefined && typeof options.count !== 'string';
-
             if (this.options.saveMissingPlurals && needsPluralHandling) {
-              lngs.forEach(function (l) {
-                var plurals = _this2.pluralResolver.getPluralFormsOfKey(l, key);
-
-                plurals.forEach(function (p) {
-                  return send([l], p);
+              lngs.forEach(function (language) {
+                _this2.pluralResolver.getSuffixes(language).forEach(function (suffix) {
+                  send([language], key + suffix, options["defaultValue".concat(suffix)] || defaultValue);
                 });
               });
             } else {
-              send(lngs, key);
+              send(lngs, key, defaultValue);
             }
           }
         }
@@ -4063,7 +4106,7 @@ var Translator = function (_EventEmitter) {
         var namespaces = extracted.namespaces;
         if (_this4.options.fallbackNS) namespaces = namespaces.concat(_this4.options.fallbackNS);
         var needsPluralHandling = options.count !== undefined && typeof options.count !== 'string';
-        var needsContextHandling = options.context !== undefined && typeof options.context === 'string' && options.context !== '';
+        var needsContextHandling = options.context !== undefined && (typeof options.context === 'string' || typeof options.context === 'number') && options.context !== '';
         var codes = options.lngs ? options.lngs : _this4.languageUtils.toResolveHierarchy(options.lng || _this4.language, options.fallbackLng);
         namespaces.forEach(function (ns) {
           if (_this4.isValidLookup(found)) return;
@@ -4121,6 +4164,19 @@ var Translator = function (_EventEmitter) {
       var options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
       if (this.i18nFormat && this.i18nFormat.getResource) return this.i18nFormat.getResource(code, ns, key, options);
       return this.resourceStore.getResource(code, ns, key, options);
+    }
+  }], [{
+    key: "hasDefaultValue",
+    value: function hasDefaultValue(options) {
+      var prefix = 'defaultValue';
+
+      for (var option in options) {
+        if (Object.prototype.hasOwnProperty.call(options, option) && prefix === option.substring(0, prefix.length) && undefined !== options[option]) {
+          return true;
+        }
+      }
+
+      return false;
     }
   }]);
 
@@ -4284,15 +4340,15 @@ var LanguageUtil = function () {
 }();
 
 var sets = [{
-  lngs: ['ach', 'ak', 'am', 'arn', 'br', 'fil', 'gun', 'ln', 'mfe', 'mg', 'mi', 'oc', 'pt', 'pt-BR', 'tg', 'ti', 'tr', 'uz', 'wa'],
+  lngs: ['ach', 'ak', 'am', 'arn', 'br', 'fil', 'gun', 'ln', 'mfe', 'mg', 'mi', 'oc', 'pt', 'pt-BR', 'tg', 'tl', 'ti', 'tr', 'uz', 'wa'],
   nr: [1, 2],
   fc: 1
 }, {
-  lngs: ['af', 'an', 'ast', 'az', 'bg', 'bn', 'ca', 'da', 'de', 'dev', 'el', 'en', 'eo', 'es', 'et', 'eu', 'fi', 'fo', 'fur', 'fy', 'gl', 'gu', 'ha', 'hi', 'hu', 'hy', 'ia', 'it', 'kn', 'ku', 'lb', 'mai', 'ml', 'mn', 'mr', 'nah', 'nap', 'nb', 'ne', 'nl', 'nn', 'no', 'nso', 'pa', 'pap', 'pms', 'ps', 'pt-PT', 'rm', 'sco', 'se', 'si', 'so', 'son', 'sq', 'sv', 'sw', 'ta', 'te', 'tk', 'ur', 'yo'],
+  lngs: ['af', 'an', 'ast', 'az', 'bg', 'bn', 'ca', 'da', 'de', 'dev', 'el', 'en', 'eo', 'es', 'et', 'eu', 'fi', 'fo', 'fur', 'fy', 'gl', 'gu', 'ha', 'hi', 'hu', 'hy', 'ia', 'it', 'kk', 'kn', 'ku', 'lb', 'mai', 'ml', 'mn', 'mr', 'nah', 'nap', 'nb', 'ne', 'nl', 'nn', 'no', 'nso', 'pa', 'pap', 'pms', 'ps', 'pt-PT', 'rm', 'sco', 'se', 'si', 'so', 'son', 'sq', 'sv', 'sw', 'ta', 'te', 'tk', 'ur', 'yo'],
   nr: [1, 2],
   fc: 2
 }, {
-  lngs: ['ay', 'bo', 'cgg', 'fa', 'ht', 'id', 'ja', 'jbo', 'ka', 'kk', 'km', 'ko', 'ky', 'lo', 'ms', 'sah', 'su', 'th', 'tt', 'ug', 'vi', 'wo', 'zh'],
+  lngs: ['ay', 'bo', 'cgg', 'fa', 'ht', 'id', 'ja', 'jbo', 'ka', 'km', 'ko', 'ky', 'lo', 'ms', 'sah', 'su', 'th', 'tt', 'ug', 'vi', 'wo', 'zh'],
   nr: [1],
   fc: 3
 }, {
@@ -4489,17 +4545,24 @@ var PluralResolver = function () {
   }, {
     key: "getPluralFormsOfKey",
     value: function getPluralFormsOfKey(code, key) {
+      return this.getSuffixes(code).map(function (suffix) {
+        return key + suffix;
+      });
+    }
+  }, {
+    key: "getSuffixes",
+    value: function getSuffixes(code) {
       var _this = this;
 
-      var ret = [];
       var rule = this.getRule(code);
-      if (!rule) return ret;
-      rule.numbers.forEach(function (n) {
-        var suffix = _this.getSuffix(code, n);
 
-        ret.push("".concat(key).concat(suffix));
+      if (!rule) {
+        return [];
+      }
+
+      return rule.numbers.map(function (number) {
+        return _this.getSuffix(code, number);
       });
-      return ret;
     }
   }, {
     key: "getSuffix",
@@ -4616,13 +4679,17 @@ var Interpolator = function () {
       var handleFormat = function handleFormat(key) {
         if (key.indexOf(_this.formatSeparator) < 0) {
           var path = getPathWithDefaults(data, defaultData, key);
-          return _this.alwaysFormat ? _this.format(path, undefined, lng) : path;
+          return _this.alwaysFormat ? _this.format(path, undefined, lng, _objectSpread({}, options, data, {
+            interpolationkey: key
+          })) : path;
         }
 
         var p = key.split(_this.formatSeparator);
         var k = p.shift().trim();
         var f = p.join(_this.formatSeparator).trim();
-        return _this.format(getPathWithDefaults(data, defaultData, k), f, lng, options);
+        return _this.format(getPathWithDefaults(data, defaultData, k), f, lng, _objectSpread({}, options, data, {
+          interpolationkey: k
+        }));
       };
 
       this.resetRegExp();
@@ -4661,8 +4728,16 @@ var Interpolator = function () {
             value = makeString(value);
           }
 
-          str = str.replace(match[0], todo.safeValue(value));
-          todo.regex.lastIndex = 0;
+          var safeValue = todo.safeValue(value);
+          str = str.replace(match[0], safeValue);
+
+          if (skipOnVariables) {
+            todo.regex.lastIndex += safeValue.length;
+            todo.regex.lastIndex -= match[0].length;
+          } else {
+            todo.regex.lastIndex = 0;
+          }
+
           replaces++;
 
           if (replaces >= _this.maxReplaces) {
@@ -4711,7 +4786,7 @@ var Interpolator = function () {
         var formatters = [];
         var doReduce = false;
 
-        if (match[0].includes(this.formatSeparator) && !/{.*}/.test(match[1])) {
+        if (match[0].indexOf(this.formatSeparator) !== -1 && !/{.*}/.test(match[1])) {
           var r = match[1].split(this.formatSeparator).map(function (elem) {
             return elem.trim();
           });
@@ -4731,7 +4806,9 @@ var Interpolator = function () {
 
         if (doReduce) {
           value = formatters.reduce(function (v, f) {
-            return _this2.format(v, f, options.lng, options);
+            return _this2.format(v, f, options.lng, _objectSpread({}, options, {
+              interpolationkey: match[1].trim()
+            }));
           }, value.trim());
         }
 
@@ -5224,6 +5301,7 @@ var I18n = function (_EventEmitter) {
 
       var load = function load() {
         var finish = function finish(err, t) {
+          if (_this2.isInitialized) _this2.logger.warn('init: i18next is already initialized. You should call init just once!');
           _this2.isInitialized = true;
           if (!_this2.options.isClone) _this2.logger.log('initialized', _this2.options);
 
@@ -5233,7 +5311,7 @@ var I18n = function (_EventEmitter) {
           callback(err, t);
         };
 
-        if (_this2.languages && _this2.options.compatibilityAPI !== 'v1') return finish(null, _this2.t.bind(_this2));
+        if (_this2.languages && _this2.options.compatibilityAPI !== 'v1' && !_this2.isInitialized) return finish(null, _this2.t.bind(_this2));
 
         _this2.changeLanguage(_this2.options.lng, finish);
       };
@@ -5369,6 +5447,7 @@ var I18n = function (_EventEmitter) {
       };
 
       var setLng = function setLng(lngs) {
+        if (!lng && !lngs && _this4.services.languageDetector) lngs = [];
         var l = typeof lngs === 'string' ? lngs : _this4.services.languageUtils.getBestMatchFromCodes(lngs);
 
         if (l) {
@@ -5581,12 +5660,33 @@ var I18n = function (_EventEmitter) {
       };
       return clone;
     }
+  }, {
+    key: "toJSON",
+    value: function toJSON() {
+      return {
+        options: this.options,
+        store: this.store,
+        language: this.language,
+        languages: this.languages
+      };
+    }
   }]);
 
   return I18n;
 }(EventEmitter);
 
 var i18next = new I18n();
+
+/**
+ * @param {string} namespace The namespace to override
+ * @returns {string} The new namespace name
+ */
+function getOverrideNamespace(namespace) {
+    // This just needs to be different to the namespace, make it special
+    // so it's clear what it is used for in case it ends up in some error
+    // message or something
+    return '--' + namespace + '-override';
+}
 
 /**
  * Creates a new i18next instance that is fully initialized.
@@ -5596,19 +5696,30 @@ var i18next = new I18n();
  * @param {object} languages - Mapping from languages to translation objects
  * @param {string} lng - The default language
  * @param {string} fallback - The fallback language to use for unknown languages or untranslated keys
+ * @param {string} [namespace] - The i18next namespace to load, defaults to 'translation'
  * @returns {i18next.i18n} A new independent i18next instance
  */
-function createInstance(languages, lng, fallback) {
+function createInstance$2(languages, lng, fallback, namespace) {
+    if (namespace === undefined) {
+        namespace = 'translation';
+    }
+    let overrideNamespace = getOverrideNamespace(namespace);
+
+    var fallbackLng = [fallback, lng, ...Object.keys(languages)];
+
     var options = {
         lng: lng,
-        fallbackLng: fallback,
+        fallbackLng: fallbackLng,
         debug: false,
+        ns: [overrideNamespace, namespace],
+        defaultNS: namespace,
+        fallbackNS: namespace,
         initImmediate: false, // Don't init async
         resources: {},
     };
 
     Object.keys(languages).forEach(function(key) {
-        options['resources'][key] = {translation: languages[key]};
+        options['resources'][key] = {[namespace]: languages[key]};
     });
 
     var i18n = i18next.createInstance();
@@ -5618,25 +5729,23 @@ function createInstance(languages, lng, fallback) {
     return i18n;
 }
 
-var login = "Einloggen";
-var logout = "Ausloggen";
-var profile = "Profil";
-var de = {
-	login: login,
-	logout: logout,
-	profile: profile
-};
-
-var login$1 = "Login";
-var logout$1 = "Logout";
-var profile$1 = "Profile";
-var en = {
+var login$1 = "Einloggen";
+var logout$1 = "Ausloggen";
+var de$1 = {
 	login: login$1,
-	logout: logout$1,
-	profile: profile$1
+	logout: logout$1
 };
 
-const i18n = createInstance({en: en, de: de}, 'de', 'en');
+var login = "Login";
+var logout = "Logout";
+var en$1 = {
+	login: login,
+	logout: logout
+};
+
+function createInstance$1() {
+    return createInstance$2({en: en$1, de: de$1}, 'de', 'en');
+}
 
 /**
  * Sends a notification via the event
@@ -5723,7 +5832,15 @@ const parseBaseUrl = (url) => {
  */
 
 /**
- * 
+ * Same as customElements.define() but with some additional error handling.
+ *
+ * In case the same component (with the exact same implementation) is already
+ * defined then this will do nothing instead of erroring out.
+ *
+ * In case the browser doesn't support custom elements it will fill all those
+ * custom tags with an error message so the user gets some feedback instead of
+ * just an empty page.
+ *
  * @param {string} name 
  * @param {Function} constructor 
  * @param {object} options 
@@ -5746,37 +5863,38 @@ const defineCustomElement = (name, constructor, options) => {
     return true;
 };
 
-var error = {
+var error$1 = {
 	summary: "Ein Fehler ist aufgetreten",
 	"connection-to-server-refused": "Verbindungs zum Server verweigert!"
 };
-var jsonld = {
+var jsonld$1 = {
 	"error-api-server": "Verbindung zum API Server {{apiUrl}} fehlgeschlagen!",
 	"error-hydra-documentation-url-not-set": "Hydra apiDocumentation URL wurden für server {{apiUrl}} nicht gesetzt!",
 	"api-documentation-server": "Verbindung zum apiDocumentation API Server {{apiDocUrl}} fehlgeschlagen!"
 };
-var de$1 = {
-	error: error,
-	jsonld: jsonld
-};
-
-var error$1 = {
-	summary: "An error occurred",
-	"connection-to-server-refused": "Connection to server refused!"
-};
-var jsonld$1 = {
-	"error-api-server": "Connection to api server {{apiUrl}} failed!",
-	"error-hydra-documentation-url-not-set": "Hydra apiDocumentation url was not set for server {{apiUrl}}!",
-	"api-documentation-server": "Connection to apiDocumentation server {{apiDocUrl}} failed!"
-};
-var en$1 = {
+var de = {
 	error: error$1,
 	jsonld: jsonld$1
 };
 
-const i18n$1 = createInstance({en: en$1, de: de$1}, 'de', 'en');
+var error = {
+	summary: "An error occurred",
+	"connection-to-server-refused": "Connection to server refused!"
+};
+var jsonld = {
+	"error-api-server": "Connection to api server {{apiUrl}} failed!",
+	"error-hydra-documentation-url-not-set": "Hydra apiDocumentation url was not set for server {{apiUrl}}!",
+	"api-documentation-server": "Connection to apiDocumentation server {{apiDocUrl}} failed!"
+};
+var en = {
+	error: error,
+	jsonld: jsonld
+};
 
-// "module.exports = class JSONLD" doesn't work with rollup because of above "import"
+function createInstance() {
+    return createInstance$2({en: en, de: de}, 'de', 'en');
+}
+
 class JSONLD {
     constructor(baseApiUrl, entities) {
         this.entities = entities;
@@ -5791,10 +5909,34 @@ class JSONLD {
         this.idToEntityNameMatchList = idToEntityNameMatchList;
     }
 
-    static initialize(apiUrl, successFnc, failureFnc, lang = 'de') {
-        if (lang !== 'de') {
-            i18n$1.changeLanguage(lang);
+    static async getInstance(apiUrl, lang = 'de') {
+        let promise = JSONLD.promises[apiUrl];
+        if (promise === undefined) {
+            promise = new Promise((resolve, reject) => {
+                JSONLD._initialize(
+                    apiUrl,
+                    (instance) => resolve(instance),
+                    (error) => reject(error),
+                    lang
+                );
+            });
+            JSONLD.promises[apiUrl] = promise;
         }
+        return promise;
+    }
+
+    static initialize(apiUrl, successFnc, failureFnc, lang = 'de') {
+        console.warn('DEPRECATED: JSONLD.initialize(), use JSONLD.getInstance() instead');
+        JSONLD._initialize(apiUrl, successFnc, failureFnc, lang);
+    }
+
+    static doInitializationOnce(apiUrl) {
+        // No longer needed, remove any calls
+        console.warn('DEPRECATED: JSONLD.doInitializationOnce() calls can be removed');
+    }
+
+    static _initialize(apiUrl, successFnc, failureFnc, lang = 'de') {
+        JSONLD._i18n.changeLanguage(lang);
 
         // if init api call was already successfully finished execute the success function
         if (JSONLD.instances[apiUrl] !== undefined) {
@@ -5810,31 +5952,19 @@ class JSONLD {
         // add success and failure functions
         if (typeof successFnc == 'function') JSONLD.successFunctions[apiUrl].push(successFnc);
         if (typeof failureFnc == 'function') JSONLD.failureFunctions[apiUrl].push(failureFnc);
-    }
 
-    /**
-     * This should be run as soon as an api token is available (can be run multiple times)
-     *
-     * @param apiUrl
-     * @param token
-     */
-    static doInitializationOnce(apiUrl, token) {
-        // console.log("doInitializationOnce", apiUrl, token);
-
-        // check if token is not set or api call was already started
-        if (!apiUrl || !token || JSONLD.initStarted[apiUrl] !== undefined) {
+        if (!apiUrl || JSONLD.initStarted[apiUrl] !== undefined) {
             return;
         }
 
         JSONLD.initStarted[apiUrl] = true;
-        JSONLD.doInitialization(apiUrl, token);
-        // console.log("doInitializationOnce Done", apiUrl, token);
+        JSONLD._doInitialization(apiUrl);
     }
 
-    static doInitialization(apiUrl, token) {
+    static _doInitialization(apiUrl) {
         const xhr = new XMLHttpRequest();
+        const i18n = JSONLD._i18n;
         xhr.open("GET", apiUrl, true);
-        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
 
         xhr.onreadystatechange = function () {
             if (xhr.readyState !== 4) {
@@ -5868,18 +5998,18 @@ class JSONLD {
                         }
 
                         if (docXhr.status === 200) {
-                            JSONLD.gatherEntities(docXhr, apiUrl, entryPoints);
+                            JSONLD._gatherEntities(docXhr, apiUrl, entryPoints);
                         } else {
-                            JSONLD.executeFailureFunctions(apiUrl, i18n$1.t('jsonld.api-documentation-server', {apiUrl: apiDocUrl}));
+                            JSONLD._executeFailureFunctions(apiUrl, i18n.t('jsonld.api-documentation-server', {apiUrl: apiDocUrl}));
                         }
                     };
 
                     docXhr.send();
                 } else {
-                    JSONLD.executeFailureFunctions(apiUrl, i18n$1.t('jsonld.error-hydra-documentation-url-not-set', {apiUrl: apiUrl}));
+                    JSONLD._executeFailureFunctions(apiUrl, i18n.t('jsonld.error-hydra-documentation-url-not-set', {apiUrl: apiUrl}));
                 }
             } else {
-                JSONLD.executeFailureFunctions(apiUrl, i18n$1.t('jsonld.error-api-server', {apiUrl: apiUrl}));
+                JSONLD._executeFailureFunctions(apiUrl, i18n.t('jsonld.error-api-server', {apiUrl: apiUrl}));
             }
         };
 
@@ -5893,7 +6023,7 @@ class JSONLD {
      * @param apiUrl
      * @param entryPoints
      */
-    static gatherEntities(docXhr, apiUrl, entryPoints) {
+    static _gatherEntities(docXhr, apiUrl, entryPoints) {
         const json = JSON.parse(docXhr.responseText);
         const supportedClasses = json["hydra:supportedClass"];
 
@@ -5915,7 +6045,13 @@ class JSONLD {
         JSONLD.instances[apiUrl] = instance;
 
         // return the initialized JSONLD object
-        for (const fnc of JSONLD.successFunctions[apiUrl]) if (typeof fnc == 'function') fnc(instance);
+        if (JSONLD.successFunctions[apiUrl] !== undefined) {
+            for (const fnc of JSONLD.successFunctions[apiUrl]) {
+                if (typeof fnc == 'function') {
+                    fnc(instance);
+                }
+            }
+        }
         JSONLD.successFunctions[apiUrl] = [];
     }
 
@@ -5925,21 +6061,24 @@ class JSONLD {
      * @param apiUrl
      * @param message
      */
-    static executeFailureFunctions(apiUrl, message = "") {
-        for (const fnc of JSONLD.failureFunctions[apiUrl]) if (typeof fnc == 'function') fnc();
+    static _executeFailureFunctions(apiUrl, message = "") {
+        const i18n = JSONLD._i18n;
+        if (JSONLD.failureFunctions[apiUrl] !== undefined) {
+            for (const fnc of JSONLD.failureFunctions[apiUrl]) {
+                if (typeof fnc == 'function') {
+                    fnc(new Error(message));
+                }
+            }
+        }
         JSONLD.failureFunctions[apiUrl] = [];
 
         if (message !== "") {
             send({
-                "summary": i18n$1.t('error.summary'),
+                "summary": i18n.t('error.summary'),
                 "body": message,
                 "type": "danger",
             });
         }
-    }
-
-    static getInstance(apiUrl) {
-        return JSONLD.instances[apiUrl];
     }
 
     getEntityForIdentifier(identifier) {
@@ -6051,10 +6190,12 @@ class JSONLD {
     }
 }
 
+JSONLD._i18n = createInstance();
 JSONLD.instances = {};
 JSONLD.successFunctions = {};
 JSONLD.failureFunctions = {};
 JSONLD.initStarted = {};
+JSONLD.promises = {};
 
 /**
  * Assert a condition.
@@ -7283,7 +7424,7 @@ class KeycloakWrapper extends EventTarget {
     }
 
     async _keycloakInit(options) {
-        // https://gitlab.tugraz.at/dbp/apps/library/issues/41
+        // https://gitlab.tugraz.at/dbp/topics/library/issues/41
         // retry the keycloak init in case it fails, maybe it helps :/
         try {
             return await this._keycloak.init(options);
@@ -7387,6 +7528,355 @@ const LoginStatus = Object.freeze({
     LOGGED_OUT: 'logged-out',
 });
 
+class MiniSpinner extends LitElement {
+    constructor() {
+        super();
+        this.text = "";
+    }
+
+    static get properties() {
+        return {
+            text: { type: String },
+        };
+    }
+
+    static get styles() {
+        // language=css
+        return css`
+        .outer {
+            display: inline-block;
+            vertical-align: sub;
+        }
+        .inner {
+            display: flex;
+        }
+        .ring {
+          display: inline-block;
+          position: relative;
+          width: 1em;
+          height: 1em;
+        }
+        .ring div {
+          box-sizing: border-box;
+          display: block;
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          border: 0.2em solid currentColor;
+          border-radius: 50%;
+          animation: ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+          border-color: currentColor transparent transparent transparent;
+        }
+        .ring div:nth-child(1) {
+          animation-delay: -0.45s;
+        }
+        .ring div:nth-child(2) {
+          animation-delay: -0.3s;
+        }
+        .ring div:nth-child(3) {
+          animation-delay: -0.15s;
+        }
+        @keyframes ring {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+        .text {
+            display: inline-block;
+            margin-left: 0.5em;
+            font-size: 0.7em;
+        }`;
+    } 
+
+    render() {
+        const textHtml = this.text !== "" ? html`<div class="text">${this.text}</div>` : html``;
+
+        return html`<div class="outer"><div class="inner"><div class="ring"><div></div><div></div><div></div><div></div></div>${textHtml}</div></div>`;
+    }
+}
+
+/**
+ * We want to have "neutral" colors here
+ *
+ * @returns {CSSResult}
+ */
+function getThemeCSS() {
+    // language=css
+    return css`
+        :host {
+            --dbp-primary-bg-color: var(--dbp-override-primary-bg-color, #007bff);
+            --dbp-primary-text-color: var(--dbp-override-primary-text-color, #fff);
+            --dbp-primary-button-border: var(--dbp-override-primary-button-border, #007bff);
+            --dbp-secondary-bg-color: var(--dbp-override-secondary-bg-color, #6c757d);
+            --dbp-secondary-text-color: var(--dbp-override-secondary-text-color, #fff);
+            --dbp-info-bg-color: var(--dbp-override-info-bg-color, #17a2b8);
+            --dbp-info-text-color: var(--dbp-override-info-text-color, #fff);
+            --dbp-success-bg-color: var(--dbp-override-success-bg-color, #28a745);
+            --dbp-success-text-color: var(--dbp-override-success-text-color, #fff);
+            --dbp-warning-bg-color: var(--dbp-override-warning-bg-color, #ffc107);
+            --dbp-warning-text-color: var(--dbp-override-warning-text-color, #343a40);
+            --dbp-danger-bg-color: var(--dbp-override-danger-bg-color, #dc3545);
+            --dbp-danger-text-color: var(--dbp-override-danger-text-color, #fff);
+            --dbp-light: var(--dbp-override-light, #f8f9fa);
+            --dbp-dark: var(--dbp-override-dark, #343a40);
+            --dbp-muted-text: var(--dbp-override-muted-text, #6c757d);
+            --dbp-border-radius: var(--dbp-override-border-radius, 0px);
+            --dbp-border-width: var(--dbp-override-border-width, 1px);
+            --dbp-border-color: var(--dbp-override-border-color, #000);
+            --dbp-placeholder-color: #777;
+            --dbp-downloaded-bg-color: var(--dbp-override-downloaded-bg-color, #c8dcc8);
+        }
+    `;
+}
+
+function getButtonCSS() {
+    // language=css
+    return css`
+        button.button, .button, button.dt-button {
+            border-style: solid;
+            border-color: black;
+            border-width: 1px;
+            border-radius: var(--dbp-border-radius);
+            color: black;
+            cursor: pointer;
+            justify-content: center;
+            padding-bottom: calc(0.375em - 1px);
+            padding-left: 0.75em;
+            padding-right: 0.75em;
+            padding-top: calc(0.375em - 1px);
+            text-align: center;
+            white-space: nowrap;
+            font-size: inherit;
+            font-family: inherit;
+            transition: background-color 0.15s ease 0s, color 0.15s ease 0s;
+            background: none;
+        }
+
+        button.button:hover:enabled, .button:hover:enabled, button.dt-button:hover:enabled, button.dt-button:hover:not(.disabled) {
+            color: white;
+            background: none;
+            background-color: black;
+        }
+
+        button.button.is-small, .button.is-small {
+            border-radius: calc(var(--dbp-border-radius) / 2);
+            font-size: .75rem;
+        }
+
+        button.button.is-primary, .button.is-primary {
+            background-color: var(--dbp-primary-bg-color);
+            border: var(--dbp-primary-button-border);
+            color: var(--dbp-primary-text-color);
+        }
+
+        button.button.is-info, .button.is-info {
+            background-color: var(--dbp-info-bg-color);
+            color: var(--dbp-info-text-color);
+        }
+
+        button.button.is-success, .button.is-success {
+            background-color: var(--dbp-success-bg-color);
+            color: var(--dbp-success-text-color);
+        }
+
+        button.button.is-warning, .button.is-warning {
+            background-color: var(--dbp-warning-bg-color);
+            color: var(--dbp-warning-text-color);
+        }
+
+        .button.button.is-danger, .button.is-danger {
+            background-color: var(--dbp-danger-bg-color);
+            color: var(--dbp-danger-text-color);
+        }
+
+        button.button[disabled], .button[disabled], fieldset[disabled] .button {
+            opacity: .4;
+            cursor: not-allowed;
+        }
+    `;
+}
+
+/**
+ * dbp-button implements a button with Bulma styles and automatic spinner and
+ * disabling if button is clicked
+ *
+ * Use the attribute "no-spinner-on-click" to disable the spinner, then you can
+ * start it with start() and stop it with stop()
+ *
+ * Type can be is-primary/is-info/is-success/is-warning/is-danger
+ */
+class Button extends ScopedElementsMixin(LitElement) {
+    constructor() {
+        super();
+        this.value = "";
+        this.type = "";
+        this.spinner = false;
+        this.noSpinnerOnClick = false;
+        this.disabled = false;
+    }
+
+    static get scopedElements() {
+        return {
+            'dbp-mini-spinner': MiniSpinner,
+        };
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+    }
+
+    static get properties() {
+        return {
+            value: { type: String },
+            type: { type: String },
+            spinner: { type: Boolean },
+            noSpinnerOnClick: { type: Boolean, attribute: 'no-spinner-on-click' },
+            disabled: { type: Boolean, reflect: true },
+        };
+    }
+
+    clickHandler() {
+        if (!this.noSpinnerOnClick) {
+            this.start();
+        }
+    }
+
+    start() {
+        this.spinner = true;
+        this.disabled = true;
+    }
+
+    stop() {
+        this.spinner = false;
+        this.disabled = false;
+    }
+
+    isDisabled() {
+        return this.disabled;
+    }
+
+    static get styles() {
+        // language=css
+        return css`
+            ${getThemeCSS()}
+            ${getButtonCSS()}
+
+            .spinner { margin-left: 0.5em; }
+        `;
+    }
+
+    render() {
+        return html`
+            <button @click="${this.clickHandler}" class="button ${this.type}" ?disabled="${this.disabled}">
+                ${this.value} <dbp-mini-spinner class="spinner" style="display: ${this.spinner ? "inline" : "none"}"></dbp-mini-spinner>
+            </button>
+        `;
+    }
+}
+
+class LoadingButton extends ScopedElementsMixin(LitElement) {
+    constructor() {
+        super();
+        this.value = "";
+        this.type = "";
+        this.loading = false;
+        this.disabled = false;
+
+        // https://bugs.chromium.org/p/chromium/issues/detail?id=1061240#c12
+        this.addEventListener('click', (e) => {
+            if (this.disabled) {
+              e.stopImmediatePropagation();
+            }
+        });
+    }
+
+    static get scopedElements() {
+        return {
+            'dbp-mini-spinner': MiniSpinner,
+        };
+    }
+
+    static get properties() {
+        return {
+            // value is deprecated, use the main slot instead
+            value: { type: String },
+            type: { type: String },
+            loading: { type: Boolean },
+            disabled: { type: Boolean, reflect: true },
+        };
+    }
+
+    start() {
+        this.loading = true;
+        this.disabled = true;
+    }
+
+    stop() {
+        this.loading = false;
+        this.disabled = false;
+    }
+
+    static get styles() {
+        // language=css
+        return css`
+            ${getThemeCSS()}
+            ${getButtonCSS()}
+
+            .spinner {
+                padding-left: 0.5em;
+                min-width: 16px;
+            }
+
+            .loading-container {
+                display: flex;
+                align-items: baseline;
+            }
+
+            .label {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            :host {
+                display: inline-block;
+            }
+
+            .is-not-loading .label {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+
+            .button {
+                width: 100%;
+            }
+        `;
+    }
+
+    render() {
+        return html`
+            <button class="button ${this.type} loading-container ${!this.loading ? "is-not-loading" : ""}" ?disabled="${this.disabled}">
+               <div class="label"><slot>${this.value}</slot></div> <dbp-mini-spinner class="spinner" style="display: ${this.loading ? "inline" : "none"}"></dbp-mini-spinner>
+            </button>
+        `;
+    }
+}
+
+class LoggerType {
+    get debug() {
+        if (window.location.hash.includes("debug")) {
+            return console.debug;
+        } else {
+            return () => {};
+        }
+    }
+}
+
+const Logger = new LoggerType();
+
 class AdapterLitElement extends LitElement {
     constructor() {
         super();
@@ -7410,7 +7900,7 @@ class AdapterLitElement extends LitElement {
         // We need to store our own "last values" because we cannot be sure what the MutationObserver detects
         this.lastProperties = {};
 
-        console.log('AdapterLitElement(' + this.tagName + ') constructor()');
+        Logger.debug('AdapterLitElement(' + this.tagName + ') constructor()');
     }
 
     getProperty(name) {
@@ -7428,7 +7918,7 @@ class AdapterLitElement extends LitElement {
     setProperty(name, value) {
         // TODO: check if lit attribute really present?
         if (typeof value === 'object' && value !== null) {
-            // console.log("value is object", value);
+            // Logger.debug("value is object", value);
             this.setPropertyByAttributeName(name, value);
         } else {
             this.attributeChangedCallback(name, this.getPropertyByAttributeName(name), value);
@@ -7469,8 +7959,8 @@ class AdapterLitElement extends LitElement {
 
         this.addEventListener('dbp-subscribe', function (e) {
             const name = e.detail.name;
-            if (that.hasProperty(name) || that.root) {
-                console.log('AdapterLitElementProvider(' + that.tagName + ') eventListener("dbp-subscribe",..) name "' + name + '" found.');
+            if (that.hasProperty(name) || that.providerRoot) {
+                Logger.debug('AdapterLitElementProvider(' + that.tagName + ') eventListener("dbp-subscribe",..) name "' + name + '" found.');
                 that.callbackStore.push({name: name, callback: e.detail.callback, sender: e.detail.sender});
 
                 e.detail.callback(that.getProperty(name));
@@ -7481,13 +7971,13 @@ class AdapterLitElement extends LitElement {
         this.addEventListener('dbp-unsubscribe', function (e) {
             const name = e.detail.name;
             const sender = e.detail.sender;
-            if (that.hasProperty(name) || that.root) {
-                console.log('AdapterLitElementProvider(' + that.tagName + ') eventListener("dbp-unsubscribe",..) name "' + name + '" found.');
+            if (that.hasProperty(name) || that.providerRoot) {
+                Logger.debug('AdapterLitElementProvider(' + that.tagName + ') eventListener("dbp-unsubscribe",..) name "' + name + '" found.');
                 that.callbackStore.forEach(item => {
                     if (item.sender === sender && item.name === name) {
                         const index = that.callbackStore.indexOf(item);
                         that.callbackStore.splice(index, 1);
-                        console.log('AdapterLitElementProvider(' + that.tagName + ') eventListener for name "' + name + '" removed.');
+                        Logger.debug('AdapterLitElementProvider(' + that.tagName + ') eventListener for name "' + name + '" removed.');
                     }
                 });
 
@@ -7500,8 +7990,8 @@ class AdapterLitElement extends LitElement {
             const name = e.detail.name;
             const value = e.detail.value;
 
-            if (that.hasProperty(name) || that.root) {
-                console.log('AdapterLitElementProvider(' + that.tagName + ') eventListener("dbp-set-property",..) name "' + name + '" found.');
+            if (that.hasProperty(name) || that.providerRoot) {
+                Logger.debug('AdapterLitElementProvider(' + that.tagName + ') eventListener("dbp-set-property",..) name "' + name + '" found.');
                 that.setProperty(name, value);
 
                 that.callbackStore.forEach(item => {
@@ -7526,7 +8016,7 @@ class AdapterLitElement extends LitElement {
                     const value = that.getAttribute(name);
 
                     if (that.hasPropertyChanged(name, value)) {
-                        console.log('AdapterLitElementProvider (' + that.tagName + ') observed attribute "' + name + '" changed');
+                        Logger.debug('AdapterLitElementProvider (' + that.tagName + ') observed attribute "' + name + '" changed');
                         that.setProperty(name, value);
 
                         that.callbackStore.forEach(item => {
@@ -7554,7 +8044,7 @@ class AdapterLitElement extends LitElement {
                 }
 
                 this.setProperty(attrs[i].name, attrs[i].value);
-                console.log('AdapterLitElementProvider (' + that.tagName + ') found attribute "' + attrs[i].name + '" = "' + attrs[i].value + '"');
+                Logger.debug('AdapterLitElementProvider (' + that.tagName + ') found attribute "' + attrs[i].name + '" = "' + attrs[i].value + '"');
             }
         }
     }
@@ -7567,7 +8057,7 @@ class AdapterLitElement extends LitElement {
     }
 
     subscribeProviderFor(element) {
-        console.log('AdapterLitElement(' + this.tagName + ') subscribeProviderFor( ' + element + ' )');
+        Logger.debug('AdapterLitElement(' + this.tagName + ') subscribeProviderFor( ' + element + ' )');
         const pair = element.trim().split(':');
         const local = pair[0];
         const global = pair[1] || local;
@@ -7579,14 +8069,14 @@ class AdapterLitElement extends LitElement {
                 detail: {
                     name: global,
                     callback: (value) => {
-                        console.log('AdapterLitElement(' + that.tagName + ') sub/Callback ' + global + ' -> ' + local + ' = ' + value);
+                        Logger.debug('AdapterLitElement(' + that.tagName + ') sub/Callback ' + global + ' -> ' + local + ' = ' + value);
 
                         // If value is an object set it directly as property
                         if (typeof value === 'object' && value !== null) {
-                            // console.log("value is object", value);
+                            // Logger.debug("value is object", value);
                             that.setPropertyByAttributeName(local, value);
                         } else {
-                            // console.log("local, that.getPropertyByAttributeName(local), value", local, that.getPropertyByAttributeName(local), value);
+                            // Logger.debug("local, that.getPropertyByAttributeName(local), value", local, that.getPropertyByAttributeName(local), value);
                             that.attributeChangedCallback(local, that.getPropertyByAttributeName(local), value);
 
                             // check if an attribute also exists in the tag
@@ -7608,7 +8098,7 @@ class AdapterLitElement extends LitElement {
     }
 
     unSubscribeProviderFor(element) {
-        console.log('AdapterLitElement(' + this.tagName + ') unSubscribeProviderFor( ' + element + ' )');
+        Logger.debug('AdapterLitElement(' + this.tagName + ') unSubscribeProviderFor( ' + element + ' )');
         const pair = element.trim().split(':');
         const global = pair[1] || pair[0];
         const event = new CustomEvent('dbp-unsubscribe',
@@ -7625,18 +8115,20 @@ class AdapterLitElement extends LitElement {
 
     static get properties() {
         return {
+            ...super.properties,
             subscribe: { type: String },
             unsubscribe: { type: String },
+            providerRoot: { type: Boolean, attribute: 'provider-root' },
         };
     }
 
     findPropertyName(attributeName) {
         let resultName = attributeName;
         const properties = this.constructor.properties;
-        // console.log("properties", properties);
+        // Logger.debug("properties", properties);
 
         for (const propertyName in properties) {
-            // console.log("findPropertyName", `${propertyName}: ${properties[propertyName]}`);
+            // Logger.debug("findPropertyName", `${propertyName}: ${properties[propertyName]}`);
             const attribute = properties[propertyName].attribute;
             if (attribute === attributeName) {
                 resultName = propertyName;
@@ -7650,7 +8142,7 @@ class AdapterLitElement extends LitElement {
     attributeChangedCallback(name, oldValue, newValue) {
         switch(name) {
             case 'subscribe':
-                console.log('AdapterLitElement() attributeChangesCallback( ' + name + ', ' + oldValue + ', ' + newValue + ')');
+                Logger.debug('AdapterLitElement() attributeChangesCallback( ' + name + ', ' + oldValue + ', ' + newValue + ')');
 
                 if (this.subscribe && this.subscribe.length > 0) {
                     if (this.connected) {
@@ -7673,17 +8165,18 @@ class AdapterLitElement extends LitElement {
                 }
                 break;
             default:
-                // The function should not be called if newValue is empty but name and oldValue are set
+                // The function should not be called if oldValue is an object, oldValue and newValue are empty
+                // or if newValue is empty but name and oldValue are set
                 // This should prevent 'Uncaught SyntaxError: JSON.parse unexpected end of data at line 1 column 1 of the JSON data'
-                if (newValue || !oldValue || !name) {
-                    super.attributeChangedCallback(name, oldValue, newValue);
-                // } else {
-                    //     console.log("attributeChangedCallback ignored", name, oldValue, newValue);
+                if ((typeof oldValue === 'object' && !oldValue && !newValue) || (!newValue && oldValue && name)) {
+                    // Logger.debug("attributeChangedCallback ignored", name, oldValue, newValue);
+                    break;
                 }
+                super.attributeChangedCallback(name, oldValue, newValue);
         }
 
-        // console.log("this.lang", this.tagName, name, this.lang);
-        // console.log("this.entryPointUrl", this.tagName, name, this.entryPointUrl);
+        // Logger.debug("this.lang", this.tagName, name, this.lang);
+        // Logger.debug("this.entryPointUrl", this.tagName, name, this.entryPointUrl);
         // console.trace();
     }
 
@@ -7692,10 +8185,11 @@ class AdapterLitElement extends LitElement {
      *
      * @param name
      * @param value
+     * @param sendToSelf Set this to "true" if the event should  be sent to oneself instead of the parent (e.g. in the app shell if there isn't a provider around it)
      * @returns {boolean}
      */
-    sendSetPropertyEvent(name, value) {
-        // console.log("dbp-set-property", name, value);
+    sendSetPropertyEvent(name, value, sendToSelf = false) {
+        // Logger.debug("dbp-set-property", name, value);
 
         const event = new CustomEvent('dbp-set-property', {
             bubbles: true,
@@ -7703,7 +8197,11 @@ class AdapterLitElement extends LitElement {
             detail: {'name': name, 'value': value}
         });
 
-        return this.dispatchEvent(event);
+        // dispatch the dbp-set-property event to the parent (if there is any) so that the current element
+        // doesn't terminate the event if it has the attribute set itself
+        const element = this.parentElement && !sendToSelf ? this.parentElement : this;
+
+        return element.dispatchEvent(event);
     }
 
     // update(changedProperties) {
@@ -7750,7 +8248,6 @@ class AdapterLitElement extends LitElement {
 class AuthKeycloak extends AdapterLitElement {
     constructor() {
         super();
-        this.lang = 'de';
         this.forceLogin = false;
         this.loadPerson = false;
         this.token = "";
@@ -7762,6 +8259,8 @@ class AuthKeycloak extends AdapterLitElement {
         this.entryPointUrl = '';
         this._loginStatus = LoginStatus.UNKNOWN;
         this.requestedLoginStatus = LoginStatus.UNKNOWN;
+        this._i18n = createInstance$1();
+        this.lang = this._i18n.language;
 
         // Keycloak config
         this.keycloakUrl = null;
@@ -7779,7 +8278,11 @@ class AuthKeycloak extends AdapterLitElement {
         changedProperties.forEach((oldValue, propName) => {
             switch (propName) {
                 case 'lang':
-                    i18n.changeLanguage(this.lang);
+                    this._i18n.changeLanguage(this.lang);
+                break;
+                case 'entryPointUrl':
+                    // for preloading the instance
+                    JSONLD.getInstance(this.entryPointUrl, this.lang);
                 break;
                 case 'requestedLoginStatus':
                     console.log("requested-login-status changed", this.requestedLoginStatus);
@@ -7844,24 +8347,31 @@ class AuthKeycloak extends AdapterLitElement {
         const that = this;
 
         if (newPerson && this.loadPerson) {
-            JSONLD.initialize(this.entryPointUrl, (jsonld) => {
-                // find the correct api url for the current person
-                // we are fetching the logged-in person directly to respect the REST philosophy
-                // see: https://github.com/api-platform/api-platform/issues/337
-                const apiUrl = jsonld.getApiUrlForEntityName("Person") + '/' + that.personId;
+            JSONLD.getInstance(this.entryPointUrl).then((jsonld) => {
+                try {
+                    // find the correct api url for the current person
+                    // we are fetching the logged-in person directly to respect the REST philosophy
+                    // see: https://github.com/api-platform/api-platform/issues/337
+                    const apiUrl = jsonld.getApiUrlForEntityName("Person") + '/' + that.personId;
 
-                fetch(apiUrl, {
-                    headers: {
-                        'Content-Type': 'application/ld+json',
-                        'Authorization': 'Bearer ' + that.token,
-                    },
-                })
-                .then(response => response.json())
-                .then((person) => {
-                    that.person = person;
+                    fetch(apiUrl, {
+                        headers: {
+                            'Content-Type': 'application/ld+json',
+                            'Authorization': 'Bearer ' + that.token,
+                        },
+                    })
+                        .then(response => response.json())
+                        .then((person) => {
+                            that.person = person;
+                            this.sendSetPropertyEvents();
+                            this._setLoginStatus(this._loginStatus, true);
+                        });
+                } catch (error) {
+                    console.warn(error);
+                    that.person = null;
                     this.sendSetPropertyEvents();
                     this._setLoginStatus(this._loginStatus, true);
-                });
+                }
             }, {}, that.lang);
         }
     }
@@ -7882,13 +8392,6 @@ class AuthKeycloak extends AdapterLitElement {
         }
 
         this.sendSetPropertyEvent('auth', auth);
-        JSONLD.doInitializationOnce(this.entryPointUrl, this.token);
-
-        // this.sendSetPropertyEvent('auth-subject', this.subject);
-        // this.sendSetPropertyEvent('auth-token', this.token);
-        // this.sendSetPropertyEvent('user-full-name', this.name);
-        // this.sendSetPropertyEvent('person-id', this.personId);
-        // this.sendSetPropertyEvent('person', this.person);
     }
 
     _setLoginStatus(status, force) {
@@ -8003,39 +8506,6 @@ const unsafeHTML = directive((value) => (part) => {
     previousValues.set(part, { value, fragment });
 });
 
-/**
- * We want to have "neutral" colors here
- *
- * @returns {CSSResult}
- */
-function getThemeCSS() {
-    // language=css
-    return css`
-        :host {
-            --dbp-primary-bg-color: var(--dbp-override-primary-bg-color, #007bff);
-            --dbp-primary-text-color: var(--dbp-override-primary-text-color, #fff);
-            --dbp-primary-button-border: var(--dbp-override-primary-button-border, #007bff);
-            --dbp-secondary-bg-color: var(--dbp-override-secondary-bg-color, #6c757d);
-            --dbp-secondary-text-color: var(--dbp-override-secondary-text-color, #fff);
-            --dbp-info-bg-color: var(--dbp-override-info-bg-color, #17a2b8);
-            --dbp-info-text-color: var(--dbp-override-info-text-color, #fff);
-            --dbp-success-bg-color: var(--dbp-override-success-bg-color, #28a745);
-            --dbp-success-text-color: var(--dbp-override-success-text-color, #fff);
-            --dbp-warning-bg-color: var(--dbp-override-warning-bg-color, #ffc107);
-            --dbp-warning-text-color: var(--dbp-override-warning-text-color, #343a40);
-            --dbp-danger-bg-color: var(--dbp-override-danger-bg-color, #dc3545);
-            --dbp-danger-text-color: var(--dbp-override-danger-text-color, #fff);
-            --dbp-light: var(--dbp-override-light, #f8f9fa);
-            --dbp-dark: var(--dbp-override-dark, #343a40);
-            --dbp-muted-text: var(--dbp-override-muted-text, #6c757d);
-            --dbp-border-radius: var(--dbp-override-border-radius, 0px);
-            --dbp-border-width: var(--dbp-override-border-width, 1px);
-            --dbp-border-color: var(--dbp-override-border-color, #000);
-            --dbp-placeholder-color: #777; 
-        }
-    `;
-}
-
 let logoutSVG = `
 <svg
    viewBox="0 0 100 100"
@@ -8081,27 +8551,18 @@ let loginSVG = `
 </svg>
 `;
 
-let loggingInSVG = `
-<svg
-   viewBox="0 0 100 100"
-   y="0px"
-   x="0px"
-   id="icon"
-   role="img"
-   version="1.1">
-</svg>
-`;
-
 class LoginButton extends ScopedElementsMixin(AdapterLitElement) {
 
     constructor() {
         super();
-        this.lang = 'de';
+        this._i18n = createInstance$1();
+        this.lang = this._i18n.language;
         this.auth = {};
     }
 
     static get scopedElements() {
         return {
+            'dbp-mini-spinner': MiniSpinner,
         };
     }
 
@@ -8133,7 +8594,7 @@ class LoginButton extends ScopedElementsMixin(AdapterLitElement) {
     update(changedProperties) {
         changedProperties.forEach((oldValue, propName) => {
             if (propName === "lang") {
-                i18n.changeLanguage(this.lang);
+                this._i18n.changeLanguage(this.lang);
             }
         });
 
@@ -8162,9 +8623,12 @@ class LoginButton extends ScopedElementsMixin(AdapterLitElement) {
                 transition: background-color 0.15s, color 0.15s;
             }
 
-            .login-box svg {
+            .login-box svg, .icon {
                 width: 1.1em;
                 height: 1.1em;
+            }
+
+            .login-box svg, .spinner {
                 display: flex;
             }
 
@@ -8187,12 +8651,13 @@ class LoginButton extends ScopedElementsMixin(AdapterLitElement) {
     }
 
     render() {
+        let i18n = this._i18n;
         if (this.auth['login-status'] === LoginStatus.LOGGING_IN) {
             // try to keep the layout the same to avoid layout shifts
             return html`
                 <a href="#">
                     <div class="login-box login-button">
-                        <div class="icon">${unsafeHTML(loggingInSVG)}</div>
+                        <div class="icon"><dbp-mini-spinner class="spinner"></dbp-mini-spinner></div>
                         <div class="label">&#8203;</div>
                     </div>
                 </a>

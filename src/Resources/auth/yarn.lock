@@ -116,34 +116,34 @@
     lodash "^4.17.19"
     to-fast-properties "^2.0.0"
 
-"@dbp-toolkit/auth@^0.2.1", "@dbp-toolkit/auth@^0.2.2":
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/@dbp-toolkit/auth/-/auth-0.2.2.tgz#76a212fcfa449d55c54bc60a8e180c6ccbb3fdd0"
-  integrity sha512-xodL9G6KHwrftubq4mFrHO0u7d8+vMPWi0xDHSDR9eFtwRPy/mGbyCN1fcDj+mUANrxwrzc+MV7sFBVBQ4f7Bg==
+"@dbp-toolkit/auth@^0.2.5", "@dbp-toolkit/auth@dev-master as 0.2.5":
+  version "0.2.5"
+  resolved "https://registry.npmjs.org/@dbp-toolkit/auth/-/auth-0.2.5.tgz#9079b8a64f787f50c78103a36567c1b253146bd3"
+  integrity sha512-SOKZIdtb48quWp6TwiNKEQykrv2OdF/68t6/oCTU7bfBqwGZl9DUDgZH74jR7NrZZEEk757HVq8wZoLWjprsrg==
   dependencies:
-    "@dbp-toolkit/common" "^0.2.2"
-    "@open-wc/scoped-elements" "^1.3.2"
+    "@dbp-toolkit/common" "^0.2.12"
+    "@open-wc/scoped-elements" "^1.3.3"
     event-target-shim "^6.0.0"
     lit-element "^2.4.0"
 
-"@dbp-toolkit/common@^0.2.1", "@dbp-toolkit/common@^0.2.2":
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/@dbp-toolkit/common/-/common-0.2.2.tgz#56254a1516cba347c652c40169446f9b8cc4597d"
-  integrity sha512-k7n4CPRbl0FQbycsUkj5I3Q1EMaec+ou7maJX3oNB/Y0vDMaGsiwsBWBQmXcIF3epm8LuN2AQCJCcsDMOhfJ+w==
+"@dbp-toolkit/common@^0.2.12", "@dbp-toolkit/common@dev-master as 0.2.12":
+  version "0.2.12"
+  resolved "https://registry.npmjs.org/@dbp-toolkit/common/-/common-0.2.12.tgz#68e854bb1ff181ac52417b9cb5bfa64a47a9bc3e"
+  integrity sha512-d+vkStH3VFVEaLMtJyj6DYzrlqb8X3cmK6Ijra26/2DzVDEu91w/oyQI0b/hiQYPsNFaU5UWHorGV4YKsvht/g==
   dependencies:
-    "@open-wc/scoped-elements" "^1.3.2"
+    "@open-wc/scoped-elements" "^1.3.3"
     "@sentry/browser" "^6.0.0"
-    i18next "^19.8.4"
+    i18next "^20.0.0"
     lit-element "^2.4.0"
 
-"@dbp-toolkit/provider@^0.2.1":
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/@dbp-toolkit/provider/-/provider-0.2.2.tgz#95e6e527989dd3aecd184e492a33397715c2e84f"
-  integrity sha512-qGHzkSbuAIOIL/CX3AcucNVDGyqVDt9PENAxkd0Fc9BkU1LLpIn0C5VUoatlWeUC0KV2/3qPOkXWCSVagu5qfw==
+"@dbp-toolkit/provider@dev-master as 0.2.5":
+  version "0.2.5"
+  resolved "https://registry.npmjs.org/@dbp-toolkit/provider/-/provider-0.2.5.tgz#9ebce84701269359808e51444aa621479ebf4440"
+  integrity sha512-Qb7qdJTWWB0L2Zs5mDbLuGmLoIvnjZQABk9iEzkJpvQlSgi+KTPHK37ML25iqDLyHWwQIj77McTnSdnv1LYsjA==
   dependencies:
-    "@dbp-toolkit/auth" "^0.2.2"
-    "@dbp-toolkit/common" "^0.2.2"
-    "@open-wc/scoped-elements" "^1.1.1"
+    "@dbp-toolkit/auth" "^0.2.5"
+    "@dbp-toolkit/common" "^0.2.12"
+    "@open-wc/scoped-elements" "^1.3.3"
     lit-element "^2.4.0"
 
 "@eslint/eslintrc@^0.4.0":
@@ -187,7 +187,7 @@
   resolved "https://registry.yarnpkg.com/@open-wc/dedupe-mixin/-/dedupe-mixin-1.3.0.tgz#0df5d438285fc3482838786ee81895318f0ff778"
   integrity sha512-UfdK1MPnR6T7f3svzzYBfu3qBkkZ/KsPhcpc3JYhsUY4hbpwNF9wEQtD4Z+/mRqMTJrKg++YSxIxE0FBhY3RIw==
 
-"@open-wc/scoped-elements@^1.1.1", "@open-wc/scoped-elements@^1.3.2":
+"@open-wc/scoped-elements@^1.3.2", "@open-wc/scoped-elements@^1.3.3":
   version "1.3.3"
   resolved "https://registry.npmjs.org/@open-wc/scoped-elements/-/scoped-elements-1.3.3.tgz#fe008aef4d74fb00c553c900602960638fc1c7b0"
   integrity sha512-vFIQVYYjFw67odUE4JzZOpctnF7S/2DX+S+clrL3bQPql7HvEnV0wMFwOWUavQTuCJi0rfU8GTcNMiUybio+Yg==
@@ -1556,10 +1556,10 @@ i18next@*:
   dependencies:
     "@babel/runtime" "^7.12.0"
 
-i18next@^19.8.4:
-  version "19.9.1"
-  resolved "https://registry.yarnpkg.com/i18next/-/i18next-19.9.1.tgz#7a072b75daf677aa51fd4ce55214f21702af3ffd"
-  integrity sha512-9Azzyb3DvMJUMd7sPhwVEs6PQcogvdHmLQTjMQ+P+h3XwW4O66/8lgZTmYShgkjPOCqTw4Fwl5LOp/VhZgPo5A==
+i18next@^20.0.0:
+  version "20.3.2"
+  resolved "https://registry.npmjs.org/i18next/-/i18next-20.3.2.tgz#5195e76b9e0848a1c198001bf6c7fc72995a55f1"
+  integrity sha512-e8CML2R9Ng2sSQOM80wb/PrM2j8mDm84o/T4Amzn9ArVyNX5/ENWxxAXkRpZdTQNDaxKImF93Wep4mAoozFrKw==
   dependencies:
     "@babel/runtime" "^7.12.0"
 
