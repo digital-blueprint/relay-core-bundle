@@ -4,21 +4,13 @@ declare(strict_types=1);
 
 namespace DBP\API\CoreBundle\DependencyInjection;
 
-use ApiPlatform\Core\Exception\FilterValidationException;
-use ApiPlatform\Core\Exception\InvalidArgumentException;
-use ApiPlatform\Core\Exception\ItemNotFoundException;
-use DBP\API\CoreBundle\Exception\ItemNotLoadedException;
-use DBP\API\CoreBundle\Exception\ItemNotStoredException;
-use DBP\API\CoreBundle\Exception\ItemNotUsableException;
 use DBP\API\CoreBundle\Keycloak\KeycloakBearerAuthenticator;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
-use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 class DbpCoreExtension extends ConfigurableExtension implements PrependExtensionInterface
 {
@@ -53,23 +45,6 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
             }
         }
 
-        // FIXME: We need to get rid of our custom exceptions here and throw them manually in the controllers/providers
-        $exceptionToStatus = [
-            ItemNotFoundException::class => Response::HTTP_NOT_FOUND,
-
-            // The 4 following handlers are registered by default, keep those lines to prevent unexpected side effects
-            // TODO: can we get them programmatically somehow?
-            ExceptionInterface::class => Response::HTTP_BAD_REQUEST,
-            InvalidArgumentException::class => Response::HTTP_BAD_REQUEST,
-            FilterValidationException::class => Response::HTTP_BAD_REQUEST,
-            'Doctrine\ORM\OptimisticLockException' => Response::HTTP_CONFLICT,
-
-            // These should be 5xx, but https://github.com/api-platform/core/issues/3659
-            ItemNotStoredException::class => Response::HTTP_FAILED_DEPENDENCY,
-            ItemNotLoadedException::class => Response::HTTP_FAILED_DEPENDENCY,
-            ItemNotUsableException::class => Response::HTTP_FAILED_DEPENDENCY,
-        ];
-
         $container->loadFromExtension('api_platform', [
             'title' => 'DBP API Gateway',
             'defaults' => [
@@ -95,7 +70,6 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
                     ],
                 ],
             ],
-            'exception_to_status' => $exceptionToStatus,
             'path_segment_name_generator' => 'api_platform.path_segment_name_generator.dash',
         ]);
 
