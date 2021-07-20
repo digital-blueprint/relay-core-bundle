@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace DBP\API\CoreBundle\Tests\Helpers;
 
-use DBP\API\CoreBundle\Helpers\JsonException;
 use DBP\API\CoreBundle\Helpers\Tools;
 use PHPUnit\Framework\TestCase;
 
@@ -28,7 +27,7 @@ class ToolsTest extends TestCase
             try {
                 Tools::decodeJSON($input, true);
                 $this->fail('not thrown');
-            } catch (JsonException $e) {
+            } catch (\JsonException $e) {
             }
         }
     }

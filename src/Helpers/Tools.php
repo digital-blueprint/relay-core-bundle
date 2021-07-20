@@ -9,7 +9,7 @@ class Tools
     /**
      * Like json_decode but throws on invalid json data.
      *
-     * @throws JsonException
+     * @throws \JsonException
      *
      * @return mixed
      */
@@ -18,7 +18,7 @@ class Tools
         $result = json_decode($json, $assoc);
         $json_error = json_last_error();
         if ($json_error !== JSON_ERROR_NONE) {
-            throw new JsonException(sprintf('%s: "%s"', json_last_error_msg(), print_r($json, true)));
+            throw new \JsonException(sprintf('%s: "%s"', json_last_error_msg(), print_r($json, true)));
         }
 
         return $result;

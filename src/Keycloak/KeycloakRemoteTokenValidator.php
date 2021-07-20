@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace DBP\API\CoreBundle\Keycloak;
 
 use DBP\API\CoreBundle\Helpers\GuzzleTools;
-use DBP\API\CoreBundle\Helpers\JsonException;
 use DBP\API\CoreBundle\Helpers\Tools;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
@@ -76,7 +75,7 @@ class KeycloakRemoteTokenValidator extends KeycloakTokenValidatorBase
 
         try {
             $jwt = Tools::decodeJSON((string) $response->getBody(), true);
-        } catch (JsonException $e) {
+        } catch (\JsonException $e) {
             throw new TokenValidationException('Cert fetching, invalid json: '.$e->getMessage());
         }
 
