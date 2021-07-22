@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace DBP\API\CoreBundle\DependencyInjection;
 
-use DBP\API\CoreBundle\Keycloak\KeycloakBearerAuthenticator;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
+use Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface;
 
 class DbpCoreExtension extends ConfigurableExtension implements PrependExtensionInterface
 {
@@ -22,19 +21,11 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
         );
         $loader->load('services.yaml');
 
-        $certCacheDef = $container->register('dbp_api.cache.core.keycloak_cert', FilesystemAdapter::class);
-        $certCacheDef->setArguments(['core-keycloak-cert', 60, '%kernel.cache_dir%/dbp/core-keycloak-cert']);
-        $certCacheDef->addTag('cache.pool');
-
         // Pass the collected paths that need to be hidden to the OpenApiDecorator
         $definition = $container->getDefinition('DBP\API\CoreBundle\Swagger\OpenApiDecorator');
         if ($container->hasParameter('dbp_api.paths_to_hide')) {
             $definition->addMethodCall('setPathsToHide', [$container->getParameter('dbp_api.paths_to_hide')]);
         }
-
-        $definition = $container->getDefinition('DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProvider');
-        $definition->addMethodCall('setConfig', [$mergedConfig['keycloak'] ?? []]);
-        $definition->addMethodCall('setCertCache', [$certCacheDef]);
     }
 
     public function prepend(ContainerBuilder $container)
@@ -96,7 +87,7 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
                     'pattern' => '^/',
                     'lazy' => true,
                     'custom_authenticators' => [
-                        KeycloakBearerAuthenticator::class,
+                        AuthenticatorInterface::class,
                     ],
                 ],
             ],
@@ -139,19 +130,20 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
         ]);
 
         $config = $container->getExtensionConfig($this->getAlias())[0];
-        $keycloak = $config['keycloak'] ?? [];
-        $api_docs = $config['api_docs'] ?? [];
+
+        // In case another bundle wants to inject twig globals
+        $twigGlobals = [];
+        if ($container->hasParameter('dbp_api.twig_globals')) {
+            $twigGlobals = $container->getParameter('dbp_api.twig_globals');
+        }
 
         $container->loadFromExtension('twig', [
-            'globals' => [
-                'keycloak_server_url' => $keycloak['server_url'] ?? '',
-                'keycloak_realm' => $keycloak['realm'] ?? '',
-                'keycloak_frontend_client_id' => $api_docs['keycloak_client_id'] ?? '',
-                'app_buildinfo' => $api_docs['build_info'] ?? '',
-                'app_buildinfo_url' => $api_docs['build_info_url'] ?? '',
+            'globals' => array_merge($twigGlobals, [
+                'app_buildinfo' => $config['build_info'] ?? '',
+                'app_buildinfo_url' => $config['build_info_url'] ?? '',
                 'app_env' => '%kernel.environment%',
                 'app_debug' => '%kernel.debug%',
-            ],
+            ]),
         ]);
 
         // https://symfony.com/doc/4.4/messenger.html#transports-async-queued-messages

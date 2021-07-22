@@ -5,19 +5,39 @@ declare(strict_types=1);
 namespace DBP\API\CoreBundle\TestUtils;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
-use DBP\API\CoreBundle\Keycloak\KeycloakBearerUser;
+use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\Client;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 trait UserAuthTrait
 {
-    public function withUser(?string $id, string $token, array $options = []): array
+    public function withUser(?string $id, array $roles = [], ?string $token = null): Client
     {
-        $client = ApiTestCase::createClient();
-        $roles = $options['roles'] ?? [];
-        $user = new KeycloakBearerUser($id, $roles);
-        $userProvider = new DummyUserProvider($user, $token);
-        $container = $client->getContainer();
-        $container->set('test.UserProviderInterface', $userProvider);
+        KernelTestCase::ensureKernelShutdown();
 
-        return [$client, $user];
+        $client = ApiTestCase::createClient();
+        $container = $client->getContainer();
+
+        $session = $container->get(TestUserSession::class);
+        assert($session instanceof TestUserSession);
+        $session->setIdentifier($id);
+        $session->setRoles($roles);
+
+        $auth = $container->get(TestAuthenticator::class);
+        assert($auth instanceof TestAuthenticator);
+        $auth->setToken($token);
+        $user = new TestUser($id, $roles);
+        $auth->setUser($user);
+
+        return $client;
+    }
+
+    public function getUser(Client $client): ?UserInterface
+    {
+        $container = $client->getContainer();
+        $auth = $container->get(TestAuthenticator::class);
+        assert($auth instanceof TestAuthenticator);
+
+        return $auth->getUser();
     }
 }

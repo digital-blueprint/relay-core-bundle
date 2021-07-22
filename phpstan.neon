@@ -15,5 +15,3 @@ parameters:
     ignoreErrors:
         - message: '#.*NodeDefinition::children.*#'
           path: ./src/DependencyInjection
-        - message: '#.*NodeDefinition::append.*#'
-          path: ./src/DependencyInjection

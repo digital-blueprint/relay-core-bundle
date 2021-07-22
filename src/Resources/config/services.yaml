@@ -14,30 +14,7 @@ services:
     autowire: true
     autoconfigure: true
 
-  DBP\API\CoreBundle\Service\DummyUserSession:
-    autowire: true
-    autoconfigure: true
-
-  DBP\API\CoreBundle\API\UserSessionInterface:
-    '@DBP\API\CoreBundle\Service\DummyUserSession'
-
-  DBP\API\CoreBundle\Keycloak\KeycloakBearerAuthenticator:
-    autowire: true
-    autoconfigure: true
-
-  DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProvider:
-    autowire: true
-    autoconfigure: true
-
-  DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProviderInterface:
-    '@DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProvider'
-
   DBP\API\CoreBundle\Swagger\OpenApiDecorator:
     decorates: 'api_platform.openapi.factory'
     autowire: true
     autoconfigure: false
-
-  # This alias exist so we can replace the service during tests
-  test.UserProviderInterface:
-    alias: 'DBP\API\CoreBundle\Keycloak\KeycloakBearerUserProviderInterface'
-    public: true

@@ -6,9 +6,8 @@ namespace DBP\API\CoreBundle\TestUtils;
 
 use DBP\API\CoreBundle\API\UserSessionInterface;
 
-class DummyUserSession implements UserSessionInterface
+class TestUserSession implements UserSessionInterface
 {
-    private $jwt;
     private $id;
     private $roles;
 
@@ -18,9 +17,18 @@ class DummyUserSession implements UserSessionInterface
         $this->roles = $roles;
     }
 
+    public function setIdentifier(?string $identifier)
+    {
+        $this->id = $identifier;
+    }
+
+    public function setRoles(array $roles)
+    {
+        $this->roles = $roles;
+    }
+
     public function setSessionToken(?array $jwt): void
     {
-        $this->jwt = $jwt;
     }
 
     public function getUserIdentifier(): ?string
