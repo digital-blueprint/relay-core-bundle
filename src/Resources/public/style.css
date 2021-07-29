@@ -18,6 +18,11 @@ header {
     color: #555;
 }
 
+#swagger-ui.api-platform .info .description {
+    padding-left: 60px;
+    margin-top: -15px;
+}
+
 .swagger-ui .auth-wrapper .authorize {
     display: none;
 }

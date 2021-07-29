@@ -36,8 +36,12 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
             }
         }
 
+        $configs = $container->getExtensionConfig($this->getAlias());
+        $config = $this->processConfiguration(new Configuration(), $configs);
+
         $container->loadFromExtension('api_platform', [
-            'title' => 'DBP API Gateway',
+            'title' => $config['docs_title'],
+            'description' => $config['docs_description'],
             'defaults' => [
                 'cache_headers' => [
                     'etag' => true,
@@ -128,8 +132,6 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
             'strict_variables' => '%kernel.debug%',
             'exception_controller' => null,
         ]);
-
-        $config = $container->getExtensionConfig($this->getAlias())[0];
 
         // In case another bundle wants to inject twig globals
         $twigGlobals = [];
