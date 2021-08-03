@@ -8,12 +8,12 @@
 
         <link rel="stylesheet" href="{{ asset('bundles/apiplatform/swagger-ui/swagger-ui.css') }}">
         <link rel="stylesheet" href="{{ asset('bundles/apiplatform/style.css') }}">
-        <link rel="stylesheet" href="{{ asset('bundles/dbpcore/fonts/fonts.css') }}">
-        <link rel="stylesheet" href="{{ asset('bundles/dbpcore/style.css') }}">
+        <link rel="stylesheet" href="{{ asset('bundles/dbprelaycore/fonts/fonts.css') }}">
+        <link rel="stylesheet" href="{{ asset('bundles/dbprelaycore/style.css') }}">
 
         <style>
             #swagger-ui.api-platform .info .title {
-                background-image: url({{ asset('bundles/dbpcore/logo.png') }});
+                background-image: url({{ asset('bundles/dbprelaycore/logo.png') }});
                 background-repeat: no-repeat;
                 background-size: auto 100%;
                 padding-left: 60px
@@ -33,7 +33,7 @@
             clientId: "{{ keycloak_frontend_client_id }}"
         };
     </script>
-    <script type="module" src="{{ asset('bundles/dbpcore/index.js') }}"></script>
+    <script type="module" src="{{ asset('bundles/dbprelaycore/index.js') }}"></script>
 
     <script type="module">
         // XXX: Hide the models. Ideally we would pass defaultModelsExpandDepth=0 to swaggerUI, but
