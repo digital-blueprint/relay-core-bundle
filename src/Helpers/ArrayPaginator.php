@@ -6,7 +6,7 @@ declare(strict_types=1);
  * that contains the full result set.
  */
 
-namespace DBP\API\CoreBundle\Helpers;
+namespace Dbp\Relay\CoreBundle\Helpers;
 
 use ApiPlatform\Core\DataProvider\PaginatorInterface;
 use Iterator;

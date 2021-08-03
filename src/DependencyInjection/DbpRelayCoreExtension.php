@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DBP\API\CoreBundle\DependencyInjection;
+namespace Dbp\Relay\CoreBundle\DependencyInjection;
 
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 use Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface;
 
-class DbpCoreExtension extends ConfigurableExtension implements PrependExtensionInterface
+class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExtensionInterface
 {
     public function loadInternal(array $mergedConfig, ContainerBuilder $container)
     {
@@ -22,7 +22,7 @@ class DbpCoreExtension extends ConfigurableExtension implements PrependExtension
         $loader->load('services.yaml');
 
         // Pass the collected paths that need to be hidden to the OpenApiDecorator
-        $definition = $container->getDefinition('DBP\API\CoreBundle\Swagger\OpenApiDecorator');
+        $definition = $container->getDefinition('Dbp\Relay\CoreBundle\Swagger\OpenApiDecorator');
         if ($container->hasParameter('dbp_api.paths_to_hide')) {
             $definition->addMethodCall('setPathsToHide', [$container->getParameter('dbp_api.paths_to_hide')]);
         }

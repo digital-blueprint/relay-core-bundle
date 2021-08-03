@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace DBP\API\CoreBundle\Service;
+namespace Dbp\Relay\CoreBundle\Service;
 
-use DBP\API\CoreBundle\API\UserSessionInterface;
-use DBP\API\CoreBundle\Helpers\Tools;
+use Dbp\Relay\CoreBundle\API\UserSessionInterface;
+use Dbp\Relay\CoreBundle\Helpers\Tools;
 
 class LoggingProcessor
 {

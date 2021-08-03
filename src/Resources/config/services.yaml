@@ -1,20 +1,20 @@
 services:
-  DBP\API\CoreBundle\Serializer\ApiErrorNormalizer:
+  Dbp\Relay\CoreBundle\Serializer\ApiErrorNormalizer:
     autowire: true
     autoconfigure: false
     tags: [{'name' : 'serializer.normalizer', priority: '-700'}]
 
-  DBP\API\CoreBundle\Service\LoggingProcessor:
+  Dbp\Relay\CoreBundle\Service\LoggingProcessor:
     autowire: true
     autoconfigure: true
     tags:
       - { name: monolog.processor }
 
-  DBP\API\CoreBundle\Command\CronCommand:
+  Dbp\Relay\CoreBundle\Command\CronCommand:
     autowire: true
     autoconfigure: true
 
-  DBP\API\CoreBundle\Swagger\OpenApiDecorator:
+  Dbp\Relay\CoreBundle\Swagger\OpenApiDecorator:
     decorates: 'api_platform.openapi.factory'
     autowire: true
     autoconfigure: false

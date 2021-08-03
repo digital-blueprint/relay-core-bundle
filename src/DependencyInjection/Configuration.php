@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DBP\API\CoreBundle\DependencyInjection;
+namespace Dbp\Relay\CoreBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;

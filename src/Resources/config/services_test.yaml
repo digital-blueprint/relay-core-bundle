@@ -1,16 +1,16 @@
 services:
-  DBP\API\CoreBundle\TestUtils\TestUserSession:
+  Dbp\Relay\CoreBundle\TestUtils\TestUserSession:
     autowire: true
     autoconfigure: true
     public: true
 
-  DBP\API\CoreBundle\TestUtils\TestAuthenticator:
+  Dbp\Relay\CoreBundle\TestUtils\TestAuthenticator:
     autowire: true
     autoconfigure: true
     public: true
 
   Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface:
-    '@DBP\API\CoreBundle\TestUtils\TestAuthenticator'
+    '@Dbp\Relay\CoreBundle\TestUtils\TestAuthenticator'
 
-  DBP\API\CoreBundle\API\UserSessionInterface:
-    '@DBP\API\CoreBundle\TestUtils\TestUserSession'
+  Dbp\Relay\CoreBundle\API\UserSessionInterface:
+    '@Dbp\Relay\CoreBundle\TestUtils\TestUserSession'

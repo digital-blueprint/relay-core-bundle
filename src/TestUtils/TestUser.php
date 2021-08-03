@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DBP\API\CoreBundle\TestUtils;
+namespace Dbp\Relay\CoreBundle\TestUtils;
 
 use Symfony\Component\Security\Core\User\UserInterface;
 

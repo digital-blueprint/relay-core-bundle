@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace DBP\API\CoreBundle;
+namespace Dbp\Relay\CoreBundle;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class DbpCoreBundle extends Bundle
+class DbpRelayCoreBundle extends Bundle
 {
     public function build(ContainerBuilder $container)
     {

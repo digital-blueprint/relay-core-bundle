@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DBP\API\CoreBundle\TestUtils;
+namespace Dbp\Relay\CoreBundle\TestUtils;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\Client;

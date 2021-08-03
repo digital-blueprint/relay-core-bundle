@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DBP\API\CoreBundle\Exception;
+namespace Dbp\Relay\CoreBundle\Exception;
 
 use Symfony\Component\HttpKernel\Exception\HttpException;
 

@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use DBP\API\CoreBundle\Service\LoggingProcessor;
-use DBP\API\CoreBundle\TestUtils\TestUserSession;
+use Dbp\Relay\CoreBundle\Service\LoggingProcessor;
+use Dbp\Relay\CoreBundle\TestUtils\TestUserSession;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class LoggingProcessorTest extends WebTestCase

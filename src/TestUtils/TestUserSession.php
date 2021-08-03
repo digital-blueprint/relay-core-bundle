@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace DBP\API\CoreBundle\TestUtils;
+namespace Dbp\Relay\CoreBundle\TestUtils;
 
-use DBP\API\CoreBundle\API\UserSessionInterface;
+use Dbp\Relay\CoreBundle\API\UserSessionInterface;
 
 class TestUserSession implements UserSessionInterface
 {

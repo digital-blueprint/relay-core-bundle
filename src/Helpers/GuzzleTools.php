@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DBP\API\CoreBundle\Helpers;
+namespace Dbp\Relay\CoreBundle\Helpers;
 
 use GuzzleHttp\MessageFormatter;
 use GuzzleHttp\Middleware;

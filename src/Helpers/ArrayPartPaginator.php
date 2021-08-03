@@ -6,7 +6,7 @@ declare(strict_types=1);
  * that only contains a part of the result set.
  */
 
-namespace DBP\API\CoreBundle\Helpers;
+namespace Dbp\Relay\CoreBundle\Helpers;
 
 class ArrayPartPaginator extends ArrayPaginator
 {

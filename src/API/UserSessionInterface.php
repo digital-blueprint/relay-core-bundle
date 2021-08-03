@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DBP\API\CoreBundle\API;
+namespace Dbp\Relay\CoreBundle\API;
 
 interface UserSessionInterface
 {

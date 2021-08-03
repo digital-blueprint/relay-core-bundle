@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace DBP\API\CoreBundle\Tests;
+namespace Dbp\Relay\CoreBundle\Tests;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
-use DBP\API\CoreBundle\TestUtils\UserAuthTrait;
+use Dbp\Relay\CoreBundle\TestUtils\UserAuthTrait;
 use Symfony\Component\HttpFoundation\Response;
 
 class ApiTest extends ApiTestCase

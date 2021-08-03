@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace DBP\API\CoreBundle\Tests\Helpers;
+namespace Dbp\Relay\CoreBundle\Tests\Helpers;
 
-use DBP\API\CoreBundle\Helpers\Tools;
+use Dbp\Relay\CoreBundle\Helpers\Tools;
 use PHPUnit\Framework\TestCase;
 
 class ToolsTest extends TestCase

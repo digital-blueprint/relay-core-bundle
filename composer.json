@@ -1,5 +1,5 @@
 {
-    "name": "dbp/api-core-bundle",
+    "name": "dbp/relay-core-bundle",
     "type": "symfony-bundle",
     "license": "AGPL-3.0-or-later",
     "require": {
@@ -32,12 +32,12 @@
     },
     "autoload": {
         "psr-4": {
-            "DBP\\API\\CoreBundle\\": "src/"
+            "Dbp\\Relay\\CoreBundle\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-          "DBP\\API\\CoreBundle\\Tests\\": "tests/"
+          "Dbp\\Relay\\CoreBundle\\Tests\\": "tests/"
         }
     },
     "config": {

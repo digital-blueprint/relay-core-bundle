@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace DBP\API\CoreBundle\Tests;
+namespace Dbp\Relay\CoreBundle\Tests;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\ApiPlatformBundle;
-use DBP\API\CoreBundle\DbpCoreBundle;
+use Dbp\Relay\CoreBundle\DbpRelayCoreBundle;
 use Nelmio\CorsBundle\NelmioCorsBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
@@ -26,17 +26,17 @@ class Kernel extends BaseKernel
         yield new TwigBundle();
         yield new NelmioCorsBundle();
         yield new ApiPlatformBundle();
-        yield new DbpCoreBundle();
+        yield new DbpRelayCoreBundle();
     }
 
     protected function configureRoutes(RoutingConfigurator $routes)
     {
-        $routes->import('@DbpCoreBundle/Resources/config/routing.yaml');
+        $routes->import('@DbpRelayCoreBundle/Resources/config/routing.yaml');
     }
 
     protected function configureContainer(ContainerConfigurator $container)
     {
-        $container->import('@DbpCoreBundle/Resources/config/services_test.yaml');
+        $container->import('@DbpRelayCoreBundle/Resources/config/services_test.yaml');
         $container->extension('framework', [
             'test' => true,
             'secret' => '',
