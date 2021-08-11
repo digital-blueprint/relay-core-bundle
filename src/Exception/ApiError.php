@@ -27,8 +27,7 @@ class ApiError extends HttpException
     {
         $message = json_decode($message, true);
 
-        if ($message === null)
-        {
+        if ($message === null) {
             $message = [
                 'message' => $message,
                 'errorId' => '',

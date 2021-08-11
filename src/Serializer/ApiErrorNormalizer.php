@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Serializer;
 
 use Dbp\Relay\CoreBundle\Exception\ApiError;
-use Symfony\Bundle\FrameworkBundle\Command\EventDispatcherDebugCommand;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Symfony\Component\Serializer\Normalizer\ContextAwareNormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
@@ -31,13 +30,12 @@ class ApiErrorNormalizer implements ContextAwareNormalizerInterface, NormalizerA
 
         $normalized = $this->normalizer->normalize($object, $format, $context);
 
-        if ($object->getClass() === APIError::class)
-        {
+        if ($object->getClass() === APIError::class) {
             $message = $object->getMessage();
             $message = json_decode($message, true);
-            $errorId = $message["errorId"];
-            $errorDetails = $message["errorDetails"];
-            $message = $message["message"];
+            $errorId = $message['errorId'];
+            $errorDetails = $message['errorDetails'];
+            $message = $message['message'];
 
             if ($format === 'jsonld') {
                 if ($message !== '') {
@@ -49,9 +47,7 @@ class ApiErrorNormalizer implements ContextAwareNormalizerInterface, NormalizerA
                 if ($errorDetails !== null) {
                     $normalized['dbp:errordetails'] = $errorDetails;
                 }
-            }
-            elseif ($format === 'jsonproblem')
-            {
+            } elseif ($format === 'jsonproblem') {
                 if ($message !== '') {
                     $normalized['detail'] = $message;
                 }
