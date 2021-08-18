@@ -42,20 +42,20 @@ class ApiErrorNormalizer implements ContextAwareNormalizerInterface, NormalizerA
                     $normalized['hydra:description'] = $message;
                 }
                 if ($errorId !== '') {
-                    $normalized['dbp:errorid'] = $errorId;
+                    $normalized['relay:errorId'] = $errorId;
                 }
                 if ($errorDetails !== null) {
-                    $normalized['dbp:errordetails'] = $errorDetails;
+                    $normalized['relay:errorDetails'] = $errorDetails;
                 }
             } elseif ($format === 'jsonproblem') {
                 if ($message !== '') {
                     $normalized['detail'] = $message;
                 }
                 if ($errorId !== '') {
-                    $normalized['errorid'] = $errorId;
+                    $normalized['errorId'] = $errorId;
                 }
                 if ($errorDetails !== null) {
-                    $normalized['errordetails'] = $errorDetails;
+                    $normalized['errorDetails'] = $errorDetails;
                 }
             }
         }
