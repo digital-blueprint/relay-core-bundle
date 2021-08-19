@@ -49,8 +49,6 @@ RUN apt-get update && apt-get install -y \
 COPY ./php-ini-overrides.ini /etc/php/7.4/cli/conf.d/
 
 # PHP 8.0
-# FIXME: php8.0-xdebug not installed because it leads to segfaults
-# https://gitlab.tugraz.at/dbp/middleware/api/-/issues/65#note_21039
 RUN apt-get update && apt-get install -y \
     php8.0 \
     php8.0-curl \
@@ -59,6 +57,7 @@ RUN apt-get update && apt-get install -y \
     php8.0-ldap \
     php8.0-zip \
     php8.0-gmp \
+    php8.0-xdebug \
     php8.0-gd \
     php8.0-mbstring \
     && rm -rf /var/lib/apt/lists/*
