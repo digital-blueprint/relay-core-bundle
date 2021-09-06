@@ -10,7 +10,7 @@ services:
     tags:
       - { name: monolog.processor }
 
-  Dbp\Relay\CoreBundle\Command\CronCommand:
+  Dbp\Relay\CoreBundle\Cron\CronCommand:
     autowire: true
     autoconfigure: true
 
