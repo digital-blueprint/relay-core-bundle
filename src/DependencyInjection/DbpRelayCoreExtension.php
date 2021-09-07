@@ -39,7 +39,7 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
         $configs = $container->getExtensionConfig($this->getAlias());
         $config = $this->processConfiguration(new Configuration(), $configs);
 
-        $container->loadFromExtension('api_platform', [
+        $container->prependExtensionConfig('api_platform', [
             'title' => $config['docs_title'],
             'description' => $config['docs_description'],
             'defaults' => [
@@ -55,7 +55,7 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
                 ],
             ],
             'show_webby' => false,
-            'doctrine' => false, // TODO: should we change the default?,
+            'doctrine' => false,
             'swagger' => [
                 'versions' => [3],
                 'api_keys' => [
