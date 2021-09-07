@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\DependencyInjection;
 
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
@@ -26,6 +27,13 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
         if ($container->hasParameter('dbp_api.paths_to_hide')) {
             $definition->addMethodCall('setPathsToHide', [$container->getParameter('dbp_api.paths_to_hide')]);
         }
+
+        $cronCacheDef = $container->register('dbp.relay.cache.core.cron', FilesystemAdapter::class);
+        $cronCacheDef->setArguments(['core-cron', 0, '%kernel.cache_dir%/dbp/relay/core-cron']);
+        $cronCacheDef->addTag('cache.pool');
+
+        $definition = $container->getDefinition('Dbp\Relay\CoreBundle\Cron\CronCommand');
+        $definition->addMethodCall('setCache', [$cronCacheDef]);
     }
 
     public function prepend(ContainerBuilder $container)
