@@ -13,50 +13,34 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
  */
 class ApiError extends HttpException
 {
-    /**
-     * @var ?string
-     */
-    private $errorId;
-
-    /**
-     * @var ?array
-     */
-    private $errorDetails;
+    private const WITHDETAILSSTATUS = -1;
 
     public function __construct(int $statusCode, ?string $message = '', \Throwable $previous = null, array $headers = [], ?int $code = 0)
     {
-        $message = json_decode($message, true);
-
-        if ($message === null) {
-            $message = [
+        if ($statusCode === self::WITHDETAILSSTATUS) {
+            $decoded = json_decode($message, true, 512, JSON_THROW_ON_ERROR);
+            $statusCode = $decoded['statusCode'];
+            unset($decoded['statusCode']);
+        } else {
+            $decoded = [
                 'message' => $message,
                 'errorId' => '',
                 'errorDetails' => null,
             ];
         }
 
-        parent::__construct($statusCode, json_encode($message), $previous, $headers, $code);
-    }
-
-    public function setErrorDetails(string $errorId, array $errorDetails = [])
-    {
-        $this->errorId = $errorId;
-        $this->errorDetails = $errorDetails;
-    }
-
-    public function getErrorDetails(): array
-    {
-        return [$this->errorId, $this->errorDetails];
+        parent::__construct($statusCode, json_encode($decoded), $previous, $headers, $code);
     }
 
     public static function withDetails(int $statusCode, ?string $message = '', string $errorId = '', array $errorDetails = [])
     {
         $message = [
+            'statusCode' => $statusCode,
             'message' => $message,
             'errorId' => $errorId,
             'errorDetails' => $errorDetails,
         ];
 
-        return new ApiError($statusCode, json_encode($message));
+        return new ApiError(self::WITHDETAILSSTATUS, json_encode($message));
     }
 }
