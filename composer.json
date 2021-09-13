@@ -35,6 +35,9 @@
         "symfony/phpunit-bridge": "^5.3",
         "vimeo/psalm": "^4.4"
     },
+    "conflict": {
+        "symfony/dependency-injection": "5.3.7"
+    },
     "autoload": {
         "psr-4": {
             "Dbp\\Relay\\CoreBundle\\": "src/"
