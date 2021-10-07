@@ -4,7 +4,7 @@ services:
     autoconfigure: false
     tags: [{'name' : 'serializer.normalizer', priority: '-700'}]
 
-  Dbp\Relay\CoreBundle\Service\LoggingProcessor:
+  Dbp\Relay\CoreBundle\Logging\LoggingProcessor:
     autowire: true
     autoconfigure: true
     tags:
