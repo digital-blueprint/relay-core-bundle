@@ -30,6 +30,16 @@ class Configuration implements ConfigurationInterface
                 ->info('The description text of the API docs page (supports markdown)')
                     ->defaultValue('*part of the [Digital Blueprint](https://gitlab.tugraz.at/dbp) project*')
                 ->end()
+                ->scalarNode('messenger_transport_dsn')
+                    ->info('See https://symfony.com/doc/5.3/messenger.html#redis-transport')
+                    ->defaultValue('')
+                    ->example('redis://localhost:6379/messages')
+                ->end()
+                ->scalarNode('lock_dsn')
+                    ->info('https://symfony.com/doc/5.3/components/lock.html')
+                    ->defaultValue('')
+                    ->example('redis://redis:6379')
+                ->end()
             ->end();
 
         return $treeBuilder;

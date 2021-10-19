@@ -157,22 +157,31 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
         ]);
 
         // https://symfony.com/doc/4.4/messenger.html#transports-async-queued-messages
+        $messengerTransportDsn = $config['messenger_transport_dsn'];
         if ($container->hasParameter('dbp_api.messenger_routing')) {
             $routing = [];
             $routing = array_merge($routing, $container->getParameter('dbp_api.messenger_routing'));
 
+            if ($messengerTransportDsn === '') {
+                throw new \RuntimeException('A bundle requires a messenger: set "messenger_transport_dsn" in the core bundle config');
+            }
+
             $container->loadFromExtension('framework', [
                 'messenger' => [
                     'transports' => [
-                        'async' => '%env(MESSENGER_TRANSPORT_DSN)%',
+                        'async' => $messengerTransportDsn,
                     ],
                     'routing' => $routing,
                 ],
             ]);
         }
 
-        $container->loadFromExtension('framework', [
-            'lock' => '%env(LOCK_DSN)%',
-        ]);
+        // https://symfony.com/doc/5.3/components/lock.html
+        $lockDsn = $config['lock_dsn'];
+        if ($lockDsn !== '') {
+            $container->loadFromExtension('framework', [
+                'lock' => $lockDsn,
+            ]);
+        }
     }
 }
