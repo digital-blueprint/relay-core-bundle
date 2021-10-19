@@ -21,18 +21,25 @@ dbp_relay_core:
 
 ## Configuration
 
-To handle locking you need to set an environment variable `LOCK_DSN` in your `.env` file or by any other means.
-The usual way would be to use [Redis](https://redis.io/) for locking.
+To handle [locking](https://symfony.com/doc/current/components/lock.html) you need to set an environment variable `LOCK_DSN`
+in your `.env` file or by any other means.
+
+For example, you could use [Redis](https://redis.io/) for distributed locking or `semaphore` for local locking.
 
 Example:
 
 ```dotenv
+# Redis
 LOCK_DSN=redis://redis:6379/
+
+# Semaphore
+LOCK_DSN=semaphore
 ```
 
 For projects that also use the [Symfony Messenger](https://symfony.com/doc/current/components/messenger.html) you also
 need to set an environment variable `MESSENGER_TRANSPORT_DSN` in your `.env` file or by any other means.
-[Redis](https://redis.io/) is also the best way for this.
+
+[Redis](https://redis.io/) is also a way for doing this.
 
 Example:
 
