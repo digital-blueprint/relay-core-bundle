@@ -21,6 +21,8 @@ dbp_relay_core:
     messenger_transport_dsn: '%env(MESSENGER_TRANSPORT_DSN)'
 ```
 
+### Locking
+
 To handle [locking](https://symfony.com/doc/current/components/lock.html) you need to set above `lock_dsn` config,
 for example as `lock_dsn: '%env(LOCK_DSN)%'` with an environment variable `LOCK_DSN` in your `.env` file or by any other means.
 
@@ -35,6 +37,8 @@ LOCK_DSN=redis://redis:6379/
 # Semaphore (local locking)
 LOCK_DSN=semaphore
 ```
+
+### Symfony Messenger
 
 For projects that also use the [Symfony Messenger](https://symfony.com/doc/current/components/messenger.html)
 you need to set above `messenger_transport_dsn` config, for example as `messenger_transport_dsn: '%env(MESSENGER_TRANSPORT_DSN)%'`
