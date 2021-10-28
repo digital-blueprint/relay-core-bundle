@@ -55,3 +55,9 @@ MESSENGER_TRANSPORT_DSN=redis://redis:6379/local-messages/symfony/consumer?auto_
 You need to have a system in place to run the [Symfony Messenger](https://symfony.com/doc/current/components/messenger.html).
 Symfony recommends to use [Supervisor](http://supervisord.org/) to do this. You can use
 [Supervisor configuration](https://symfony.com/doc/current/messenger.html#supervisor-configuration) to help you with the setup process.
+
+Keep in mind that you need to **restart** the Symfony Messenger **workers** when you **deploy** Relay API **updates**
+to your server, so changes to the messaging system can be picked up.
+
+If you are using Supervisor to run the Symfony Messenger you can just stop the workers with
+`php bin/console messenger:stop-workers`, Supervisor will start them again.
