@@ -18,7 +18,8 @@ final class CronCommand extends Command implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    protected static $defaultName = 'dbp:relay:cron|dbp:cron';
+    // dbp:cron only for backwards compat
+    protected static $defaultName = 'dbp:relay:core:cron|dbp:cron';
 
     /** @var EventDispatcherInterface */
     private $dispatcher;
