@@ -51,3 +51,7 @@ Example:
 ```dotenv
 MESSENGER_TRANSPORT_DSN=redis://redis:6379/local-messages/symfony/consumer?auto_setup=true&serializer=1&stream_max_entries=0&dbindex=0
 ```
+
+You need to have a system in place to run the [Symfony Messenger](https://symfony.com/doc/current/components/messenger.html).
+Symfony recommends to use [Supervisor](http://supervisord.org/) to do this. You can use
+[Supervisor configuration](https://symfony.com/doc/current/messenger.html#supervisor-configuration) to help you with the setup process.
