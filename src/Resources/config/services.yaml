@@ -18,3 +18,16 @@ services:
     decorates: 'api_platform.openapi.factory'
     autowire: true
     autoconfigure: false
+
+  Dbp\Relay\CoreBundle\Queue\TransportFactoryDecorator:
+    decorates: 'messenger.transport_factory'
+    autowire: true
+    autoconfigure: true
+
+  Dbp\Relay\CoreBundle\Queue\WorkCommand:
+    autowire: true
+    autoconfigure: true
+
+  Dbp\Relay\CoreBundle\Queue\RestartCommand:
+    autowire: true
+    autoconfigure: true
