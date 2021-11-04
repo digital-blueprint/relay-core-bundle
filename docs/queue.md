@@ -53,9 +53,12 @@ After deployment run
 This will signal the workers to exit after the current task, which means they
 will be restarted by supervisor and will run the newly deployed code.
 
+
+## Manage Workers with Supervisor
+
 Symfony
 [recommends](https://symfony.com/doc/current/messenger.html#supervisor-configuration)
-to use [Supervisor](http://supervisord.org/) to do this.
+to use [Supervisor](http://supervisord.org/) to handle worker jobs and restart them.
 
 ```bash
 sudo apt-get install supervisor
