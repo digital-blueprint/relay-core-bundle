@@ -37,6 +37,7 @@ class WorkCommand extends Command implements LoggerAwareInterface
 
     protected function configure(): void
     {
+        $this->setDescription('Start a worker which processes queued tasks');
         $this->addArgument('worker-name', InputArgument::REQUIRED, 'A unique and stable worker name');
     }
 

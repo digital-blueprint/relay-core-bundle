@@ -17,6 +17,11 @@ class RestartCommand extends Command implements LoggerAwareInterface
 
     protected static $defaultName = 'dbp:relay:core:queue:restart';
 
+    protected function configure()
+    {
+        $this->setDescription('Stop all workers once they are done with the current task');
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         // Now run the real messenger:stop-workers command
