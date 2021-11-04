@@ -111,3 +111,12 @@ process_name=%(program_name)s_%(process_num)02d
 ```
 
 Change `user` to the Unix user on your server.
+
+## Testing your Setup
+
+After everything is set up you can create a few dummy tasks and see if they get
+handled by the workers:
+
+```bash
+./bin/console dbp:relay:core:queue:test --count 10 --delay 3
+```
