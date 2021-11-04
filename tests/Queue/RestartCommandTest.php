@@ -15,7 +15,7 @@ class RestartCommandTest extends KernelTestCase
         $kernel = static::createKernel();
         $application = new Application($kernel);
 
-        $command = $application->find('dbp:relay:queue:restart');
+        $command = $application->find('dbp:relay:core:queue:restart');
         $commandTester = new CommandTester($command);
         $res = $commandTester->execute([]);
         $this->assertSame(0, $res);
