@@ -39,6 +39,7 @@ Note:
 
 * You need to take care of restarting it automatically.
 * Each active worker needs to have a unique name passed as the first argument
+  which should stay the same across restarts.
 
 
 ## Restart the workers
@@ -52,5 +53,24 @@ After deployment run
 This will signal the workers to exit after the current task, which means they
 will be restarted by supervisor and will run the newly deployed code.
 
-Symfony recommends to use [Supervisor](http://supervisord.org/) to do this. You can use
-[Supervisor configuration](https://symfony.com/doc/current/messenger.html#supervisor-configuration) to help you with the setup process.
+Symfony
+[recommends](https://symfony.com/doc/current/messenger.html#supervisor-configuration)
+to use [Supervisor](http://supervisord.org/) to do this.
+
+```bash
+sudo apt-get install supervisor
+```
+
+```ini
+;/etc/supervisor/conf.d/queue-worker.conf
+[program:queue-work]
+command=php /path/to/your/app/bin/console dbp:relay:queue:work "%(program_name)s_%(process_num)02d"
+user=user
+numprocs=2
+startsecs=0
+autostart=true
+autorestart=true
+process_name=%(program_name)s_%(process_num)02d
+```
+
+Change `user` to the Unix user on your server.
