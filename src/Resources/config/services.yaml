@@ -31,3 +31,11 @@ services:
   Dbp\Relay\CoreBundle\Queue\RestartCommand:
     autowire: true
     autoconfigure: true
+
+  Dbp\Relay\CoreBundle\Queue\TestCommand:
+    autowire: true
+    autoconfigure: true
+
+  Dbp\Relay\CoreBundle\Queue\TestHandler:
+    autowire: true
+    autoconfigure: true

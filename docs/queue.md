@@ -16,13 +16,47 @@ This requires two extra deployment related tasks:
 In the bundle configuration set the `queue_dsn` key to a DSN supported by the
 [Symfony messenger component](https://symfony.com/doc/current/messenger.html)
 
-At the moment we only support the redis transport.
+At the moment we only support the redis and doctrine transports:
 
-Example:
+### Redis
+
+This transport requires the Redis PHP extension (>=4.3) and a running Redis server (^5.0).
 
 ```yaml
-queue_dsn: 'redis://localhost:6379'
+# config/packages/dbp_relay_core.yaml
+dbp_relay_core:
+  # redis[s]://[pass@][ip|host|socket[:port]]
+  queue_dsn: 'redis://localhost:6379'
 ```
+
+This creates a redis stream automatically when active.
+
+### Doctrine
+
+In case of doctrine you have to install `symfony/doctrine-messenger`
+
+```bash
+composer require symfony/doctrine-messenger
+```
+
+then create a doctrine connection and point the `queue_dsn` to that connection:
+
+```yaml
+# config/packages/doctrine.yaml
+doctrine:
+  dbal:
+    connections:
+      my-queue-connection-name:
+        url: 'mysql://db:secret@mariadb:3306/db'
+```
+
+```yaml
+# config/packages/dbp_relay_core.yaml
+dbp_relay_core:
+  queue_dsn: 'doctrine://my-queue-connection-name'
+```
+
+I will automatically create a new database table when active.
 
 ## Run the workers
 

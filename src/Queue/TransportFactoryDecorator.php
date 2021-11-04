@@ -56,10 +56,13 @@ class TransportFactoryDecorator implements TransportFactoryInterface, LoggerAwar
                 // Use the new recommended default:
                 // https://github.com/symfony/symfony/pull/42163
                 $options['delete_after_ack'] = true;
+            } elseif (strpos($dsn, 'doctrine://') === 0) {
+                $options['table_name'] = 'core_queue_messages';
+                $options['queue_name'] = 'main';
             } elseif ($dsn === 'in-memory://dummy-queue-not-configured') {
                 // This is used when no queue is configured, so allow it.
             } else {
-                throw new \Exception('Only redis currently supported as a messenger transport (current DSN: '.$dsn.')');
+                throw new \Exception('Only redis and doctrine currently supported as a queue transport (current DSN: '.$dsn.')');
             }
         }
 

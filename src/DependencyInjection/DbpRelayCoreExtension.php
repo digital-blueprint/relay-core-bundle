@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\DependencyInjection;
 
+use Dbp\Relay\CoreBundle\Queue\TestMessage;
+use Dbp\Relay\CoreBundle\Queue\Utils as QueueUtils;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -163,6 +165,10 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
             ]),
         ]);
 
+        $routing = [
+            TestMessage::class => QueueUtils::QUEUE_TRANSPORT_NAME,
+        ];
+
         // https://symfony.com/doc/4.4/messenger.html#transports-async-queued-messages
         $messengerTransportDsn = $config['queue_dsn'];
         if ($messengerTransportDsn === '') {
@@ -170,35 +176,27 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
             $messengerTransportDsn = $config['messenger_transport_dsn'];
         }
         if ($container->hasParameter('dbp_api.messenger_routing')) {
-            $routing = [];
             $routing = array_merge($routing, $container->getParameter('dbp_api.messenger_routing'));
 
             if ($messengerTransportDsn === '') {
                 throw new \RuntimeException('A bundle requires a worker queue: set "queue_dsn" in the core bundle config');
             }
-
-            $container->loadFromExtension('framework', [
-                'messenger' => [
-                    'transports' => [
-                        'async' => $messengerTransportDsn,
-                    ],
-                    'routing' => $routing,
-                ],
-            ]);
         } else {
             // By always setting a transport, we ensure that the messenger commands work in all cases, even if they
             // are not stricly needed
             if ($messengerTransportDsn === '') {
                 $messengerTransportDsn = 'in-memory://dummy-queue-not-configured';
             }
-            $container->loadFromExtension('framework', [
-                'messenger' => [
-                    'transports' => [
-                        'async' => $messengerTransportDsn,
-                    ],
-                ],
-            ]);
         }
+
+        $container->loadFromExtension('framework', [
+            'messenger' => [
+                'transports' => [
+                    QueueUtils::QUEUE_TRANSPORT_NAME => $messengerTransportDsn,
+                ],
+                'routing' => $routing,
+            ],
+        ]);
 
         // https://symfony.com/doc/5.3/components/lock.html
         $lockDsn = $config['lock_dsn'];
