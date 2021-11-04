@@ -22,7 +22,7 @@ class WorkCommand extends Command implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    protected static $defaultName = 'dbp:relay:queue:work';
+    protected static $defaultName = 'dbp:relay:core:queue:work';
 
     /**
      * @var TransportFactoryDecorator

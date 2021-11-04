@@ -29,7 +29,7 @@ queue_dsn: 'redis://localhost:6379'
 Start a worker using
 
 ```bash
-./bin/console dbp:relay:queue:work my-worker-01
+./bin/console dbp:relay:core:queue:work my-worker-01
 ```
 
 It will automatically exit after a specific amount 0f time or after a specific
@@ -47,7 +47,7 @@ Note:
 After deployment run
 
 ```bash
-./bin/console dbp:relay:queue:restart
+./bin/console dbp:relay:core:queue:restart
 ```
 
 This will signal the workers to exit after the current task, which means they
@@ -64,7 +64,7 @@ sudo apt-get install supervisor
 ```ini
 ;/etc/supervisor/conf.d/queue-worker.conf
 [program:queue-work]
-command=php /path/to/your/app/bin/console dbp:relay:queue:work "%(program_name)s_%(process_num)02d"
+command=php /path/to/your/app/bin/console dbp:relay:core:queue:work "%(program_name)s_%(process_num)02d"
 user=user
 numprocs=2
 startsecs=0

@@ -15,7 +15,7 @@ class RestartCommand extends Command implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    protected static $defaultName = 'dbp:relay:queue:restart';
+    protected static $defaultName = 'dbp:relay:core:queue:restart';
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
