@@ -19,20 +19,3 @@ dbp_relay_core:
     # https://symfony.com/doc/5.3/components/lock.html
     lock_dsn:             '' # Example: 'redis://redis:6379'
 ```
-
-## Locking
-
-To handle [locking](https://symfony.com/doc/current/components/lock.html) you need to set above `lock_dsn` config,
-for example as `lock_dsn: '%env(LOCK_DSN)%'` with an environment variable `LOCK_DSN` in your `.env` file or by any other means.
-
-For example, you could use [Redis](https://redis.io/) for distributed locking or `semaphore` for local locking.
-
-Example:
-
-```dotenv
-# Redis (distributed locking)
-LOCK_DSN=redis://redis:6379/
-
-# Semaphore (local locking)
-LOCK_DSN=semaphore
-```
