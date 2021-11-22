@@ -23,10 +23,6 @@ header {
     margin-top: -15px;
 }
 
-.swagger-ui .auth-wrapper .authorize {
-    display: none;
-}
-
 .swagger-ui .scheme-container .servers, .swagger-ui .scheme-container .servers-title {
     display: none;
 }

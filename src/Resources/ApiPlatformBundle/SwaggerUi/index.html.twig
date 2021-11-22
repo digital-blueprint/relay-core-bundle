@@ -26,14 +26,22 @@
     <script id="swagger-data" type="application/json">{{ swagger_data|merge(oauth_data)|json_encode(65)|raw }}</script>
 
     {# insert auth web component, use token in Swagger UI #}
-    <script>
-        var keycloakConfig = {
-            url: "{{ keycloak_server_url }}",
-            realm: "{{ keycloak_realm }}",
-            clientId: "{{ keycloak_frontend_client_id }}"
-        };
-    </script>
-    <script type="module" src="{{ asset('bundles/dbprelaycore/index.js') }}"></script>
+    {% if keycloak_server_url and keycloak_realm and keycloak_frontend_client_id %}
+        <style>
+            /* Hide the builtin auth key button in case we have a keycloak setup */
+            .swagger-ui .auth-wrapper .authorize {
+                display: none;
+            }
+        </style>
+        <script>
+            var keycloakConfig = {
+                url: "{{ keycloak_server_url }}",
+                realm: "{{ keycloak_realm }}",
+                clientId: "{{ keycloak_frontend_client_id }}"
+            };
+        </script>
+        <script type="module" src="{{ asset('bundles/dbprelaycore/index.js') }}"></script>
+    {% endif %}
 
     <script type="module">
         // XXX: Hide the models. Ideally we would pass defaultModelsExpandDepth=0 to swaggerUI, but
