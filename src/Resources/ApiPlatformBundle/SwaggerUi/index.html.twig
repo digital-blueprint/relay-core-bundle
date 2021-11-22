@@ -38,6 +38,8 @@
     <script type="module">
         // XXX: Hide the models. Ideally we would pass defaultModelsExpandDepth=0 to swaggerUI, but
         // we don't have access to it here. So wait until they appear and click on the toggle button.
+        // FIXME: This is fixed upstream starting with 2.7.0:
+        // https://github.com/api-platform/core/pull/3731
         window.addEventListener("load", () => {
             new MutationObserver(function (mutations, self) {
                 const models = document.querySelector(`.models.is-open > h4 > button.models-control`);
