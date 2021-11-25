@@ -57,7 +57,6 @@ class TransportFactoryDecorator implements TransportFactoryInterface, LoggerAwar
                 // https://github.com/symfony/symfony/pull/42163
                 $options['delete_after_ack'] = true;
             } elseif (strpos($dsn, 'doctrine://') === 0) {
-                $options['table_name'] = 'core_queue_messages';
                 $options['queue_name'] = 'main';
             } elseif ($dsn === 'in-memory://dummy-queue-not-configured') {
                 // This is used when no queue is configured, so allow it.
