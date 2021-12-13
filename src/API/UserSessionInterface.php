@@ -12,7 +12,8 @@ interface UserSessionInterface
     public function setSessionToken(?array $jwt): void;
 
     /**
-     * The unique identifier of the authenticated user. Or null in case the user is a system.
+     * The unique identifier of the authenticated user. Or null in case it is called
+     * before the user is known or if the user is a system.
      *
      * Can be derived from the session token for example.
      */
