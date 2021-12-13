@@ -41,7 +41,7 @@ class WorkCommand extends Command implements LoggerAwareInterface
         $this->addArgument('worker-name', InputArgument::REQUIRED, 'A unique and stable worker name');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // The question is why can't we use a random worker name based on the hostname or pid etc.
         // https://github.com/symfony/symfony-docs/pull/11869/files explains why consumer names

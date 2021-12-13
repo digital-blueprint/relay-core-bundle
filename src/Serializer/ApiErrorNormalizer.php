@@ -24,6 +24,9 @@ class ApiErrorNormalizer implements ContextAwareNormalizerInterface, NormalizerA
 
     private const ALREADY_CALLED = 'ALREADY_CALLED_'.ApiErrorNormalizer::class;
 
+    /**
+     * @return array|\ArrayObject|bool|float|int|string|null
+     */
     public function normalize($object, $format = null, array $context = [])
     {
         $context[self::ALREADY_CALLED] = true;
@@ -63,7 +66,7 @@ class ApiErrorNormalizer implements ContextAwareNormalizerInterface, NormalizerA
         return $normalized;
     }
 
-    public function supportsNormalization($data, $format = null, array $context = [])
+    public function supportsNormalization($data, $format = null, array $context = []): bool
     {
         // Make sure we're not called twice
         if (isset($context[self::ALREADY_CALLED])) {

@@ -17,17 +17,17 @@ class TestUser implements UserInterface
         $this->roles = $roles;
     }
 
-    public function getRoles()
+    public function getRoles(): array
     {
         return $this->roles;
     }
 
-    public function getPassword()
+    public function getPassword(): ?string
     {
         return null;
     }
 
-    public function getSalt()
+    public function getSalt(): ?string
     {
         return null;
     }
@@ -36,12 +36,12 @@ class TestUser implements UserInterface
     {
     }
 
-    public function getUsername()
+    public function getUsername(): string
     {
         return $this->id;
     }
 
-    public function getUserIdentifier()
+    public function getUserIdentifier(): string
     {
         return $this->id;
     }

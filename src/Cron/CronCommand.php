@@ -75,7 +75,7 @@ final class CronCommand extends Command implements LoggerAwareInterface
         return $event;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $event = $this->createCronEvent();
         $this->dispatcher->dispatch($event, CronEvent::NAME);

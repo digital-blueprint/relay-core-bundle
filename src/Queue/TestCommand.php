@@ -39,7 +39,7 @@ class TestCommand extends Command implements LoggerAwareInterface
         $this->addOption('delay', null, InputArgument::OPTIONAL, 'Delay in seconds', 0);
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $count = (int) $input->getOption('count');
         $delay = (int) $input->getOption('delay');

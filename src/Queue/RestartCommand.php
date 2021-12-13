@@ -22,7 +22,7 @@ class RestartCommand extends Command implements LoggerAwareInterface
         $this->setDescription('Stop all workers once they are done with the current task');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Now run the real messenger:stop-workers command
         $app = $this->getApplication();
