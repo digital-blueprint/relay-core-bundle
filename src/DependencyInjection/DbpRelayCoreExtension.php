@@ -179,7 +179,7 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
             $routing = array_merge($routing, $container->getParameter('dbp_api.messenger_routing'));
 
             if ($messengerTransportDsn === '') {
-                throw new \RuntimeException('A bundle requires a worker queue: set "queue_dsn" in the core bundle config');
+                throw new \RuntimeException('A bundle requires a worker queue: set "queue_dsn" in the "dbp_relay_core" bundle config');
             }
         } else {
             // By always setting a transport, we ensure that the messenger commands work in all cases, even if they
