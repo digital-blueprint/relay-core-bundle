@@ -39,3 +39,12 @@ services:
   Dbp\Relay\CoreBundle\Queue\TestHandler:
     autowire: true
     autoconfigure: true
+
+  Dbp\Relay\CoreBundle\HealthCheck\HealthCheckCommand:
+    autowire: true
+    autoconfigure: true
+
+  Dbp\Relay\CoreBundle\HealthCheck\Checks\:
+    resource: '../../HealthCheck/Checks'
+    autowire: true
+    autoconfigure: true
