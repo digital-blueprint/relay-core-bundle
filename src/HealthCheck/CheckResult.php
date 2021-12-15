@@ -15,9 +15,16 @@ class CheckResult
     private $message;
     private $extra;
 
-    public function __construct(string $description, string $status, ?string $message = null, ?array $extra = null)
+    public function __construct(string $description)
     {
         $this->description = $description;
+        $this->status = 'UNKNOWN';
+        $this->message = null;
+        $this->extra = null;
+    }
+
+    public function set(string $status, ?string $message = null, ?array $extra = null)
+    {
         $this->status = $status;
         $this->message = $message;
         $this->extra = $extra;

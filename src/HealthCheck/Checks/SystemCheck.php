@@ -18,26 +18,32 @@ class SystemCheck implements CheckInterface
 
     private function checkDNS(): CheckResult
     {
-        $description = 'Check if DNS is working';
+        $result = new CheckResult('Check if DNS is working');
         $ok = !empty(dns_get_record('orf.at'));
         if ($ok) {
-            return new CheckResult($description, CheckResult::STATUS_SUCCESS);
+            $result->set(CheckResult::STATUS_SUCCESS);
         } else {
-            return new CheckResult($description, CheckResult::STATUS_FAILURE, 'Failed to look up IP for orf.at');
+            $result->set(CheckResult::STATUS_FAILURE, 'Failed to look up IP for orf.at');
         }
+
+        return $result;
     }
 
     private function checkTLS(): CheckResult
     {
-        $description = 'Check if TLS is working';
+        $result = new CheckResult('Check if TLS is working');
         $client = new Client();
         try {
             $client->head('https://www.tugraz.at/');
         } catch (GuzzleException $e) {
-            return new CheckResult($description, CheckResult::STATUS_FAILURE, $e->getMessage());
+            $result->set(CheckResult::STATUS_FAILURE, $e->getMessage());
+
+            return $result;
         }
 
-        return new CheckResult($description, CheckResult::STATUS_SUCCESS);
+        $result->set(CheckResult::STATUS_SUCCESS);
+
+        return $result;
     }
 
     public function check(): array

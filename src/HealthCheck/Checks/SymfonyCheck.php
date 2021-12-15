@@ -24,24 +24,28 @@ class SymfonyCheck implements CheckInterface
 
     private function checkAppSecret(): CheckResult
     {
-        $description = 'APP_SECRET should be set';
+        $result = new CheckResult('APP_SECRET should be set');
         $secret = $this->parameters->get('kernel.secret');
         if (!is_string($secret) || trim($secret) === '') {
-            return new CheckResult($description, CheckResult::STATUS_FAILURE, 'APP_SECRET is not set');
+            $result->set(CheckResult::STATUS_FAILURE, 'APP_SECRET is not set');
         } else {
-            return new CheckResult($description, CheckResult::STATUS_SUCCESS);
+            $result->set(CheckResult::STATUS_SUCCESS);
         }
+
+        return $result;
     }
 
     private function checkAppDebug(): CheckResult
     {
-        $description = "APP_ENV should be set to 'prod'";
+        $result = new CheckResult("APP_ENV should be set to 'prod'");
         $debug = $this->parameters->get('kernel.debug');
         if (!is_bool($debug) || $debug) {
-            return new CheckResult($description, CheckResult::STATUS_WARNING, 'Debugging is enabled, not suitable for production!');
+            $result->set(CheckResult::STATUS_WARNING, 'Debugging is enabled, not suitable for production!');
         } else {
-            return new CheckResult($description, CheckResult::STATUS_SUCCESS);
+            $result->set(CheckResult::STATUS_SUCCESS);
         }
+
+        return $result;
     }
 
     public function check(): array
