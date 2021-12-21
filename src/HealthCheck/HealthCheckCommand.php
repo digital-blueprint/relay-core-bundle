@@ -42,7 +42,7 @@ class HealthCheckCommand extends Command implements LoggerAwareInterface
         $status = 0;
         foreach ($this->checks as $check) {
             $output->writeln('<fg=green;options=bold>['.$check->getName().']</>');
-            $results = $check->check();
+            $results = $check->check(new CheckOptions());
             foreach ($results as $result) {
                 $color = '';
                 $output->write('  <fg=cyan>'.$result->getDescription().': </>');

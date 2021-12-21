@@ -11,5 +11,5 @@ interface CheckInterface
     /**
      * @return CheckResult[]
      */
-    public function check(): array;
+    public function check(CheckOptions $options): array;
 }

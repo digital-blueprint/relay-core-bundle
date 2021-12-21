@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\HealthCheck\Checks;
 
 use Dbp\Relay\CoreBundle\HealthCheck\CheckInterface;
+use Dbp\Relay\CoreBundle\HealthCheck\CheckOptions;
 use Dbp\Relay\CoreBundle\HealthCheck\CheckResult;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
@@ -48,7 +49,7 @@ class SymfonyCheck implements CheckInterface
         return $result;
     }
 
-    public function check(): array
+    public function check(CheckOptions $options): array
     {
         $results = [];
         $results[] = $this->checkAppSecret();
