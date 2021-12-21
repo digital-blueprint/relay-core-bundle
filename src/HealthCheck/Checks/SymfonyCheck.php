@@ -40,7 +40,7 @@ class SymfonyCheck implements CheckInterface
         $result = new CheckResult("APP_ENV should be set to 'prod'");
         $debug = $this->parameters->get('kernel.debug');
         if (!is_bool($debug) || $debug) {
-            $result->set(CheckResult::STATUS_WARNING, 'Debugging is enabled, not suitable for production!');
+            $result->set(CheckResult::STATUS_FAILURE, 'Debugging is enabled, not suitable for production!');
         } else {
             $result->set(CheckResult::STATUS_SUCCESS);
         }
