@@ -13,8 +13,7 @@ $replacement = '# $1';
 
 $strAfter = preg_replace($pattern, $replacement, $str);
 
-if ($strAfter !== $str)
-{
+if ($strAfter !== $str) {
     // write the entire string
     file_put_contents('.env', $strAfter);
 
