@@ -176,11 +176,13 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
             // backward compatibility
             $messengerTransportDsn = $config['messenger_transport_dsn'];
         }
+        $unusedMessages = [];
         if ($container->hasParameter('dbp_api.messenger_routing')) {
-            $routing = array_merge($routing, $container->getParameter('dbp_api.messenger_routing'));
+            $extraRouting = $container->getParameter('dbp_api.messenger_routing');
+            $routing = array_merge($routing, $extraRouting);
 
             if ($messengerTransportDsn === '') {
-                throw new \RuntimeException('A bundle requires a worker queue: set "queue_dsn" in the "dbp_relay_core" bundle config');
+                $unusedMessages = array_keys($extraRouting);
             }
         } else {
             // By always setting a transport, we ensure that the messenger commands work in all cases, even if they
@@ -189,6 +191,7 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
                 $messengerTransportDsn = 'in-memory://dummy-queue-not-configured';
             }
         }
+        $container->setParameter('dbp_api.messenger_unused_messages', $unusedMessages);
 
         $messengerConfig = [
             'transports' => [
