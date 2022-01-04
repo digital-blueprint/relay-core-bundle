@@ -11,6 +11,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\HttpFoundation\Session\SessionFactoryInterface;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 use Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface;
 
@@ -189,13 +190,21 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
             }
         }
 
-        $container->loadFromExtension('framework', [
-            'messenger' => [
-                'transports' => [
-                    QueueUtils::QUEUE_TRANSPORT_NAME => $messengerTransportDsn,
-                ],
-                'routing' => $routing,
+        $messengerConfig = [
+            'transports' => [
+                QueueUtils::QUEUE_TRANSPORT_NAME => $messengerTransportDsn,
             ],
+            'routing' => $routing,
+        ];
+
+        // Symfony 5.4+
+        // https://symfony.com/blog/new-in-symfony-5-4-messenger-improvements
+        if (interface_exists(SessionFactoryInterface::class)) {
+            $messengerConfig['reset_on_message'] = true;
+        }
+
+        $container->loadFromExtension('framework', [
+            'messenger' => $messengerConfig,
         ]);
 
         // https://symfony.com/doc/5.3/components/lock.html
