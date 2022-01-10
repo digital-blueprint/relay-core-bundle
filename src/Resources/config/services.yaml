@@ -14,6 +14,11 @@ services:
     autowire: true
     autoconfigure: true
 
+  Dbp\Relay\CoreBundle\Cron\CronJobs\:
+    resource: '../../Cron/CronJobs'
+    autowire: true
+    autoconfigure: true
+
   Dbp\Relay\CoreBundle\Swagger\OpenApiDecorator:
     decorates: 'api_platform.openapi.factory'
     autowire: true
