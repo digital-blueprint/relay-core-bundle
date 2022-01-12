@@ -16,7 +16,7 @@ For example in crontab, every 5 minutes:
 This cron job will regularly prune caches and dispatch a cron event which can be
 handled by different bundles.
 
-To get access to such an even you have to implement an event listener:
+To get access to such an event you have to implement an event listener:
 
 ```yaml
   Dbp\Relay\MyBundle\Cron\CleanupJob:
