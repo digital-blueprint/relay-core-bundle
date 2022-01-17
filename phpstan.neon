@@ -6,7 +6,6 @@ parameters:
     level: 3
     paths:
         - src
-        - tests
     excludePaths:
         - tests/bootstrap.php
         - src/Swagger/DocumentationNormalizer.php
