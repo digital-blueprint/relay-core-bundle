@@ -62,34 +62,42 @@ abstract class ArrayPaginator implements Iterator, PaginatorInterface
         return $this->perPage;
     }
 
-    public function count()
+    public function count(): int
     {
         $value = count($this->array);
 
         return $value;
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         $this->position = ($this->page - 1) * $this->perPage;
     }
 
+    /**
+     * @return mixed
+     */
+    #[\ReturnTypeWillChange]
     public function current()
     {
         return $this->array[$this->position];
     }
 
+    /**
+     * @return bool|float|int|mixed|string|null
+     */
+    #[\ReturnTypeWillChange]
     public function key()
     {
         return $this->position;
     }
 
-    public function next()
+    public function next(): void
     {
         ++$this->position;
     }
 
-    public function valid()
+    public function valid(): bool
     {
         $value = isset($this->array[$this->position]) &&
             ($this->position >= (($this->page - 1) * $this->perPage)) &&

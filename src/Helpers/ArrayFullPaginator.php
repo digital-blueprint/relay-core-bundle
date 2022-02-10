@@ -10,5 +10,4 @@ namespace Dbp\Relay\CoreBundle\Helpers;
 
 class ArrayFullPaginator extends ArrayPaginator
 {
-    public const DEBUG = false;
 }
