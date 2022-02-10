@@ -53,3 +53,7 @@ services:
     resource: '../../HealthCheck/Checks'
     autowire: true
     autoconfigure: true
+
+  Dbp\Relay\CoreBundle\Auth\ProxyAuthenticator:
+    autowire: true
+    autoconfigure: true

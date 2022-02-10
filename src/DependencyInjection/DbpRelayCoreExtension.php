@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\DependencyInjection;
 
+use Dbp\Relay\CoreBundle\Auth\ProxyAuthenticator;
 use Dbp\Relay\CoreBundle\Queue\TestMessage;
 use Dbp\Relay\CoreBundle\Queue\Utils as QueueUtils;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
@@ -13,7 +14,6 @@ use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\HttpFoundation\Session\SessionFactoryInterface;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
-use Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface;
 
 class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExtensionInterface
 {
@@ -102,7 +102,7 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
                     'pattern' => '^/',
                     'lazy' => true,
                     'custom_authenticators' => [
-                        AuthenticatorInterface::class,
+                        ProxyAuthenticator::class,
                     ],
                 ],
             ],

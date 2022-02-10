@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle;
 
+use Dbp\Relay\CoreBundle\Auth\AuthenticatorCompilerPass;
 use Dbp\Relay\CoreBundle\Cron\CronCompilerPass;
 use Dbp\Relay\CoreBundle\HealthCheck\HealthCheckCompilerPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -17,5 +18,6 @@ class DbpRelayCoreBundle extends Bundle
 
         HealthCheckCompilerPass::register($container);
         CronCompilerPass::register($container);
+        AuthenticatorCompilerPass::register($container);
     }
 }
