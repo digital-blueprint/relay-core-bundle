@@ -32,7 +32,11 @@ class ProxyAuthenticator extends AbstractAuthenticator
     private function getAuthenticator(Request $request): ?AuthenticatorInterface
     {
         foreach ($this->authenticators as $auth) {
-            if ($auth->supports($request)) {
+            $supports = $auth->supports($request);
+            if ($supports === null) {
+                throw new \RuntimeException('Lazy authenticators not supported atm');
+            }
+            if ($supports === true) {
                 return $auth;
             }
         }
