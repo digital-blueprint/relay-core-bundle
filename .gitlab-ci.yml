@@ -17,6 +17,7 @@ stages:
 .test_defaults: &test_defaults
   script:
     - sudo update-alternatives --set php "/usr/bin/${PHP}"
+    - composer validate
     - composer install
     - composer test
 

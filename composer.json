@@ -1,5 +1,6 @@
 {
     "name": "dbp/relay-core-bundle",
+    "description": "The core bundle of the Relay API gateway",
     "type": "symfony-bundle",
     "license": "AGPL-3.0-or-later",
     "require": {
