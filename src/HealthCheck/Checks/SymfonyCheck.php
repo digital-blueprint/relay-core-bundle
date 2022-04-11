@@ -7,20 +7,47 @@ namespace Dbp\Relay\CoreBundle\HealthCheck\Checks;
 use Dbp\Relay\CoreBundle\HealthCheck\CheckInterface;
 use Dbp\Relay\CoreBundle\HealthCheck\CheckOptions;
 use Dbp\Relay\CoreBundle\HealthCheck\CheckResult;
+use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class SymfonyCheck implements CheckInterface
 {
     private $parameters;
+    /** @var ContainerInterface */
+    private $container;
 
-    public function __construct(ParameterBagInterface $parameters)
+    public function __construct(ParameterBagInterface $parameters, ContainerInterface $container)
     {
         $this->parameters = $parameters;
+        $this->container = $container;
     }
 
     public function getName(): string
     {
         return 'core.symfony';
+    }
+
+    private function checkAllServices(): CheckResult
+    {
+        $result = new CheckResult('Check if all Symfony services can be initialized');
+        $result->set(CheckResult::STATUS_SUCCESS);
+
+        // This catches errors like unimplemented interfaces, cyclic dependencies and so on.
+        // Otherwise we would only get those errors when the services are actually needed,
+        // on specific requests/tasks at runtime.
+        $container = $this->container;
+        assert($container instanceof Container);
+        foreach ($container->getServiceIds() as $id) {
+            try {
+                $container->get($id);
+            } catch (\Throwable $e) {
+                $result->set(CheckResult::STATUS_FAILURE, $e->getMessage(), ['exception' => $e]);
+                break;
+            }
+        }
+
+        return $result;
     }
 
     private function checkAppSecret(): CheckResult
@@ -54,6 +81,7 @@ class SymfonyCheck implements CheckInterface
         $results = [];
         $results[] = $this->checkAppSecret();
         $results[] = $this->checkAppDebug();
+        $results[] = $this->checkAllServices();
 
         return $results;
     }
