@@ -18,15 +18,19 @@ trait LocalDataAwareTrait
      */
     private $localData;
 
+    /**
+     * Returns the array of local data attributes.
+     */
     public function getLocalData(): array
     {
         return $this->localData;
     }
 
     /**
-     * Adds a local data entry.
+     * Sets the value of a local data attribute.
      *
-     * @param mixed|null $value
+     * @param string     $key   the attribute name
+     * @param mixed|null $value the attribute value
      */
     public function setLocalDataValue(string $key, $value): void
     {
@@ -38,9 +42,11 @@ trait LocalDataAwareTrait
 
     /**
      * @Ignore
-     * Returns the local data value for the given key or null if the key is not found.
+     * Returns the value of a local data attribute.
      *
-     * @return ?mixed
+     * @param string $key the attribute name
+     *
+     * @return ?mixed the value or null if the attribute is not found
      */
     public function getLocalDataValue(string $key)
     {

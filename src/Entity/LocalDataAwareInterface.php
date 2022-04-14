@@ -7,21 +7,19 @@ namespace Dbp\Relay\CoreBundle\Entity;
 interface LocalDataAwareInterface
 {
     /**
-     * Returns the unique name (shortName of the ApiResource) of this entity.
-     */
-    public static function getUniqueEntityName(): string;
-
-    /**
      * Sets the value of a local data attribute.
      *
-     * @param mixed|null $value
+     * @param string $key   the attribute name
+     * @param ?mixed $value the attribute value
      */
     public function setLocalDataValue(string $key, $value): void;
 
     /**
-     * Returns the value of local data value attribute or null if the attribute is not found.
+     * Returns the value of a local data attribute.
      *
-     * @return ?mixed
+     * @param string $key The attribute name
+     *
+     * @return ?mixed The value or null if the attribute is not found
      */
     public function getLocalDataValue(string $key);
 }

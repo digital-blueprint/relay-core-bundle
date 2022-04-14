@@ -4,16 +4,21 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Service;
 
-use Dbp\Relay\CoreBundle\Event\LocalDataAwarePostEvent;
+use ApiPlatform\Core\Exception\ResourceClassNotFoundException;
+use ApiPlatform\Core\Metadata\Resource\Factory\AnnotationResourceMetadataFactory;
+use Dbp\Relay\CoreBundle\Event\LocalDataAwareEvent;
+use Dbp\Relay\CoreBundle\Exception\ApiError;
+use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class LocalDataAwareEventDispatcher
 {
+    /** @var array */
     private $requestedAttributes;
 
     /** @var string */
-    private $unqiueEntityName;
+    private $uniqueEntityName;
 
     /** @var EventDispatcherInterface */
     private $eventDispatcher;
@@ -21,18 +26,23 @@ class LocalDataAwareEventDispatcher
     /** @var string */
     private $eventName;
 
-    public function __construct(string $unqiueEntityName, EventDispatcherInterface $eventDispatcher, string $eventName)
+    public function __construct(string $resourceClass, EventDispatcherInterface $eventDispatcher, string $eventName)
     {
-        $this->unqiueEntityName = $unqiueEntityName;
+        $this->uniqueEntityName = self::getUniqueEntityName($resourceClass);
         $this->eventDispatcher = $eventDispatcher;
         $this->eventName = $eventName;
     }
 
-    public function initRequestedLocalDataAttributes(array $options)
+    /**
+     * Parses the 'include' option, if present, and extracts the list of requested attributes for $this->uniqueEntityName.
+     *
+     * @param string $includeParameter The value of the 'include' parameter as passed to a GET-operation
+     */
+    public function initRequestedLocalDataAttributes(string $includeParameter): void
     {
         $this->requestedAttributes = [];
-        if ($include = $options['include'] ?? null) {
-            $requestedLocalDataAttributes = explode(',', $include);
+        if (!empty($includeParameter)) {
+            $requestedLocalDataAttributes = explode(',', $includeParameter);
 
             foreach ($requestedLocalDataAttributes as $requestedLocalDataAttribute) {
                 $requestedLocalDataAttribute = trim($requestedLocalDataAttribute);
@@ -43,7 +53,7 @@ class LocalDataAwareEventDispatcher
                         throw new HttpException(400, sprintf("value of 'include' parameter has invalid format: '%s' (Example: 'ResourceName.attr,ResourceName.attr2')", $requestedLocalDataAttribute));
                     }
 
-                    if ($this->unqiueEntityName === $requestedUniqueEntityName) {
+                    if ($this->uniqueEntityName === $requestedUniqueEntityName) {
                         $this->requestedAttributes[] = $requestedAttributeName;
                     }
                 }
@@ -52,7 +62,10 @@ class LocalDataAwareEventDispatcher
         }
     }
 
-    public function dispatch(LocalDataAwarePostEvent $event)
+    /**
+     * Dispatches the given event.
+     */
+    public function dispatch(LocalDataAwareEvent $event): void
     {
         $event->setRequestedAttributes($this->requestedAttributes);
 
@@ -60,17 +73,46 @@ class LocalDataAwareEventDispatcher
 
         $remainingLocalDataAttributes = $event->getRemainingRequestedAttributes();
         if (!empty($remainingLocalDataAttributes)) {
-            throw new HttpException(500, sprintf("the following local data attributes were not provided for resource '%s': %s", $this->unqiueEntityName, implode(', ', $remainingLocalDataAttributes)));
+            throw new HttpException(500, sprintf("the following local data attributes were not provided for resource '%s': %s", $this->uniqueEntityName, implode(', ', $remainingLocalDataAttributes)));
         }
     }
 
-    private static function parseLocalDataAttribute(string $localDataAttribute, ?string &$entityUniqueName, ?string &$attributeName): bool
+    /**
+     * Returns the unique API resource name, i.e. short name, of this entity. For this to work, the ApiResource annotation
+     * of the entity has to include a non-empty 'shortName' attribute.
+     *
+     * @throws ApiError if the ApiResource annotation of $resourceClass doesn't have a non-empty 'shortName' attribute
+     */
+    public static function getUniqueEntityName(string $resourceClass): string
+    {
+        $resourceMetadataFactory = new AnnotationResourceMetadataFactory(new AnnotationReader());
+        try {
+            $resourceMetadata = $resourceMetadataFactory->create($resourceClass);
+        } catch (ResourceClassNotFoundException $exc) {
+            throw new ApiError(500, $exc->getMessage());
+        }
+
+        $uniqueName = $resourceMetadata->getShortName() ?? '';
+        if (empty($uniqueName)) {
+            throw new ApiError(500, sprintf("'shortName' attribute missing in ApiResource annotation of resource class '%s'", $resourceClass));
+        }
+
+        return $uniqueName;
+    }
+
+    /**
+     * Parses a local data attribute of the form 'UniqueEntityName.attributeName'.
+     * NOTE: Due to possible performance impact, there is currently no regex check for valid entity and attribute names (i.e. PHP type/variable names).
+     *
+     * @retrun true if $localDataAttribute complies with the local attribute format, false otherwise
+     */
+    private static function parseLocalDataAttribute(string $localDataAttribute, ?string &$uniqueEntityName, ?string &$attributeName): bool
     {
         $parts = explode('.', $localDataAttribute);
         if (count($parts) !== 2 || empty($parts[0]) || empty($parts[1])) {
             return false;
         }
-        $entityUniqueName = $parts[0];
+        $uniqueEntityName = $parts[0];
         $attributeName = $parts[1];
 
         return true;
