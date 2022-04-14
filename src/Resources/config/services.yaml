@@ -57,3 +57,7 @@ services:
   Dbp\Relay\CoreBundle\Auth\ProxyAuthenticator:
     autowire: true
     autoconfigure: true
+
+  Dbp\Relay\CoreBundle\Service\LocalDataAwareEventDispatcher:
+    autowire: true
+    autoconfigure: true
