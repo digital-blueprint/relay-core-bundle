@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\Service;
+namespace Dbp\Relay\CoreBundle\LocalData;
 
 use ApiPlatform\Core\Exception\ResourceClassNotFoundException;
 use ApiPlatform\Core\Metadata\Resource\Factory\AnnotationResourceMetadataFactory;
-use Dbp\Relay\CoreBundle\Event\LocalDataAwareEvent;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -23,14 +22,10 @@ class LocalDataAwareEventDispatcher
     /** @var EventDispatcherInterface */
     private $eventDispatcher;
 
-    /** @var string */
-    private $eventName;
-
-    public function __construct(string $resourceClass, EventDispatcherInterface $eventDispatcher, string $eventName)
+    public function __construct(string $resourceClass, EventDispatcherInterface $eventDispatcher)
     {
         $this->uniqueEntityName = self::getUniqueEntityName($resourceClass);
         $this->eventDispatcher = $eventDispatcher;
-        $this->eventName = $eventName;
     }
 
     /**
@@ -65,11 +60,11 @@ class LocalDataAwareEventDispatcher
     /**
      * Dispatches the given event.
      */
-    public function dispatch(LocalDataAwareEvent $event): void
+    public function dispatch(LocalDataAwareEvent $event, string $eventName): void
     {
         $event->setRequestedAttributes($this->requestedAttributes);
 
-        $this->eventDispatcher->dispatch($event, $this->eventName);
+        $this->eventDispatcher->dispatch($event, $eventName);
 
         $remainingLocalDataAttributes = $event->getRemainingRequestedAttributes();
         if (!empty($remainingLocalDataAttributes)) {
@@ -95,6 +90,8 @@ class LocalDataAwareEventDispatcher
         $uniqueName = $resourceMetadata->getShortName() ?? '';
         if (empty($uniqueName)) {
             throw new ApiError(500, sprintf("'shortName' attribute missing in ApiResource annotation of resource class '%s'", $resourceClass));
+        } elseif (str_contains($uniqueName, '.') || str_contains($uniqueName, ',')) {
+            throw new ApiError(500, sprintf("'shortName' attribute of resource class '%s' must not contain '.' or ',' characters: '%s'", $resourceClass, $uniqueName));
         }
 
         return $uniqueName;

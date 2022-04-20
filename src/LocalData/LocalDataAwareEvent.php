@@ -2,11 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\Event;
+namespace Dbp\Relay\CoreBundle\LocalData;
 
-use Dbp\Relay\CoreBundle\Entity\LocalDataAwareInterface;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
-use Dbp\Relay\CoreBundle\Service\LocalDataAwareEventDispatcher;
 use Symfony\Contracts\EventDispatcher\Event;
 
 class LocalDataAwareEvent extends Event
