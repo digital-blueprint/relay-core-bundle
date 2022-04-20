@@ -124,6 +124,10 @@
             <br> Build: <a href="{{ app_buildinfo_url }}">{{ app_buildinfo }}</a>
             <br> Environment: {{ app_env }}
             <br> Debug: {% if app_debug %}yes{% else %}no{% endif %}
+            <br> Host: {{ app.request.getHost() }}
+            <br> Port: {{ app.request.getPort() }}
+            <br> Scheme: {{ app.request.getScheme() }}
+            <br> IP: {{ app.request.getClientIp() }}
         </div>
     </div>
 </div>
