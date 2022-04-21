@@ -20,6 +20,11 @@ class LocalDataAwareEvent extends Event
         $this->entity = $entity;
     }
 
+    public function getEntity(): LocalDataAwareInterface
+    {
+        return $this->entity;
+    }
+
     /**
      * Sets the list of requested local data attribute names for this event's entity.
      *
@@ -51,15 +56,19 @@ class LocalDataAwareEvent extends Event
      */
     public function setLocalDataAttribute(string $key, $value): void
     {
-        $arrayKey = array_search($key, $this->requestedAttributes, true);
-        if ($arrayKey === false) {
-            // TODO: maybe ignore or just emit warning?
-            throw new ApiError(500, sprintf("trying to set local data attribute '%s', which was not requested for entity '%s'", $key, LocalDataAwareEventDispatcher::getUniqueEntityName(get_class($this->entity))));
-        }
+        $this->setLocalDataAttributeInternal($key, $value, true);
+    }
 
-        // once set, remove the attribute from the list of requested attributes
-        array_splice($this->requestedAttributes, $arrayKey, 1);
-        $this->entity->setLocalDataValue($key, $value);
+    /**
+     * Tries to set a local data attribute of this event's entity and removes it from the list of requested attributes.
+     *
+     * @parem string $key The name of the attribute.
+     *
+     * @param mixed|null $value the value for the attribute
+     */
+    public function trySetLocalDataAttribute(string $key, $value): void
+    {
+        $this->setLocalDataAttributeInternal($key, $value, false);
     }
 
     /**
@@ -70,5 +79,30 @@ class LocalDataAwareEvent extends Event
     public function isLocalDataAttributeRequested(string $key): bool
     {
         return in_array($key, $this->requestedAttributes, true);
+    }
+
+    /**
+     * Sets a local data attribute of this event's entity and removes it from the list of requested attributes.
+     *
+     * @parem string $key The name of the attribute.
+     *
+     * @param mixed|null $value the value for the attribute
+     *
+     * @throws ApiError if attribute $key is not in the set of requested attributes
+     */
+    private function setLocalDataAttributeInternal(string $key, $value, bool $throwIfNotFound): void
+    {
+        $arrayKey = array_search($key, $this->requestedAttributes, true);
+        if ($arrayKey === false) {
+            if ($throwIfNotFound) {
+                throw new ApiError(500, sprintf("trying to set local data attribute '%s', which was not requested for entity '%s'", $key, LocalDataAwareEventDispatcher::getUniqueEntityName(get_class($this->entity))));
+            } else {
+                return;
+            }
+        }
+
+        // once set, remove the attribute from the list of requested attributes
+        array_splice($this->requestedAttributes, $arrayKey, 1);
+        $this->entity->setLocalDataValue($key, $value);
     }
 }

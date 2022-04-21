@@ -1,65 +1,83 @@
 #Local Data
 
-Local data provides a mechanism to extend base-entities by attributes which are not part of the entities default set of attributes. Local data can be added in custom base-entity (post-)event subscribers.
+Local data provides a mechanism to extend entities by attributes which are not part of the entities default set of attributes. Local data can be added in custom entity (post-)event subscribers.
 
 ## Local Data requests
 
-Local data can be requested using the `inlucde` parameter provided by base-entity GET operations by default. The format is the following:
+Local data can be requested using the `inlucde` parameter provided by entity GET operations. The format is the following:
 
 ```php
 include=<ResourceName>.<attributeName>,...
 ```
 
-It is a comma-separated list of 0 ... n `<ResourceName>.<attributeName>` pairs. Note that `ResourceName` is the `shortName` defined in the `ApiResource` annotation of an entity. The backend will return an error if
+It is a comma-separated list of 0 ... n `<ResourceName>.<attributeName>` pairs, where `ResourceName` is the `shortName` defined in the `ApiResource` annotation of an entity. The list may contain attributes form different resources. 
+
+The backend will return an error if
+* The `shortName` of the entity contains `.` or `,` characters 
 * The format of the `include` parameter is invalid
 * Any of the requested attributes could not be provided
-* The backend tries to set an attribute which was not requested
+* The backend tried to set an attribute which was not requested
 
-##Adding local data attributes
+##Adding Local Data Attributes to Existing Entities
 
-Integraters have to make sure that local attributes requested by their client applications are added in the backend. This can be done in custom base-entity event subscribers.
+Integraters have to make sure that local attributes requested by their client applications are added in the backend. This can be done in custom entity (post-)event subscribers:
 
 ```php
-class BaseEntityEventSubscriber implements EventSubscriberInterface
+class EntityEventSubscriber implements EventSubscriberInterface
 {
     public static function getSubscribedEvents(): array
     {
         return [
-            BaseEntityPostEvent::NAME => 'onPost',
+            EntityPostEvent::NAME => 'onPost',
          ];
     }
 
-    public function onPost(BaseEntityPostEvent $event)
+    public function onPost(EntityPostEvent $event)
     {
-        $data = $event->getBaseEntityData();
-        if ($event->isLocalDataAttributeRequested('foo')) {
-            $event->setLocalDataAttribute('foo', $data->getFoo());
-        }
+        $data = $event->getSourceData();
+        $event->trySetLocalDataAttribute('foo', $data->getFoo());
     }
 }
 ```
+Events of built-in entities provide a `getSourceData()` and a `getEntity()` method by convention, where
+* `getSourceData()` provides the full set of available attributes for the entity
+* `getEntity()` provides the entity itself
+
+The event's `trySetLocalDataAttribute` method provides a convient way for setting attributes without causing an error in case the attribute was not requested by the client.
+
+Note that local data values have to be serializable to JSON.
 
 ##Creating Local Data aware Entities
 
-You can easily add Local Data to your Entity (`MyEntity`) by:
+You can easily add local data to your Entity (`MyEntity`) by:
 
 * Using the `LocalDataAwareTrait` in `MyEntity`
 * Implementing the `LocalDataAwareInterface` in `MyEntity`
-* Adding the `LocalData:output` group to the normalization context of `MyEntity`
-* Adding an event dispatcher of type `LocalDataAwareEventDispatcher` to your Entity provider
+* Adding the `LocalData:output` group to the normalization context of `MyEntity`. For example:
+  ```php
+   normalizationContext={"groups" = {"MyEntity:output", "LocalData:output"}}
+  ```
+* Adding an event dispatcher member variable of type `LocalDataAwareEventDispatcher` to your entity provider
 * On GET-requests, passing the value of the `include` parameter to the event dispatcher
 ```php
 $this->eventDispatcher->initRequestedLocalDataAttributes($includeParameter);
 ```
-* Creating a (post-)event `MyEntityPostEvent` extending the `LocalDataAwareEvent`, which you pass to the event dispatcher once your Entity provider is done setting up a new instance of `MyEntity`:
+* Creating a (post-)event `MyEntityPostEvent` extending `LocalDataAwareEvent`, which you pass to the event dispatcher's `dispatch` method once your entity provider is done setting up a new instance of `MyEntity`:
 ```php
 // get some data
-$myEntityData = $externalApi->getEntityData($identifier);
+$mySourceData = $externalApi->getSourceData($identifier);
+
+// craete a new instance of MyEntity
 $myEntity = new MyEntity();
-// first, set the default attributes:
-$myEntity->setIdentifier($myEntityData->getIdentifier());
-$myEntity->setName($myEntityData->getName());
-// now, for custom attributes:
-$postEvent = new MyEntityPostEvent($myEntity, $myEntityData);
-$this->eventDispatcher->dispatch($postEvent);
+// first, set the entity's default attributes:
+$myEntity->setIdentifier($mySourceData->getIdentifier());
+$myEntity->setName($mySourceData->getName());
+
+// now, fire the event allowing event subscribers to add local data attributes
+$postEvent = new MyEntityPostEvent($myEntity, $mySourceData);
+$this->eventDispatcher->dispatch($postEvent, MyEntityPostEvent::NAME);
+
+return $myEntity;
 ```
+
+In case your entity has nested entities (sub-resources), your entity provider is responsible of passing the `include` parameter to sub-resource providers.
