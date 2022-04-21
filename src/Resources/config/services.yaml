@@ -61,3 +61,10 @@ services:
   Dbp\Relay\CoreBundle\Service\LocalDataAwareEventDispatcher:
     autowire: true
     autoconfigure: true
+
+  Dbp\Relay\CoreBundle\Routing\RoutingLoader:
+    tags: ['routing.loader']
+    autowire: true
+    autoconfigure: true
+    arguments:
+      $env: ~

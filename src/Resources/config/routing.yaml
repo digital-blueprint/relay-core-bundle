@@ -2,3 +2,8 @@ api_platform:
   resource: .
   type: api_platform
   prefix: /
+
+dbp_relay:
+  resource: .
+  type: dbp_relay
+  prefix: /
