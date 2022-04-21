@@ -20,7 +20,7 @@ class LocalDataAwareEvent extends Event
         $this->entity = $entity;
     }
 
-    public function getEntity(): LocalDataAwareInterface
+    protected function getEntityInternal(): LocalDataAwareInterface
     {
         return $this->entity;
     }
