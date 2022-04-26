@@ -29,4 +29,12 @@ class ExtensionTraitTest extends TestCase
         $this->addAllowHeader($builder, 'foobar');
         $this->assertTrue($params->has('dbp_api.allow_headers'));
     }
+
+    public function testCalledTooLate()
+    {
+        $builder = new ContainerBuilder();
+        $builder->setParameter('dbp_api._prepend_done', true);
+        $this->expectException(\RuntimeException::class);
+        $this->addQueueMessage($builder, 'foobar');
+    }
 }

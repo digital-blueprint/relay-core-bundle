@@ -73,7 +73,7 @@ trait ExtensionTrait
     {
         // Some things can only be called in prepend, so that the core bundle can forward them
         // to other bundles in prepend() as well.
-        if ($container->has('dbp_api._prepend_done')) {
+        if ($container->hasParameter('dbp_api._prepend_done')) {
             throw new \RuntimeException('This function can only be called in prepend(). See PrependExtensionInterface');
         }
     }
