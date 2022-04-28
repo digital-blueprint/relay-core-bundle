@@ -10,6 +10,6 @@ class LocalData
 
     public static function getIncludeParameter(array $filters): string
     {
-        return $filters(self::INCLUDE_PARAMETER_NAME) ?? '';
+        return $filters[self::INCLUDE_PARAMETER_NAME] ?? '';
     }
 }
