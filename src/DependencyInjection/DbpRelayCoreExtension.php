@@ -217,5 +217,9 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
                 'lock' => $lockDsn,
             ]);
         }
+
+        // Since the core bundle should always be called last we can use this to detect if
+        // things are called after this by checking if this exist.
+        $container->setParameter('dbp_api._prepend_done', true);
     }
 }
