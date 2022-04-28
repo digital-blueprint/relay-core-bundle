@@ -58,7 +58,11 @@ services:
     autowire: true
     autoconfigure: true
 
-  Dbp\Relay\CoreBundle\Service\LocalDataAwareEventDispatcher:
+  Dbp\Relay\CoreBundle\LocalData\LocalDataAwareEventDispatcher:
+    autowire: true
+    autoconfigure: true
+
+  Dbp\Relay\CoreBundle\LocalData\LocalDataAwareEvent:
     autowire: true
     autoconfigure: true
 
