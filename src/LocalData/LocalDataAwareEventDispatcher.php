@@ -22,20 +22,26 @@ class LocalDataAwareEventDispatcher
     /** @var EventDispatcherInterface */
     private $eventDispatcher;
 
+    /**
+     * @param string                   $resourceClass   The class name of the entity (resource) this event dispatcher is responsible for
+     * @param EventDispatcherInterface $eventDispatcher The inner event dispatcher that this event dispatcher decorates
+     */
     public function __construct(string $resourceClass, EventDispatcherInterface $eventDispatcher)
     {
+        $this->requestedAttributes = [];
         $this->uniqueEntityName = self::getUniqueEntityName($resourceClass);
         $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
-     * Parses the 'include' option, if present, and extracts the list of requested attributes for $this->uniqueEntityName.
+     * Parses the 'include' parameter and extracts the list of requested attributes for this event dispatcher's entity (resource).
      *
-     * @param string $includeParameter The value of the 'include' parameter as passed to a GET-operation
+     * @param ?string $includeParameter The value of the 'include' parameter as passed to a GET-operation
      */
-    public function initRequestedLocalDataAttributes(string $includeParameter): void
+    public function initRequestedLocalDataAttributes(?string $includeParameter): void
     {
         $this->requestedAttributes = [];
+
         if (!empty($includeParameter)) {
             $requestedLocalDataAttributes = explode(',', $includeParameter);
 
@@ -55,6 +61,25 @@ class LocalDataAwareEventDispatcher
             }
             $this->requestedAttributes = array_unique($this->requestedAttributes);
         }
+    }
+
+    /**
+     * Checks if the given entity's local data attribute names matches the list of requested attributes this event dispatcher's entity (resource).
+     * NOTE: The resource class of the entities must match.
+     *
+     * @param LocalDataAwareInterface $entity The entity whose local data attributes to check
+     */
+    public function checkRequestedAttributesIdentitcal(LocalDataAwareInterface $entity)
+    {
+        assert(self::getUniqueEntityName(get_class($entity)) === $this->uniqueEntityName);
+
+        dump(array_keys($entity->getLocalData() ?? []));
+        dump($this->requestedAttributes);
+
+        $availableAttributes = $entity->getLocalData() ? array_keys($entity->getLocalData()) : [];
+
+        return count($this->requestedAttributes) === count($availableAttributes) &&
+            empty(array_diff($this->requestedAttributes, $availableAttributes));
     }
 
     /**

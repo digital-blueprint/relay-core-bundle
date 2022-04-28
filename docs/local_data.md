@@ -4,18 +4,20 @@ Local data provides a mechanism to extend entities by attributes which are not p
 
 ## Local Data requests
 
-Local data can be requested using the `inlucde` parameter provided by entity GET operations. The format is the following:
+Local data can be requested using the `includeLocal` parameter provided by entity GET operations. The format is the following:
 
 ```php
-include=<ResourceName>.<attributeName>,...
+includeLocal=<ResourceName>.<attributeName>,...
 ```
 
 It is a comma-separated list of 0 ... n `<ResourceName>.<attributeName>` pairs, where `ResourceName` is the `shortName` defined in the `ApiResource` annotation of an entity. The list may contain attributes form different resources. 
 
 The backend will return an error if
 * The `shortName` of the entity contains `.` or `,` characters 
-* The format of the `include` parameter is invalid
+* The format of the `includeLocal` parameter is invalid
 * Any of the requested attributes could not be provided
+
+The backend will issue a warning if
 * The backend tried to set an attribute which was not requested
 
 ##Adding Local Data Attributes to Existing Entities
@@ -34,8 +36,13 @@ class EntityEventSubscriber implements EventSubscriberInterface
 
     public function onPost(EntityPostEvent $event)
     {
-        $data = $event->getSourceData();
-        $event->trySetLocalDataAttribute('foo', $data->getFoo());
+        $sourceData = $event->getSourceData();
+        $event->trySetLocalDataAttribute('foo', $sourceData->getFoo());
+        
+        if ($event->isLocalDataAttributeRequested('bar')) {
+            $bar = $externalApi->getBar(); // expensive api call
+            $event->setLocalDataAttribute('bar', $bar);
+        }
     }
 }
 ```
@@ -43,7 +50,9 @@ Events of built-in entities provide a `getSourceData()` and a `getEntity()` meth
 * `getSourceData()` provides the full set of available attributes for the entity
 * `getEntity()` provides the entity itself
 
-The event's `trySetLocalDataAttribute` method provides a convient way for setting attributes without causing an error in case the attribute was not requested by the client.
+To set local data attributes, use:
+* `trySetLocalDataAttribute` if you have the attribute value already at hand. It is safe because it only sets the value if the attrubte was requested.
+* `setLocalDataAttribute` if `isLocalDataAttributeRequested` is `true`, if getting the attribute value is expensive.
 
 Note that local data values have to be serializable to JSON.
 
@@ -58,7 +67,7 @@ You can easily add local data to your Entity (`MyEntity`) by:
    normalizationContext={"groups" = {"MyEntity:output", "LocalData:output"}}
   ```
 * Adding an event dispatcher member variable of type `LocalDataAwareEventDispatcher` to your entity provider
-* On GET-requests, passing the value of the `include` parameter to the event dispatcher
+* On GET-requests, passing the value of the `includeLocal` parameter to the event dispatcher
 ```php
 $this->eventDispatcher->initRequestedLocalDataAttributes($includeParameter);
 ```
@@ -80,4 +89,4 @@ $this->eventDispatcher->dispatch($postEvent, MyEntityPostEvent::NAME);
 return $myEntity;
 ```
 
-In case your entity has nested entities (sub-resources), your entity provider is responsible of passing the `include` parameter to sub-resource providers.
+In case your entity has nested entities (sub-resources), your entity provider is responsible of passing the `includeLocal` parameter to sub-resource providers.

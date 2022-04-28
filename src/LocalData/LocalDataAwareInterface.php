@@ -7,6 +7,11 @@ namespace Dbp\Relay\CoreBundle\LocalData;
 interface LocalDataAwareInterface
 {
     /**
+     * Returns the array of local data attributes.
+     */
+    public function getLocalData(): ?array;
+
+    /**
      * Sets the value of a local data attribute.
      *
      * @param string $key   the attribute name
@@ -19,7 +24,14 @@ interface LocalDataAwareInterface
      *
      * @param string $key The attribute name
      *
-     * @return ?mixed The value or null if the attribute is not found
+     * @return ?mixed The value or null if there is no local data attribute with the given name
      */
     public function getLocalDataValue(string $key);
+
+    /**
+     * Returns whether there is a local attribute with the given name.
+     *
+     * @param string $key The attribute name
+     */
+    public function hasLocalDataValue(string $key): bool;
 }
