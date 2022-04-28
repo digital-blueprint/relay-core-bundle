@@ -73,9 +73,6 @@ class LocalDataAwareEventDispatcher
     {
         assert(self::getUniqueEntityName(get_class($entity)) === $this->uniqueEntityName);
 
-        dump(array_keys($entity->getLocalData() ?? []));
-        dump($this->requestedAttributes);
-
         $availableAttributes = $entity->getLocalData() ? array_keys($entity->getLocalData()) : [];
 
         return count($this->requestedAttributes) === count($availableAttributes) &&

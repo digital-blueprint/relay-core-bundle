@@ -5,10 +5,14 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\LocalData;
 
 use Dbp\Relay\CoreBundle\Exception\ApiError;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 use Symfony\Contracts\EventDispatcher\Event;
 
-class LocalDataAwareEvent extends Event
+class LocalDataAwareEvent extends Event implements LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     /** @var LocalDataAwareInterface */
     private $entity;
 
@@ -90,12 +94,15 @@ class LocalDataAwareEvent extends Event
      *
      * @throws ApiError if attribute $key is not in the set of requested attributes
      */
-    private function setLocalDataAttributeInternal(string $key, $value, bool $throwIfNotFound): void
+    private function setLocalDataAttributeInternal(string $key, $value, bool $warnfNotFound): void
     {
         $arrayKey = array_search($key, $this->requestedAttributes, true);
         if ($arrayKey === false) {
-            if ($throwIfNotFound) {
-                throw new ApiError(500, sprintf("trying to set local data attribute '%s', which was not requested for entity '%s'", $key, LocalDataAwareEventDispatcher::getUniqueEntityName(get_class($this->entity))));
+            if ($warnfNotFound) {
+                if ($this->logger !== null) {
+                    $this->logger->warning(sprintf("trying to set local data attribute '%s', which was not requested for entity '%s'", $key, LocalDataAwareEventDispatcher::getUniqueEntityName(get_class($this->entity))));
+                }
+                assert(false);
             } else {
                 return;
             }
