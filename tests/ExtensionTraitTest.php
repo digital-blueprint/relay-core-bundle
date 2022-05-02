@@ -16,7 +16,7 @@ class ExtensionTraitTest extends TestCase
     {
         $builder = new ContainerBuilder();
         $params = $builder->getParameterBag();
-        $this->addQueueMessage($builder, 'foobar');
+        $this->addQueueMessageClass($builder, 'foobar');
         $this->assertTrue($params->has('dbp_api.messenger_routing'));
         $this->addResourceClassDirectory($builder, '.');
         $this->assertTrue($params->has('api_platform.resource_class_directories'));
@@ -35,6 +35,6 @@ class ExtensionTraitTest extends TestCase
         $builder = new ContainerBuilder();
         $builder->setParameter('dbp_api._prepend_done', true);
         $this->expectException(\RuntimeException::class);
-        $this->addQueueMessage($builder, 'foobar');
+        $this->addQueueMessageClass($builder, 'foobar');
     }
 }

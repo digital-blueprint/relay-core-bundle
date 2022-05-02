@@ -37,9 +37,9 @@ trait ExtensionTrait
     }
 
     /**
-     * Registers a specific message to be routed via the global async queue.
+     * Registers a specific message type to be routed via the global async queue.
      */
-    public function addQueueMessage(ContainerBuilder $container, string $messageClass)
+    public function addQueueMessageClass(ContainerBuilder $container, string $messageClass): void
     {
         $this->ensureInPrepend($container);
         $this->extendArrayParameter($container, 'dbp_api.messenger_routing', [
@@ -48,7 +48,9 @@ trait ExtensionTrait
     }
 
     /**
-     * Registers a specific message to be routed via the global async queue.
+     * Adds a header to Access-Control-Expose-Headers, so that scripts in browsers can access them.
+     *
+     * See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers
      */
     public function addExposeHeader(ContainerBuilder $container, string $headerName)
     {
@@ -59,7 +61,9 @@ trait ExtensionTrait
     }
 
     /**
-     * Registers a specific message to be routed via the global async queue.
+     * Adds a header to Access-Control-Allow-Headers, so that scripts in browsers can send those headers.
+     *
+     * See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers
      */
     public function addAllowHeader(ContainerBuilder $container, string $headerName)
     {
@@ -86,5 +90,13 @@ trait ExtensionTrait
         $oldValues = $container->getParameter($parameter);
         assert(is_array($oldValues));
         $container->setParameter($parameter, array_merge($oldValues, $values));
+    }
+
+    /**
+     * @deprecated use addQueueMessageClass instead
+     */
+    public function addQueueMessage(ContainerBuilder $container, string $messageClass): void
+    {
+        $this->addQueueMessageClass($container, $messageClass);
     }
 }
