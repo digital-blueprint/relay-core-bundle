@@ -1,10 +1,10 @@
 #Local Data
 
-Local data provides a mechanism to extend entities by attributes which are not part of the entities default set of attributes. Local data can be added in custom entity (post-)event subscribers.
+Local data provides a mechanism to extend resource entities by attributes which are not part of the entities default set of attributes. Local data can be added in custom entity (post-)event subscribers.
 
 ## Local Data requests
 
-Local data can be requested using the `includeLocal` parameter provided by entity GET operations. The format is the following:
+Local data can be requested using the `includeLocal` parameter provided by resource entity GET operations. The format is the following:
 
 ```php
 includeLocal=<ResourceName>.<attributeName>,...
@@ -14,7 +14,7 @@ It is a comma-separated list of 0 ... n `<ResourceName>.<attributeName>` pairs, 
 
 The backend will return an error if
 * The `shortName` of the entity contains `.` or `,` characters 
-* The format of the `includeLocal` parameter is invalid
+* The format of the `includeLocal` parameter value is invalid
 * Any of the requested attributes could not be provided
 
 The backend will issue a warning if
@@ -51,8 +51,8 @@ Events of built-in entities provide a `getSourceData()` and a `getEntity()` meth
 * `getEntity()` provides the entity itself
 
 To set local data attributes, use:
-* `trySetLocalDataAttribute` if you have the attribute value already at hand. It is safe because it only sets the value if the attrubte was requested.
-* `setLocalDataAttribute` if `isLocalDataAttributeRequested` is `true`, if getting the attribute value is expensive.
+* `trySetLocalDataAttribute` if you have the attribute value already at hand. It is safe because it sets the value only if the attrubte was requested
+* `setLocalDataAttribute`, in case `isLocalDataAttributeRequested` is `true`, if getting the attribute value is expensive
 
 Note that local data values have to be serializable to JSON.
 
