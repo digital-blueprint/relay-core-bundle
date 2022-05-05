@@ -137,6 +137,7 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
                     // Apache returns with a 304 without cors headers, the browser serves the cached request with
                     // wrong 'access-control-allow-origin' and the fetch will fail with a CORS error.
                     // By always sending '*' the cached response still happens to be valid in that case.
+                    // edit: this is fixed in Apache since 2.4.48, so we can drop this line once we require that version
                     'forced_allow_origin_value' => '*',
                 ],
             ],
