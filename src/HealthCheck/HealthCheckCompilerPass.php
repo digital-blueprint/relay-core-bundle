@@ -10,9 +10,11 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class HealthCheckCompilerPass implements CompilerPassInterface
 {
+    private const TAG = 'dbp.relay.core.health_check';
+
     public static function register(ContainerBuilder $container): void
     {
-        $container->registerForAutoconfiguration(CheckInterface::class)->addTag('dbp.relay.health_check');
+        $container->registerForAutoconfiguration(CheckInterface::class)->addTag(self::TAG);
         $container->addCompilerPass(new HealthCheckCompilerPass());
     }
 
@@ -22,7 +24,7 @@ class HealthCheckCompilerPass implements CompilerPassInterface
             return;
         }
         $definition = $container->findDefinition(HealthCheckCommand::class);
-        $taggedServices = $container->findTaggedServiceIds('dbp.relay.health_check');
+        $taggedServices = $container->findTaggedServiceIds(self::TAG);
         foreach ($taggedServices as $id => $tags) {
             $definition->addMethodCall('addCheck', [new Reference($id)]);
         }
