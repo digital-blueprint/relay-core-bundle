@@ -13,6 +13,7 @@ includeLocal=<ResourceName>.<attributeName>,...
 It is a comma-separated list of 0 ... n `<ResourceName>.<attributeName>` pairs, where `ResourceName` is the `shortName` defined in the `ApiResource` annotation of an entity. The list may contain attributes form different resources. 
 
 The backend will return an error if
+
 * The `shortName` of the entity contains `.` or `,` characters 
 * The format of the `includeLocal` parameter value is invalid
 * Any of the requested attributes could not be provided
@@ -47,10 +48,12 @@ class EntityEventSubscriber implements EventSubscriberInterface
 }
 ```
 Events of built-in entities provide a `getSourceData()` and a `getEntity()` method by convention, where
+
 * `getSourceData()` provides the full set of available attributes for the entity
 * `getEntity()` provides the entity itself
 
 To set local data attributes, use:
+
 * `trySetLocalDataAttribute` if you have the attribute value already at hand. It is safe because it sets the value only if the attrubte was requested
 * `setLocalDataAttribute`, in case `isLocalDataAttributeRequested` is `true`, if getting the attribute value is expensive
 
