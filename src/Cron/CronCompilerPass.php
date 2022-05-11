@@ -10,9 +10,11 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class CronCompilerPass implements CompilerPassInterface
 {
+    private const TAG = 'dbp.relay.core.cron_job';
+
     public static function register(ContainerBuilder $container): void
     {
-        $container->registerForAutoconfiguration(CronJobInterface::class)->addTag('dbp.relay.cron_job');
+        $container->registerForAutoconfiguration(CronJobInterface::class)->addTag(self::TAG);
         $container->addCompilerPass(new CronCompilerPass());
     }
 
@@ -22,7 +24,7 @@ class CronCompilerPass implements CompilerPassInterface
             return;
         }
         $definition = $container->findDefinition(CronCommand::class);
-        $taggedServices = $container->findTaggedServiceIds('dbp.relay.cron_job');
+        $taggedServices = $container->findTaggedServiceIds(self::TAG);
         foreach ($taggedServices as $id => $tags) {
             $definition->addMethodCall('addJob', [new Reference($id)]);
         }
