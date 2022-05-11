@@ -72,3 +72,7 @@ services:
     autoconfigure: true
     arguments:
       $env: ~
+
+  Dbp\Relay\CoreBundle\Pagination\Pagination:
+    autowire: true
+    autoconfigure: true
