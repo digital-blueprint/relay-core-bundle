@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>{% if title %}{{ title }} - {% endif %}API Platform</title>
+    <title>{% if title %}{{ title }}{% endif %}</title>
 
     {% block stylesheet %}
         <link rel="stylesheet" href="{{ asset('bundles/apiplatform/swagger-ui/swagger-ui.css', assetPackage) }}">
@@ -12,7 +12,7 @@
 
         <style>
             #swagger-ui.api-platform .info .title {
-                background-image: url({{ asset('bundles/dbprelaycore/logo.png', assetPackage) }});
+                background-image: url({{ asset(logo_path, assetPackage) }});
                 background-repeat: no-repeat;
                 background-size: auto 100%;
                 padding-left: 60px

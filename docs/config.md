@@ -9,6 +9,8 @@ dbp_relay_core:
     build_info:           ~ # Example: deadbeef
     # Some URL identifying the current build (URL to the commit on some git web interface)
     build_info_url:       ~ # Example: 'https://gitlab.example.com/project/-/commit/deadbeef'
+    # Path to the logo (256x256) of the API frontend
+    logo_path:            ~ # Example: 'bundles/dbprelaycore/logo.png'
     # The title text of the API docs page
     docs_title:           'Relay API Gateway'
     # The description text of the API docs page (supports markdown)

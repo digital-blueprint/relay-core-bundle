@@ -162,6 +162,7 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
             'globals' => array_merge($twigGlobals, [
                 'app_buildinfo' => $config['build_info'] ?? '',
                 'app_buildinfo_url' => $config['build_info_url'] ?? '',
+                'logo_path' => $config['logo_path'] ?? 'bundles/dbprelaycore/logo.png',
                 'app_env' => '%kernel.environment%',
                 'app_debug' => '%kernel.debug%',
             ]),
