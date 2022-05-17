@@ -9,7 +9,6 @@ use ApiPlatform\Core\Metadata\Resource\Factory\AnnotationResourceMetadataFactory
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class LocalDataAwareEventDispatcher
 {
@@ -51,7 +50,7 @@ class LocalDataAwareEventDispatcher
                     $requestedUniqueEntityName = null;
                     $requestedAttributeName = null;
                     if (!self::parseLocalDataAttribute($requestedLocalDataAttribute, $requestedUniqueEntityName, $requestedAttributeName)) {
-                        throw new HttpException(400, sprintf("value of 'include' parameter has invalid format: '%s' (Example: 'ResourceName.attr,ResourceName.attr2')", $requestedLocalDataAttribute));
+                        throw new ApiError(400, sprintf("value of 'include' parameter has invalid format: '%s' (Example: 'ResourceName.attr,ResourceName.attr2')", $requestedLocalDataAttribute));
                     }
 
                     if ($this->uniqueEntityName === $requestedUniqueEntityName) {
@@ -98,7 +97,7 @@ class LocalDataAwareEventDispatcher
 
         $remainingLocalDataAttributes = $event->getRemainingRequestedAttributes();
         if (!empty($remainingLocalDataAttributes)) {
-            throw new HttpException(500, sprintf("the following local data attributes were not provided for resource '%s': %s", $this->uniqueEntityName, implode(', ', $remainingLocalDataAttributes)));
+            throw new ApiError(500, sprintf("the following local data attributes were not provided for resource '%s': %s", $this->uniqueEntityName, implode(', ', $remainingLocalDataAttributes)));
         }
     }
 
