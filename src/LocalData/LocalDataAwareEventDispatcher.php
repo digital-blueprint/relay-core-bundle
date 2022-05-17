@@ -34,7 +34,7 @@ class LocalDataAwareEventDispatcher
     }
 
     /**
-     * Parses the 'include' parameter and extracts the list of requested attributes for this event dispatcher's entity (resource).
+     * Parses the local data request parameter and extracts the list of requested attributes for this event dispatcher's entity (resource).
      *
      * @param ?string $includeParameter The value of the 'include' parameter as passed to a GET-operation
      */
@@ -61,6 +61,14 @@ class LocalDataAwareEventDispatcher
             }
             $this->requestedAttributes = array_unique($this->requestedAttributes);
         }
+    }
+
+    /**
+     * Returns, whether the attribute with the given name was requested.
+     */
+    public function isAttributeRequested(string $attributeName): bool
+    {
+        return in_array($attributeName, $this->requestedAttributes, true);
     }
 
     /**

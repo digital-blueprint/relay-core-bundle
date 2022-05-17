@@ -8,8 +8,8 @@ class LocalData
 {
     public const INCLUDE_PARAMETER_NAME = 'includeLocal';
 
-    public static function getIncludeParameter(array $filters): string
+    public static function getIncludeParameter(array $filters): ?string
     {
-        return $filters[self::INCLUDE_PARAMETER_NAME] ?? '';
+        return $filters[self::INCLUDE_PARAMETER_NAME] ?? null;
     }
 }
