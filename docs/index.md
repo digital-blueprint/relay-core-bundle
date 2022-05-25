@@ -11,4 +11,4 @@ gateway and also is a dependency of every other API bundle.
 * and more ...
 
 For more information on how to configure and interface with the core bundle see
-the [Developer Guide](https://dbp-demo.tugraz.at/dev-guide/relay/dev/)
+the [Developer Guide](https://dbp-demo.tugraz.at/handbook/relay/dev/)
