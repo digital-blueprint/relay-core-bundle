@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Pagination;
 
-class AllItemsPaginator extends FullPaginator
+class WholeResultPaginator extends FullPaginator
 {
     public function __construct(array $items, int $currentPageNumber, int $maxNumItemsPerPage)
     {
