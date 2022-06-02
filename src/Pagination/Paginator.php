@@ -1,29 +1,38 @@
 <?php
 
 declare(strict_types=1);
-/**
- * This is a paginator for collection data providers to work with items from an array,
- * that only contains a part of the result set.
- */
 
 namespace Dbp\Relay\CoreBundle\Pagination;
 
 use ApiPlatform\Core\DataProvider\PartialPaginatorInterface;
+use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Iterator;
 
 abstract class Paginator implements Iterator, PartialPaginatorInterface
 {
-    protected $position;
+    /** @var int */
+    protected $currentPosition;
+    /** @var array */
     protected $items;
-    protected $numItemsPerPage;
-    protected $page;
+    /** @var int */
+    protected $maxNumItemsPerPage;
+    /** @var int */
+    protected $currentPageNumber;
 
-    protected function __construct(array $items, int $page, int $numItemsPerPage)
+    protected function __construct(array $items, int $currentPageNumber, int $maxNumItemsPerPage)
     {
-        $this->position = 0;
+        if ($currentPageNumber < 1) {
+            throw new ApiError(500, 'current page number must be greater than or equal to one');
+        }
+        if ($maxNumItemsPerPage <= 0) {
+            throw new ApiError(500, 'maximum number of items per page must be greater than zero');
+        }
+
         $this->items = $items;
-        $this->page = $page;
-        $this->numItemsPerPage = $numItemsPerPage;
+        $this->currentPageNumber = $currentPageNumber;
+        $this->maxNumItemsPerPage = $maxNumItemsPerPage;
+
+        $this->rewind();
     }
 
     /**
@@ -31,12 +40,12 @@ abstract class Paginator implements Iterator, PartialPaginatorInterface
      */
     public function current()
     {
-        return $this->items[$this->position];
+        return $this->items[$this->currentPosition];
     }
 
     public function next(): void
     {
-        ++$this->position;
+        ++$this->currentPosition;
     }
 
     /**
@@ -44,34 +53,48 @@ abstract class Paginator implements Iterator, PartialPaginatorInterface
      */
     public function key()
     {
-        return $this->position;
+        return $this->currentPosition;
     }
 
     public function valid(): bool
     {
-        return isset($this->items[$this->position]);
+        return
+            $this->currentPosition < count($this->items) &&
+            $this->currentPosition < $this->maxNumItemsPerPage;
     }
 
     public function rewind(): void
     {
-        $this->position = 0;
+        $this->currentPosition = 0;
     }
 
+    /**
+     * Returns the current page number (page numbering starts at 1).
+     */
     public function getCurrentPage(): float
     {
-        return $this->page;
+        return $this->currentPageNumber;
     }
 
+    /**
+     * Returns the maximum number of page items.
+     */
     public function getItemsPerPage(): float
     {
-        return $this->numItemsPerPage;
+        return $this->maxNumItemsPerPage;
     }
 
+    /**
+     * Returns the number of current page items.
+     */
     public function count(): int
     {
         return count($this->items);
     }
 
+    /**
+     * Returns the current page items.
+     */
     public function getItems(): array
     {
         return $this->items;

@@ -5,29 +5,37 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Pagination;
 
 use ApiPlatform\Core\DataProvider\PaginatorInterface;
+use Dbp\Relay\CoreBundle\Exception\ApiError;
 
 class FullPaginator extends Paginator implements PaginatorInterface
 {
     /** @var int */
-    private $totalNumItems;
+    protected $totalNumItems;
 
+    /**
+     * @throws ApiError
+     */
     public function __construct(array $items, int $page, int $numItemsPerPage, int $totalNumItems)
     {
+        if ($totalNumItems < 0) {
+            throw new ApiError(500, 'total number of items must be greater than or equal to zero');
+        }
+
         parent::__construct($items, $page, $numItemsPerPage);
 
         $this->totalNumItems = $totalNumItems;
     }
 
     /**
-     * Gets last page.
+     * Gets the last page number (page numbering starts at 1).
      */
     public function getLastPage(): float
     {
-        return ceil($this->getTotalItems() / $this->getItemsPerPage());
+        return ceil($this->totalNumItems / $this->maxNumItemsPerPage);
     }
 
     /**
-     * Gets the number of items in the whole collection.
+     * Gets the number of items in the whole result collection.
      */
     public function getTotalItems(): float
     {
