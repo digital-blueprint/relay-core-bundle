@@ -4,58 +4,72 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Pagination;
 
-use ApiPlatform\Core\DataProvider\Pagination as ApiPlatformPagination;
-
 class Pagination
 {
+    public const MAX_NUM_ITEMS_PER_PAGE_DEFAULT = 30;
+
     private const CURRENT_PAGE_NUMBER_PARAMETER_NAME = 'page';
     private const MAX_NUM_ITEMS_PER_PAGE_PARAMETER_NAME = 'perPage';
     private const IS_PARTIAL_PAGINATION_PARAMETER_NAME = 'partialPagination';
 
     private const CURRENT_PAGE_NUMBER_DEFAULT = 1;
-    private const MAX_NUM_ITEMS_PER_PAGE_DEFAULT = 30;
     private const IS_PARTIAL_PAGINATION_DEFAULT = false;
 
-    /** @var ApiPlatformPagination */
-    private $pagination;
-
-    public function __construct(ApiPlatformPagination $pagination)
+    public static function addPaginationOptions(array &$options, array $filters, int $maxNumItemsPerPageDefault = self::MAX_NUM_ITEMS_PER_PAGE_DEFAULT)
     {
-        $this->pagination = $pagination;
+        self::addPaginationOptionsInternal($options, $filters, $maxNumItemsPerPageDefault);
     }
 
-    public function addPaginationOptions(array &$options, string $resourceClass, string $operationName, array $context)
+    public static function getCurrentPageNumber(array $options): int
     {
-        $this->addPaginationOptionsInternal($options, $resourceClass, $operationName, $context);
+        return $options[self::CURRENT_PAGE_NUMBER_PARAMETER_NAME] ?? self::CURRENT_PAGE_NUMBER_DEFAULT;
     }
 
-    public static function getCurrentPageNumber(array $paginationOptions): int
+    public static function getMaxNumItemsPerPage(array $options): int
     {
-        return $paginationOptions[self::CURRENT_PAGE_NUMBER_PARAMETER_NAME] ?? self::CURRENT_PAGE_NUMBER_DEFAULT;
+        return $options[self::MAX_NUM_ITEMS_PER_PAGE_PARAMETER_NAME] ?? self::MAX_NUM_ITEMS_PER_PAGE_DEFAULT;
     }
 
-    public static function getMaxNumItemsPerPage(array $paginationOptions): int
+    public static function isPartialPagination(array $options): bool
     {
-        return $paginationOptions[self::MAX_NUM_ITEMS_PER_PAGE_PARAMETER_NAME] ?? self::MAX_NUM_ITEMS_PER_PAGE_DEFAULT;
+        return $options[self::IS_PARTIAL_PAGINATION_PARAMETER_NAME] ?? self::IS_PARTIAL_PAGINATION_DEFAULT;
     }
 
-    public static function isPartialPagination(array $paginationOptions): bool
+    /**
+     * Creates a new full paginator for the given page items.
+     */
+    public static function createFullPaginator(array $pageItems, array $options, int $totalNumItems): FullPaginator
     {
-        return $paginationOptions[self::IS_PARTIAL_PAGINATION_PARAMETER_NAME] ?? self::IS_PARTIAL_PAGINATION_DEFAULT;
+        return new FullPaginator($pageItems, self::getCurrentPageNumber($options), self::getMaxNumItemsPerPage($options), $totalNumItems);
     }
 
-    public function createWholeResultPaginator(array $result, string $resourceClass, string $operationName, array $context): WholeResultPaginator
+    /**
+     * Creates a new partial paginator for the given page items.
+     */
+    public static function createPartialPaginator(array $pageItems, array $options): PartialPaginator
     {
-        $paginationOptions = [];
-        $this->addPaginationOptionsInternal($paginationOptions, $resourceClass, $operationName, $context);
-
-        return new WholeResultPaginator($result, self::getCurrentPageNumber($paginationOptions), self::getMaxNumItemsPerPage($paginationOptions));
+        return new PartialPaginator($pageItems, self::getCurrentPageNumber($options), self::getMaxNumItemsPerPage($options));
     }
 
-    public function addPaginationOptionsInternal(array &$options, string $resourceClass, string $operationName, array $context)
+    /**
+     * Creates a new paginator for the given whole result set.
+     * Note that this is always a full paginator, even if a partial paginator was requested.
+     */
+    public static function createWholeResultPaginator(array $resultItems, array $options): WholeResultPaginator
     {
-        $options[self::CURRENT_PAGE_NUMBER_PARAMETER_NAME] = $this->pagination->getPage($context);
-        $options[self::MAX_NUM_ITEMS_PER_PAGE_PARAMETER_NAME] = $this->pagination->getLimit($resourceClass, $operationName, $context);
-        $options[self::IS_PARTIAL_PAGINATION_PARAMETER_NAME] = $this->pagination->isPartialEnabled($resourceClass, $operationName, $context);
+        return new WholeResultPaginator($resultItems, self::getCurrentPageNumber($options), self::getMaxNumItemsPerPage($options));
+    }
+
+    private static function addPaginationOptionsInternal(array &$options, array $filters, int $maxNumItemsPerPageDefault)
+    {
+        if (($currentPageNumber = $filters[self::CURRENT_PAGE_NUMBER_PARAMETER_NAME] ?? self::CURRENT_PAGE_NUMBER_DEFAULT) !== self::CURRENT_PAGE_NUMBER_DEFAULT) {
+            $options[self::CURRENT_PAGE_NUMBER_PARAMETER_NAME] = $currentPageNumber;
+        }
+        if (($maxNumItemsPerPage = $filters[self::MAX_NUM_ITEMS_PER_PAGE_PARAMETER_NAME] ?? $maxNumItemsPerPageDefault) !== self::MAX_NUM_ITEMS_PER_PAGE_DEFAULT) {
+            $options[self::MAX_NUM_ITEMS_PER_PAGE_PARAMETER_NAME] = $maxNumItemsPerPage;
+        }
+        if (($isPartialPagination = $filters[self::IS_PARTIAL_PAGINATION_PARAMETER_NAME] ?? self::IS_PARTIAL_PAGINATION_DEFAULT) !== self::IS_PARTIAL_PAGINATION_DEFAULT) {
+            $options[self::IS_PARTIAL_PAGINATION_PARAMETER_NAME] = $isPartialPagination;
+        }
     }
 }

@@ -25,7 +25,11 @@ abstract class Paginator implements Iterator, PartialPaginatorInterface
             throw new ApiError(500, 'current page number must be greater than or equal to one');
         }
         if ($maxNumItemsPerPage <= 0) {
-            throw new ApiError(500, 'maximum number of items per page must be greater than zero');
+            if ($maxNumItemsPerPage === 0 && empty($items)) {
+                $maxNumItemsPerPage = Pagination::MAX_NUM_ITEMS_PER_PAGE_DEFAULT;
+            } else {
+                throw new ApiError(500, 'maximum number of items per page must be greater than zero for non-empty results');
+            }
         }
 
         $this->items = $items;

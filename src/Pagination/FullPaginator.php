@@ -7,6 +7,9 @@ namespace Dbp\Relay\CoreBundle\Pagination;
 use ApiPlatform\Core\DataProvider\PaginatorInterface;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 
+/**
+ * Paginator that holds the items of one page and is aware of the total amount of result items.
+ */
 class FullPaginator extends Paginator implements PaginatorInterface
 {
     /** @var int */

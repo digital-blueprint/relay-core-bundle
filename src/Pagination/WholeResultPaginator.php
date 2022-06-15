@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Pagination;
 
+/**
+ * Paginator that holds the whole set of result items.
+ * Note that it is a full paginator because partial pagination makes no sense with the whole result already at hand.
+ */
 class WholeResultPaginator extends FullPaginator
 {
     public function __construct(array $items, int $currentPageNumber, int $maxNumItemsPerPage)
