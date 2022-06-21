@@ -42,6 +42,7 @@ abstract class Paginator implements Iterator, PartialPaginatorInterface
     /**
      * @return mixed
      */
+    #[\ReturnTypeWillChange]
     public function current()
     {
         return $this->items[$this->currentPosition];
@@ -53,8 +54,9 @@ abstract class Paginator implements Iterator, PartialPaginatorInterface
     }
 
     /**
-     * @return float|int|null
+     * @return bool|float|int|mixed|string|null
      */
+    #[\ReturnTypeWillChange]
     public function key()
     {
         return $this->currentPosition;
