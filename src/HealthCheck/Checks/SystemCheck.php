@@ -20,7 +20,7 @@ class SystemCheck implements CheckInterface
     private function checkDNS(): CheckResult
     {
         $result = new CheckResult('Check if DNS is working');
-        $ok = !empty(dns_get_record('orf.at'));
+        $ok = !empty(dns_get_record('packagist.org'));
         if ($ok) {
             $result->set(CheckResult::STATUS_SUCCESS);
         } else {
@@ -35,7 +35,7 @@ class SystemCheck implements CheckInterface
         $result = new CheckResult('Check if TLS is working');
         $client = new Client();
         try {
-            $client->head('https://www.tugraz.at/');
+            $client->head('https://packagist.org/', ['timeout' => 10]);
         } catch (GuzzleException $e) {
             $result->set(CheckResult::STATUS_FAILURE, $e->getMessage());
 
