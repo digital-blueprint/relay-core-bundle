@@ -13,6 +13,7 @@ class Pagination
     private const IS_PARTIAL_PAGINATION_PARAMETER_NAME = 'partialPagination';
 
     private const CURRENT_PAGE_NUMBER_DEFAULT = 1;
+    private const CURRENT_PAGE_NUMBER_DEFAULT_STR = '1';
     private const IS_PARTIAL_PAGINATION_DEFAULT = false;
 
     public static function addPaginationOptions(array &$options, array $filters, int $maxNumItemsPerPageDefault = self::MAX_NUM_ITEMS_PER_PAGE_DEFAULT)
@@ -62,8 +63,8 @@ class Pagination
 
     private static function addPaginationOptionsInternal(array &$options, array $filters, int $maxNumItemsPerPageDefault)
     {
-        if (($currentPageNumber = $filters[self::CURRENT_PAGE_NUMBER_PARAMETER_NAME] ?? self::CURRENT_PAGE_NUMBER_DEFAULT) !== self::CURRENT_PAGE_NUMBER_DEFAULT) {
-            $options[self::CURRENT_PAGE_NUMBER_PARAMETER_NAME] = $currentPageNumber;
+        if (($currentPageNumber = $filters[self::CURRENT_PAGE_NUMBER_PARAMETER_NAME] ?? self::CURRENT_PAGE_NUMBER_DEFAULT_STR) !== self::CURRENT_PAGE_NUMBER_DEFAULT_STR) {
+            $options[self::CURRENT_PAGE_NUMBER_PARAMETER_NAME] = intval($currentPageNumber);
         }
         if (($maxNumItemsPerPage = $filters[self::MAX_NUM_ITEMS_PER_PAGE_PARAMETER_NAME] ?? $maxNumItemsPerPageDefault) !== self::MAX_NUM_ITEMS_PER_PAGE_DEFAULT) {
             $options[self::MAX_NUM_ITEMS_PER_PAGE_PARAMETER_NAME] = $maxNumItemsPerPage;
