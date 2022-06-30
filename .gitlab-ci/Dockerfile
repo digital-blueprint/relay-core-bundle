@@ -90,9 +90,8 @@ USER user
 
 # Install a newer composer
 RUN mkdir -p /home/user/.local/bin
-WORKDIR /home/user/.local/bin
-RUN wget https://raw.githubusercontent.com/composer/getcomposer.org/2dce1a337ceed821c5e243bd54ca11b61e903a2a/web/installer  -O - -q | php --
-RUN mv composer.phar composer
-ENV PATH "/home/user/.local/bin:$PATH"
+RUN curl -L https://github.com/composer/getcomposer.org/raw/main/web/download/2.3.7/composer.phar -o /home/user/.local/bin/composer
+RUN chmod a+x /home/user/.local/bin/composer
+ENV PATH "/home/user/.local/bin:${PATH}"
 
 WORKDIR /home/user
