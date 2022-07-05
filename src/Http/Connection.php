@@ -15,6 +15,7 @@ use Kevinrob\GuzzleCache\Strategy\GreedyCacheStrategy;
 use League\Uri\Contracts\UriException;
 use League\Uri\UriTemplate;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 
@@ -24,15 +25,14 @@ class Connection implements LoggerAwareInterface
 
     private $cachePool;
     private $cacheTTL;
-    private $baseUrl;
     private $clientHandler;
 
     public function __construct()
     {
-        $this->clientHandler = null;
         $this->logger = null;
         $this->cachePool = null;
         $this->cacheTTL = 0;
+        $this->clientHandler = null;
     }
 
     public function setCache(?CacheItemPoolInterface $cachePool, int $ttl)
@@ -47,26 +47,27 @@ class Connection implements LoggerAwareInterface
     }
 
     /**
-     * @param array $parameters Array of <param name>-<param value> key-value pairs
+     * @param array $getParameters  Array of GET <param name>-<param value> pairs
+     * @param array $requestOptions Array of RequestOptions to apply (see \GuzzleHttp\RequestOptions)
      *
      * @throws ApiError
      */
-    public function get(string $uri, array $parameters = []): string
+    public function get(string $uri, array $getParameters = [], array $requestOptions = []): ResponseInterface
     {
         try {
-            $uri = $this->makeUri($uri, $parameters);
+            $uri = $this->makeUri($uri, $getParameters);
         } catch (UriException $e) {
             throw ApiError::withDetails(500, 'invalid uri or parameters: '.$uri);
         }
 
         $client = $this->getClientInternal();
         try {
-            $response = $client->get($uri);
+            $response = $client->get($uri, $requestOptions);
         } catch (GuzzleException $e) {
-            throw new ApiError($e->getCode(), $e->getMessage(), $e);
+            throw new ApiError(500, $e->getMessage(), $e);
         }
 
-        return (string) $response->getBody();
+        return $response;
     }
 
     public function getClient(): Client
@@ -104,12 +105,8 @@ class Connection implements LoggerAwareInterface
      */
     private function makeUri(string $uri, array $parameters): string
     {
-        $uri = $uri.'?';
-
         foreach ($parameters as $param_key => $param_value) {
-            if ($param_key !== array_key_first($parameters)) {
-                $uri .= '&';
-            }
+            $uri .= $param_key === array_key_first($parameters) ? '?' : '&';
             $uri .= $param_key.'={'.$param_key.'}';
         }
 

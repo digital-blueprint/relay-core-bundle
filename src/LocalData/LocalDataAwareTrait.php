@@ -26,6 +26,11 @@ trait LocalDataAwareTrait
         return $this->localData;
     }
 
+    public function setLocalData(?array $localData)
+    {
+        $this->localData = $localData;
+    }
+
     /**
      * Sets the value of a local data attribute.
      *
