@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Http;
 
-use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Helpers\GuzzleTools;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\RequestOptions;
 use Kevinrob\GuzzleCache\CacheMiddleware;
 use Kevinrob\GuzzleCache\Storage\Psr6CacheStorage;
 use Kevinrob\GuzzleCache\Strategy\GreedyCacheStrategy;
-use League\Uri\Contracts\UriException;
-use League\Uri\UriTemplate;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerAwareInterface;
@@ -23,13 +21,20 @@ class Connection implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
+    private $baseUri;
     private $cachePool;
     private $cacheTTL;
     private $clientHandler;
 
-    public function __construct()
+    public function __construct(string $baseUri = null)
     {
         $this->logger = null;
+
+        if (substr($baseUri, -1) !== '/') {
+            $baseUri .= '/';
+        }
+        $this->baseUri = $baseUri;
+
         $this->cachePool = null;
         $this->cacheTTL = 0;
         $this->clientHandler = null;
@@ -47,32 +52,44 @@ class Connection implements LoggerAwareInterface
     }
 
     /**
-     * @param array $getParameters  Array of GET <param name>-<param value> pairs
+     * @param array $queryParameters Associative array of query parameters
+     * @param array $requestOptions  Array of RequestOptions to apply (see \GuzzleHttp\RequestOptions)
+     *
+     * @throws GuzzleException
+     */
+    public function get(string $uri, array $queryParameters = [], array $requestOptions = []): ResponseInterface
+    {
+        if (!empty($queryParameters)) {
+            $requestOptions[RequestOptions::QUERY] = array_merge($queryParameters,
+                $requestOptions[RequestOptions::QUERY] ?? []);
+        }
+
+        return $this->request('GET', $uri, $requestOptions);
+    }
+
+    /**
      * @param array $requestOptions Array of RequestOptions to apply (see \GuzzleHttp\RequestOptions)
      *
-     * @throws ApiError
+     * @throws GuzzleException
      */
-    public function get(string $uri, array $getParameters = [], array $requestOptions = []): ResponseInterface
+    public function post(string $uri, array $requestOptions = []): ResponseInterface
     {
-        try {
-            $uri = $this->makeUri($uri, $getParameters);
-        } catch (UriException $e) {
-            throw ApiError::withDetails(500, 'invalid uri or parameters: '.$uri);
-        }
-
-        $client = $this->getClientInternal();
-        try {
-            $response = $client->get($uri, $requestOptions);
-        } catch (GuzzleException $e) {
-            throw new ApiError(500, $e->getMessage(), $e);
-        }
-
-        return $response;
+        return $this->request('POST', $uri, $requestOptions);
     }
 
     public function getClient(): Client
     {
         return $this->getClientInternal();
+    }
+
+    /**
+     * @throws GuzzleException
+     */
+    private function request(string $method, string $uri, array $requestOptions): ResponseInterface
+    {
+        $client = $this->getClientInternal();
+
+        return $client->request($method, $uri, $requestOptions);
     }
 
     private function getClientInternal(): Client
@@ -97,21 +114,10 @@ class Connection implements LoggerAwareInterface
             'handler' => $stack,
         ];
 
-        return new Client($client_options);
-    }
-
-    /**
-     * @throws UriException
-     */
-    private function makeUri(string $uri, array $parameters): string
-    {
-        foreach ($parameters as $param_key => $param_value) {
-            $uri .= $param_key === array_key_first($parameters) ? '?' : '&';
-            $uri .= $param_key.'={'.$param_key.'}';
+        if ($this->baseUri) {
+            $client_options['base_uri'] = $this->baseUri;
         }
 
-        $uriTemplate = new UriTemplate($uri);
-
-        return (string) $uriTemplate->expand($parameters);
+        return new Client($client_options);
     }
 }
