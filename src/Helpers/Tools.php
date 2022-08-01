@@ -35,4 +35,9 @@ class Tools
         $e = new \Exception();
         dump($e->getTraceAsString(), $moreVars);
     }
+
+    public static function isNullOrEmpty(string $str = null): bool
+    {
+        return $str === null || $str === '';
+    }
 }

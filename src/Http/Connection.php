@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Http;
 
 use Dbp\Relay\CoreBundle\Helpers\GuzzleTools;
+use Dbp\Relay\CoreBundle\Helpers\Tools;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\HandlerStack;
@@ -29,8 +30,8 @@ class Connection implements LoggerAwareInterface
     public function __construct(string $baseUri = null)
     {
         $this->logger = null;
-
-        if (substr($baseUri, -1) !== '/') {
+        
+        if (!Tools::isNullOrEmpty($baseUri) && substr($baseUri, -1) !== '/') {
             $baseUri .= '/';
         }
         $this->baseUri = $baseUri;
@@ -114,7 +115,7 @@ class Connection implements LoggerAwareInterface
             'handler' => $stack,
         ];
 
-        if ($this->baseUri) {
+        if (!Tools::isNullOrEmpty($this->baseUri)) {
             $client_options['base_uri'] = $this->baseUri;
         }
 
