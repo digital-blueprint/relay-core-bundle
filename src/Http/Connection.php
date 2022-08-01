@@ -30,7 +30,7 @@ class Connection implements LoggerAwareInterface
     public function __construct(string $baseUri = null)
     {
         $this->logger = null;
-        
+
         if (!Tools::isNullOrEmpty($baseUri) && substr($baseUri, -1) !== '/') {
             $baseUri .= '/';
         }
