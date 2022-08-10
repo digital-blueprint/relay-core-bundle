@@ -15,9 +15,19 @@ class Pagination
     private const CURRENT_PAGE_NUMBER_DEFAULT = 1;
     private const IS_PARTIAL_PAGINATION_DEFAULT = false;
 
-    public static function addPaginationOptions(array &$options, array $filters, int $maxNumItemsPerPageDefault = self::MAX_NUM_ITEMS_PER_PAGE_DEFAULT)
+    public static function addOptions(array &$targetOptions, array $sourceOptions, int $maxNumItemsPerPageDefault = self::MAX_NUM_ITEMS_PER_PAGE_DEFAULT)
     {
-        self::addPaginationOptionsInternal($options, $filters, $maxNumItemsPerPageDefault);
+        $targetOptions[self::CURRENT_PAGE_NUMBER_PARAMETER_NAME] = intval($sourceOptions[self::CURRENT_PAGE_NUMBER_PARAMETER_NAME] ?? self::CURRENT_PAGE_NUMBER_DEFAULT);
+        $targetOptions[self::MAX_NUM_ITEMS_PER_PAGE_PARAMETER_NAME] = intval($sourceOptions[self::MAX_NUM_ITEMS_PER_PAGE_PARAMETER_NAME] ?? $maxNumItemsPerPageDefault);
+        $targetOptions[self::IS_PARTIAL_PAGINATION_PARAMETER_NAME] = filter_var(
+            $sourceOptions[self::IS_PARTIAL_PAGINATION_PARAMETER_NAME] ?? self::IS_PARTIAL_PAGINATION_DEFAULT, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    public static function removeOptions(array &$options)
+    {
+        unset($options[self::CURRENT_PAGE_NUMBER_PARAMETER_NAME]);
+        unset($options[self::MAX_NUM_ITEMS_PER_PAGE_PARAMETER_NAME]);
+        unset($options[self::IS_PARTIAL_PAGINATION_PARAMETER_NAME]);
     }
 
     public static function getCurrentPageNumber(array $options): int
@@ -58,12 +68,5 @@ class Pagination
     public static function createWholeResultPaginator(array $resultItems, array $options): WholeResultPaginator
     {
         return new WholeResultPaginator($resultItems, self::getCurrentPageNumber($options), self::getMaxNumItemsPerPage($options));
-    }
-
-    private static function addPaginationOptionsInternal(array &$options, array $filters, int $maxNumItemsPerPageDefault)
-    {
-        $options[self::CURRENT_PAGE_NUMBER_PARAMETER_NAME] = intval($filters[self::CURRENT_PAGE_NUMBER_PARAMETER_NAME] ?? self::CURRENT_PAGE_NUMBER_DEFAULT);
-        $options[self::MAX_NUM_ITEMS_PER_PAGE_PARAMETER_NAME] = intval($filters[self::MAX_NUM_ITEMS_PER_PAGE_PARAMETER_NAME] ?? $maxNumItemsPerPageDefault);
-        $options[self::IS_PARTIAL_PAGINATION_PARAMETER_NAME] = filter_var($filters[self::IS_PARTIAL_PAGINATION_PARAMETER_NAME] ?? self::IS_PARTIAL_PAGINATION_DEFAULT, FILTER_VALIDATE_BOOLEAN);
     }
 }

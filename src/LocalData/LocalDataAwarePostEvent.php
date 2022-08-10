@@ -9,7 +9,7 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Symfony\Contracts\EventDispatcher\Event;
 
-class LocalDataAwareEvent extends Event implements LoggerAwareInterface
+class LocalDataAwarePostEvent extends Event implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
