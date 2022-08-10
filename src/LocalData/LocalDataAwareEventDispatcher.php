@@ -77,7 +77,15 @@ class LocalDataAwareEventDispatcher
     }
 
     /**
-     * Dispatches the given pre-event.
+     * Dispatches the given event. Default event-dispatch as provided by EventDispatcherInterface.
+     */
+    public function dispatch(LocalDataAwarePreEvent $preEvent, string $eventName): void
+    {
+        $this->eventDispatcher->dispatch($preEvent, $eventName);
+    }
+
+    /**
+     * Dispatches the given pre-event. Implements the local query parameters logic.
      */
     public function dispatchPre(LocalDataAwarePreEvent $preEvent, string $eventName): void
     {
@@ -86,7 +94,7 @@ class LocalDataAwareEventDispatcher
     }
 
     /**
-     * Dispatches the given post-event.
+     * Dispatches the given post-event. Implements the local include parameters logic.
      */
     public function dispatchPost(LocalDataAwarePostEvent $event, string $eventName): void
     {
