@@ -10,6 +10,7 @@ use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Helpers\Tools;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\Event;
 
 class LocalDataAwareEventDispatcher
 {
@@ -37,7 +38,10 @@ class LocalDataAwareEventDispatcher
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function init(array &$options)
+    /**
+     * To be called at the beginning of a new operation.
+     */
+    public function onNewOperation(array &$options): void
     {
         $localIncludeParameter = LocalData::getIncludeParameter($options);
         if (!Tools::isNullOrEmpty($localIncludeParameter)) {
@@ -77,34 +81,23 @@ class LocalDataAwareEventDispatcher
     }
 
     /**
-     * Dispatches the given event. Default event-dispatch as provided by EventDispatcherInterface.
+     * Dispatches the given event.
      */
-    public function dispatch(LocalDataAwarePreEvent $preEvent, string $eventName): void
+    public function dispatch(Event $event, string $eventName): void
     {
-        $this->eventDispatcher->dispatch($preEvent, $eventName);
-    }
+        if ($event instanceof LocalDataAwarePreEvent) {
+            $event->setQueryParameters($this->queryParameters);
+            $this->eventDispatcher->dispatch($event, $eventName);
+        } elseif ($event instanceof LocalDataAwarePostEvent) {
+            $event->setRequestedAttributes($this->requestedAttributes);
+            $this->eventDispatcher->dispatch($event, $eventName);
 
-    /**
-     * Dispatches the given pre-event. Implements the local query parameters logic.
-     */
-    public function dispatchPre(LocalDataAwarePreEvent $preEvent, string $eventName): void
-    {
-        $preEvent->setQueryParameters($this->queryParameters);
-        $this->eventDispatcher->dispatch($preEvent, $eventName);
-    }
-
-    /**
-     * Dispatches the given post-event. Implements the local include parameters logic.
-     */
-    public function dispatchPost(LocalDataAwarePostEvent $event, string $eventName): void
-    {
-        $event->setRequestedAttributes($this->requestedAttributes);
-
-        $this->eventDispatcher->dispatch($event, $eventName);
-
-        $remainingLocalDataAttributes = $event->getRemainingRequestedAttributes();
-        if (!empty($remainingLocalDataAttributes)) {
-            throw new ApiError(400, sprintf("the following requested local data attributes could not be provided for resource '%s': %s", $this->uniqueEntityName, implode(', ', $remainingLocalDataAttributes)));
+            $remainingLocalDataAttributes = $event->getRemainingRequestedAttributes();
+            if (!empty($remainingLocalDataAttributes)) {
+                throw new ApiError(400, sprintf("the following requested local data attributes could not be provided for resource '%s': %s", $this->uniqueEntityName, implode(', ', $remainingLocalDataAttributes)));
+            }
+        } else {
+            $this->eventDispatcher->dispatch($event, $eventName);
         }
     }
 
