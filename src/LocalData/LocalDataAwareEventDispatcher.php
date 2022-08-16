@@ -150,7 +150,7 @@ class LocalDataAwareEventDispatcher
         }
     }
 
-    private function initQueryParameters(string $queryParameter)
+    private function initQueryParameters(?string $queryParameter)
     {
         $this->queryParameters = [];
 
