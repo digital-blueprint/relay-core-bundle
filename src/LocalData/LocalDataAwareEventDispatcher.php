@@ -10,6 +10,7 @@ use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Helpers\Tools;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\EventDispatcher\Event;
 
 class LocalDataAwareEventDispatcher
@@ -43,15 +44,8 @@ class LocalDataAwareEventDispatcher
      */
     public function onNewOperation(array &$options): void
     {
-        $localIncludeParameter = LocalData::getIncludeParameter($options);
-        if (!Tools::isNullOrEmpty($localIncludeParameter)) {
-            $this->initIncludeParameters($localIncludeParameter);
-        }
-
-        $localQueryParameter = LocalData::getQueryParameter($options);
-        if (!Tools::isNullOrEmpty($localQueryParameter)) {
-            $this->initQueryParameters($localQueryParameter);
-        }
+        $this->initIncludeParameters(LocalData::getIncludeParameter($options));
+        $this->initQueryParameters(LocalData::getQueryParameter($options));
 
         LocalData::removeOptions($options);
     }
@@ -94,7 +88,7 @@ class LocalDataAwareEventDispatcher
 
             $remainingLocalDataAttributes = $event->getRemainingRequestedAttributes();
             if (!empty($remainingLocalDataAttributes)) {
-                throw new ApiError(400, sprintf("the following requested local data attributes could not be provided for resource '%s': %s", $this->uniqueEntityName, implode(', ', $remainingLocalDataAttributes)));
+                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf("the following requested local data attributes could not be provided for resource '%s': %s", $this->uniqueEntityName, implode(', ', $remainingLocalDataAttributes)));
             }
         } else {
             $this->eventDispatcher->dispatch($event, $eventName);
@@ -158,22 +152,26 @@ class LocalDataAwareEventDispatcher
 
     private function initQueryParameters(string $queryParameter)
     {
-        $localQueryParameters = explode(',', $queryParameter);
+        $this->queryParameters = [];
 
-        foreach ($localQueryParameters as $localQueryParameter) {
-            $localQueryParameter = trim($localQueryParameter);
-            if ($localQueryParameter !== '') {
-                $parameterKey = null;
-                $parameterValue = null;
-                $uniqueEntityName = null;
-                $uniqueAttributeName = null;
-                if (!$this->parseQueryParameterAssignment($localQueryParameter, $parameterKey, $parameterValue) ||
-                    !$this->parseLocalDataAttribute($parameterKey ?? '', $uniqueEntityName, $uniqueAttributeName)) {
-                    throw new ApiError(400, sprintf("'%s' parameter has invalid format: '%s' (Example: 'param1:val1,ResourceName.attr1:val2')", LocalData::QUERY_PARAMETER_NAME, $localQueryParameter));
-                }
+        if (!Tools::isNullOrEmpty($queryParameter)) {
+            $localQueryParameters = explode(',', $queryParameter);
 
-                if ($uniqueEntityName === $this->uniqueEntityName) {
-                    $this->queryParameters[$parameterKey] = $parameterValue;
+            foreach ($localQueryParameters as $localQueryParameter) {
+                $localQueryParameter = trim($localQueryParameter);
+                if ($localQueryParameter !== '') {
+                    $parameterKey = null;
+                    $parameterValue = null;
+                    $uniqueEntityName = null;
+                    $uniqueAttributeName = null;
+                    if (!$this->parseQueryParameterAssignment($localQueryParameter, $parameterKey, $parameterValue) ||
+                        !$this->parseLocalDataAttribute($parameterKey ?? '', $uniqueEntityName, $uniqueAttributeName)) {
+                        throw new ApiError(400, sprintf("'%s' parameter has invalid format: '%s' (Example: 'param1:val1,ResourceName.attr1:val2')", LocalData::QUERY_PARAMETER_NAME, $localQueryParameter));
+                    }
+
+                    if ($uniqueEntityName === $this->uniqueEntityName) {
+                        $this->queryParameters[$parameterKey] = $parameterValue;
+                    }
                 }
             }
         }
