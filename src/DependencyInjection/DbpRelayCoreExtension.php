@@ -220,6 +220,15 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
             ]);
         }
 
+        // Set the locale via Accept-Language, this also makes
+        // Symfony add Accept-Language to the Vary header.
+        $container->loadFromExtension('framework', [
+            'default_locale' => 'en',
+            // https://github.com/symfony/symfony/issues/47355
+            'enabled_locales' => ['en', 'de'],
+            'set_locale_from_accept_language' => true,
+        ]);
+
         // Since the core bundle should always be called last we can use this to detect if
         // things are called after this by checking if this exist.
         $container->setParameter('dbp_api._prepend_done', true);
