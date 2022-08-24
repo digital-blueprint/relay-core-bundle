@@ -8,8 +8,14 @@ use GuzzleHttp\MessageFormatter;
 use GuzzleHttp\Middleware;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @deprecated copy this code instead
+ */
 class GuzzleTools
 {
+    /**
+     * @deprecated copy this code instead
+     */
     public static function createLoggerMiddleware(LoggerInterface $logger): callable
     {
         return Middleware::log(
