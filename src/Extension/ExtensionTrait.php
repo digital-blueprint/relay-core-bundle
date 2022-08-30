@@ -73,6 +73,17 @@ trait ExtensionTrait
         );
     }
 
+    /**
+     * Registers a Doctrine entity manager name. This can be used for managing database migrations etc.
+     */
+    public function registerEntityManager(ContainerBuilder $container, string $entityManagerName): void
+    {
+        $this->ensureInPrepend($container);
+        $this->extendArrayParameter(
+            $container, 'dbp_api.entity_managers', [$entityManagerName]
+        );
+    }
+
     private function ensureInPrepend(ContainerBuilder $container)
     {
         // Some things can only be called in prepend, so that the core bundle can forward them
