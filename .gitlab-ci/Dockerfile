@@ -31,6 +31,7 @@ RUN apt-get update && apt-get install -y \
     php7.3-gd \
     php7.3-mbstring \
     php7.3-intl \
+    php7.3-sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 COPY ./php-ini-overrides.ini /etc/php/7.3/cli/conf.d/
 
@@ -47,6 +48,7 @@ RUN apt-get update && apt-get install -y \
     php7.4-gd \
     php7.4-mbstring \
     php7.4-intl \
+    php7.4-sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 COPY ./php-ini-overrides.ini /etc/php/7.4/cli/conf.d/
 
@@ -63,6 +65,7 @@ RUN apt-get update && apt-get install -y \
     php8.0-gd \
     php8.0-mbstring \
     php8.0-intl \
+    php8.0-sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 COPY ./php-ini-overrides.ini /etc/php/8.0/cli/conf.d/
 
@@ -79,6 +82,7 @@ RUN apt-get update && apt-get install -y \
     php8.1-gd \
     php8.1-mbstring \
     php8.1-intl \
+    php8.1-sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 COPY ./php-ini-overrides.ini /etc/php/8.1/cli/conf.d/
 
