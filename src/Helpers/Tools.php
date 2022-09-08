@@ -36,7 +36,7 @@ class Tools
         dump($e->getTraceAsString(), $moreVars);
     }
 
-    public static function isNullOrEmpty(string $str = null): bool
+    public static function isNullOrEmpty(?string $str): bool
     {
         return $str === null || $str === '';
     }
