@@ -28,6 +28,7 @@ class Connection implements LoggerAwareInterface
 
     public const REQUEST_OPTION_FORM_PARAMS = RequestOptions::FORM_PARAMS;
     public const REQUEST_OPTION_HEADERS = RequestOptions::HEADERS;
+    public const REQUEST_OPTION_QUERY = RequestOptions::QUERY;
 
     private $baseUri;
     private $cachePool;
@@ -76,16 +77,16 @@ class Connection implements LoggerAwareInterface
     }
 
     /**
-     * @param array $body           Associative data array to send as request body
+     * @param array $parameters     Associative array of (form) parameters to send
      * @param array $requestOptions Array of request options to apply
      *
      * @throws ClientExceptionInterface
      */
-    public function post(string $uri, array $body = [], array $requestOptions = []): ResponseInterface
+    public function post(string $uri, array $parameters = [], array $requestOptions = []): ResponseInterface
     {
-        if (!empty($body)) {
-            $requestOptions[RequestOptions::BODY] = array_merge($body,
-                $requestOptions[RequestOptions::BODY] ?? []);
+        if (!empty($parameters)) {
+            $requestOptions[RequestOptions::FORM_PARAMS] = array_merge($parameters,
+                $requestOptions[RequestOptions::FORM_PARAMS] ?? []);
         }
 
         return $this->request(self::REQUEST_METHOD_POST, $uri, $requestOptions);
