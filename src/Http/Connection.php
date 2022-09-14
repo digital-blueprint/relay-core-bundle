@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Http;
 
-use Dbp\Relay\CoreBundle\Helpers\GuzzleTools;
 use Dbp\Relay\CoreBundle\Helpers\Tools;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\MessageFormatter;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\RequestOptions;
 use Kevinrob\GuzzleCache\CacheMiddleware;
 use Kevinrob\GuzzleCache\Storage\Psr6CacheStorage;
@@ -68,26 +69,37 @@ class Connection implements LoggerAwareInterface
      */
     public function get(string $uri, array $query = [], array $requestOptions = []): ResponseInterface
     {
-        if (!empty($query)) {
-            $requestOptions[RequestOptions::QUERY] = array_merge($query,
-                $requestOptions[RequestOptions::QUERY] ?? []);
-        }
+        $requestOptions[RequestOptions::QUERY] = $query;
 
         return $this->request(self::REQUEST_METHOD_GET, $uri, $requestOptions);
     }
 
     /**
-     * @param array $parameters     Associative array of (form) parameters to send
+     * Post web form parameters (automatically adds appropriate 'Content-Type' header).
+     *
+     * @param array $parameters     Associative array of web form parameters to send
      * @param array $requestOptions Array of request options to apply
      *
      * @throws ClientExceptionInterface
      */
-    public function post(string $uri, array $parameters = [], array $requestOptions = []): ResponseInterface
+    public function postForm(string $uri, array $parameters = [], array $requestOptions = []): ResponseInterface
     {
-        if (!empty($parameters)) {
-            $requestOptions[RequestOptions::FORM_PARAMS] = array_merge($parameters,
-                $requestOptions[RequestOptions::FORM_PARAMS] ?? []);
-        }
+        $requestOptions[RequestOptions::FORM_PARAMS] = $parameters;
+
+        return $this->request(self::REQUEST_METHOD_POST, $uri, $requestOptions);
+    }
+
+    /**
+     * Post data encoded in JSON format (automatically adds appropriate 'Content-Type' header).
+     *
+     * @param mixed $data           Data to send (must be JSON encode-able)
+     * @param array $requestOptions Array of request options to apply
+     *
+     * @throws ClientExceptionInterface
+     */
+    public function postJSON(string $uri, $data, array $requestOptions = []): ResponseInterface
+    {
+        $requestOptions[RequestOptions::JSON] = $data;
 
         return $this->request(self::REQUEST_METHOD_POST, $uri, $requestOptions);
     }
@@ -111,7 +123,9 @@ class Connection implements LoggerAwareInterface
     {
         $stack = HandlerStack::create($this->clientHandler);
         if ($this->logger !== null) {
-            $stack->push(GuzzleTools::createLoggerMiddleware($this->logger));
+            $stack->push(Middleware::log(
+                $this->logger,
+                new MessageFormatter('[{method}] {uri}: CODE={code}, ERROR={error}, CACHE={res_header_X-Kevinrob-Cache}')));
         }
 
         if ($this->cachePool !== null) {
