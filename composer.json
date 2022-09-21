@@ -32,16 +32,16 @@
         "symfony/yaml": "^5.3"
     },
     "require-dev": {
-        "brainmaestro/composer-git-hooks": "^2.8",
-        "friendsofphp/php-cs-fixer": "^3.0",
-        "phpstan/phpstan": "^1.0.0",
-        "phpstan/phpstan-phpunit": "^1.0.0",
-        "phpstan/phpstan-symfony": "^1.2",
-        "phpunit/phpunit": "^9",
-        "symfony/browser-kit": "^5.3",
-        "symfony/http-client": "^5.3",
-        "symfony/phpunit-bridge": "^5.3",
-        "vimeo/psalm": "^4.4"
+        "brainmaestro/composer-git-hooks": "^2.8.5",
+        "friendsofphp/php-cs-fixer": "^3.4",
+        "phpstan/phpstan": "^1.8.5",
+        "phpstan/phpstan-phpunit": "^1.1.1",
+        "phpstan/phpstan-symfony": "^1.2.13",
+        "phpunit/phpunit": "^9.5.24",
+        "symfony/browser-kit": "^5.4.11",
+        "symfony/http-client": "^5.4.12",
+        "symfony/phpunit-bridge": "^5.4.11",
+        "vimeo/psalm": "^4.27"
     },
     "conflict": {
         "symfony/dependency-injection": "5.3.7"
