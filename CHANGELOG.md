@@ -1,3 +1,7 @@
+# v0.1.43
+
+* Temporarily restrict api-platform/core to < 2.7.0
+
 # v0.1.40
 
 * extension: add registerEntityManager() for registering doctrine entity managers
