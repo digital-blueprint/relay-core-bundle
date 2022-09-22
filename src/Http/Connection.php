@@ -6,6 +6,8 @@ namespace Dbp\Relay\CoreBundle\Http;
 
 use Dbp\Relay\CoreBundle\Helpers\Tools;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\MessageFormatter;
 use GuzzleHttp\Middleware;
@@ -14,7 +16,6 @@ use Kevinrob\GuzzleCache\CacheMiddleware;
 use Kevinrob\GuzzleCache\Storage\Psr6CacheStorage;
 use Kevinrob\GuzzleCache\Strategy\GreedyCacheStrategy;
 use Psr\Cache\CacheItemPoolInterface;
-use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -27,9 +28,7 @@ class Connection implements LoggerAwareInterface
     public const REQUEST_METHOD_HEAD = 'HEAD';
     public const REQUEST_METHOD_POST = 'POST';
 
-    public const REQUEST_OPTION_FORM_PARAMS = RequestOptions::FORM_PARAMS;
     public const REQUEST_OPTION_HEADERS = RequestOptions::HEADERS;
-    public const REQUEST_OPTION_QUERY = RequestOptions::QUERY;
 
     private $baseUri;
     private $cachePool;
@@ -65,7 +64,7 @@ class Connection implements LoggerAwareInterface
      * @param array $query          Associative array of query parameters
      * @param array $requestOptions Array of request options to apply
      *
-     * @throws ClientExceptionInterface
+     * @throws ConnectionException
      */
     public function get(string $uri, array $query = [], array $requestOptions = []): ResponseInterface
     {
@@ -80,7 +79,7 @@ class Connection implements LoggerAwareInterface
      * @param array $parameters     Associative array of web form parameters to send
      * @param array $requestOptions Array of request options to apply
      *
-     * @throws ClientExceptionInterface
+     * @throws ConnectionException
      */
     public function postForm(string $uri, array $parameters = [], array $requestOptions = []): ResponseInterface
     {
@@ -95,7 +94,7 @@ class Connection implements LoggerAwareInterface
      * @param mixed $data           Data to send (must be JSON encode-able)
      * @param array $requestOptions Array of request options to apply
      *
-     * @throws ClientExceptionInterface
+     * @throws ConnectionException
      */
     public function postJSON(string $uri, $data, array $requestOptions = []): ResponseInterface
     {
@@ -105,13 +104,23 @@ class Connection implements LoggerAwareInterface
     }
 
     /**
-     * @throws ClientExceptionInterface
+     * @throws ConnectionException
      */
     public function request(string $method, string $uri, array $requestOptions = []): ResponseInterface
     {
-        $client = $this->getClientInternal();
+        try {
+            $client = $this->getClientInternal();
 
-        return $client->request($method, $uri, $requestOptions);
+            return $client->request($method, $uri, $requestOptions);
+        } catch (GuzzleException $exception) {
+            $request = null;
+            $response = null;
+            if ($exception instanceof RequestException) {
+                $request = $exception->getRequest();
+                $response = $exception->getResponse();
+            }
+            throw new ConnectionException(sprintf('HTTP %s request to %s failed. Message: \'%s\', Code: %s', $method, $this->baseUri.$uri, $exception->getMessage(), $exception->getCode()), ConnectionException::REQUEST_EXCEPTION, $exception, $request, $response);
+        }
     }
 
     public function getClient(): Client
