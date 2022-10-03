@@ -76,3 +76,11 @@ services:
   Dbp\Relay\CoreBundle\Pagination\Pagination:
     autowire: true
     autoconfigure: true
+
+  Dbp\Relay\CoreBundle\Authorization\Authorization:
+    autowire: true
+    autoconfigure: true
+
+  Dbp\Relay\CoreBundle\Authorization\AuthorizationAwareService:
+    autowire: true
+    autoconfigure: true
