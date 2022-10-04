@@ -77,7 +77,7 @@ services:
     autowire: true
     autoconfigure: true
 
-  Dbp\Relay\CoreBundle\Authorization\Authorization:
+  Dbp\Relay\CoreBundle\Authorization\UserAuthorizationChecker:
     autowire: true
     autoconfigure: true
 

@@ -5,15 +5,10 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Authorization;
 
 use Dbp\Relay\CoreBundle\API\UserInterface;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerAwareTrait;
-use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
-class Authorization implements LoggerAwareInterface
+class UserAuthorizationChecker
 {
-    use LoggerAwareTrait;
-
     public const PRIVILEGE_NAME_ATTRIBUTE = 'name';
     public const PRIVILEGE_EXPRESSION_ATTRIBUTE = 'expression';
 
@@ -23,14 +18,14 @@ class Authorization implements LoggerAwareInterface
     /** @var array */
     private $privileges;
 
-    /** @var ExpressionLanguage */
-    private $expressionLanguage;
+    /** @var UserExtender|null */
+    private $userExtender;
 
     public function __construct(TokenStorageInterface $tokenStorage)
     {
         $this->tokenStorage = $tokenStorage;
         $this->privileges = [];
-        $this->expressionLanguage = new ExpressionLanguage();
+        $this->userExtender = null;
     }
 
     public function addPrivileges(array $privileges)
@@ -45,15 +40,7 @@ class Authorization implements LoggerAwareInterface
      */
     public function hasPrivilege(string $privilegeName, $subject = null): bool
     {
-        $privilegeExpression = $this->privileges[$privilegeName] ?? null;
-        if ($privilegeExpression === null) {
-            throw new AuthorizationException(sprintf('privilege \'%s\' undefined', $privilegeName), AuthorizationException::PRIVILEGE_UNDEFINED);
-        }
-
-        return $this->expressionLanguage->evaluate($privilegeExpression, [
-            'user' => $this->getCurrentUser(),
-            'subject' => $subject,
-        ]);
+        return $this->getUserExtender()->hasPrivilege($privilegeName, $subject);
     }
 
     /**
@@ -72,6 +59,15 @@ class Authorization implements LoggerAwareInterface
     public function getAttribute(string $attributeName)
     {
         return $this->getCurrentUser()->getAttribute($attributeName);
+    }
+
+    private function getUserExtender(): UserExtender
+    {
+        if ($this->userExtender === null) {
+            $this->userExtender = new UserExtender($this->getCurrentUser(), $this->privileges);
+        }
+
+        return $this->userExtender;
     }
 
     private function getCurrentUser(): UserInterface

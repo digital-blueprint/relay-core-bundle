@@ -9,17 +9,17 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AuthorizationAwareService
 {
-    /** @var Authorization */
-    private $authorization;
+    /** @var UserAuthorizationChecker */
+    private $userAuthorizationChecker;
 
-    public function __construct(Authorization $authorization)
+    public function __construct(UserAuthorizationChecker $userAuthorizationChecker)
     {
-        $this->authorization = $authorization;
+        $this->userAuthorizationChecker = $userAuthorizationChecker;
     }
 
     protected function addPrivileges(array $privileges)
     {
-        $this->authorization->addPrivileges($privileges);
+        $this->userAuthorizationChecker->addPrivileges($privileges);
     }
 
     /**
@@ -27,7 +27,7 @@ class AuthorizationAwareService
      */
     public function hasPrivilege(string $privilegeName, $subject = null): bool
     {
-        return $this->authorization->hasPrivilege($privilegeName, $subject);
+        return $this->userAuthorizationChecker->hasPrivilege($privilegeName, $subject);
     }
 
     /**
@@ -36,7 +36,7 @@ class AuthorizationAwareService
      */
     public function denyAccessUnlessHasPrivilege(string $privilegeName, $subject = null): void
     {
-        if (!$this->authorization->hasPrivilege($privilegeName, $subject)) {
+        if (!$this->userAuthorizationChecker->hasPrivilege($privilegeName, $subject)) {
             throw new ApiError(Response::HTTP_FORBIDDEN, 'access denied. missing privilege.');
         }
     }
@@ -46,7 +46,7 @@ class AuthorizationAwareService
      */
     public function hasRole(string $roleName): bool
     {
-        return $this->authorization->hasRole($roleName);
+        return $this->userAuthorizationChecker->hasRole($roleName);
     }
 
     /**
@@ -54,7 +54,7 @@ class AuthorizationAwareService
      */
     public function denyAccessUnlessHasRole(string $roleName): void
     {
-        if (!$this->authorization->hasRole($roleName)) {
+        if (!$this->userAuthorizationChecker->hasRole($roleName)) {
             throw new ApiError(Response::HTTP_FORBIDDEN, 'access denied. missing role.');
         }
     }
@@ -66,6 +66,6 @@ class AuthorizationAwareService
      */
     public function getAttribute(string $attributeName)
     {
-        return $this->authorization->getAttribute($attributeName);
+        return $this->userAuthorizationChecker->getAttribute($attributeName);
     }
 }
