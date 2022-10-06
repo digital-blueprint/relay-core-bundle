@@ -81,6 +81,11 @@ services:
     autowire: true
     autoconfigure: true
 
-  Dbp\Relay\CoreBundle\Authorization\AuthorizationAwareService:
+  Dbp\Relay\CoreBundle\Authorization\AuthorizationService:
     autowire: true
     autoconfigure: true
+
+  Dbp\Relay\CoreBundle\Authorization\AuthorizationDataProviderProvider:
+    autowire: true
+    autoconfigure: true
+    arguments: [ !tagged auth.authorization_data_provider ]
