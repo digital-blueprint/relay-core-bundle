@@ -1,3 +1,8 @@
+# v0.1.44
+
+* new dbp:relay:core:migrate command
+* start of a new authorization framework
+
 # v0.1.43
 
 * Temporarily restrict api-platform/core to < 2.7.0
