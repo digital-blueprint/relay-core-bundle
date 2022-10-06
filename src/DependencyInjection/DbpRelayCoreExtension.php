@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\DependencyInjection;
 
 use Dbp\Relay\CoreBundle\Auth\ProxyAuthenticator;
+use Dbp\Relay\CoreBundle\DB\MigrateCommand;
 use Dbp\Relay\CoreBundle\Queue\TestMessage;
 use Dbp\Relay\CoreBundle\Queue\Utils as QueueUtils;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
@@ -37,6 +38,13 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
 
         $definition = $container->getDefinition('Dbp\Relay\CoreBundle\Cron\CronCommand');
         $definition->addMethodCall('setCache', [$cronCacheDef]);
+
+        $definition = $container->getDefinition(MigrateCommand::class);
+        $entityManagers = [];
+        if ($container->hasParameter('dbp_api.entity_managers')) {
+            $entityManagers = $container->getParameter('dbp_api.entity_managers');
+        }
+        $definition->addMethodCall('setEntityManagers', [$entityManagers]);
     }
 
     public function prepend(ContainerBuilder $container)
