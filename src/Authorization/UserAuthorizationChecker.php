@@ -60,9 +60,14 @@ class UserAuthorizationChecker
         $this->loadExpressions($config[AuthorizationService::ATTRIBUTES_CONFIG_ATTRIBUTE], $this->attributeExpressions);
     }
 
-    public function resetRecursionCounter()
+    public function init()
     {
         $this->callCounter = 0;
+    }
+
+    public function getCurrentUserIdentifier(): string
+    {
+        return $this->currentUserIdentifier;
     }
 
     public function hasRole(AuthorizationUser $currentAuthorizationUser, bool $areCustomRolesAllowed, string $roleName): bool

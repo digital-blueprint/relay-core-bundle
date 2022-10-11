@@ -78,14 +78,14 @@ class AuthorizationService
 
     private function hasRoleInternal(string $roleName): bool
     {
-        $this->userAuthorizationChecker->resetRecursionCounter();
+        $this->userAuthorizationChecker->init();
 
         return $this->userAuthorizationChecker->hasRole($this->currentAuthorizationUser, false, $roleName);
     }
 
     private function getAttributeInternal(string $attributeName, $defaultValue = null)
     {
-        $this->userAuthorizationChecker->resetRecursionCounter();
+        $this->userAuthorizationChecker->init();
 
         return $this->userAuthorizationChecker->getAttribute($this->currentAuthorizationUser, false, $attributeName, $defaultValue);
     }
@@ -95,7 +95,7 @@ class AuthorizationService
      */
     private function hasPrivilegeInternal(string $privilegeName, $subject): bool
     {
-        $this->userAuthorizationChecker->resetRecursionCounter();
+        $this->userAuthorizationChecker->init();
 
         return $this->userAuthorizationChecker->hasPrivilege($this->currentAuthorizationUser, $privilegeName, $subject);
     }

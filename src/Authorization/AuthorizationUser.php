@@ -17,6 +17,11 @@ class AuthorizationUser implements AuthorizationUserInterface
         $this->authorizationChecker = $authorizationChecker;
     }
 
+    public function getIdentifier(): string
+    {
+        return $this->authorizationChecker->getCurrentUserIdentifier();
+    }
+
     public function hasRole(string $roleName): bool
     {
         return $this->authorizationChecker->hasRole($this, true, $roleName);
