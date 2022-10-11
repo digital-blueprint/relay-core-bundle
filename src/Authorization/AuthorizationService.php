@@ -7,8 +7,9 @@ namespace Dbp\Relay\CoreBundle\Authorization;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Symfony\Component\HttpFoundation\Response;
 
-class AuthorizationService
+abstract class AuthorizationService
 {
+    public const AUTHORIZATION_CONFIG_ATTRIBUTE = 'authorization';
     public const ROLES_CONFIG_ATTRIBUTE = 'roles';
     public const PRIVILEGES_CONFIG_ATTRIBUTE = 'privileges';
     public const ATTRIBUTES_CONFIG_ATTRIBUTE = 'attributes';
@@ -27,9 +28,9 @@ class AuthorizationService
         $this->currentAuthorizationUser = new AuthorizationUser($this->userAuthorizationChecker);
     }
 
-    public function setAuthorizationConfig(array $config)
+    public function setConfig(array $config)
     {
-        $this->userAuthorizationChecker->setConfig($config);
+        $this->userAuthorizationChecker->setConfig($config[self::AUTHORIZATION_CONFIG_ATTRIBUTE]);
     }
 
     /**
