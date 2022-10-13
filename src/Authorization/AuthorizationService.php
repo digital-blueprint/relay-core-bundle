@@ -10,8 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 abstract class AuthorizationService
 {
     public const AUTHORIZATION_CONFIG_ATTRIBUTE = 'authorization';
-    public const ROLES_CONFIG_ATTRIBUTE = 'roles';
-    public const PRIVILEGES_CONFIG_ATTRIBUTE = 'privileges';
+    public const RIGHTS_CONFIG_ATTRIBUTE = 'rights';
     public const ATTRIBUTES_CONFIG_ATTRIBUTE = 'attributes';
     public const NAME_CONFIG_ATTRIBUTE = 'name';
     public const EXPRESSION_CONFIG_ATTRIBUTE = 'expression';
@@ -34,29 +33,23 @@ abstract class AuthorizationService
     }
 
     /**
+     * @param mixed $subject
+     *
      * @throws ApiError
      */
-    public function denyAccessUnlessHasRole(string $roleName): void
+    public function denyAccessUnlessIsGranted(string $rightName, $subject = null): void
     {
-        if ($this->hasRoleInternal($roleName) === false) {
-            throw new ApiError(Response::HTTP_FORBIDDEN, 'access denied. missing role '.$roleName);
+        if ($this->isGrantedInternal($rightName, $subject) === false) {
+            throw new ApiError(Response::HTTP_FORBIDDEN, 'access denied. missing right '.$rightName);
         }
     }
 
     /**
-     * @throws AuthorizationException
-     * @throws ApiError
+     * @param mixed $subject
      */
-    public function denyAccessUnlessHasPrivilege(string $privilegeName, $subject = null): void
+    public function isGranted(string $expressionName, $subject = null): bool
     {
-        if ($this->hasPrivilegeInternal($privilegeName, $subject) === false) {
-            throw new ApiError(Response::HTTP_FORBIDDEN, 'access denied. missing privilege '.$privilegeName);
-        }
-    }
-
-    public function hasRole(string $roleName): bool
-    {
-        return $this->hasRoleInternal($roleName);
+        return $this->isGrantedInternal($expressionName, $subject);
     }
 
     /**
@@ -69,35 +62,20 @@ abstract class AuthorizationService
         return $this->getAttributeInternal($attributeName, $defaultValue);
     }
 
-    /**
-     * @throws AuthorizationException
-     */
-    public function hasPrivilege(string $privilegeName, $subject): bool
-    {
-        return $this->hasPrivilegeInternal($privilegeName, $subject);
-    }
-
-    private function hasRoleInternal(string $roleName): bool
-    {
-        $this->userAuthorizationChecker->init();
-
-        return $this->userAuthorizationChecker->hasRole($this->currentAuthorizationUser, false, $roleName);
-    }
-
     private function getAttributeInternal(string $attributeName, $defaultValue = null)
     {
         $this->userAuthorizationChecker->init();
 
-        return $this->userAuthorizationChecker->getAttribute($this->currentAuthorizationUser, false, $attributeName, $defaultValue);
+        return $this->userAuthorizationChecker->getAttribute($this->currentAuthorizationUser, $attributeName, $defaultValue);
     }
 
     /**
      * @throws AuthorizationException
      */
-    private function hasPrivilegeInternal(string $privilegeName, $subject): bool
+    private function isGrantedInternal(string $rightName, $subject = null): bool
     {
         $this->userAuthorizationChecker->init();
 
-        return $this->userAuthorizationChecker->hasPrivilege($this->currentAuthorizationUser, $privilegeName, $subject);
+        return $this->userAuthorizationChecker->isGranted($this->currentAuthorizationUser, $rightName, $subject);
     }
 }

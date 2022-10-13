@@ -7,7 +7,7 @@ namespace Dbp\Relay\CoreBundle\Authorization;
 /**
  * Provides the user interface available within privilege expressions.
  */
-class AuthorizationUser implements AuthorizationUserInterface
+class AuthorizationUser
 {
     /** @var UserAuthorizationChecker */
     private $authorizationChecker;
@@ -22,21 +22,37 @@ class AuthorizationUser implements AuthorizationUserInterface
         return $this->authorizationChecker->getCurrentUserIdentifier();
     }
 
-    public function hasRole(string $roleName): bool
-    {
-        return $this->authorizationChecker->hasRole($this, true, $roleName);
-    }
-
+    /**
+     * @param mixed $defaultValue
+     *
+     * @return mixed|null
+     *
+     * @throws AuthorizationException
+     */
     public function getAttribute(string $attributeName, $defaultValue = null)
     {
-        return $this->authorizationChecker->getAttribute($this, true, $attributeName, $defaultValue);
+        return $this->authorizationChecker->getAttribute($this, $attributeName, $defaultValue);
     }
 
     /**
+     * @param mixed $subject
+     *
      * @throws AuthorizationException
      */
-    public function hasPrivilege(string $privilegeName, $subject): bool
+    public function isGranted(string $rightName, $subject = null): bool
     {
-        return $this->authorizationChecker->hasPrivilege($this, $privilegeName, $subject);
+        return $this->authorizationChecker->isGranted($this, $rightName, $subject);
+    }
+
+    /**
+     * @param mixed|null $defaultValue
+     *
+     * @return mixed|null
+     *
+     * @throws AuthorizationException
+     */
+    public function get(string $attributeName, $defaultValue = null)
+    {
+        return $this->authorizationChecker->getCustomAttribute($this, $attributeName, $defaultValue);
     }
 }

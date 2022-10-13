@@ -22,16 +22,10 @@ class UserAuthorizationChecker
     private $expressionLanguage;
 
     /** @var array */
-    private $customRoles;
-
-    /** @var array */
     private $customAttributes;
 
     /** @var array */
-    private $privilegeExpressions;
-
-    /** @var array */
-    private $roleExpressions;
+    private $rightExpressions;
 
     /** @var array */
     private $attributeExpressions;
@@ -45,18 +39,15 @@ class UserAuthorizationChecker
         $this->authorizationDataProviders = $authorizationDataProviderProvider->getAuthorizationDataProviders();
         $this->expressionLanguage = new ExpressionLanguage();
 
-        $this->customRoles = [];
         $this->customAttributes = [];
 
-        $this->roleExpressions = [];
-        $this->privilegeExpressions = [];
+        $this->rightExpressions = [];
         $this->attributeExpressions = [];
     }
 
     public function setConfig(array $config)
     {
-        $this->loadExpressions($config[AuthorizationService::ROLES_CONFIG_ATTRIBUTE], $this->roleExpressions);
-        $this->loadExpressions($config[AuthorizationService::PRIVILEGES_CONFIG_ATTRIBUTE], $this->privilegeExpressions);
+        $this->loadExpressions($config[AuthorizationService::RIGHTS_CONFIG_ATTRIBUTE], $this->rightExpressions);
         $this->loadExpressions($config[AuthorizationService::ATTRIBUTES_CONFIG_ATTRIBUTE], $this->attributeExpressions);
     }
 
@@ -70,63 +61,40 @@ class UserAuthorizationChecker
         return $this->currentUserIdentifier;
     }
 
-    public function hasRole(AuthorizationUser $currentAuthorizationUser, bool $areCustomRolesAllowed, string $roleName): bool
+    /**
+     * @param mixed|null $defaultValue
+     *
+     * @return mixed|null
+     */
+    public function getAttribute(AuthorizationUser $currentAuthorizationUser, string $attributeName, $defaultValue = null)
     {
-        $this->tryIncreaseRecursionCounter($roleName);
+        $this->tryIncreaseRecursionCounter($attributeName);
 
-        $hasRole = null;
-
-        if (($roleExpression = $this->roleExpressions[$roleName] ?? null) !== null) {
-            $hasRole = $this->expressionLanguage->evaluate($roleExpression, [
+        if (($attributeExpression = $this->attributeExpressions[$attributeName] ?? null) !== null) {
+            $attribute = $this->expressionLanguage->evaluate($attributeExpression, [
                 'user' => $currentAuthorizationUser,
             ]);
-        } elseif ($areCustomRolesAllowed) {
-            if (array_key_exists($roleName, $this->customRoles) === false) {
-                $this->loadRole($roleName);
-            }
-
-            $hasRole = $this->customRoles[$roleName] ?? null;
+        } else {
+            throw new AuthorizationException(sprintf('attribute \'%s\' undefined', $attributeName), AuthorizationException::ATTRIBUTE_UNDEFINED);
         }
 
-        if ($hasRole === null) {
-            throw new AuthorizationException(sprintf('role \'%s\' undefined', $roleName), AuthorizationException::ROLE_UNDEFINED);
-        }
-
-        return $hasRole;
+        return $attribute ?? $defaultValue;
     }
 
     /**
      * @param mixed|null $defaultValue
      *
      * @return mixed|null
+     *
+     * @throws AuthorizationException
      */
-    public function getAttribute(AuthorizationUser $currentAuthorizationUser, bool $areCustomAttributesAllowed, string $attributeName, $defaultValue = null)
+    public function getCustomAttribute(AuthorizationUser $currentAuthorizationUser, string $attributeName, $defaultValue = null)
     {
-        $this->tryIncreaseRecursionCounter($attributeName);
-
-        $attributeDefined = false;
-
-        if (($attributeExpression = $this->attributeExpressions[$attributeName] ?? null) !== null) {
-            $attributeDefined = true;
-            $attribute = $this->expressionLanguage->evaluate($attributeExpression, [
-                'user' => $currentAuthorizationUser,
-            ]);
-        } elseif ($areCustomAttributesAllowed) {
-            if (array_key_exists($attributeName, $this->customAttributes) === false) {
-                $this->loadAttribute($attributeName);
-            }
-
-            if (isset($this->customAttributes[$attributeName])) {
-                $attributeDefined = true;
-                $attribute = $this->customAttributes[$attributeName];
-            }
+        if (array_key_exists($attributeName, $this->customAttributes) === false) {
+            $this->loadCustomAttribute($attributeName);
         }
 
-        if ($attributeDefined === false) {
-            throw new AuthorizationException(sprintf('attribute \'%s\' undefined', $attributeName), AuthorizationException::ATTRIBUTE_UNDEFINED);
-        }
-
-        return $attribute ?? $defaultValue;
+        return $this->customAttributes[$attributeName] ?? $defaultValue;
     }
 
     /**
@@ -135,69 +103,65 @@ class UserAuthorizationChecker
      *
      * @throws AuthorizationException
      */
-    public function hasPrivilege(AuthorizationUser $currentAuthorizationUser, string $privilegeName, $subject): bool
+    public function isGranted(AuthorizationUser $currentAuthorizationUser, string $rightName, $subject): bool
     {
-        $this->tryIncreaseRecursionCounter($privilegeName);
+        $this->tryIncreaseRecursionCounter($rightName);
 
-        $privilegeExpression = $this->privilegeExpressions[$privilegeName] ?? null;
-        if ($privilegeExpression === null) {
-            throw new AuthorizationException(sprintf('privilege \'%s\' undefined', $privilegeName), AuthorizationException::PRIVILEGE_UNDEFINED);
+        $rightExpression = $this->rightExpressions[$rightName] ?? null;
+        if ($rightExpression === null) {
+            throw new AuthorizationException(sprintf('right \'%s\' undefined', $rightName), AuthorizationException::PRIVILEGE_UNDEFINED);
         }
 
-        return $this->expressionLanguage->evaluate($privilegeExpression, [
+        return $this->expressionLanguage->evaluate($rightExpression, [
             'user' => $currentAuthorizationUser,
             'subject' => $subject,
         ]);
     }
 
-    private function loadExpressions(array $expressions, array &$target)
+    private function loadExpressions(array $expressions, array &$target): void
     {
         foreach ($expressions as $expression) {
             $target[$expression[AuthorizationService::NAME_CONFIG_ATTRIBUTE]] = $expression[AuthorizationService::EXPRESSION_CONFIG_ATTRIBUTE];
         }
     }
 
-    private function loadRole(string $roleName)
+    /**
+     * @throws AuthorizationException
+     */
+    private function loadCustomAttribute(string $attributeName): void
     {
-        foreach ($this->authorizationDataProviders as $authorizationDataProvider) {
-            $availableRoles = $authorizationDataProvider->getAvailableRoles();
-            if (in_array($roleName, $availableRoles, true)) {
-                $this->loadUserDataFromAuthorizationProvider($authorizationDataProvider);
-                break;
-            }
-        }
-    }
-
-    private function loadAttribute(string $attributeName)
-    {
+        $wasFound = false;
         foreach ($this->authorizationDataProviders as $authorizationDataProvider) {
             $availableAttributes = $authorizationDataProvider->getAvailableAttributes();
             if (in_array($attributeName, $availableAttributes, true)) {
-                $this->loadUserDataFromAuthorizationProvider($authorizationDataProvider);
+                $this->loadUserAttributesFromAuthorizationProvider($authorizationDataProvider);
+                $wasFound = true;
                 break;
             }
         }
+
+        if ($wasFound === false) {
+            throw new AuthorizationException(sprintf('custom attribute \'%s\' undefined', $attributeName), AuthorizationException::ATTRIBUTE_UNDEFINED);
+        }
     }
 
-    private function loadUserDataFromAuthorizationProvider(AuthorizationDataProviderInterface $authorizationDataProvider)
+    private function loadUserAttributesFromAuthorizationProvider(AuthorizationDataProviderInterface $authorizationDataProvider): void
     {
-        $userRoles = [];
         $userAttributes = [];
 
         if (Tools::isNullOrEmpty($this->currentUserIdentifier) === false) {
-            $authorizationDataProvider->getUserData($this->currentUserIdentifier, $userRoles, $userAttributes);
+            $userAttributes = $authorizationDataProvider->getUserAttributes($this->currentUserIdentifier);
         }
 
         foreach ($authorizationDataProvider->getAvailableAttributes() as $availableAttribute) {
             $this->customAttributes[$availableAttribute] = $userAttributes[$availableAttribute] ?? null;
         }
-
-        foreach ($authorizationDataProvider->getAvailableRoles() as $availableRole) {
-            $this->customRoles[$availableRole] = in_array($availableRole, $userRoles, true);
-        }
     }
 
-    private function tryIncreaseRecursionCounter(string $hint)
+    /**
+     * @throws AuthorizationException
+     */
+    private function tryIncreaseRecursionCounter(string $hint): void
     {
         if (++$this->callCounter > self::MAX_NUM_CALLS) {
             throw new AuthorizationException(sprintf('possible infinite loop in authorization expression detected (%s)', $hint), AuthorizationException::INFINITE_LOOP_DETECTED);
