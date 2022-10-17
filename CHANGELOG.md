@@ -1,3 +1,8 @@
+# v0.1.45
+
+* dbp:relay:core:migrate: Work around issues in DoctrineMigrationsBundle which
+  sometimes led to migrations being skipped.
+
 # v0.1.44
 
 * new dbp:relay:core:migrate command
