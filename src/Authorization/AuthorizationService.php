@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Authorization;
 
+use Dbp\Relay\CoreBundle\API\UserSessionInterface;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -21,9 +22,9 @@ abstract class AuthorizationService
     /** @var AuthorizationUser|null */
     private $currentAuthorizationUser;
 
-    public function __construct(UserAuthorizationChecker $userAuthorizationChecker)
+    public function __construct(UserSessionInterface $userSession, AuthorizationDataProviderProvider $authorizationDataProviderProvider)
     {
-        $this->userAuthorizationChecker = $userAuthorizationChecker;
+        $this->userAuthorizationChecker = new UserAuthorizationChecker($userSession, $authorizationDataProviderProvider);
         $this->currentAuthorizationUser = new AuthorizationUser($this->userAuthorizationChecker);
     }
 
