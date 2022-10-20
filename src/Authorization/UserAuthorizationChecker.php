@@ -47,8 +47,8 @@ class UserAuthorizationChecker
 
     public function setConfig(array $config)
     {
-        $this->loadExpressions($config[AuthorizationService::RIGHTS_CONFIG_ATTRIBUTE], $this->rightExpressions);
-        $this->loadExpressions($config[AuthorizationService::ATTRIBUTES_CONFIG_ATTRIBUTE], $this->attributeExpressions);
+        $this->loadExpressions($config[AbstractAuthorizationService::RIGHTS_CONFIG_ATTRIBUTE], $this->rightExpressions);
+        $this->loadExpressions($config[AbstractAuthorizationService::ATTRIBUTES_CONFIG_ATTRIBUTE], $this->attributeExpressions);
     }
 
     public function init()
@@ -121,7 +121,7 @@ class UserAuthorizationChecker
     private function loadExpressions(array $expressions, array &$target): void
     {
         foreach ($expressions as $expression) {
-            $target[$expression[AuthorizationService::NAME_CONFIG_ATTRIBUTE]] = $expression[AuthorizationService::EXPRESSION_CONFIG_ATTRIBUTE];
+            $target[$expression[AbstractAuthorizationService::NAME_CONFIG_ATTRIBUTE]] = $expression[AbstractAuthorizationService::EXPRESSION_CONFIG_ATTRIBUTE];
         }
     }
 
