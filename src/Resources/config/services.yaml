@@ -85,3 +85,7 @@ services:
     autowire: true
     autoconfigure: true
     arguments: [ !tagged auth.authorization_data_provider ]
+
+  Dbp\Relay\CoreBundle\Helpers\Locale:
+    autowire: true
+    autoconfigure: true
