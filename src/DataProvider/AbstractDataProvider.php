@@ -14,8 +14,11 @@ use Dbp\Relay\CoreBundle\Pagination\PartialPaginator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-abstract class DataProvider extends AbstractController implements RestrictedDataProviderInterface, ItemDataProviderInterface, CollectionDataProviderInterface
+abstract class AbstractDataProvider extends AbstractController implements RestrictedDataProviderInterface, ItemDataProviderInterface, CollectionDataProviderInterface
 {
+    protected const GET_COLLECTION_OPERATION = 1;
+    protected const GET_ITEM_OPERATION = 2;
+
     private const FILTERS_KEY = 'filters';
 
     /** @var Locale */
@@ -33,6 +36,8 @@ abstract class DataProvider extends AbstractController implements RestrictedData
 
     public function getCollection(string $resourceClass, string $operationName = null, array $context = []): PartialPaginator
     {
+        $this->onOperationStart(self::GET_COLLECTION_OPERATION);
+
         $filters = $context[self::FILTERS_KEY] ?? [];
 
         $currentPageNumber = Pagination::getCurrentPageNumber($filters);
@@ -47,6 +52,8 @@ abstract class DataProvider extends AbstractController implements RestrictedData
 
     public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []): ?object
     {
+        $this->onOperationStart(self::GET_ITEM_OPERATION);
+
         $filters = $context[self::FILTERS_KEY] ?? [];
 
         $options = [];
@@ -54,6 +61,11 @@ abstract class DataProvider extends AbstractController implements RestrictedData
         $this->locale->addLanguageOption($options);
 
         return $this->getItemById($id, $options);
+    }
+
+    protected function onOperationStart(int $operation)
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
     }
 
     abstract protected function getResourceClass(): string;
