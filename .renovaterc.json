@@ -12,10 +12,16 @@
   },
   "packageRules": [
     {
-      "matchPackagePrefixes": [
-        "symfony/"
-      ],
+      "matchPackagePrefixes": ["symfony/"],
       "allowedVersions": "<6"
+    },
+    {
+      "matchPackageNames": ["api-platform/core"],
+      "allowedVersions": "<2.7"
+    },
+    {
+      "matchPackageNames": ["friendsofphp/php-cs-fixer"],
+      "allowedVersions": "<=3.4.0"
     }
   ],
   "js": {
