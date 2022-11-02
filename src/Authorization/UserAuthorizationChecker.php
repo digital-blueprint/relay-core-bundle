@@ -10,6 +10,9 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 class UserAuthorizationChecker
 {
+    public const RIGHTS_CONFIG_ATTRIBUTE = 'rights';
+    public const ATTRIBUTES_CONFIG_ATTRIBUTE = 'attributes';
+
     private const MAX_NUM_CALLS = 16;
 
     /** @var string */
@@ -47,8 +50,8 @@ class UserAuthorizationChecker
 
     public function setConfig(array $config)
     {
-        $this->loadExpressions($config[AbstractAuthorizationService::RIGHTS_CONFIG_ATTRIBUTE], $this->rightExpressions);
-        $this->loadExpressions($config[AbstractAuthorizationService::ATTRIBUTES_CONFIG_ATTRIBUTE], $this->attributeExpressions);
+        $this->loadExpressions($config[self::RIGHTS_CONFIG_ATTRIBUTE], $this->rightExpressions);
+        $this->loadExpressions($config[self::ATTRIBUTES_CONFIG_ATTRIBUTE], $this->attributeExpressions);
     }
 
     public function init()
@@ -120,8 +123,8 @@ class UserAuthorizationChecker
 
     private function loadExpressions(array $expressions, array &$target): void
     {
-        foreach ($expressions as $expression) {
-            $target[$expression[AbstractAuthorizationService::NAME_CONFIG_ATTRIBUTE]] = $expression[AbstractAuthorizationService::EXPRESSION_CONFIG_ATTRIBUTE];
+        foreach ($expressions as $name => $expression) {
+            $target[$name] = $expression;
         }
     }
 

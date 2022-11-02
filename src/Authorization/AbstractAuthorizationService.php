@@ -10,12 +10,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 abstract class AbstractAuthorizationService
 {
-    public const AUTHORIZATION_CONFIG_ATTRIBUTE = 'authorization';
-    public const RIGHTS_CONFIG_ATTRIBUTE = 'rights';
-    public const ATTRIBUTES_CONFIG_ATTRIBUTE = 'attributes';
-    public const NAME_CONFIG_ATTRIBUTE = 'name';
-    public const EXPRESSION_CONFIG_ATTRIBUTE = 'expression';
-
     /** @var UserAuthorizationChecker */
     private $userAuthorizationChecker;
 
@@ -30,7 +24,7 @@ abstract class AbstractAuthorizationService
 
     public function setConfig(array $config)
     {
-        $this->userAuthorizationChecker->setConfig($config[self::AUTHORIZATION_CONFIG_ATTRIBUTE]);
+        $this->userAuthorizationChecker->setConfig($config);
     }
 
     /**
