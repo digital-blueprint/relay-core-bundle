@@ -18,7 +18,7 @@ abstract class AbstractAuthorizationService
 
     public function __construct(UserSessionInterface $userSession, AuthorizationDataProviderProvider $authorizationDataProviderProvider)
     {
-        $this->userAuthorizationChecker = new UserAuthorizationChecker($userSession, $authorizationDataProviderProvider);
+        $this->userAuthorizationChecker = new UserAuthorizationChecker($userSession->getUserIdentifier(), $authorizationDataProviderProvider);
         $this->currentAuthorizationUser = new AuthorizationUser($this->userAuthorizationChecker);
     }
 

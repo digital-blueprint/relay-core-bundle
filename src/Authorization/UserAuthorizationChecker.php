@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Authorization;
 
-use Dbp\Relay\CoreBundle\API\UserSessionInterface;
 use Dbp\Relay\CoreBundle\Helpers\Tools;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
@@ -36,9 +35,9 @@ class UserAuthorizationChecker
     /** @var int */
     private $callCounter;
 
-    public function __construct(UserSessionInterface $userSession, AuthorizationDataProviderProvider $authorizationDataProviderProvider)
+    public function __construct(string $userIdentifier, AuthorizationDataProviderProvider $authorizationDataProviderProvider)
     {
-        $this->currentUserIdentifier = $userSession->getUserIdentifier();
+        $this->currentUserIdentifier = $userIdentifier;
         $this->authorizationDataProviders = $authorizationDataProviderProvider->getAuthorizationDataProviders();
         $this->expressionLanguage = new ExpressionLanguage();
 
