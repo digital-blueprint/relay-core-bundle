@@ -17,7 +17,7 @@ class AuthorizationUser
         $this->authorizationChecker = $authorizationChecker;
     }
 
-    public function getIdentifier(): string
+    public function getIdentifier(): ?string
     {
         return $this->authorizationChecker->getCurrentUserIdentifier();
     }

@@ -14,7 +14,7 @@ class UserAuthorizationChecker
 
     private const MAX_NUM_CALLS = 16;
 
-    /** @var string */
+    /** @var ?string */
     private $currentUserIdentifier;
 
     /** @var iterable */
@@ -35,7 +35,7 @@ class UserAuthorizationChecker
     /** @var int */
     private $callCounter;
 
-    public function __construct(string $userIdentifier, AuthorizationDataProviderProvider $authorizationDataProviderProvider)
+    public function __construct(?string $userIdentifier, AuthorizationDataProviderProvider $authorizationDataProviderProvider)
     {
         $this->currentUserIdentifier = $userIdentifier;
         $this->authorizationDataProviders = $authorizationDataProviderProvider->getAuthorizationDataProviders();
@@ -58,7 +58,7 @@ class UserAuthorizationChecker
         $this->callCounter = 0;
     }
 
-    public function getCurrentUserIdentifier(): string
+    public function getCurrentUserIdentifier(): ?string
     {
         return $this->currentUserIdentifier;
     }
