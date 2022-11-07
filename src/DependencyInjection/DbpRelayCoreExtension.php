@@ -171,6 +171,7 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
                 'app_buildinfo' => $config['build_info'] ?? '',
                 'app_buildinfo_url' => $config['build_info_url'] ?? '',
                 'logo_path' => $config['logo_path'] ?? 'bundles/dbprelaycore/logo.png',
+                'favicon_path' => $config['favicon_path'] ?? 'bundles/dbprelaycore/apple-touch-icon.png',
                 'app_env' => '%kernel.environment%',
                 'app_debug' => '%kernel.debug%',
             ]),
