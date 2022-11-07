@@ -10,6 +10,7 @@ use Psr\Http\Message\ResponseInterface;
 class ConnectionException extends \RuntimeException
 {
     public const REQUEST_EXCEPTION = 1;
+    public const JSON_EXCEPTION = 2;
 
     /** @var RequestInterface|null */
     private $request;
