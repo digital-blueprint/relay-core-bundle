@@ -10,7 +10,7 @@ use Exception;
 
 class ProxyDataEventSubscriber extends AbstractProxyDataEventSubscriber
 {
-    protected const NAMESPACE = 'core';
+    public const NAMESPACE = 'core';
 
     public const GET_AVAILABLE_ATTRIBUTES_FUNCTION_NAME = 'getAvailableAttributes';
     public const GET_USER_ATTRIBUTES_FUNCTION_NAME = 'getUserAttributes';
