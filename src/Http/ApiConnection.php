@@ -80,7 +80,7 @@ class ApiConnection
     /**
      * @throws ConnectionException
      */
-    public function get(string $uri, array $options): ResponseInterface
+    public function get(string $uri, array $query): ResponseInterface
     {
         $requestOptions = [
             Connection::REQUEST_OPTION_HEADERS => [
@@ -88,7 +88,21 @@ class ApiConnection
             ],
         ];
 
-        return $this->getApiConnection()->get($uri, $options, $requestOptions);
+        return $this->getConnection()->get($uri, $query, $requestOptions);
+    }
+
+    /**
+     * @throws ConnectionException
+     */
+    public function postJSON(string $uri, array $parameters): ResponseInterface
+    {
+        $requestOptions = [
+            Connection::REQUEST_OPTION_HEADERS => [
+                'Authorization' => 'Bearer '.$this->getAccessToken(),
+            ],
+        ];
+
+        return $this->getConnection()->postJSON($uri, $parameters, $requestOptions);
     }
 
     /**
@@ -123,7 +137,7 @@ class ApiConnection
         return $this->accessToken;
     }
 
-    private function getApiConnection(): Connection
+    private function getConnection(): Connection
     {
         if ($this->connection === null) {
             $connection = new Connection($this->config[self::API_URL_CONFIG_PARAMETER]);

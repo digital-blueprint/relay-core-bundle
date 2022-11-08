@@ -11,6 +11,7 @@ class ConnectionException extends \RuntimeException
 {
     public const REQUEST_EXCEPTION = 1;
     public const JSON_EXCEPTION = 2;
+    public const INVALID_DATA_EXCEPTION = 3;
 
     /** @var RequestInterface|null */
     private $request;
