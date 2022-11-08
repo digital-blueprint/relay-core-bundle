@@ -29,7 +29,8 @@
         "symfony/twig-bundle": "^5.4",
         "symfony/uid": "^5.4",
         "symfony/validator": "^5.4",
-        "symfony/yaml": "^5.4"
+        "symfony/yaml": "^5.4",
+        "ext-intl": "*"
     },
     "require-dev": {
         "brainmaestro/composer-git-hooks": "^2.8.5",
