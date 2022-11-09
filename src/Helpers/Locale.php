@@ -6,6 +6,9 @@ namespace Dbp\Relay\CoreBundle\Helpers;
 
 use Symfony\Component\HttpFoundation\RequestStack;
 
+/**
+ * @deprecated Use Locale/Locale instead
+ */
 class Locale
 {
     public const LANGUAGE_OPTION = 'lang';

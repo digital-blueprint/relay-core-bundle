@@ -6,6 +6,7 @@ namespace Dbp\Relay\CoreBundle\Tests\Auth;
 
 use Dbp\Relay\CoreBundle\Auth\AuthenticatorCompilerPass;
 use Dbp\Relay\CoreBundle\Auth\ProxyAuthenticator;
+use Dbp\Relay\CoreBundle\Auth\UserSession;
 use Dbp\Relay\CoreBundle\TestUtils\TestAuthenticator;
 use Dbp\Relay\CoreBundle\TestUtils\TestUser;
 use PHPUnit\Framework\TestCase;
@@ -17,13 +18,13 @@ class AuthenticatorTest extends TestCase
 {
     public function testSupports()
     {
-        $auth = new ProxyAuthenticator();
+        $auth = new ProxyAuthenticator(new UserSession());
         $this->assertFalse($auth->supports(new Request()));
     }
 
     public function testSingle()
     {
-        $auth = new ProxyAuthenticator();
+        $auth = new ProxyAuthenticator(new UserSession());
         $user = new TestUser();
         $sub = new TestAuthenticator($user, 'bla');
         $auth->addAuthenticator($sub);

@@ -18,6 +18,7 @@ $config->setRules([
     'strict_param' => true,
     'declare_strict_types' => true,
     'method_argument_space' => ['on_multiline' => 'ignore'],
+    'phpdoc_to_comment' => false,
 ])
 ->setRiskyAllowed(true)
 ->setFinder($finder);

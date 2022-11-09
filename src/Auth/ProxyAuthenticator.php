@@ -19,9 +19,15 @@ class ProxyAuthenticator extends AbstractAuthenticator
      */
     private $authenticators;
 
-    public function __construct()
+    /**
+     * @var UserSession
+     */
+    private $userSession;
+
+    public function __construct(UserSession $userSession)
     {
         $this->authenticators = [];
+        $this->userSession = $userSession;
     }
 
     public function addAuthenticator(AuthenticatorInterface $sub)
@@ -54,7 +60,11 @@ class ProxyAuthenticator extends AbstractAuthenticator
         $auth = $this->getAuthenticator($request);
         assert($auth !== null);
 
-        return $auth->authenticate($request);
+        $passport = $auth->authenticate($request);
+        $provider = $passport->getAttribute('relay_user_session_provider');
+        $this->userSession->setProvider($provider);
+
+        return $passport;
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
@@ -67,6 +77,8 @@ class ProxyAuthenticator extends AbstractAuthenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
+        $this->userSession->setProvider(null);
+
         $auth = $this->getAuthenticator($request);
         assert($auth !== null);
 

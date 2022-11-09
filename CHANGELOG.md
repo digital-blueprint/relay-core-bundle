@@ -1,3 +1,8 @@
+# v0.1.52
+
+* new Locale service for setting a locale from a requests and forwarding
+  to other services
+
 # v0.1.45
 
 * dbp:relay:core:migrate: Work around issues in DoctrineMigrationsBundle which

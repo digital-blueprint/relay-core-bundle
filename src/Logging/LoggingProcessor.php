@@ -43,10 +43,7 @@ final class LoggingProcessor
         $this->maskUserId($record);
 
         // Add a session ID (the same during multiple requests for the same user session)
-        $loggingId = $this->userDataProvider->getSessionLoggingId();
-        if ($loggingId !== null) {
-            $record['context']['relay-session-id'] = $loggingId;
-        }
+        $record['context']['relay-session-id'] = $this->userDataProvider->getSessionLoggingId();
 
         // Add a request ID (the same during the same client request)
         $request = $this->requestStack->getMainRequest();

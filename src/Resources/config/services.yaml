@@ -58,6 +58,13 @@ services:
     autowire: true
     autoconfigure: true
 
+  Dbp\Relay\CoreBundle\Auth\UserSession:
+    autowire: true
+    autoconfigure: true
+
+  Dbp\Relay\CoreBundle\API\UserSessionInterface:
+    '@Dbp\Relay\CoreBundle\Auth\UserSession'
+
   Dbp\Relay\CoreBundle\LocalData\LocalDataAwareEventDispatcher:
     autowire: true
     autoconfigure: true
@@ -95,5 +102,9 @@ services:
     autoconfigure: true
 
   Dbp\Relay\CoreBundle\ProxyApi\ProxyDataEventSubscriber:
+    autowire: true
+    autoconfigure: true
+
+  Dbp\Relay\CoreBundle\Locale\Locale:
     autowire: true
     autoconfigure: true
