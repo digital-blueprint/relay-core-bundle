@@ -39,4 +39,20 @@ class LocaleTest extends TestCase
         $lang = $service->getCurrentPrimaryLanguage();
         $this->assertSame('de', $lang);
     }
+
+    public function testSetExplicit()
+    {
+        $stack = new RequestStack();
+        $params = new ParameterBag(['kernel.default_locale' => \Locale::acceptFromHttp('en')]);
+        $service = new Locale($stack, $params);
+        $request = new Request(['foo' => 'fr']);
+        $service->setRequestLocaleFromQuery($request, 'foo');
+
+        $stack->push($request);
+        $lang = $service->getCurrentPrimaryLanguage();
+        $this->assertSame('fr', $lang);
+        $stack->pop();
+        $lang = $service->getCurrentPrimaryLanguage();
+        $this->assertSame('en', $lang);
+    }
 }

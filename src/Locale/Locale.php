@@ -74,7 +74,10 @@ class Locale
         return $locale;
     }
 
-    private static function setRequestLocaleFromQuery(Request $request, string $queryParam): void
+    /**
+     * Same as setCurrentRequestLocaleFromQuery(), but takes a request object.
+     */
+    public static function setRequestLocaleFromQuery(Request $request, string $queryParam): void
     {
         if ($request->query->has($queryParam)) {
             $lang = $request->query->get($queryParam);
