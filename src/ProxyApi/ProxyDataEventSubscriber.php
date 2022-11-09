@@ -22,9 +22,20 @@ class ProxyDataEventSubscriber extends AbstractProxyDataEventSubscriber
      */
     private $provider;
 
+    /** @var bool */
+    private static $isCurrentlyActive = false;
+
     public function __construct(AuthorizationDataProviderProvider $provider)
     {
         $this->provider = $provider;
+    }
+
+    /**
+     * Indicates, that the event subscriber is currently busy handling a proxy data event.
+     */
+    public static function isCurrentlyActive(): bool
+    {
+        return self::$isCurrentlyActive;
     }
 
     protected function isFunctionDefined(string $functionName): bool
@@ -46,18 +57,23 @@ class ProxyDataEventSubscriber extends AbstractProxyDataEventSubscriber
      */
     protected function callFunction(string $functionName, array $arguments): ?array
     {
-        $returnValue = null;
+        try {
+            self::$isCurrentlyActive = true;
+            $returnValue = null;
 
-        switch ($functionName) {
-            case self::GET_AVAILABLE_ATTRIBUTES_FUNCTION_NAME:
-                $returnValue = $this->getAvailableAttributes();
-                break;
-            case self::GET_USER_ATTRIBUTES_FUNCTION_NAME:
-                $returnValue = $this->getUserAttributes($arguments[self::USER_ID_PARAMETER_NAME]);
-                break;
+            switch ($functionName) {
+                case self::GET_AVAILABLE_ATTRIBUTES_FUNCTION_NAME:
+                    $returnValue = $this->getAvailableAttributes();
+                    break;
+                case self::GET_USER_ATTRIBUTES_FUNCTION_NAME:
+                    $returnValue = $this->getUserAttributes($arguments[self::USER_ID_PARAMETER_NAME]);
+                    break;
+            }
+
+            return $returnValue;
+        } finally {
+            self::$isCurrentlyActive = false;
         }
-
-        return $returnValue;
     }
 
     private function getAvailableAttributes(): array

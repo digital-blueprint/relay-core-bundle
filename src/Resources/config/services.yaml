@@ -93,3 +93,7 @@ services:
   Dbp\Relay\CoreBundle\Authorization\DebugCommand:
     autowire: true
     autoconfigure: true
+
+  Dbp\Relay\CoreBundle\ProxyApi\ProxyDataEventSubscriber:
+    autowire: true
+    autoconfigure: true

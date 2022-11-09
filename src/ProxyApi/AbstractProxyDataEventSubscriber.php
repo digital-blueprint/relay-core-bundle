@@ -15,7 +15,7 @@ abstract class AbstractProxyDataEventSubscriber implements EventSubscriberInterf
     public static function getSubscribedEvents(): array
     {
         return [
-            ProxyApi::PROXY_DATA_EVENT_NAME.static::NAMESPACE => 'onProxyDataEvent',
+            ProxyDataEvent::NAME.'.'.static::NAMESPACE => 'onProxyDataEvent',
         ];
     }
 
@@ -24,7 +24,7 @@ abstract class AbstractProxyDataEventSubscriber implements EventSubscriberInterf
      */
     public function onProxyDataEvent(ProxyDataEvent $event): void
     {
-        $event->setHandled();
+        $event->acknowledge();
         $proxyData = $event->getProxyData();
         $functionName = $proxyData->getFunctionName();
         $arguments = $proxyData->getArguments();

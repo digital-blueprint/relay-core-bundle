@@ -8,18 +8,18 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class ProxyDataEvent extends Event
 {
-    public const NAME = 'dbp.relay.proxy_bundle.proxy_data';
+    public const NAME = 'dbp.relay.core_bundle.proxy_data';
 
     /** @var ProxyDataInterface */
     private $proxyData;
 
     /** @var bool */
-    private $wasHandled;
+    private $wasAcknowledged;
 
     public function __construct(ProxyDataInterface $proxyData)
     {
         $this->proxyData = $proxyData;
-        $this->wasHandled = false;
+        $this->wasAcknowledged = false;
     }
 
     public function getProxyData(): ProxyDataInterface
@@ -28,18 +28,18 @@ class ProxyDataEvent extends Event
     }
 
     /**
-     * Indicate, that the event was handled, e.g. there was an event subscriber for the requested proxy data namespace.
+     * Acknowledge the event, i.e. tell that there was an event subscriber responsible for the requested proxy data namespace.
      */
-    public function setHandled(): void
+    public function acknowledge(): void
     {
-        $this->wasHandled = true;
+        $this->wasAcknowledged = true;
     }
 
     /**
-     * True, if the event was handled, e.g. there was an event subscriber for the requested proxy data namespace, false otherwise.
+     * True, if the event was acknowledged, e.g. there was an event subscriber responsible for the requested proxy data namespace, false otherwise.
      */
-    public function wasHandled(): bool
+    public function wasAcknowledged(): bool
     {
-        return $this->wasHandled;
+        return $this->wasAcknowledged;
     }
 }

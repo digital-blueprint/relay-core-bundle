@@ -13,8 +13,8 @@ class ApiConnection
 {
     public const API_URL_CONFIG_PARAMETER = 'api_url';
 
-    public const KEYCLOAK_SERVER_URL_CONFIG_PARAMETER = 'keycloak_server_url';
-    public const KEYCLOAK_REALM_CONFIG_PARAMETER = 'keycloak_realm';
+    public const OIDC_SERVER_URL_CONFIG_PARAMETER = 'oidc_server_url';
+    public const OIDC_REALM_CONFIG_PARAMETER = 'oidc_realm';
     public const CLIENT_ID_CONFIG_PARAMETER = 'client_id';
     public const CLIENT_SECRET_CONFIG_PARAMETER = 'client_secret';
 
@@ -111,8 +111,8 @@ class ApiConnection
     private function getAccessToken(): string
     {
         if ($this->accessToken === null) {
-            $idServerUrl = $this->config[self::KEYCLOAK_SERVER_URL_CONFIG_PARAMETER];
-            $idServerRealm = $this->config[self::KEYCLOAK_REALM_CONFIG_PARAMETER];
+            $idServerUrl = $this->config[self::OIDC_SERVER_URL_CONFIG_PARAMETER];
+            $idServerRealm = $this->config[self::OIDC_REALM_CONFIG_PARAMETER];
             $clientId = $this->config[self::CLIENT_ID_CONFIG_PARAMETER];
             $clientSecret = $this->config[self::CLIENT_SECRET_CONFIG_PARAMETER];
 
