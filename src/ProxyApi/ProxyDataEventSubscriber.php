@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\ProxyApi;
 
 use Dbp\Relay\CoreBundle\Authorization\AuthorizationDataProviderProvider;
-use Dbp\Relay\CoreBundle\Helpers\Tools;
 use Exception;
 
 class ProxyDataEventSubscriber extends AbstractProxyDataEventSubscriber
