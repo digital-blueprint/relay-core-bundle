@@ -38,18 +38,17 @@ class ProxyDataEventSubscriber extends AbstractProxyDataEventSubscriber
         return self::$isCurrentlyActive;
     }
 
-    protected function isFunctionDefined(string $functionName): bool
+    protected static function getSubscribedNamespace(): string
     {
-        return
-            $functionName === self::GET_AVAILABLE_ATTRIBUTES_FUNCTION_NAME ||
-            $functionName === self::GET_USER_ATTRIBUTES_FUNCTION_NAME;
+        return self::NAMESPACE;
     }
 
-    protected function areAllRequiredArgumentsDefined(string $functionName, array $arguments): bool
+    protected static function getAvailableFunctionSignatures(): array
     {
-        return
-            $functionName !== self::GET_USER_ATTRIBUTES_FUNCTION_NAME ||
-            !Tools::isNullOrEmpty($arguments[self::USER_ID_PARAMETER_NAME] ?? null);
+        return [
+            self::GET_AVAILABLE_ATTRIBUTES_FUNCTION_NAME => [],
+            self::GET_USER_ATTRIBUTES_FUNCTION_NAME => [self::USER_ID_PARAMETER_NAME],
+        ];
     }
 
     /**

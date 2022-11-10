@@ -49,8 +49,8 @@ class UserAuthorizationChecker
 
     public function setConfig(array $config)
     {
-        $this->loadExpressions($config[self::RIGHTS_CONFIG_ATTRIBUTE], $this->rightExpressions);
-        $this->loadExpressions($config[self::ATTRIBUTES_CONFIG_ATTRIBUTE], $this->attributeExpressions);
+        $this->loadExpressions($config[self::RIGHTS_CONFIG_ATTRIBUTE] ?? [], $this->rightExpressions);
+        $this->loadExpressions($config[self::ATTRIBUTES_CONFIG_ATTRIBUTE] ?? [], $this->attributeExpressions);
     }
 
     public function init()
