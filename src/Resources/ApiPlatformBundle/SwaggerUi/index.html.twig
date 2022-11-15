@@ -26,7 +26,7 @@
     <script id="swagger-data" type="application/json">{{ swagger_data|merge(oauth_data)|json_encode(65)|raw }}</script>
 
     {# insert auth web component, use token in Swagger UI #}
-    {% if keycloak_server_url and keycloak_realm and keycloak_frontend_client_id %}
+    {% if (keycloak_server_url or oidc_server_url) and (keycloak_realm or oidc_server_url) and (keycloak_frontend_client_id or oidc_frontend_client_id) %}
         <style>
             /* Hide the builtin auth key button in case we have a keycloak setup */
             .swagger-ui .auth-wrapper .authorize {
@@ -34,10 +34,12 @@
             }
         </style>
         <script>
-            var keycloakConfig = {
-                url: "{{ keycloak_server_url }}",
-                realm: "{{ keycloak_realm }}",
-                clientId: "{{ keycloak_frontend_client_id }}"
+            var oidcConfig = {
+                oidcServer: "{{ oidc_server_url }}",
+                oidcFrontendClientId: "{{ oidc_frontend_client_id }}",
+                keycloakUrl: "{{ keycloak_server_url }}",
+                keycloakRealm: "{{ keycloak_realm }}",
+                keycloakClientId: "{{ keycloak_frontend_client_id }}"
             };
         </script>
         <script type="module" src="{{ asset('bundles/dbprelaycore/index.js', assetPackage) }}"></script>
