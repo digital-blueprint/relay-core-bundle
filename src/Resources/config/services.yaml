@@ -108,3 +108,8 @@ services:
   Dbp\Relay\CoreBundle\Locale\Locale:
     autowire: true
     autoconfigure: true
+
+  Dbp\Relay\CoreBundle\DataProvider\AbstractDataProvider:
+    abstract:  true
+    calls:
+      - setLocale: ['@locale']

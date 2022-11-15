@@ -16,6 +16,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
  */
 class Locale
 {
+    public const LANGUAGE_OPTION = 'lang';
+
     /** @var RequestStack */
     private $requestStack;
 
