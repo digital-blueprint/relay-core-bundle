@@ -32,12 +32,12 @@ class Pagination
 
     public static function getCurrentPageNumber(array $options): int
     {
-        return max(1, intval($options[self::CURRENT_PAGE_NUMBER_PARAMETER_NAME]) ?? self::CURRENT_PAGE_NUMBER_DEFAULT);
+        return max(1, intval($options[self::CURRENT_PAGE_NUMBER_PARAMETER_NAME] ?? self::CURRENT_PAGE_NUMBER_DEFAULT));
     }
 
     public static function getMaxNumItemsPerPage(array $options): int
     {
-        return max(1, intval($options[self::MAX_NUM_ITEMS_PER_PAGE_PARAMETER_NAME]) ?? self::MAX_NUM_ITEMS_PER_PAGE_DEFAULT);
+        return max(1, intval($options[self::MAX_NUM_ITEMS_PER_PAGE_PARAMETER_NAME] ?? self::MAX_NUM_ITEMS_PER_PAGE_DEFAULT));
     }
 
     public static function isPartialPagination(array $options): bool
