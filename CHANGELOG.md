@@ -1,3 +1,7 @@
+# v0.1.59
+
+* api-docs: compatibility fixes for relay-auth-bundle v0.1.12
+
 # v0.1.52
 
 * new Locale service for setting a locale from a requests and forwarding
