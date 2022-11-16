@@ -8,6 +8,9 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Helpers;
 
+/**
+ * @deprecated Use Dbp\Relay\CoreBundle\Pagination\PartialPaginator
+ */
 class ArrayPartPaginator extends ArrayPaginator
 {
     protected $totalItemCount = 0;

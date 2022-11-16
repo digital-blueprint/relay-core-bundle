@@ -11,6 +11,9 @@ namespace Dbp\Relay\CoreBundle\Helpers;
 use ApiPlatform\Core\DataProvider\PaginatorInterface;
 use Iterator;
 
+/**
+ * @deprecated Use Dbp\Relay\CoreBundle\Pagination\PartialPaginator
+ */
 abstract class ArrayPaginator implements Iterator, PaginatorInterface
 {
     protected $position = 0;

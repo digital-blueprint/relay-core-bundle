@@ -8,17 +8,17 @@ namespace Dbp\Relay\CoreBundle\Pagination;
  * Paginator that holds the whole set of result items.
  * Note that it is a full paginator because partial pagination makes no sense with the whole result already at hand.
  */
-class WholeResultPaginator extends FullPaginator
+class WholeResultPaginator extends PartialPaginator
 {
     public function __construct(array $items, int $currentPageNumber, int $maxNumItemsPerPage)
     {
-        parent::__construct($items, $currentPageNumber, $maxNumItemsPerPage, count($items));
+        parent::__construct($items, $currentPageNumber, $maxNumItemsPerPage);
     }
 
     public function valid(): bool
     {
         return
-            ($this->currentPosition < $this->totalNumItems) &&
+            ($this->currentPosition < count($this->items)) &&
             ($this->currentPosition < ($this->currentPageNumber * $this->maxNumItemsPerPage)) &&
             ($this->currentPosition >= (($this->currentPageNumber - 1) * $this->maxNumItemsPerPage));
     }
@@ -30,8 +30,8 @@ class WholeResultPaginator extends FullPaginator
 
     public function count(): int
     {
-        return $this->currentPageNumber < $this->getLastPage() ?
+        return $this->currentPageNumber < ceil(count($this->items) / $this->maxNumItemsPerPage) ?
             $this->maxNumItemsPerPage :
-            (($this->currentPageNumber - 1) * $this->maxNumItemsPerPage) - $this->totalNumItems;
+            count($this->items) - (($this->currentPageNumber - 1) * $this->maxNumItemsPerPage);
     }
 }
