@@ -60,6 +60,15 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
 
         $container->prependExtensionConfig('api_platform', [
             'title' => $config['docs_title'],
+            'collection' => [
+              'pagination' => [
+                  // This enables it for the doctrine integration, which we don't actually use.
+                  // But it also adds it to the open-api docs which need because we implement it manually
+                  // in the controllers and providers, so enable it anyway.
+                  'client_items_per_page' => true,
+                  'items_per_page_parameter_name' => 'perPage',
+              ],
+            ],
             'description' => $config['docs_description'],
             'defaults' => [
                 'cache_headers' => [
