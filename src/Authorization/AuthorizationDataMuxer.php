@@ -23,15 +23,29 @@ class AuthorizationDataMuxer
 
     private function loadUserAttributesFromAuthorizationProvider(?string $userIdentifier, AuthorizationDataProviderInterface $authorizationDataProvider): void
     {
-        $userAttributes = [];
-
-        if ($userIdentifier !== null) {
-            $userAttributes = $authorizationDataProvider->getUserAttributes($userIdentifier);
-        }
+        $userAttributes = $authorizationDataProvider->getUserAttributes($userIdentifier);
 
         foreach ($authorizationDataProvider->getAvailableAttributes() as $availableAttribute) {
-            $this->customAttributes[$availableAttribute] = $userAttributes[$availableAttribute] ?? null;
+            if (array_key_exists($availableAttribute, $userAttributes)) {
+                $this->customAttributes[$availableAttribute] = $userAttributes[$availableAttribute];
+            }
         }
+    }
+
+    /**
+     * Returns an array of available attributes.
+     *
+     * @return string[]
+     */
+    public function getAvailableAttributes(): array
+    {
+        $res = [];
+        foreach ($this->authorizationDataProviders as $authorizationDataProvider) {
+            $availableAttributes = $authorizationDataProvider->getAvailableAttributes();
+            $res = array_merge($res, $availableAttributes);
+        }
+
+        return $res;
     }
 
     /**

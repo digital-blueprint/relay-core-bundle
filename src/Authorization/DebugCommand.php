@@ -37,32 +37,26 @@ class DebugCommand extends Command implements LoggerAwareInterface
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $username = $input->getArgument('username');
-        if ($username === null) {
-            // No username, list all providers
-            $output->writeln("<fg=blue;options=bold>Attributes available for all provider</>\n");
-            $providers = $this->provider->getAuthorizationDataProviders();
-            foreach ($providers as $provider) {
-                $output->writeln('<fg=green;options=bold>['.get_class($provider).']</>');
-                foreach ($provider->getAvailableAttributes() as $attr) {
-                    $output->writeln($attr);
-                }
-                $output->writeln('');
-            }
 
-            // TODO: list all attributes
-        } else {
-            // get all available attributes for a user per provider
-            $output->writeln('<fg=blue;options=bold>Attributes for user "'.$username."\":</>\n");
-            $providers = $this->provider->getAuthorizationDataProviders();
-            foreach ($providers as $provider) {
-                $output->writeln('<fg=green;options=bold>['.get_class($provider).']</>');
-                foreach ($provider->getUserAttributes($username) as $attr => $value) {
-                    $output->writeln($attr.'='.json_encode($value));
-                }
-                $output->writeln('');
-            }
+        // Fetch all attributes first (to get potential log spam first)
+        $providers = $this->provider->getAuthorizationDataProviders();
+        $mux = new AuthorizationDataMuxer($providers);
+        $attrs = $mux->getAvailableAttributes();
+        $all = [];
+        $default = new \stdClass();
+        sort($attrs, SORT_STRING | SORT_FLAG_CASE);
+        foreach ($attrs as $attr) {
+            $all[$attr] = $mux->getCustomAttribute($username, $attr, $default);
+        }
 
-            // TODO: list all attributes
+        // Now print them out
+        $output->writeln('<fg=blue;options=bold>[Authorization attributes]</>');
+        foreach ($all as $attr => $value) {
+            if ($value === $default) {
+                $output->writeln('<fg=green;options=bold>'.$attr.'</> = <fg=magenta;options=bold>\<N/A\></>');
+            } else {
+                $output->writeln('<fg=green;options=bold>'.$attr.'</> = '.json_encode($value));
+            }
         }
 
         return 0;
