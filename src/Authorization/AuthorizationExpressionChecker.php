@@ -5,26 +5,16 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Authorization;
 
 use Dbp\Relay\CoreBundle\Authorization\ExpressionLanguage\ExpressionLanguage;
-use Dbp\Relay\CoreBundle\Helpers\Tools;
 
-class UserAuthorizationChecker
+class AuthorizationExpressionChecker
 {
     public const RIGHTS_CONFIG_ATTRIBUTE = 'rights';
     public const ATTRIBUTES_CONFIG_ATTRIBUTE = 'attributes';
 
     private const MAX_NUM_CALLS = 16;
 
-    /** @var ?string */
-    private $currentUserIdentifier;
-
-    /** @var iterable */
-    private $authorizationDataProviders;
-
     /** @var ExpressionLanguage */
     private $expressionLanguage;
-
-    /** @var array */
-    private $customAttributes;
 
     /** @var array */
     private $rightExpressions;
@@ -35,16 +25,16 @@ class UserAuthorizationChecker
     /** @var int */
     private $callCounter;
 
-    public function __construct(?string $userIdentifier, AuthorizationDataProviderProvider $authorizationDataProviderProvider)
-    {
-        $this->currentUserIdentifier = $userIdentifier;
-        $this->authorizationDataProviders = $authorizationDataProviderProvider->getAuthorizationDataProviders();
-        $this->expressionLanguage = new ExpressionLanguage();
+    /** @var AuthorizationDataMuxer */
+    private $dataMux;
 
-        $this->customAttributes = [];
+    public function __construct(AuthorizationDataMuxer $dataMux)
+    {
+        $this->expressionLanguage = new ExpressionLanguage();
 
         $this->rightExpressions = [];
         $this->attributeExpressions = [];
+        $this->dataMux = $dataMux;
     }
 
     public function setConfig(array $config)
@@ -56,11 +46,6 @@ class UserAuthorizationChecker
     public function init()
     {
         $this->callCounter = 0;
-    }
-
-    public function getCurrentUserIdentifier(): ?string
-    {
-        return $this->currentUserIdentifier;
     }
 
     /**
@@ -92,11 +77,7 @@ class UserAuthorizationChecker
      */
     public function getCustomAttribute(AuthorizationUser $currentAuthorizationUser, string $attributeName, $defaultValue = null)
     {
-        if (array_key_exists($attributeName, $this->customAttributes) === false) {
-            $this->loadCustomAttribute($attributeName);
-        }
-
-        return $this->customAttributes[$attributeName] ?? $defaultValue;
+        return $this->dataMux->getCustomAttribute($currentAuthorizationUser->getIdentifier(), $attributeName, $defaultValue);
     }
 
     /**
@@ -124,39 +105,6 @@ class UserAuthorizationChecker
     {
         foreach ($expressions as $name => $expression) {
             $target[$name] = $expression;
-        }
-    }
-
-    /**
-     * @throws AuthorizationException
-     */
-    private function loadCustomAttribute(string $attributeName): void
-    {
-        $wasFound = false;
-        foreach ($this->authorizationDataProviders as $authorizationDataProvider) {
-            $availableAttributes = $authorizationDataProvider->getAvailableAttributes();
-            if (in_array($attributeName, $availableAttributes, true)) {
-                $this->loadUserAttributesFromAuthorizationProvider($authorizationDataProvider);
-                $wasFound = true;
-                break;
-            }
-        }
-
-        if ($wasFound === false) {
-            throw new AuthorizationException(sprintf('custom attribute \'%s\' undefined', $attributeName), AuthorizationException::ATTRIBUTE_UNDEFINED);
-        }
-    }
-
-    private function loadUserAttributesFromAuthorizationProvider(AuthorizationDataProviderInterface $authorizationDataProvider): void
-    {
-        $userAttributes = [];
-
-        if (Tools::isNullOrEmpty($this->currentUserIdentifier) === false) {
-            $userAttributes = $authorizationDataProvider->getUserAttributes($this->currentUserIdentifier);
-        }
-
-        foreach ($authorizationDataProvider->getAvailableAttributes() as $availableAttribute) {
-            $this->customAttributes[$availableAttribute] = $userAttributes[$availableAttribute] ?? null;
         }
     }
 

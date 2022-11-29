@@ -9,17 +9,23 @@ namespace Dbp\Relay\CoreBundle\Authorization;
  */
 class AuthorizationUser
 {
-    /** @var UserAuthorizationChecker */
+    /** @var AuthorizationExpressionChecker */
     private $authorizationChecker;
 
-    public function __construct(UserAuthorizationChecker $authorizationChecker)
+    /**
+     * @var string|null
+     */
+    private $identifier;
+
+    public function __construct(?string $identifier, AuthorizationExpressionChecker $authorizationChecker)
     {
         $this->authorizationChecker = $authorizationChecker;
+        $this->identifier = $identifier;
     }
 
     public function getIdentifier(): ?string
     {
-        return $this->authorizationChecker->getCurrentUserIdentifier();
+        return $this->identifier;
     }
 
     /**

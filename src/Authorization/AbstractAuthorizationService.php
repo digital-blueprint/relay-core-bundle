@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 abstract class AbstractAuthorizationService
 {
-    /** @var UserAuthorizationChecker */
+    /** @var AuthorizationExpressionChecker */
     private $userAuthorizationChecker;
 
     /** @var AuthorizationUser|null */
@@ -18,8 +18,9 @@ abstract class AbstractAuthorizationService
 
     public function __construct(UserSessionInterface $userSession, AuthorizationDataProviderProvider $authorizationDataProviderProvider)
     {
-        $this->userAuthorizationChecker = new UserAuthorizationChecker($userSession->getUserIdentifier(), $authorizationDataProviderProvider);
-        $this->currentAuthorizationUser = new AuthorizationUser($this->userAuthorizationChecker);
+        $muxer = new AuthorizationDataMuxer($authorizationDataProviderProvider->getAuthorizationDataProviders());
+        $this->userAuthorizationChecker = new AuthorizationExpressionChecker($muxer);
+        $this->currentAuthorizationUser = new AuthorizationUser($userSession->getUserIdentifier(), $this->userAuthorizationChecker);
     }
 
     public function setConfig(array $config)
