@@ -6,6 +6,9 @@ namespace Dbp\Relay\CoreBundle\Authorization;
 
 use Dbp\Relay\CoreBundle\Authorization\ExpressionLanguage\ExpressionLanguage;
 
+/**
+ * @internal
+ */
 class AuthorizationExpressionChecker
 {
     public const RIGHTS_CONFIG_ATTRIBUTE = 'rights';

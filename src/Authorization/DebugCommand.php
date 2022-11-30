@@ -18,14 +18,14 @@ class DebugCommand extends Command implements LoggerAwareInterface
     protected static $defaultName = 'dbp:relay:core:auth-debug';
 
     /**
-     * @var AuthorizationDataProviderProvider
+     * @var AuthorizationDataMuxer
      */
-    private $provider;
+    private $mux;
 
-    public function __construct(AuthorizationDataProviderProvider $provider)
+    public function __construct(AuthorizationDataMuxer $mux)
     {
         parent::__construct();
-        $this->provider = $provider;
+        $this->mux = $mux;
     }
 
     protected function configure()
@@ -38,15 +38,12 @@ class DebugCommand extends Command implements LoggerAwareInterface
     {
         $username = $input->getArgument('username');
 
-        // Fetch all attributes first (to get potential log spam first)
-        $providers = $this->provider->getAuthorizationDataProviders();
-        $mux = new AuthorizationDataMuxer($providers);
-        $attrs = $mux->getAvailableAttributes();
+        $attrs = $this->mux->getAvailableAttributes();
         $all = [];
         $default = new \stdClass();
         sort($attrs, SORT_STRING | SORT_FLAG_CASE);
         foreach ($attrs as $attr) {
-            $all[$attr] = $mux->getAttribute($username, $attr, $default);
+            $all[$attr] = $this->mux->getAttribute($username, $attr, $default);
         }
 
         // Now print them out

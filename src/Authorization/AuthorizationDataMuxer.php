@@ -4,32 +4,43 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Authorization;
 
+use Dbp\Relay\CoreBundle\Authorization\Event\GetAttributeEvent;
+use Dbp\Relay\CoreBundle\Authorization\Event\GetAvailableAttributesEvent;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+
+/**
+ * @internal
+ */
 class AuthorizationDataMuxer
 {
-    /** @var iterable */
+    /** @var iterable<AuthorizationDataProviderInterface> */
     private $authorizationDataProviders;
 
-    /** @var array */
-    private $attributes;
+    /** @var array<string, array> */
+    private $providerCache;
+
+    /** @var array<string, string[]> */
+    private $availableCache;
+
+    /** @var EventDispatcherInterface */
+    private $eventDispatcher;
+
+    /** @var string[] */
+    private $attributeStack;
 
     /**
-     * @param iterable<AuthorizationDataProviderInterface> $authorizationDataProviders
+     * @var ?string[]
      */
-    public function __construct(iterable $authorizationDataProviders)
-    {
-        $this->authorizationDataProviders = $authorizationDataProviders;
-        $this->attributes = [];
-    }
+    private $availableCacheAll;
 
-    private function loadUserAttributesFromAuthorizationProvider(?string $userIdentifier, AuthorizationDataProviderInterface $authorizationDataProvider): void
+    public function __construct(AuthorizationDataProviderProvider $authorizationDataProviderProvider, EventDispatcherInterface $eventDispatcher)
     {
-        $userAttributes = $authorizationDataProvider->getUserAttributes($userIdentifier);
-
-        foreach ($authorizationDataProvider->getAvailableAttributes() as $availableAttribute) {
-            if (array_key_exists($availableAttribute, $userAttributes)) {
-                $this->attributes[$availableAttribute] = $userAttributes[$availableAttribute];
-            }
-        }
+        $this->authorizationDataProviders = $authorizationDataProviderProvider->getAuthorizationDataProviders();
+        $this->eventDispatcher = $eventDispatcher;
+        $this->providerCache = [];
+        $this->availableCache = [];
+        $this->availableCacheAll = null;
+        $this->attributeStack = [];
     }
 
     /**
@@ -39,48 +50,97 @@ class AuthorizationDataMuxer
      */
     public function getAvailableAttributes(): array
     {
-        $res = [];
-        foreach ($this->authorizationDataProviders as $authorizationDataProvider) {
-            $availableAttributes = $authorizationDataProvider->getAvailableAttributes();
-            $res = array_merge($res, $availableAttributes);
+        if ($this->availableCacheAll === null) {
+            $res = [];
+            foreach ($this->authorizationDataProviders as $authorizationDataProvider) {
+                $availableAttributes = $this->getProviderAvailableAttributes($authorizationDataProvider);
+                $res = array_merge($res, $availableAttributes);
+            }
+
+            $event = new GetAvailableAttributesEvent($res);
+            $this->eventDispatcher->dispatch($event);
+            $this->availableCacheAll = $event->getAttributes();
         }
 
-        return $res;
+        return $this->availableCacheAll;
     }
 
     /**
-     * @param mixed|null $defaultValue
+     * Returns a cached list for available attributes for the provider.
      *
-     * @return mixed|null
+     * @return string[]
+     */
+    private function getProviderAvailableAttributes(AuthorizationDataProviderInterface $prov): array
+    {
+        // Caches getAvailableAttributes for each provider
+        $provKey = get_class($prov);
+        if (!array_key_exists($provKey, $this->availableCache)) {
+            $this->availableCache[$provKey] = $prov->getAvailableAttributes();
+        }
+
+        return $this->availableCache[$provKey];
+    }
+
+    /**
+     * Returns a cached map of available user attributes.
+     *
+     * @return array<string, mixed>
+     */
+    private function getProviderUserAttributes(AuthorizationDataProviderInterface $prov, ?string $userIdentifier): array
+    {
+        // We cache the attributes for each provider, but only for the last userIdentifier
+        $provKey = get_class($prov);
+        if (!array_key_exists($provKey, $this->providerCache) || $this->providerCache[$provKey][0] !== $userIdentifier) {
+            $this->providerCache[$provKey] = [$userIdentifier, $prov->getUserAttributes($userIdentifier)];
+        }
+        $res = $this->providerCache[$provKey];
+        assert($res[0] === $userIdentifier);
+
+        return $res[1];
+    }
+
+    /**
+     * @param mixed $defaultValue
+     *
+     * @return mixed
      *
      * @throws AuthorizationException
      */
     public function getAttribute(?string $userIdentifier, string $attributeName, $defaultValue = null)
     {
-        if (array_key_exists($attributeName, $this->attributes) === false) {
-            $this->loadAttribute($userIdentifier, $attributeName);
+        if (!in_array($attributeName, $this->getAvailableAttributes(), true)) {
+            throw new AuthorizationException(sprintf('attribute \'%s\' undefined', $attributeName), AuthorizationException::ATTRIBUTE_UNDEFINED);
         }
 
-        return $this->attributes[$attributeName] ?? $defaultValue;
-    }
-
-    /**
-     * @throws AuthorizationException
-     */
-    private function loadAttribute(?string $userIdentifier, string $attributeName): void
-    {
         $wasFound = false;
+        $value = null;
         foreach ($this->authorizationDataProviders as $authorizationDataProvider) {
-            $availableAttributes = $authorizationDataProvider->getAvailableAttributes();
-            if (in_array($attributeName, $availableAttributes, true)) {
-                $this->loadUserAttributesFromAuthorizationProvider($userIdentifier, $authorizationDataProvider);
-                $wasFound = true;
-                break;
+            $availableAttributes = $this->getProviderAvailableAttributes($authorizationDataProvider);
+            if (!in_array($attributeName, $availableAttributes, true)) {
+                continue;
             }
+            $userAttributes = $this->getProviderUserAttributes($authorizationDataProvider, $userIdentifier);
+            if (!array_key_exists($attributeName, $userAttributes)) {
+                continue;
+            }
+            $value = $userAttributes[$attributeName];
+            $wasFound = true;
+            break;
         }
 
-        if ($wasFound === false) {
-            throw new AuthorizationException(sprintf('custom attribute \'%s\' undefined', $attributeName), AuthorizationException::ATTRIBUTE_UNDEFINED);
+        $event = new GetAttributeEvent($this, $attributeName, $userIdentifier);
+
+        if ($wasFound) {
+            $event->setValue($value);
         }
+
+        // Avoid endless recursions by only emitting an event for each attribtue only once
+        if (!in_array($attributeName, $this->attributeStack, true)) {
+            array_push($this->attributeStack, $attributeName);
+            $this->eventDispatcher->dispatch($event);
+            array_pop($this->attributeStack);
+        }
+
+        return $event->getValue($defaultValue);
     }
 }
