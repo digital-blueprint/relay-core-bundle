@@ -9,7 +9,7 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Symfony\Contracts\EventDispatcher\Event;
 
-class LocalDataAwarePostEvent extends Event implements LoggerAwareInterface
+class LocalDataPostEvent extends Event implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
@@ -17,14 +17,23 @@ class LocalDataAwarePostEvent extends Event implements LoggerAwareInterface
     private $entity;
 
     /** @var array */
+    private $sourceData;
+
+    /** @var array */
     private $requestedAttributes;
 
-    protected function __construct(LocalDataAwareInterface $entity)
+    public function __construct(LocalDataAwareInterface $entity, array $sourceData)
     {
         $this->entity = $entity;
+        $this->sourceData = $sourceData;
     }
 
-    protected function getEntityInternal(): LocalDataAwareInterface
+    public function getSourceData(): array
+    {
+        return $this->sourceData;
+    }
+
+    public function getEntity(): LocalDataAwareInterface
     {
         return $this->entity;
     }
@@ -100,7 +109,7 @@ class LocalDataAwarePostEvent extends Event implements LoggerAwareInterface
         if ($arrayKey === false) {
             if ($warnfNotFound) {
                 if ($this->logger !== null) {
-                    $this->logger->warning(sprintf("trying to set local data attribute '%s', which was not requested for entity '%s'", $key, LocalDataAwareEventDispatcher::getUniqueEntityName(get_class($this->entity))));
+                    $this->logger->warning(sprintf("trying to set local data attribute '%s', which was not requested for entity '%s'", $key, LocalDataEventDispatcher::getUniqueEntityName(get_class($this->entity))));
                 }
                 assert(false);
             } else {

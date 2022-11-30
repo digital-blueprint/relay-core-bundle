@@ -13,8 +13,10 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\EventDispatcher\Event;
 
-class LocalDataAwareEventDispatcher
+class LocalDataEventDispatcher
 {
+    public const SEPARATOR = ',';
+
     /** @var array */
     private $queryParameters;
 
@@ -79,10 +81,10 @@ class LocalDataAwareEventDispatcher
      */
     public function dispatch(Event $event, string $eventName): void
     {
-        if ($event instanceof LocalDataAwarePreEvent) {
+        if ($event instanceof LocalDataPreEvent) {
             $event->setQueryParameters($this->queryParameters);
             $this->eventDispatcher->dispatch($event, $eventName);
-        } elseif ($event instanceof LocalDataAwarePostEvent) {
+        } elseif ($event instanceof LocalDataPostEvent) {
             $event->setRequestedAttributes($this->requestedAttributes);
             $this->eventDispatcher->dispatch($event, $eventName);
 
@@ -130,7 +132,7 @@ class LocalDataAwareEventDispatcher
         $this->requestedAttributes = [];
 
         if (!Tools::isNullOrEmpty($includeParameter)) {
-            $requestedAttributes = explode(',', $includeParameter);
+            $requestedAttributes = explode(self::SEPARATOR, $includeParameter);
 
             foreach ($requestedAttributes as $requestedAttribute) {
                 $requestedAttribute = trim($requestedAttribute);
@@ -155,7 +157,7 @@ class LocalDataAwareEventDispatcher
         $this->queryParameters = [];
 
         if (!Tools::isNullOrEmpty($queryParameter)) {
-            $localQueryParameters = explode(',', $queryParameter);
+            $localQueryParameters = explode(self::SEPARATOR, $queryParameter);
 
             foreach ($localQueryParameters as $localQueryParameter) {
                 $localQueryParameter = trim($localQueryParameter);

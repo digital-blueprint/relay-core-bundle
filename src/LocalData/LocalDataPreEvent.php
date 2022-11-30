@@ -6,7 +6,7 @@ namespace Dbp\Relay\CoreBundle\LocalData;
 
 use Symfony\Contracts\EventDispatcher\Event;
 
-class LocalDataAwarePreEvent extends Event
+class LocalDataPreEvent extends Event
 {
     public const NAME = 'dbp.relay.relay_core.local_data_aware_event.pre';
 

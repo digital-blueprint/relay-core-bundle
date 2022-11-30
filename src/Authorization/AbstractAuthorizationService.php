@@ -10,6 +10,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 abstract class AbstractAuthorizationService
 {
+    public const RIGHTS_CONFIG_ATTRIBUTE = AuthorizationExpressionChecker::RIGHTS_CONFIG_ATTRIBUTE;
+    public const ATTRIBUTES_CONFIG_ATTRIBUTE = AuthorizationExpressionChecker::ATTRIBUTES_CONFIG_ATTRIBUTE;
+
     /** @var AuthorizationExpressionChecker */
     private $userAuthorizationChecker;
 

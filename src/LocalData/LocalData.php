@@ -35,4 +35,9 @@ class LocalData
     {
         return $options[self::QUERY_PARAMETER_NAME] ?? null;
     }
+
+    public static function toIncludeLocalParameterValue(array $attributeNames): string
+    {
+        return implode(LocalDataEventDispatcher::SEPARATOR, $attributeNames);
+    }
 }
