@@ -77,7 +77,7 @@ class AuthorizationExpressionChecker
      */
     public function getCustomAttribute(AuthorizationUser $currentAuthorizationUser, string $attributeName, $defaultValue = null)
     {
-        return $this->dataMux->getCustomAttribute($currentAuthorizationUser->getIdentifier(), $attributeName, $defaultValue);
+        return $this->dataMux->getAttribute($currentAuthorizationUser->getIdentifier(), $attributeName, $defaultValue);
     }
 
     /**

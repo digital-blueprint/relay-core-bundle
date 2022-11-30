@@ -46,7 +46,7 @@ class DebugCommand extends Command implements LoggerAwareInterface
         $default = new \stdClass();
         sort($attrs, SORT_STRING | SORT_FLAG_CASE);
         foreach ($attrs as $attr) {
-            $all[$attr] = $mux->getCustomAttribute($username, $attr, $default);
+            $all[$attr] = $mux->getAttribute($username, $attr, $default);
         }
 
         // Now print them out

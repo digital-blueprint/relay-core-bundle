@@ -10,7 +10,7 @@ class AuthorizationDataMuxer
     private $authorizationDataProviders;
 
     /** @var array */
-    private $customAttributes;
+    private $attributes;
 
     /**
      * @param iterable<AuthorizationDataProviderInterface> $authorizationDataProviders
@@ -18,7 +18,7 @@ class AuthorizationDataMuxer
     public function __construct(iterable $authorizationDataProviders)
     {
         $this->authorizationDataProviders = $authorizationDataProviders;
-        $this->customAttributes = [];
+        $this->attributes = [];
     }
 
     private function loadUserAttributesFromAuthorizationProvider(?string $userIdentifier, AuthorizationDataProviderInterface $authorizationDataProvider): void
@@ -27,7 +27,7 @@ class AuthorizationDataMuxer
 
         foreach ($authorizationDataProvider->getAvailableAttributes() as $availableAttribute) {
             if (array_key_exists($availableAttribute, $userAttributes)) {
-                $this->customAttributes[$availableAttribute] = $userAttributes[$availableAttribute];
+                $this->attributes[$availableAttribute] = $userAttributes[$availableAttribute];
             }
         }
     }
@@ -55,19 +55,19 @@ class AuthorizationDataMuxer
      *
      * @throws AuthorizationException
      */
-    public function getCustomAttribute(?string $userIdentifier, string $attributeName, $defaultValue = null)
+    public function getAttribute(?string $userIdentifier, string $attributeName, $defaultValue = null)
     {
-        if (array_key_exists($attributeName, $this->customAttributes) === false) {
-            $this->loadCustomAttribute($userIdentifier, $attributeName);
+        if (array_key_exists($attributeName, $this->attributes) === false) {
+            $this->loadAttribute($userIdentifier, $attributeName);
         }
 
-        return $this->customAttributes[$attributeName] ?? $defaultValue;
+        return $this->attributes[$attributeName] ?? $defaultValue;
     }
 
     /**
      * @throws AuthorizationException
      */
-    private function loadCustomAttribute(?string $userIdentifier, string $attributeName): void
+    private function loadAttribute(?string $userIdentifier, string $attributeName): void
     {
         $wasFound = false;
         foreach ($this->authorizationDataProviders as $authorizationDataProvider) {
