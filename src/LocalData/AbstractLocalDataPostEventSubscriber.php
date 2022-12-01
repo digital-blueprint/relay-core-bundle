@@ -54,7 +54,7 @@ abstract class AbstractLocalDataPostEventSubscriber extends AbstractAuthorizatio
 
         foreach ($this->attributeMapping as $localDataAttributeName => $sourceAttributeName) {
             if ($this->isGranted($localDataAttributeName)) {
-                if ($sourceAttributeValue = $sourceData[$sourceAttributeName] ?? null) {
+                if (($sourceAttributeValue = $sourceData[$sourceAttributeName] ?? null) !== null) {
                     $postEvent->trySetLocalDataAttribute($localDataAttributeName, $sourceAttributeValue);
                 } else {
                     throw new \RuntimeException(sprintf('attribute \'%s\' not available in source data', $sourceAttributeName));
