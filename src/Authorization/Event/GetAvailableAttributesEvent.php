@@ -41,4 +41,9 @@ class GetAvailableAttributesEvent extends Event
     {
         $this->attributes = $attributes;
     }
+
+    public function addAttribute(string $name): void
+    {
+        $this->attributes[] = $name;
+    }
 }
