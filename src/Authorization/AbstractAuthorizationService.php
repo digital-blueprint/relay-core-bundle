@@ -16,19 +16,32 @@ abstract class AbstractAuthorizationService
     /** @var AuthorizationExpressionChecker */
     private $userAuthorizationChecker;
 
-    /** @var AuthorizationUser|null */
+    /** @var AuthorizationUser */
     private $currentAuthorizationUser;
 
-    public function __construct(UserSessionInterface $userSession, AuthorizationDataProviderProvider $authorizationDataProviderProvider)
+    private $config;
+
+    /**
+     * @required
+     */
+    public function _injectServices(UserSessionInterface $userSession, AuthorizationDataMuxer $mux)
     {
-        $muxer = new AuthorizationDataMuxer($authorizationDataProviderProvider->getAuthorizationDataProviders());
-        $this->userAuthorizationChecker = new AuthorizationExpressionChecker($muxer);
+        $this->userAuthorizationChecker = new AuthorizationExpressionChecker($mux);
         $this->currentAuthorizationUser = new AuthorizationUser($userSession->getUserIdentifier(), $this->userAuthorizationChecker);
+        $this->updateConfig();
     }
 
     public function setConfig(array $config)
     {
-        $this->userAuthorizationChecker->setConfig($config);
+        $this->config = $config;
+        $this->updateConfig();
+    }
+
+    private function updateConfig()
+    {
+        if ($this->userAuthorizationChecker !== null && $this->config !== null) {
+            $this->userAuthorizationChecker->setConfig($this->config);
+        }
     }
 
     /**
@@ -65,7 +78,7 @@ abstract class AbstractAuthorizationService
     {
         $this->userAuthorizationChecker->init();
 
-        return $this->userAuthorizationChecker->getAttribute($this->currentAuthorizationUser, $attributeName, $defaultValue);
+        return $this->userAuthorizationChecker->evalAttributeExpression($this->currentAuthorizationUser, $attributeName, $defaultValue);
     }
 
     /**

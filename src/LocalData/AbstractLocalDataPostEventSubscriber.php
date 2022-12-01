@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\LocalData;
 
-use Dbp\Relay\CoreBundle\API\UserSessionInterface;
 use Dbp\Relay\CoreBundle\Authorization\AbstractAuthorizationService;
-use Dbp\Relay\CoreBundle\Authorization\AuthorizationDataProviderProvider;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -20,10 +18,8 @@ abstract class AbstractLocalDataPostEventSubscriber extends AbstractAuthorizatio
     /** @var string[] */
     private $attributeMapping;
 
-    public function __construct(UserSessionInterface $userSession, AuthorizationDataProviderProvider $authorizationDataProviderProvider)
+    public function __construct()
     {
-        parent::__construct($userSession, $authorizationDataProviderProvider);
-
         $this->attributeMapping = [];
     }
 

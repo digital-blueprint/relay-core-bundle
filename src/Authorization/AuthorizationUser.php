@@ -37,7 +37,7 @@ class AuthorizationUser
      */
     public function getAttribute(string $attributeName, $defaultValue = null)
     {
-        return $this->authorizationChecker->getAttribute($this, $attributeName, $defaultValue);
+        return $this->authorizationChecker->evalAttributeExpression($this, $attributeName, $defaultValue);
     }
 
     /**
@@ -59,6 +59,6 @@ class AuthorizationUser
      */
     public function get(string $attributeName, $defaultValue = null)
     {
-        return $this->authorizationChecker->getCustomAttribute($this, $attributeName, $defaultValue);
+        return $this->authorizationChecker->getUserAttribute($this, $attributeName, $defaultValue);
     }
 }
