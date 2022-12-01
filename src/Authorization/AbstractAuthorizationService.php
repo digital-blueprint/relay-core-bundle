@@ -78,7 +78,7 @@ abstract class AbstractAuthorizationService
     {
         $this->userAuthorizationChecker->init();
 
-        return $this->userAuthorizationChecker->getAttribute($this->currentAuthorizationUser, $attributeName, $defaultValue);
+        return $this->userAuthorizationChecker->evalAttributeExpression($this->currentAuthorizationUser, $attributeName, $defaultValue);
     }
 
     /**

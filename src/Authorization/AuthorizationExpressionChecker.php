@@ -56,19 +56,19 @@ class AuthorizationExpressionChecker
      *
      * @return mixed|null
      */
-    public function getAttribute(AuthorizationUser $currentAuthorizationUser, string $attributeName, $defaultValue = null)
+    public function evalAttributeExpression(AuthorizationUser $currentAuthorizationUser, string $expressionName, $defaultValue = null)
     {
-        $this->tryIncreaseRecursionCounter($attributeName);
+        $this->tryIncreaseRecursionCounter($expressionName);
 
-        if (($attributeExpression = $this->attributeExpressions[$attributeName] ?? null) !== null) {
-            $attribute = $this->expressionLanguage->evaluate($attributeExpression, [
+        if (($expression = $this->attributeExpressions[$expressionName] ?? null) !== null) {
+            $result = $this->expressionLanguage->evaluate($expression, [
                 'user' => $currentAuthorizationUser,
             ]);
         } else {
-            throw new AuthorizationException(sprintf('attribute \'%s\' undefined', $attributeName), AuthorizationException::ATTRIBUTE_UNDEFINED);
+            throw new AuthorizationException(sprintf('expression \'%s\' undefined', $expressionName), AuthorizationException::ATTRIBUTE_UNDEFINED);
         }
 
-        return $attribute ?? $defaultValue;
+        return $result ?? $defaultValue;
     }
 
     /**
@@ -78,7 +78,7 @@ class AuthorizationExpressionChecker
      *
      * @throws AuthorizationException
      */
-    public function getCustomAttribute(AuthorizationUser $currentAuthorizationUser, string $attributeName, $defaultValue = null)
+    public function getUserAttribute(AuthorizationUser $currentAuthorizationUser, string $attributeName, $defaultValue = null)
     {
         return $this->dataMux->getAttribute($currentAuthorizationUser->getIdentifier(), $attributeName, $defaultValue);
     }
