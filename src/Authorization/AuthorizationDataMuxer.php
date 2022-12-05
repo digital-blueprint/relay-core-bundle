@@ -113,7 +113,7 @@ class AuthorizationDataMuxer
         }
 
         $wasFound = false;
-        $value = null;
+        $value = $defaultValue;
         foreach ($this->authorizationDataProviders as $authorizationDataProvider) {
             $availableAttributes = $this->getProviderAvailableAttributes($authorizationDataProvider);
             if (!in_array($attributeName, $availableAttributes, true)) {
@@ -124,15 +124,11 @@ class AuthorizationDataMuxer
                 continue;
             }
             $value = $userAttributes[$attributeName];
-            $wasFound = true;
             break;
         }
 
-        $event = new GetAttributeEvent($this, $attributeName, $userIdentifier);
-
-        if ($wasFound) {
-            $event->setValue($value);
-        }
+        $event = new GetAttributeEvent($this, $attributeName, $value, $userIdentifier);
+        $event->setAttributeValue($value);
 
         // Avoid endless recursions by only emitting an event for each attribtue only once
         if (!in_array($attributeName, $this->attributeStack, true)) {
@@ -141,6 +137,6 @@ class AuthorizationDataMuxer
             array_pop($this->attributeStack);
         }
 
-        return $event->getValue($defaultValue);
+        return $event->getAttributeValue();
     }
 }

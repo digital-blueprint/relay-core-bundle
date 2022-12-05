@@ -27,23 +27,18 @@ class GetAvailableAttributesEvent extends Event
     }
 
     /**
+     * @param string[] $attributes
+     */
+    public function addAttributes(array $attributes): void
+    {
+        $this->attributes = array_merge($this->attributes, $attributes);
+    }
+
+    /**
      * @return string[]
      */
     public function getAttributes(): array
     {
         return $this->attributes;
-    }
-
-    /**
-     * @param string[] $attributes
-     */
-    public function setAttributes(array $attributes): void
-    {
-        $this->attributes = $attributes;
-    }
-
-    public function addAttribute(string $name): void
-    {
-        $this->attributes[] = $name;
     }
 }

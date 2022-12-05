@@ -29,24 +29,22 @@ class GetAttributeEvent extends Event
     /**
      * @var string
      */
-    private $name;
+    private $attributeName;
 
     /**
      * @var mixed
      */
-    private $value;
+    private $attributeValue;
 
     /**
-     * @var bool
+     * @param mixed $attributeValue
      */
-    private $hasValue;
-
-    public function __construct(AuthorizationDataMuxer $mux, string $name, ?string $userIdentifier)
+    public function __construct(AuthorizationDataMuxer $mux, string $attributeName, $attributeValue, ?string $userIdentifier)
     {
         $this->mux = $mux;
         $this->userIdentifier = $userIdentifier;
-        $this->name = $name;
-        $this->hasValue = false;
+        $this->attributeName = $attributeName;
+        $this->attributeValue = $attributeValue;
     }
 
     /**
@@ -61,29 +59,27 @@ class GetAttributeEvent extends Event
 
     public function getAttributeName(): string
     {
-        return $this->name;
+        return $this->attributeName;
     }
 
     /**
-     * @param mixed $value
+     * @param mixed $attributeValue
      */
-    public function setValue($value): void
+    public function setAttributeValue($attributeValue): void
     {
-        $this->value = $value;
-        $this->hasValue = true;
+        $this->attributeValue = $attributeValue;
     }
 
     /**
-     * @param mixed $default
-     *
      * @return mixed
      */
-    public function getValue($default = null)
+    public function getAttributeValue()
     {
-        if (!$this->hasValue) {
-            return $default;
-        }
+        return $this->attributeValue;
+    }
 
-        return $this->value;
+    public function getUserIdentifier(): ?string
+    {
+        return $this->userIdentifier;
     }
 }
