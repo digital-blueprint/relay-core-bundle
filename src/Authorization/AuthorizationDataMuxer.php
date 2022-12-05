@@ -112,7 +112,6 @@ class AuthorizationDataMuxer
             throw new AuthorizationException(sprintf('attribute \'%s\' undefined', $attributeName), AuthorizationException::ATTRIBUTE_UNDEFINED);
         }
 
-        $wasFound = false;
         $value = $defaultValue;
         foreach ($this->authorizationDataProviders as $authorizationDataProvider) {
             $availableAttributes = $this->getProviderAvailableAttributes($authorizationDataProvider);
@@ -130,7 +129,7 @@ class AuthorizationDataMuxer
         $event = new GetAttributeEvent($this, $attributeName, $value, $userIdentifier);
         $event->setAttributeValue($value);
 
-        // Avoid endless recursions by only emitting an event for each attribtue only once
+        // Avoid endless recursions by only emitting an event for each attribute only once
         if (!in_array($attributeName, $this->attributeStack, true)) {
             array_push($this->attributeStack, $attributeName);
             $this->eventDispatcher->dispatch($event);

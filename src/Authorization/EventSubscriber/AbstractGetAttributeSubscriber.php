@@ -23,18 +23,19 @@ abstract class AbstractGetAttributeSubscriber implements EventSubscriberInterfac
 
     public function onGetAvailableAttributes(GetAvailableAttributesEvent $event)
     {
-        $event->addAttributes($this->getAvailableAttributes());
+        $event->addAttributes($this->getNewAttributes());
     }
 
     public function onGetAttributeEvent(GetAttributeEvent $event)
     {
         try {
             $this->event = $event;
-
             $attributeName = $event->getAttributeName();
-            if (in_array($attributeName, $this->getAvailableAttributes(), true)) {
-                $event->setAttributeValue($this->getUserAttributeValue($event->getUserIdentifier(), $attributeName, $event->getAttributeValue()));
-            }
+
+            $event->setAttributeValue(in_array($attributeName, $this->getNewAttributes(), true) ?
+                $this->getNewAttributeValue($event->getUserIdentifier(), $attributeName, $event->getAttributeValue()) :
+                $this->updateExistingAttributeValue($event->getUserIdentifier(), $attributeName, $event->getAttributeValue())
+            );
         } finally {
             $this->event = null;
         }
@@ -50,15 +51,25 @@ abstract class AbstractGetAttributeSubscriber implements EventSubscriberInterfac
         return $this->event->getAttribute($attributeName, $defaultValue);
     }
 
-    /*
-     * @return string[]
+    /**
+     * @param mixed|null $attributeValue The current attribute value
+     *
+     * @return mixed|null The updated attribute value
      */
-    abstract protected function getAvailableAttributes(): array;
+    protected function updateExistingAttributeValue(?string $userIdentifier, string $attributeName, $attributeValue)
+    {
+        return $attributeValue;
+    }
+
+    /*
+     * @return string[] The array of new attribute names that this subscriber provides
+     */
+    abstract protected function getNewAttributes(): array;
 
     /**
-     * @param mixed|null $attributeValue
+     * @param mixed|null $defaultValue the default value if provided explicitly in the authorization expression, else null
      *
-     * @return mixed|null
+     * @return mixed|null the value for the new attribute with the given name for the given user
      */
-    abstract protected function getUserAttributeValue(?string $userIdentifier, string $attributeName, $attributeValue);
+    abstract protected function getNewAttributeValue(?string $userIdentifier, string $attributeName, $defaultValue);
 }
