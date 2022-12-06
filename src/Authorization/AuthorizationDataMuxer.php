@@ -129,10 +129,14 @@ class AuthorizationDataMuxer
         $event = new GetAttributeEvent($this, $attributeName, $value, $userIdentifier);
         $event->setAttributeValue($value);
 
-        // Avoid endless recursions by only emitting an event for each attribute only once
-        if (!in_array($attributeName, $this->attributeStack, true)) {
-            array_push($this->attributeStack, $attributeName);
+        // Prevent endless recursions by only emitting an event for each attribute only once
+        if (in_array($attributeName, $this->attributeStack, true)) {
+            throw new AuthorizationException(sprintf('infinite loop caused by a %s subscriber. authorization attribute: %s', GetAttributeEvent::class, $attributeName), AuthorizationException::INFINITE_EVENT_LOOP_DETECTED);
+        }
+        array_push($this->attributeStack, $attributeName);
+        try {
             $this->eventDispatcher->dispatch($event);
+        } finally {
             array_pop($this->attributeStack);
         }
 

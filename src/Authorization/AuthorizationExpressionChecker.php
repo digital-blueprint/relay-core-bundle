@@ -31,6 +31,12 @@ class AuthorizationExpressionChecker
     /** @var AuthorizationDataMuxer */
     private $dataMux;
 
+    /** @var array */
+    private $rightExpressionStack;
+
+    /** @var array */
+    private $attributeExpressionStack;
+
     public function __construct(AuthorizationDataMuxer $dataMux)
     {
         $this->expressionLanguage = new ExpressionLanguage();
@@ -38,6 +44,8 @@ class AuthorizationExpressionChecker
         $this->rightExpressions = [];
         $this->attributeExpressions = [];
         $this->dataMux = $dataMux;
+        $this->rightExpressionStack = [];
+        $this->attributeExpressionStack = [];
     }
 
     public function setConfig(array $config)
@@ -58,17 +66,24 @@ class AuthorizationExpressionChecker
      */
     public function evalAttributeExpression(AuthorizationUser $currentAuthorizationUser, string $expressionName, $defaultValue = null)
     {
-        $this->tryIncreaseRecursionCounter($expressionName);
-
-        if (($expression = $this->attributeExpressions[$expressionName] ?? null) !== null) {
-            $result = $this->expressionLanguage->evaluate($expression, [
-                'user' => $currentAuthorizationUser,
-            ]);
-        } else {
-            throw new AuthorizationException(sprintf('expression \'%s\' undefined', $expressionName), AuthorizationException::ATTRIBUTE_UNDEFINED);
+        if (in_array($expressionName, $this->attributeExpressionStack, true)) {
+            throw new AuthorizationException(sprintf('infinite loop caused by authorization attribute expression %s detected', $expressionName), AuthorizationException::INFINITE_EXRPESSION_LOOP_DETECTED);
         }
+        array_push($this->attributeExpressionStack, $expressionName);
 
-        return $result ?? $defaultValue;
+        try {
+            if (($expression = $this->attributeExpressions[$expressionName] ?? null) !== null) {
+                $result = $this->expressionLanguage->evaluate($expression, [
+                    'user' => $currentAuthorizationUser,
+                ]);
+            } else {
+                throw new AuthorizationException(sprintf('expression \'%s\' undefined', $expressionName), AuthorizationException::ATTRIBUTE_UNDEFINED);
+            }
+
+            return $result ?? $defaultValue;
+        } finally {
+            array_pop($this->attributeExpressionStack);
+        }
     }
 
     /**
@@ -91,33 +106,30 @@ class AuthorizationExpressionChecker
      */
     public function isGranted(AuthorizationUser $currentAuthorizationUser, string $rightName, $subject): bool
     {
-        $this->tryIncreaseRecursionCounter($rightName);
-
-        $rightExpression = $this->rightExpressions[$rightName] ?? null;
-        if ($rightExpression === null) {
-            throw new AuthorizationException(sprintf('right \'%s\' undefined', $rightName), AuthorizationException::PRIVILEGE_UNDEFINED);
+        if (in_array($rightName, $this->rightExpressionStack, true)) {
+            throw new AuthorizationException(sprintf('infinite loop caused by authorization right expression %s detected', $rightName), AuthorizationException::INFINITE_EXRPESSION_LOOP_DETECTED);
         }
+        array_push($this->rightExpressionStack, $rightName);
 
-        return $this->expressionLanguage->evaluate($rightExpression, [
-            'user' => $currentAuthorizationUser,
-            'subject' => $subject,
-        ]);
+        try {
+            $rightExpression = $this->rightExpressions[$rightName] ?? null;
+            if ($rightExpression === null) {
+                throw new AuthorizationException(sprintf('right \'%s\' undefined', $rightName), AuthorizationException::PRIVILEGE_UNDEFINED);
+            }
+
+            return $this->expressionLanguage->evaluate($rightExpression, [
+                'user' => $currentAuthorizationUser,
+                'subject' => $subject,
+            ]);
+        } finally {
+            array_pop($this->rightExpressionStack);
+        }
     }
 
     private function loadExpressions(array $expressions, array &$target): void
     {
         foreach ($expressions as $name => $expression) {
             $target[$name] = $expression;
-        }
-    }
-
-    /**
-     * @throws AuthorizationException
-     */
-    private function tryIncreaseRecursionCounter(string $hint): void
-    {
-        if (++$this->callCounter > self::MAX_NUM_CALLS) {
-            throw new AuthorizationException(sprintf('possible infinite loop in authorization expression detected (%s)', $hint), AuthorizationException::INFINITE_LOOP_DETECTED);
         }
     }
 }

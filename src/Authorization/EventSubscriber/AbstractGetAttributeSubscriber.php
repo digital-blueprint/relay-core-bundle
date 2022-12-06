@@ -10,8 +10,8 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 abstract class AbstractGetAttributeSubscriber implements EventSubscriberInterface
 {
-    /** @var GetAttributeEvent|null */
-    private $event;
+    /** @var array */
+    private $eventStack;
 
     public static function getSubscribedEvents(): array
     {
@@ -19,6 +19,11 @@ abstract class AbstractGetAttributeSubscriber implements EventSubscriberInterfac
             GetAvailableAttributesEvent::class => 'onGetAvailableAttributes',
             GetAttributeEvent::class => 'onGetAttributeEvent',
         ];
+    }
+
+    public function __construct()
+    {
+        $this->eventStack = [];
     }
 
     public function onGetAvailableAttributes(GetAvailableAttributesEvent $event)
@@ -29,7 +34,7 @@ abstract class AbstractGetAttributeSubscriber implements EventSubscriberInterfac
     public function onGetAttributeEvent(GetAttributeEvent $event)
     {
         try {
-            $this->event = $event;
+            array_push($this->eventStack, $event);
             $attributeName = $event->getAttributeName();
 
             $event->setAttributeValue(in_array($attributeName, $this->getNewAttributes(), true) ?
@@ -37,7 +42,7 @@ abstract class AbstractGetAttributeSubscriber implements EventSubscriberInterfac
                 $this->updateExistingAttributeValue($event->getUserIdentifier(), $attributeName, $event->getAttributeValue())
             );
         } finally {
-            $this->event = null;
+            array_pop($this->eventStack);
         }
     }
 
@@ -48,7 +53,7 @@ abstract class AbstractGetAttributeSubscriber implements EventSubscriberInterfac
      */
     public function getAttribute(string $attributeName, $defaultValue = null)
     {
-        return $this->event->getAttribute($attributeName, $defaultValue);
+        return $this->eventStack[array_key_last($this->eventStack)]->getAttribute($attributeName, $defaultValue);
     }
 
     /**
