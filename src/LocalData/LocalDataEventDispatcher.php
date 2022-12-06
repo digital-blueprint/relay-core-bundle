@@ -79,7 +79,7 @@ class LocalDataEventDispatcher
     /**
      * Dispatches the given event.
      */
-    public function dispatch(Event $event, string $eventName): void
+    public function dispatch(Event $event, string $eventName = null): void
     {
         if ($event instanceof LocalDataPreEvent) {
             $event->setQueryParameters($this->queryParameters);
