@@ -86,6 +86,23 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 COPY ./php-ini-overrides.ini /etc/php/8.1/cli/conf.d/
 
+# PHP 8.2
+RUN apt-get update && apt-get install -y \
+    php8.2 \
+    php8.2-curl \
+    php8.2-soap \
+    php8.2-xml \
+    php8.2-ldap \
+    php8.2-zip \
+    php8.2-gmp \
+    php8.2-xdebug \
+    php8.2-gd \
+    php8.2-mbstring \
+    php8.2-intl \
+    php8.2-sqlite3 \
+    && rm -rf /var/lib/apt/lists/*
+COPY ./php-ini-overrides.ini /etc/php/8.2/cli/conf.d/
+
 # Default to PHP 7.3
 RUN sudo update-alternatives --set php /usr/bin/php7.3
 RUN sudo update-alternatives --set phar /usr/bin/phar7.3
