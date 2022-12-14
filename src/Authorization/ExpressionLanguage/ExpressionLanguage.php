@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Authorization\ExpressionLanguage;
 
+use Dbp\Relay\CoreBundle\Authorization\ExpressionLanguage\ExpressionFunctionProviders\ArrayExpressionFunctionProvider;
 use Dbp\Relay\CoreBundle\Authorization\ExpressionLanguage\ExpressionFunctionProviders\FilterExpressionFunctionProvider;
 use Dbp\Relay\CoreBundle\Authorization\ExpressionLanguage\ExpressionFunctionProviders\MapExpressionFunctionProvider;
 use Dbp\Relay\CoreBundle\Authorization\ExpressionLanguage\ExpressionFunctionProviders\PhpArrayExpressionFunctionProvider;
@@ -22,6 +23,7 @@ class ExpressionLanguage extends SymfonyExpressionLanguage
             new PhpArrayExpressionFunctionProvider(),
             new PhpNumericExpressionFunctionProvider(),
             new PhpStringExpressionFunctionProvider(),
+            new ArrayExpressionFunctionProvider(),
         ], $providers);
 
         parent::__construct($cache, $providers);

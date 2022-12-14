@@ -6,12 +6,13 @@ namespace Dbp\Relay\CoreBundle\Authorization;
 
 use Dbp\Relay\CoreBundle\API\UserSessionInterface;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
+use Symfony\Component\Config\Definition\Builder\NodeDefinition;
+use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\HttpFoundation\Response;
 
 abstract class AbstractAuthorizationService
 {
-    public const RIGHTS_CONFIG_ATTRIBUTE = AuthorizationExpressionChecker::RIGHTS_CONFIG_ATTRIBUTE;
-    public const ATTRIBUTES_CONFIG_ATTRIBUTE = AuthorizationExpressionChecker::ATTRIBUTES_CONFIG_ATTRIBUTE;
+    private const AUTHORIZATION_ROOT_CONFIG_NODE = 'authorization';
 
     /** @var AuthorizationExpressionChecker */
     private $userAuthorizationChecker;
@@ -19,6 +20,7 @@ abstract class AbstractAuthorizationService
     /** @var AuthorizationUser */
     private $currentAuthorizationUser;
 
+    /** @var array|null */
     private $config;
 
     /**
@@ -27,13 +29,13 @@ abstract class AbstractAuthorizationService
     public function _injectServices(UserSessionInterface $userSession, AuthorizationDataMuxer $mux)
     {
         $this->userAuthorizationChecker = new AuthorizationExpressionChecker($mux);
-        $this->currentAuthorizationUser = new AuthorizationUser($userSession->getUserIdentifier(), $this->userAuthorizationChecker);
+        $this->currentAuthorizationUser = new AuthorizationUser($userSession, $this->userAuthorizationChecker);
         $this->updateConfig();
     }
 
     public function setConfig(array $config)
     {
-        $this->config = $config;
+        $this->config = $config[self::AUTHORIZATION_ROOT_CONFIG_NODE] ?? [];
         $this->updateConfig();
     }
 
@@ -76,8 +78,6 @@ abstract class AbstractAuthorizationService
 
     private function getAttributeInternal(string $attributeName, $defaultValue = null)
     {
-        $this->userAuthorizationChecker->init();
-
         return $this->userAuthorizationChecker->evalAttributeExpression($this->currentAuthorizationUser, $attributeName, $defaultValue);
     }
 
@@ -86,8 +86,45 @@ abstract class AbstractAuthorizationService
      */
     private function isGrantedInternal(string $rightName, $subject = null): bool
     {
-        $this->userAuthorizationChecker->init();
-
         return $this->userAuthorizationChecker->isGranted($this->currentAuthorizationUser, $rightName, $subject);
+    }
+
+    /**
+     * @param array $rights     the mapping between right names and right default expressions
+     * @param array $attributes the mapping between attribute names and attribute default expressions
+     */
+    public static function getAuthorizationConfigNodeDefinition(array $rights = [], array $attributes = []): NodeDefinition
+    {
+        $treeBuilder = new TreeBuilder(self::AUTHORIZATION_ROOT_CONFIG_NODE);
+
+        $rightsNodeChildBuilder = $treeBuilder->getRootNode()->children()->arrayNode(AuthorizationExpressionChecker::RIGHTS_CONFIG_NODE)
+            ->addDefaultsIfNotSet()
+            ->children();
+        foreach ($rights as $rightName => $defaultExpression) {
+            $rightsNodeChildBuilder->scalarNode($rightName)
+                ->defaultValue($defaultExpression ?? 'false')
+                ->end();
+        }
+
+        $attributesNodeChildBuilder = $treeBuilder->getRootNode()->children()->arrayNode(AuthorizationExpressionChecker::ATTRIBUTES_CONFIG_NODE)
+            ->addDefaultsIfNotSet()
+            ->children();
+        foreach ($attributes as $attributeName => $defaultExpression) {
+            $attributesNodeChildBuilder->scalarNode($attributeName)
+                ->defaultValue($defaultExpression ?? 'null')
+                ->end();
+        }
+
+        return $treeBuilder->getRootNode();
+    }
+
+    public static function createConfig(array $rightExpressions = [], array $attributeExpressions = []): array
+    {
+        return [
+            AbstractAuthorizationService::AUTHORIZATION_ROOT_CONFIG_NODE => [
+                AuthorizationExpressionChecker::RIGHTS_CONFIG_NODE => $rightExpressions,
+                AuthorizationExpressionChecker::ATTRIBUTES_CONFIG_NODE => $attributeExpressions,
+            ],
+        ];
     }
 }

@@ -11,8 +11,8 @@ use Dbp\Relay\CoreBundle\Authorization\ExpressionLanguage\ExpressionLanguage;
  */
 class AuthorizationExpressionChecker
 {
-    public const RIGHTS_CONFIG_ATTRIBUTE = 'rights';
-    public const ATTRIBUTES_CONFIG_ATTRIBUTE = 'attributes';
+    public const RIGHTS_CONFIG_NODE = 'rights';
+    public const ATTRIBUTES_CONFIG_NODE = 'attributes';
 
     private const MAX_NUM_CALLS = 16;
 
@@ -24,9 +24,6 @@ class AuthorizationExpressionChecker
 
     /** @var array */
     private $attributeExpressions;
-
-    /** @var int */
-    private $callCounter;
 
     /** @var AuthorizationDataMuxer */
     private $dataMux;
@@ -40,7 +37,6 @@ class AuthorizationExpressionChecker
     public function __construct(AuthorizationDataMuxer $dataMux)
     {
         $this->expressionLanguage = new ExpressionLanguage();
-
         $this->rightExpressions = [];
         $this->attributeExpressions = [];
         $this->dataMux = $dataMux;
@@ -50,13 +46,8 @@ class AuthorizationExpressionChecker
 
     public function setConfig(array $config)
     {
-        $this->loadExpressions($config[self::RIGHTS_CONFIG_ATTRIBUTE] ?? [], $this->rightExpressions);
-        $this->loadExpressions($config[self::ATTRIBUTES_CONFIG_ATTRIBUTE] ?? [], $this->attributeExpressions);
-    }
-
-    public function init()
-    {
-        $this->callCounter = 0;
+        $this->loadExpressions($config[self::RIGHTS_CONFIG_NODE] ?? [], $this->rightExpressions);
+        $this->loadExpressions($config[self::ATTRIBUTES_CONFIG_NODE] ?? [], $this->attributeExpressions);
     }
 
     /**

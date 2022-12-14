@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Authorization;
 
+use Dbp\Relay\CoreBundle\API\UserSessionInterface;
+
 /**
  * Provides the user interface available within privilege expressions.
  */
@@ -12,20 +14,18 @@ class AuthorizationUser
     /** @var AuthorizationExpressionChecker */
     private $authorizationChecker;
 
-    /**
-     * @var string|null
-     */
-    private $identifier;
+    /** @var UserSessionInterface */
+    private $userSession;
 
-    public function __construct(?string $identifier, AuthorizationExpressionChecker $authorizationChecker)
+    public function __construct(UserSessionInterface $userSession, AuthorizationExpressionChecker $authorizationChecker)
     {
+        $this->userSession = $userSession;
         $this->authorizationChecker = $authorizationChecker;
-        $this->identifier = $identifier;
     }
 
     public function getIdentifier(): ?string
     {
-        return $this->identifier;
+        return $this->userSession->getUserIdentifier();
     }
 
     /**
