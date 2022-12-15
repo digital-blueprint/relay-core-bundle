@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\Authorization\ExpressionLanguage\ExpressionFunctionProviders;
+namespace Dbp\Relay\CoreBundle\ExpressionLanguage\ExpressionFunctionProviders;
 
 use Symfony\Component\ExpressionLanguage\ExpressionFunction;
 use Symfony\Component\ExpressionLanguage\ExpressionFunctionProviderInterface;

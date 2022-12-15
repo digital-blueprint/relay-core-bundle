@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Authorization;
 
-use Dbp\Relay\CoreBundle\Authorization\ExpressionLanguage\ExpressionLanguage;
+use Dbp\Relay\CoreBundle\ExpressionLanguage\ExpressionLanguage;
 
 /**
  * @internal
