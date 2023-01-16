@@ -90,8 +90,12 @@ abstract class AbstractAuthorizationService
     }
 
     /**
-     * @param array $rights     the mapping between right names and right default expressions
-     * @param array $attributes the mapping between attribute names and attribute default expressions
+     * Create the 'authorization' config node definition with the given right and attribute definitions.
+     * A definition is an array of the following form:
+     * [0 => <nameString>, 1 => <defaultExpressionString> (optional, default: 'false'), 2 => <infoString> (optional, default: 'null')].
+     *
+     * @param array[] $rights     the list of right definitions
+     * @param array[] $attributes the list of attribute definitions
      */
     public static function getAuthorizationConfigNodeDefinition(array $rights = [], array $attributes = []): NodeDefinition
     {
@@ -100,18 +104,20 @@ abstract class AbstractAuthorizationService
         $rightsNodeChildBuilder = $treeBuilder->getRootNode()->children()->arrayNode(AuthorizationExpressionChecker::RIGHTS_CONFIG_NODE)
             ->addDefaultsIfNotSet()
             ->children();
-        foreach ($rights as $rightName => $defaultExpression) {
-            $rightsNodeChildBuilder->scalarNode($rightName)
-                ->defaultValue($defaultExpression ?? 'false')
+        foreach ($rights as $right) {
+            $rightsNodeChildBuilder->scalarNode($right[0])
+                ->defaultValue($right[1] ?? 'false')
+                ->info($right[2] ?? '')
                 ->end();
         }
 
         $attributesNodeChildBuilder = $treeBuilder->getRootNode()->children()->arrayNode(AuthorizationExpressionChecker::ATTRIBUTES_CONFIG_NODE)
             ->addDefaultsIfNotSet()
             ->children();
-        foreach ($attributes as $attributeName => $defaultExpression) {
-            $attributesNodeChildBuilder->scalarNode($attributeName)
-                ->defaultValue($defaultExpression ?? 'null')
+        foreach ($attributes as $attribute) {
+            $attributesNodeChildBuilder->scalarNode($attribute[0])
+                ->defaultValue($attribute[1] ?? 'null')
+                ->info($attribute[2] ?? '')
                 ->end();
         }
 
