@@ -30,14 +30,15 @@ class LocalDataEventDispatcher
     private $eventDispatcher;
 
     /**
-     * @param string                   $resourceClass   The class name of the entity (resource) this event dispatcher is responsible for
-     * @param EventDispatcherInterface $eventDispatcher The inner event dispatcher that this event dispatcher decorates
+     * @param string                   $resourceClass    The class name of the entity (resource) this event dispatcher is responsible for
+     * @param EventDispatcherInterface $eventDispatcher  The inner event dispatcher that this event dispatcher decorates
+     * @param string|null              $uniqueEntityName The unique name of the entity. If not specified or empty, the 'shortName' attribute of the entities @ApiResource annotation is used.
      */
-    public function __construct(string $resourceClass, EventDispatcherInterface $eventDispatcher)
+    public function __construct(string $resourceClass, EventDispatcherInterface $eventDispatcher, string $uniqueEntityName = null)
     {
         $this->queryParameters = [];
         $this->requestedAttributes = [];
-        $this->uniqueEntityName = self::getUniqueEntityName($resourceClass);
+        $this->uniqueEntityName = !Tools::isNullOrEmpty($uniqueEntityName) ? $uniqueEntityName : self::getUniqueEntityName($resourceClass);
         $this->eventDispatcher = $eventDispatcher;
     }
 
@@ -113,7 +114,7 @@ class LocalDataEventDispatcher
         }
 
         $uniqueName = $resourceMetadata->getShortName() ?? '';
-        if (empty($uniqueName)) {
+        if (Tools::isNullOrEmpty($uniqueName)) {
             throw new ApiError(500, sprintf("'shortName' attribute missing in ApiResource annotation of resource class '%s'", $resourceClass));
         } elseif (str_contains($uniqueName, '.') || str_contains($uniqueName, ',')) {
             throw new ApiError(500, sprintf("'shortName' attribute of resource class '%s' must not contain '.' or ',' characters: '%s'", $resourceClass, $uniqueName));
