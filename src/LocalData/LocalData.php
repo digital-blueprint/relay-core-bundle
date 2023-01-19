@@ -36,7 +36,20 @@ class LocalData
         return $options[self::QUERY_PARAMETER_NAME] ?? null;
     }
 
+    /**
+     * @deprecated Use addIncludeParameter
+     */
     public static function toIncludeLocalParameterValue(array $attributeNames): string
+    {
+        return self::toIncludeParameterValue($attributeNames);
+    }
+
+    public static function addIncludeParameter(array &$targetOptions, array $attributeNames): void
+    {
+        $targetOptions[self::INCLUDE_PARAMETER_NAME] = self::toIncludeParameterValue($attributeNames);
+    }
+
+    private static function toIncludeParameterValue(array $attributeNames): string
     {
         return implode(LocalDataEventDispatcher::SEPARATOR, $attributeNames);
     }
