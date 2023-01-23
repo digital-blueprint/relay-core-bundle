@@ -37,16 +37,18 @@ class LocalData
     }
 
     /**
-     * @deprecated Use addIncludeParameter
+     * Adds the 'include Local Data' parameter to the set of options in order to request the local data attributes with the given names.
+     *
+     * @param array $targetOptions  the set of options to add the 'include Local Data' parameter to
+     * @param array $attributeNames the names of the local data attributes to request
+     *
+     * @return array the resultant $targetOptions
      */
-    public static function toIncludeLocalParameterValue(array $attributeNames): string
-    {
-        return self::toIncludeParameterValue($attributeNames);
-    }
-
-    public static function addIncludeParameter(array &$targetOptions, array $attributeNames): void
+    public static function addIncludeParameter(array &$targetOptions, array $attributeNames): array
     {
         $targetOptions[self::INCLUDE_PARAMETER_NAME] = self::toIncludeParameterValue($attributeNames);
+
+        return $targetOptions;
     }
 
     private static function toIncludeParameterValue(array $attributeNames): string
