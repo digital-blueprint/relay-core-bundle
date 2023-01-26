@@ -18,21 +18,11 @@ class LocalDataPreEvent extends Event
         $this->queryParameters = [];
     }
 
-    /**
-     * Sets the list of query parameters.
-     *
-     * @param string[] $queryParameters
-     */
     public function setQueryParameters(array $queryParameters): void
     {
         $this->queryParameters = $queryParameters;
     }
 
-    /**
-     * Returns the list of query parameters.
-     *
-     * @return string[]
-     */
     public function getQueryParameters(): array
     {
         return $this->queryParameters;
