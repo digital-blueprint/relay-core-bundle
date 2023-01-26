@@ -86,28 +86,29 @@ abstract class AbstractLocalDataEventSubscriber extends AbstractAuthorizationSer
 
     public static function getSubscribedEvents(): array
     {
-        return static::getSubscribedEventNames();
-    }
+        $eventMapping = [];
+        foreach (static::getSubscribedEventNames() as $eventName) {
+            $eventMapping[$eventName] = 'onEvent';
+        }
 
-    protected static function getSubscribedEventNames(): array
-    {
-        throw new \RuntimeException(sprintf('child classes must implement the \'%s\' method', __METHOD__));
+        return $eventMapping;
     }
 
     public function onEvent(Event $event)
     {
         if ($event instanceof LocalDataPreEvent) {
-            $filters = [];
+            $queryParametersOut = [];
 
-            // matriculateNumber[exact]:0011675
+            // matriculationNumber:0011675
             foreach ($event->getQueryParameters() as $queryParameterName => $queryParameterValue) {
                 if (($attributeMapEntry = $this->attributeMapping[$queryParameterName] ?? null) !== null) {
                     $sourceAttributeName = $attributeMapEntry[self::SOURCE_ATTRIBUTES_KEY][0];
-                    $filters[$sourceAttributeName] = $queryParameterValue;
+                    $queryParametersOut[$sourceAttributeName] = $queryParameterValue;
                 }
             }
 
-            $event->setQueryParameters(['filters' => $filters]);
+            $event->setQueryParameters($queryParametersOut);
+            $this->onPre($event);
         } elseif ($event instanceof LocalDataPostEvent) {
             $sourceData = $event->getSourceData();
 
@@ -133,6 +134,7 @@ abstract class AbstractLocalDataEventSubscriber extends AbstractAuthorizationSer
                     }
                 }
             }
+            $this->onPost($event);
         }
     }
 
@@ -173,5 +175,18 @@ abstract class AbstractLocalDataEventSubscriber extends AbstractAuthorizationSer
                 ->end()
             ->end()
         ;
+    }
+
+    protected static function getSubscribedEventNames(): array
+    {
+        throw new \RuntimeException(sprintf('child classes must implement the \'%s\' method', __METHOD__));
+    }
+
+    protected function onPre(LocalDataPreEvent $preEvent)
+    {
+    }
+
+    protected function onPost(LocalDataPostEvent $postEvent)
+    {
     }
 }
