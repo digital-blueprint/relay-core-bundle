@@ -12,6 +12,8 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 /*
+ * @deprecated Use AbstractLocalDataEventSubscriber
+ *
  * Abstract implementation of a configurable local data provider post event subscriber.
  * It is intended to be derived by local data aware entity post event subscribers.
  * A mapping between source attribute and local data attribute,

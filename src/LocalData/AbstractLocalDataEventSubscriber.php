@@ -5,16 +5,23 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\LocalData;
 
 use Dbp\Relay\CoreBundle\Authorization\AbstractAuthorizationService;
+use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /*
- * Abstract implementation of a configurable local data provider pre event subscriber.
+ * Abstract implementation of a configurable local data provider post event subscriber.
+ * It is intended to be derived by local data aware entity post event subscribers.
+ * A mapping between source attribute and local data attribute,
+ * and default values for the attributes can be specified by means of the deriving event subscriber's bundle config.
+ * If no default value is specified, an exception is thrown in the case the mapped source attribute is not found.
  */
-abstract class AbstractLocalDataPreEventSubscriber extends AbstractAuthorizationService implements EventSubscriberInterface
+abstract class AbstractLocalDataEventSubscriber extends AbstractAuthorizationService implements EventSubscriberInterface
 {
-    protected const ROOT_CONFIG_NODE = 'local_query_mapping';
+    protected const ROOT_CONFIG_NODE = 'local_data_mapping';
     protected const SOURCE_ATTRIBUTES_CONFIG_NODE = 'source_attributes';
     protected const LOCAL_DATA_ATTRIBUTE_CONFIG_NODE = 'local_data_attribute';
     protected const AUTHORIZATION_EXPRESSION_CONFIG_NODE = 'authorization_expression';
@@ -79,27 +86,54 @@ abstract class AbstractLocalDataPreEventSubscriber extends AbstractAuthorization
 
     public static function getSubscribedEvents(): array
     {
-        return [static::getSubscribedEventName() => 'onPre'];
+        return static::getSubscribedEventNames();
     }
 
-    public static function getSubscribedEventName(): string
+    protected static function getSubscribedEventNames(): array
     {
         throw new \RuntimeException(sprintf('child classes must implement the \'%s\' method', __METHOD__));
     }
 
-    public function onPre(LocalDataPreEvent $preEvent)
+    public function onEvent(Event $event)
     {
-        $filters = [];
+        if ($event instanceof LocalDataPreEvent) {
+            $filters = [];
 
-        // matriculateNumber[exact]:0011675
-        foreach ($preEvent->getQueryParameters() as $queryParameterName => $queryParameterValue) {
-            if (($attributeMapEntry = $this->attributeMapping[$queryParameterName] ?? null) !== null) {
-                $sourceAttributeName = $attributeMapEntry[self::SOURCE_ATTRIBUTES_KEY][0];
-                $filters[$sourceAttributeName] = $queryParameterValue;
+            // matriculateNumber[exact]:0011675
+            foreach ($event->getQueryParameters() as $queryParameterName => $queryParameterValue) {
+                if (($attributeMapEntry = $this->attributeMapping[$queryParameterName] ?? null) !== null) {
+                    $sourceAttributeName = $attributeMapEntry[self::SOURCE_ATTRIBUTES_KEY][0];
+                    $filters[$sourceAttributeName] = $queryParameterValue;
+                }
+            }
+
+            $event->setQueryParameters(['filters' => $filters]);
+        } elseif ($event instanceof LocalDataPostEvent) {
+            $sourceData = $event->getSourceData();
+
+            foreach ($this->attributeMapping as $localDataAttributeName => $attributeMapEntry) {
+                if ($event->isLocalDataAttributeRequested($localDataAttributeName)) {
+                    if (!$this->isGranted($localDataAttributeName)) {
+                        throw ApiError::withDetails(Response::HTTP_UNAUTHORIZED, sprintf('access to local data attribute \'%s\' denied', $localDataAttributeName));
+                    }
+
+                    $attributeValue = null;
+                    foreach ($attributeMapEntry[self::SOURCE_ATTRIBUTES_KEY] as $sourceAttributeName) {
+                        if (($value = $sourceData[$sourceAttributeName] ?? null) !== null) {
+                            $attributeValue = $value;
+                            break;
+                        }
+                    }
+
+                    $attributeValue = $attributeValue ?? $attributeMapEntry[self::DEFAULT_VALUE_KEY] ?? null;
+                    if ($attributeValue !== null) {
+                        $event->setLocalDataAttribute($localDataAttributeName, $attributeValue);
+                    } else {
+                        throw ApiError::withDetails(Response::HTTP_INTERNAL_SERVER_ERROR, sprintf('none of the source attributes available for local data attribute \'%s\'', $localDataAttributeName));
+                    }
+                }
             }
         }
-
-        $preEvent->setQueryParameters(['filters' => $filters]);
     }
 
     /**
