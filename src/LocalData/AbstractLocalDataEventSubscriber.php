@@ -97,30 +97,27 @@ abstract class AbstractLocalDataEventSubscriber extends AbstractAuthorizationSer
     public function onEvent(Event $event)
     {
         if ($event instanceof LocalDataPreEvent) {
-            $queryParametersOut = [];
-
-            // matriculationNumber:0011675
-            foreach ($event->getQueryParameters() as $queryParameterName => $queryParameterValue) {
-                if (($attributeMapEntry = $this->attributeMapping[$queryParameterName] ?? null) !== null) {
-                    $sourceAttributeName = $attributeMapEntry[self::SOURCE_ATTRIBUTES_KEY][0];
-                    $queryParametersOut[$sourceAttributeName] = $queryParameterValue;
-                }
-            }
-
-            $event->setQueryParameters($queryParametersOut);
-            $this->onPre($event);
-        } elseif ($event instanceof LocalDataPostEvent) {
-            $sourceData = $event->getSourceData();
-
-            foreach ($this->attributeMapping as $localDataAttributeName => $attributeMapEntry) {
-                if ($event->isLocalDataAttributeRequested($localDataAttributeName)) {
+            foreach ($event->getPendingQueryParametersIn() as $localDataAttributeName => $localDataAttributeValue) {
+                if (($attributeMapEntry = $this->attributeMapping[$localDataAttributeName] ?? null) !== null) {
                     if (!$this->isGranted($localDataAttributeName)) {
                         throw ApiError::withDetails(Response::HTTP_UNAUTHORIZED, sprintf('access to local data attribute \'%s\' denied', $localDataAttributeName));
                     }
+                    $sourceAttributeName = $attributeMapEntry[self::SOURCE_ATTRIBUTES_KEY][0];
+                    $event->addQueryParameterOut($sourceAttributeName, $localDataAttributeValue);
+                    $event->acknowledgeQueryParameterIn($localDataAttributeName);
+                }
+            }
 
+            $this->onPreEvent($event);
+        } elseif ($event instanceof LocalDataPostEvent) {
+            foreach ($event->getPendingRequestedAttributes() as $localDataAttributeName) {
+                if (($attributeMapEntry = $this->attributeMapping[$localDataAttributeName] ?? null) !== null) {
+                    if (!$this->isGranted($localDataAttributeName)) {
+                        throw ApiError::withDetails(Response::HTTP_UNAUTHORIZED, sprintf('access to local data attribute \'%s\' denied', $localDataAttributeName));
+                    }
                     $attributeValue = null;
                     foreach ($attributeMapEntry[self::SOURCE_ATTRIBUTES_KEY] as $sourceAttributeName) {
-                        if (($value = $sourceData[$sourceAttributeName] ?? null) !== null) {
+                        if (($value = $event->getSourceData()[$sourceAttributeName] ?? null) !== null) {
                             $attributeValue = $value;
                             break;
                         }
@@ -134,7 +131,7 @@ abstract class AbstractLocalDataEventSubscriber extends AbstractAuthorizationSer
                     }
                 }
             }
-            $this->onPost($event);
+            $this->onPostEvent($event);
         }
     }
 
@@ -182,11 +179,11 @@ abstract class AbstractLocalDataEventSubscriber extends AbstractAuthorizationSer
         throw new \RuntimeException(sprintf('child classes must implement the \'%s\' method', __METHOD__));
     }
 
-    protected function onPre(LocalDataPreEvent $preEvent)
+    protected function onPreEvent(LocalDataPreEvent $preEvent)
     {
     }
 
-    protected function onPost(LocalDataPostEvent $postEvent)
+    protected function onPostEvent(LocalDataPostEvent $postEvent)
     {
     }
 }

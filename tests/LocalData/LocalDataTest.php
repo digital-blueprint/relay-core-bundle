@@ -19,14 +19,14 @@ class LocalDataTest extends TestCase
     /** @var LocalDataEventDispatcher */
     private $localDataEventDispatcher;
 
-    /** @var TestEntityLocalDataPostEventSubscriber */
+    /** @var TestEntityLocalDataEventSubscriber */
     private $localDataEventSubscriber;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $localDataEventSubscriber = new TestEntityLocalDataPostEventSubscriber();
+        $localDataEventSubscriber = new TestEntityLocalDataEventSubscriber();
         $localDataEventSubscriber->_injectServices(new TestUserSession('testuser'), new AuthorizationDataMuxer(new AuthorizationDataProviderProvider([]), new EventDispatcher()));
         $localDataEventSubscriber->setConfig(self::createConfig());
 
@@ -96,10 +96,66 @@ class LocalDataTest extends TestCase
         }
     }
 
+    public function testLocalDataQuery()
+    {
+        // 'attribute_1' has a configured source attribute 'src_attribute_1'.
+        // Post-condition: options contain the mapped attribute 'src_attribute_1' as a key  with the given value 'value_1'.
+        $localDataAttributeName = 'attribute_1';
+
+        $options = [];
+        $options[LocalData::QUERY_PARAMETER_NAME] = $localDataAttributeName.':value_1';
+
+        $this->localDataEventDispatcher->onNewOperation($options);
+        $preEvent = new TestEntityPreEvent();
+        $this->localDataEventDispatcher->dispatch($preEvent);
+
+        $filters = $preEvent->getQueryParameterOut();
+        $this->assertArrayHasKey('src_attribute_1', $filters);
+        $this->assertEquals('value_1', $filters['src_attribute_1']);
+    }
+
+    public function testLocalDataQueryAttributeUnacknowledged()
+    {
+        // 'attribute_4' has no configured source attribute.
+        // Throw bad request error because no event subscriber acknowledged local query parameter 'attribute_4'.
+        $localDataAttributeName = 'attribute_4';
+
+        $options = [];
+        $options[LocalData::QUERY_PARAMETER_NAME] = $localDataAttributeName.':value_4';
+
+        try {
+            $this->localDataEventDispatcher->onNewOperation($options);
+            $preEvent = new TestEntityPreEvent();
+            $this->localDataEventDispatcher->dispatch($preEvent);
+        } catch (ApiError $exception) {
+            $this->assertEquals(Response::HTTP_BAD_REQUEST, $exception->getStatusCode());
+        }
+    }
+
+    public function testLocalDataQueryAccessDenied()
+    {
+        // authorization expression of attribute evaluates to false -> deny access
+        $localDataAttributeName = 'attribute_3';
+
+        $options = [];
+        $options[LocalData::QUERY_PARAMETER_NAME] = $localDataAttributeName.':value_1';
+
+        try {
+            $this->localDataEventDispatcher->onNewOperation($options);
+            $preEvent = new TestEntityPreEvent();
+            $this->localDataEventDispatcher->dispatch($preEvent);
+        } catch (ApiError $exception) {
+            $this->assertEquals(Response::HTTP_UNAUTHORIZED, $exception->getStatusCode());
+        }
+    }
+
     private function getTestEntity(string $includeLocal, array $sourceData): TestEntity
     {
         $testEntity = new TestEntity();
-        $options = [LocalData::INCLUDE_PARAMETER_NAME => $includeLocal];
+
+        $options = [];
+        $options[LocalData::INCLUDE_PARAMETER_NAME] = $includeLocal;
+
         $this->localDataEventDispatcher->onNewOperation($options);
         $this->localDataEventDispatcher->dispatch(new TestEntityPostEvent($testEntity, $sourceData));
 

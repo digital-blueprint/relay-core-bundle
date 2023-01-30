@@ -8,23 +8,40 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class LocalDataPreEvent extends Event
 {
-    public const NAME = 'dbp.relay.relay_core.local_data_aware_event.pre';
+    /** @var string[] */
+    private $queryParametersIn;
 
-    /** @var array */
-    private $queryParameters;
+    /** @var string[] */
+    private $queryParametersOut;
 
     public function __construct()
     {
-        $this->queryParameters = [];
+        $this->queryParametersIn = [];
+        $this->queryParametersOut = [];
     }
 
-    public function setQueryParameters(array $queryParameters): void
+    public function initQueryParametersIn(array $queryParametersIn): void
     {
-        $this->queryParameters = $queryParameters;
+        $this->queryParametersIn = $queryParametersIn;
     }
 
-    public function getQueryParameters(): array
+    public function getPendingQueryParametersIn(): array
     {
-        return $this->queryParameters;
+        return $this->queryParametersIn;
+    }
+
+    public function acknowledgeQueryParameterIn(string $queryParameterName): void
+    {
+        unset($this->queryParametersIn[$queryParameterName]);
+    }
+
+    public function addQueryParameterOut(string $queryParameterName, string $queryParameterValue): void
+    {
+        $this->queryParametersOut[$queryParameterName] = $queryParameterValue;
+    }
+
+    public function getQueryParameterOut(): array
+    {
+        return $this->queryParametersOut;
     }
 }

@@ -83,15 +83,20 @@ class LocalDataEventDispatcher
     public function dispatch(Event $event, string $eventName = null): void
     {
         if ($event instanceof LocalDataPreEvent) {
-            $event->setQueryParameters($this->queryParameters);
+            $event->initQueryParametersIn($this->queryParameters);
             $this->eventDispatcher->dispatch($event, $eventName);
+
+            $pendingAttributes = $event->getPendingQueryParametersIn();
+            if (count($pendingAttributes) !== 0) {
+                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf("the following local query attributes were not acknowledged for resource '%s': %s", $this->uniqueEntityName, implode(', ', $pendingAttributes)));
+            }
         } elseif ($event instanceof LocalDataPostEvent) {
             $event->setRequestedAttributes($this->requestedAttributes);
             $this->eventDispatcher->dispatch($event, $eventName);
 
-            $remainingLocalDataAttributes = $event->getRemainingRequestedAttributes();
-            if (!empty($remainingLocalDataAttributes)) {
-                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf("the following requested local data attributes could not be provided for resource '%s': %s", $this->uniqueEntityName, implode(', ', $remainingLocalDataAttributes)));
+            $pendingAttributes = $event->getPendingRequestedAttributes();
+            if (count($pendingAttributes) !== 0) {
+                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf("the following requested local data attributes could not be provided for resource '%s': %s", $this->uniqueEntityName, implode(', ', $pendingAttributes)));
             }
         } else {
             $this->eventDispatcher->dispatch($event, $eventName);

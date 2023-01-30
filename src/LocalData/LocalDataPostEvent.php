@@ -53,7 +53,7 @@ class LocalDataPostEvent extends Event implements LoggerAwareInterface
      *
      * @retrun string[]
      */
-    public function getRemainingRequestedAttributes(): array
+    public function getPendingRequestedAttributes(): array
     {
         return $this->requestedAttributes;
     }
@@ -103,11 +103,11 @@ class LocalDataPostEvent extends Event implements LoggerAwareInterface
      *
      * @throws ApiError if attribute $key is not in the set of requested attributes
      */
-    private function setLocalDataAttributeInternal(string $key, $value, bool $warnfNotFound): void
+    private function setLocalDataAttributeInternal(string $key, $value, bool $warnIfNotFound): void
     {
         $arrayKey = array_search($key, $this->requestedAttributes, true);
         if ($arrayKey === false) {
-            if ($warnfNotFound) {
+            if ($warnIfNotFound) {
                 if ($this->logger !== null) {
                     $this->logger->warning(sprintf("trying to set local data attribute '%s', which was not requested for entity '%s'", $key, LocalDataEventDispatcher::getUniqueEntityName(get_class($this->entity))));
                 }
