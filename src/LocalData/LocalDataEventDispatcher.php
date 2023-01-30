@@ -88,10 +88,10 @@ class LocalDataEventDispatcher
 
             $pendingAttributes = $event->getPendingQueryParametersIn();
             if (count($pendingAttributes) !== 0) {
-                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf("the following local query attributes were not acknowledged for resource '%s': %s", $this->uniqueEntityName, implode(', ', $pendingAttributes)));
+                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf("the following local query attributes were not acknowledged for resource '%s': %s", $this->uniqueEntityName, implode(', ', array_keys($pendingAttributes))));
             }
         } elseif ($event instanceof LocalDataPostEvent) {
-            $event->setRequestedAttributes($this->requestedAttributes);
+            $event->initRequestedAttributes($this->requestedAttributes);
             $this->eventDispatcher->dispatch($event, $eventName);
 
             $pendingAttributes = $event->getPendingRequestedAttributes();

@@ -43,7 +43,7 @@ class LocalDataPostEvent extends Event implements LoggerAwareInterface
      *
      * @param string[] $requestedAttributes
      */
-    public function setRequestedAttributes(array $requestedAttributes): void
+    public function initRequestedAttributes(array $requestedAttributes): void
     {
         $this->requestedAttributes = $requestedAttributes;
     }

@@ -109,7 +109,7 @@ class LocalDataTest extends TestCase
         $preEvent = new TestEntityPreEvent();
         $this->localDataEventDispatcher->dispatch($preEvent);
 
-        $filters = $preEvent->getQueryParameterOut();
+        $filters = $preEvent->getQueryParametersOut();
         $this->assertArrayHasKey('src_attribute_1', $filters);
         $this->assertEquals('value_1', $filters['src_attribute_1']);
     }

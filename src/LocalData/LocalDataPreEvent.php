@@ -20,6 +20,14 @@ class LocalDataPreEvent extends Event
         $this->queryParametersOut = [];
     }
 
+    /**
+     * @deprecated Use getQueryParametersOut
+     */
+    public function getQueryParameters(): array
+    {
+        return $this->queryParametersOut;
+    }
+
     public function initQueryParametersIn(array $queryParametersIn): void
     {
         $this->queryParametersIn = $queryParametersIn;
@@ -40,7 +48,7 @@ class LocalDataPreEvent extends Event
         $this->queryParametersOut[$queryParameterName] = $queryParameterValue;
     }
 
-    public function getQueryParameterOut(): array
+    public function getQueryParametersOut(): array
     {
         return $this->queryParametersOut;
     }
