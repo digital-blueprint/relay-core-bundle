@@ -73,18 +73,6 @@ class LocalDataTest extends TestCase
         $this->assertEquals([0], $testEntity->getLocalDataValue($localDataAttributeName));
     }
 
-    public function testLocalDataMappingFallback()
-    {
-        // first source attribute specified in config is present in source data -> return first source attribute value
-        $localDataAttributeName = 'attribute_2';
-        $testEntity = $this->getTestEntity($localDataAttributeName, ['src_attribute_2_1' => 'value_2_1', 'src_attribute_2_2' => 'value_2_2']);
-        $this->assertEquals('value_2_1', $testEntity->getLocalDataValue($localDataAttributeName));
-
-        // first source attribute specified in config is not present in source data, however second attribute is preset -> return second source attribute value
-        $testEntity = $this->getTestEntity($localDataAttributeName, ['src_attribute_2_2' => 'value_2_2']);
-        $this->assertEquals('value_2_2', $testEntity->getLocalDataValue($localDataAttributeName));
-    }
-
     public function testLocalDataMappingAccessDenied()
     {
         // authorization expression of attribute evaluates to false -> deny access
@@ -106,15 +94,15 @@ class LocalDataTest extends TestCase
         $options[LocalData::QUERY_PARAMETER_NAME] = $localDataAttributeName.':value_1';
 
         $this->localDataEventDispatcher->onNewOperation($options);
-        $preEvent = new TestEntityPreEvent();
+        $preEvent = new TestEntityPreEvent($options);
         $this->localDataEventDispatcher->dispatch($preEvent);
 
-        $filters = $preEvent->getQueryParametersOut();
-        $this->assertArrayHasKey('src_attribute_1', $filters);
-        $this->assertEquals('value_1', $filters['src_attribute_1']);
+        $options = $preEvent->getOptions();
+        $this->assertArrayHasKey('src_attribute_1', $options);
+        $this->assertEquals('value_1', $options['src_attribute_1']);
     }
 
-    public function testLocalDataQueryAttributeUnacknowledged()
+    public function testLocalDataQueryAttributeUnacknowledgedNotConfigure()
     {
         // 'attribute_4' has no configured source attribute.
         // Throw bad request error because no event subscriber acknowledged local query parameter 'attribute_4'.
@@ -125,7 +113,25 @@ class LocalDataTest extends TestCase
 
         try {
             $this->localDataEventDispatcher->onNewOperation($options);
-            $preEvent = new TestEntityPreEvent();
+            $preEvent = new TestEntityPreEvent($options);
+            $this->localDataEventDispatcher->dispatch($preEvent);
+        } catch (ApiError $exception) {
+            $this->assertEquals(Response::HTTP_BAD_REQUEST, $exception->getStatusCode());
+        }
+    }
+
+    public function testLocalDataQueryAttributeUnacknowledgedNotQueryable()
+    {
+        // 'attribute_2' is configured 'allow_query': false (default value)
+        // Throw bad request error because no event subscriber acknowledged local query parameter 'attribute_2'.
+        $localDataAttributeName = 'attribute_2';
+
+        $options = [];
+        $options[LocalData::QUERY_PARAMETER_NAME] = $localDataAttributeName.':value_2';
+
+        try {
+            $this->localDataEventDispatcher->onNewOperation($options);
+            $preEvent = new TestEntityPreEvent($options);
             $this->localDataEventDispatcher->dispatch($preEvent);
         } catch (ApiError $exception) {
             $this->assertEquals(Response::HTTP_BAD_REQUEST, $exception->getStatusCode());
@@ -142,7 +148,7 @@ class LocalDataTest extends TestCase
 
         try {
             $this->localDataEventDispatcher->onNewOperation($options);
-            $preEvent = new TestEntityPreEvent();
+            $preEvent = new TestEntityPreEvent($options);
             $this->localDataEventDispatcher->dispatch($preEvent);
         } catch (ApiError $exception) {
             $this->assertEquals(Response::HTTP_UNAUTHORIZED, $exception->getStatusCode());
@@ -168,24 +174,28 @@ class LocalDataTest extends TestCase
         $config['local_data_mapping'] = [
             [
                 'local_data_attribute' => 'attribute_1',
-                'source_attributes' => ['src_attribute_1'],
+                'source_attribute' => 'src_attribute_1',
                 'authorization_expression' => 'true',
+                'allow_query' => true,
                 'default_value' => 0,
             ],
             [
                 'local_data_attribute' => 'attribute_2',
-                'source_attributes' => ['src_attribute_2_1', 'src_attribute_2_2'],
+                'source_attribute' => 'src_attribute_2_1',
                 'authorization_expression' => 'true',
+                'allow_query' => false,
             ],
             [
                 'local_data_attribute' => 'attribute_3',
-                'source_attributes' => ['src_attribute_3'],
+                'source_attribute' => 'src_attribute_3',
                 'authorization_expression' => 'false',
+                'allow_query' => true,
             ],
             [
                 'local_data_attribute' => 'array_attribute_1',
-                'source_attributes' => ['array_src_attribute_1'],
+                'source_attribute' => 'array_src_attribute_1',
                 'authorization_expression' => 'true',
+                'allow_query' => false,
                 'default_values' => [0],
             ],
         ];

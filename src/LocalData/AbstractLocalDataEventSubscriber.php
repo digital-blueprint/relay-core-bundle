@@ -22,14 +22,16 @@ use Symfony\Contracts\EventDispatcher\Event;
 abstract class AbstractLocalDataEventSubscriber extends AbstractAuthorizationService implements EventSubscriberInterface
 {
     protected const ROOT_CONFIG_NODE = 'local_data_mapping';
-    protected const SOURCE_ATTRIBUTES_CONFIG_NODE = 'source_attributes';
+    protected const SOURCE_ATTRIBUTE_CONFIG_NODE = 'source_attribute';
     protected const LOCAL_DATA_ATTRIBUTE_CONFIG_NODE = 'local_data_attribute';
     protected const AUTHORIZATION_EXPRESSION_CONFIG_NODE = 'authorization_expression';
+    protected const ALLOW_LOCAL_QUERY_CONFIG_NODE = 'allow_query';
     protected const DEFAULT_VALUE_ATTRIBUTE_CONFIG_NODE = 'default_value';
     protected const DEFAULT_VALUES_ATTRIBUTE_CONFIG_NODE = 'default_values';
 
-    private const SOURCE_ATTRIBUTES_KEY = 'source';
+    private const SOURCE_ATTRIBUTE_KEY = 'source';
     private const DEFAULT_VALUE_KEY = 'default';
+    private const QUERYABLE_KEY = 'queryable';
 
     /*
      * WORKAROUND: could not find a way to determine whether a Symfony config array node was NOT specified since it provides an empty
@@ -58,7 +60,8 @@ abstract class AbstractLocalDataEventSubscriber extends AbstractAuthorizationSer
             }
 
             $attributeMapEntry = [];
-            $attributeMapEntry[self::SOURCE_ATTRIBUTES_KEY] = $configMappingEntry[self::SOURCE_ATTRIBUTES_CONFIG_NODE];
+            $attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY] = $configMappingEntry[self::SOURCE_ATTRIBUTE_CONFIG_NODE];
+            $attributeMapEntry[self::QUERYABLE_KEY] = $configMappingEntry[self::ALLOW_LOCAL_QUERY_CONFIG_NODE];
 
             $defaultValue = $configMappingEntry[self::DEFAULT_VALUE_ATTRIBUTE_CONFIG_NODE] ?? null;
             if ($defaultValue === null) {
@@ -97,33 +100,30 @@ abstract class AbstractLocalDataEventSubscriber extends AbstractAuthorizationSer
     public function onEvent(Event $event)
     {
         if ($event instanceof LocalDataPreEvent) {
-            foreach ($event->getPendingQueryParametersIn() as $localDataAttributeName => $localDataAttributeValue) {
-                if (($attributeMapEntry = $this->attributeMapping[$localDataAttributeName] ?? null) !== null) {
+            $localQueryParameters = [];
+            foreach ($event->getPendingQueryParameters() as $localDataAttributeName => $localDataAttributeValue) {
+                if (($attributeMapEntry = $this->attributeMapping[$localDataAttributeName] ?? null) !== null &&
+                    $attributeMapEntry[self::QUERYABLE_KEY] === true) {
                     if (!$this->isGranted($localDataAttributeName)) {
                         throw ApiError::withDetails(Response::HTTP_UNAUTHORIZED, sprintf('access to local data attribute \'%s\' denied', $localDataAttributeName));
                     }
-                    $sourceAttributeName = $attributeMapEntry[self::SOURCE_ATTRIBUTES_KEY][0];
-                    $event->addQueryParameterOut($sourceAttributeName, $localDataAttributeValue);
-                    $event->acknowledgeQueryParameterIn($localDataAttributeName);
+                    $sourceAttributeName = $attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY];
+                    $localQueryParameters[$sourceAttributeName] = $localDataAttributeValue;
+                    $event->acknowledgeQueryParameter($localDataAttributeName);
                 }
             }
 
-            $this->onPreEvent($event);
+            $this->onPreEvent($event, $localQueryParameters);
         } elseif ($event instanceof LocalDataPostEvent) {
             foreach ($event->getPendingRequestedAttributes() as $localDataAttributeName) {
                 if (($attributeMapEntry = $this->attributeMapping[$localDataAttributeName] ?? null) !== null) {
                     if (!$this->isGranted($localDataAttributeName)) {
                         throw ApiError::withDetails(Response::HTTP_UNAUTHORIZED, sprintf('access to local data attribute \'%s\' denied', $localDataAttributeName));
                     }
-                    $attributeValue = null;
-                    foreach ($attributeMapEntry[self::SOURCE_ATTRIBUTES_KEY] as $sourceAttributeName) {
-                        if (($value = $event->getSourceData()[$sourceAttributeName] ?? null) !== null) {
-                            $attributeValue = $value;
-                            break;
-                        }
-                    }
 
+                    $attributeValue = $event->getSourceData()[$attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY]] ?? null;
                     $attributeValue = $attributeValue ?? $attributeMapEntry[self::DEFAULT_VALUE_KEY] ?? null;
+
                     if ($attributeValue !== null) {
                         $event->setLocalDataAttribute($localDataAttributeName, $attributeValue);
                     } else {
@@ -153,20 +153,23 @@ abstract class AbstractLocalDataEventSubscriber extends AbstractAuthorizationSer
                     ->scalarNode(self::LOCAL_DATA_ATTRIBUTE_CONFIG_NODE)
                         ->info('The name of the local data attribute.')
                     ->end()
-                    ->arrayNode(self::SOURCE_ATTRIBUTES_CONFIG_NODE)
-                        ->info('The list of source attributes to map to the local data attribute ordered by preferred usage. If an attribute is not found, the next attribute in the list is used.')
-                        ->scalarPrototype()->end()
+                    ->scalarNode(self::SOURCE_ATTRIBUTE_CONFIG_NODE)
+                        ->info('The source attribute to map to the local data attribute. If the source attribute is not found, the default value is used.')
                     ->end()
                     ->scalarNode(self::AUTHORIZATION_EXPRESSION_CONFIG_NODE)
                         ->defaultValue('false')
                         ->info('A boolean expression evaluable by the Symfony Expression Language determining whether the current user may request read the local data attribute.')
                     ->end()
+                    ->booleanNode(self::ALLOW_LOCAL_QUERY_CONFIG_NODE)
+                        ->defaultValue('false')
+                        ->info('Indicates whether the local data attribute can be used in local queries.')
+                    ->end()
                     ->scalarNode(self::DEFAULT_VALUE_ATTRIBUTE_CONFIG_NODE)
-                        ->info('The default value for scalar (i.e. non-array) attributes. If none is specified, an exception is thrown in case none of the source attributes is found.')
+                        ->info('The default value for scalar (i.e. non-array) attributes. If none is specified, an exception is thrown in case the source attribute is not found.')
                     ->end()
                     ->arrayNode(self::DEFAULT_VALUES_ATTRIBUTE_CONFIG_NODE)
                         ->defaultValue(self::ARRAY_VALUE_NOT_SPECIFIED)
-                        ->info('The default value for array type attributes. If none is specified, an exception is thrown in case none of the source attributes is found.')
+                        ->info('The default value for array type attributes. If none is specified, an exception is thrown in case the source attribute is not found.')
                         ->scalarPrototype()->end()
                     ->end()
                 ->end()
@@ -179,7 +182,7 @@ abstract class AbstractLocalDataEventSubscriber extends AbstractAuthorizationSer
         throw new \RuntimeException(sprintf('child classes must implement the \'%s\' method', __METHOD__));
     }
 
-    protected function onPreEvent(LocalDataPreEvent $preEvent)
+    protected function onPreEvent(LocalDataPreEvent $preEvent, array $localQueryParameters)
     {
     }
 

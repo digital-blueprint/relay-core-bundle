@@ -11,45 +11,37 @@ class LocalDataPreEvent extends Event
     /** @var string[] */
     private $queryParametersIn;
 
-    /** @var string[] */
-    private $queryParametersOut;
+    /** @var array */
+    private $options;
 
-    public function __construct()
+    public function __construct(array $options)
     {
         $this->queryParametersIn = [];
-        $this->queryParametersOut = [];
+        $this->options = $options;
     }
 
-    /**
-     * @deprecated Use getQueryParametersOut
-     */
-    public function getQueryParameters(): array
-    {
-        return $this->queryParametersOut;
-    }
-
-    public function initQueryParametersIn(array $queryParametersIn): void
+    public function initQueryParameters(array $queryParametersIn): void
     {
         $this->queryParametersIn = $queryParametersIn;
     }
 
-    public function getPendingQueryParametersIn(): array
+    public function getPendingQueryParameters(): array
     {
         return $this->queryParametersIn;
     }
 
-    public function acknowledgeQueryParameterIn(string $queryParameterName): void
+    public function acknowledgeQueryParameter(string $queryParameterName): void
     {
         unset($this->queryParametersIn[$queryParameterName]);
     }
 
-    public function addQueryParameterOut(string $queryParameterName, string $queryParameterValue): void
+    public function getOptions(): array
     {
-        $this->queryParametersOut[$queryParameterName] = $queryParameterValue;
+        return $this->options;
     }
 
-    public function getQueryParametersOut(): array
+    public function setOptions(array $options): void
     {
-        return $this->queryParametersOut;
+        $this->options = $options;
     }
 }
