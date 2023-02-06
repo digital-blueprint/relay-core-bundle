@@ -109,7 +109,7 @@ abstract class AbstractLocalDataEventSubscriber extends AbstractAuthorizationSer
                     }
                     $sourceAttributeName = $attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY];
                     $localQueryParameters[$sourceAttributeName] = $localDataAttributeValue;
-                    $event->acknowledgeQueryParameter($localDataAttributeName);
+                    $event->tryPopPendingQueryParameter($localDataAttributeName);
                 }
             }
 
@@ -182,7 +182,7 @@ abstract class AbstractLocalDataEventSubscriber extends AbstractAuthorizationSer
         throw new \RuntimeException(sprintf('child classes must implement the \'%s\' method', __METHOD__));
     }
 
-    protected function onPreEvent(LocalDataPreEvent $preEvent, array $localQueryParameters)
+    protected function onPreEvent(LocalDataPreEvent $preEvent, array $mappedQueryParameters)
     {
     }
 
