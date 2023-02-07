@@ -11,10 +11,11 @@ use Dbp\Relay\CoreBundle\ExpressionLanguage\ExpressionLanguage;
  */
 class AuthorizationExpressionChecker
 {
-    public const RIGHTS_CONFIG_NODE = 'rights';
+    public const ROLES_CONFIG_NODE = 'roles';
     public const ATTRIBUTES_CONFIG_NODE = 'attributes';
 
-    private const MAX_NUM_CALLS = 16;
+    private const USER_VARIBLE_NAME = 'user';
+    private const DEFAULT_OBJECT_VARIBLE_NAME = 'object';
 
     /** @var ExpressionLanguage */
     private $expressionLanguage;
@@ -46,7 +47,7 @@ class AuthorizationExpressionChecker
 
     public function setConfig(array $config)
     {
-        $this->loadExpressions($config[self::RIGHTS_CONFIG_NODE] ?? [], $this->rightExpressions);
+        $this->loadExpressions($config[self::ROLES_CONFIG_NODE] ?? [], $this->rightExpressions);
         $this->loadExpressions($config[self::ATTRIBUTES_CONFIG_NODE] ?? [], $this->attributeExpressions);
     }
 
@@ -95,7 +96,7 @@ class AuthorizationExpressionChecker
      *
      * @throws AuthorizationException
      */
-    public function isGranted(AuthorizationUser $currentAuthorizationUser, string $rightName, $subject): bool
+    public function isGranted(AuthorizationUser $currentAuthorizationUser, string $rightName, $object, string $objectAlias = null): bool
     {
         if (in_array($rightName, $this->rightExpressionStack, true)) {
             throw new AuthorizationException(sprintf('infinite loop caused by authorization right expression %s detected', $rightName), AuthorizationException::INFINITE_EXRPESSION_LOOP_DETECTED);
@@ -109,8 +110,8 @@ class AuthorizationExpressionChecker
             }
 
             return $this->expressionLanguage->evaluate($rightExpression, [
-                'user' => $currentAuthorizationUser,
-                'subject' => $subject,
+                self::USER_VARIBLE_NAME => $currentAuthorizationUser,
+                $objectAlias ?? self::DEFAULT_OBJECT_VARIBLE_NAME => $object,
             ]);
         } finally {
             array_pop($this->rightExpressionStack);

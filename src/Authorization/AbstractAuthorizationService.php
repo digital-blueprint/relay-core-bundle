@@ -47,23 +47,23 @@ abstract class AbstractAuthorizationService
     }
 
     /**
-     * @param mixed $subject
+     * @param mixed $object
      *
      * @throws ApiError
      */
-    public function denyAccessUnlessIsGranted(string $rightName, $subject = null): void
+    public function denyAccessUnlessIsGranted(string $rightName, $object = null, string $objectAlias = null): void
     {
-        if ($this->isGrantedInternal($rightName, $subject) === false) {
+        if ($this->isGrantedInternal($rightName, $object, $objectAlias) === false) {
             throw new ApiError(Response::HTTP_FORBIDDEN, 'access denied. missing right '.$rightName);
         }
     }
 
     /**
-     * @param mixed $subject
+     * @param mixed $object
      */
-    public function isGranted(string $expressionName, $subject = null): bool
+    public function isGranted(string $expressionName, $object = null, string $objectAlias = null): bool
     {
-        return $this->isGrantedInternal($expressionName, $subject);
+        return $this->isGrantedInternal($expressionName, $object, $objectAlias);
     }
 
     /**
@@ -84,9 +84,9 @@ abstract class AbstractAuthorizationService
     /**
      * @throws AuthorizationException
      */
-    private function isGrantedInternal(string $rightName, $subject = null): bool
+    private function isGrantedInternal(string $rightName, $object, string $objectAlias = null): bool
     {
-        return $this->userAuthorizationChecker->isGranted($this->currentAuthorizationUser, $rightName, $subject);
+        return $this->userAuthorizationChecker->isGranted($this->currentAuthorizationUser, $rightName, $object, $objectAlias);
     }
 
     /**
@@ -101,7 +101,7 @@ abstract class AbstractAuthorizationService
     {
         $treeBuilder = new TreeBuilder(self::AUTHORIZATION_ROOT_CONFIG_NODE);
 
-        $rightsNodeChildBuilder = $treeBuilder->getRootNode()->children()->arrayNode(AuthorizationExpressionChecker::RIGHTS_CONFIG_NODE)
+        $rightsNodeChildBuilder = $treeBuilder->getRootNode()->children()->arrayNode(AuthorizationExpressionChecker::ROLES_CONFIG_NODE)
             ->addDefaultsIfNotSet()
             ->children();
         foreach ($rights as $right) {
@@ -128,7 +128,7 @@ abstract class AbstractAuthorizationService
     {
         return [
             AbstractAuthorizationService::AUTHORIZATION_ROOT_CONFIG_NODE => [
-                AuthorizationExpressionChecker::RIGHTS_CONFIG_NODE => $rightExpressions,
+                AuthorizationExpressionChecker::ROLES_CONFIG_NODE => $rightExpressions,
                 AuthorizationExpressionChecker::ATTRIBUTES_CONFIG_NODE => $attributeExpressions,
             ],
         ];
