@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\LocalData;
 
-use ApiPlatform\Core\Exception\ResourceClassNotFoundException;
-use ApiPlatform\Core\Metadata\Resource\Factory\AnnotationResourceMetadataFactory;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
+use Dbp\Relay\CoreBundle\Helpers\ApiPlatformHelperFunctions;
 use Dbp\Relay\CoreBundle\Helpers\Tools;
-use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\EventDispatcher\Event;
@@ -111,21 +109,7 @@ class LocalDataEventDispatcher
      */
     public static function getUniqueEntityName(string $resourceClass): string
     {
-        $resourceMetadataFactory = new AnnotationResourceMetadataFactory(new AnnotationReader());
-        try {
-            $resourceMetadata = $resourceMetadataFactory->create($resourceClass);
-        } catch (ResourceClassNotFoundException $exc) {
-            throw new ApiError(500, $exc->getMessage());
-        }
-
-        $uniqueName = $resourceMetadata->getShortName() ?? '';
-        if (Tools::isNullOrEmpty($uniqueName)) {
-            throw new ApiError(500, sprintf("'shortName' attribute missing in ApiResource annotation of resource class '%s'", $resourceClass));
-        } elseif (str_contains($uniqueName, '.') || str_contains($uniqueName, ',')) {
-            throw new ApiError(500, sprintf("'shortName' attribute of resource class '%s' must not contain '.' or ',' characters: '%s'", $resourceClass, $uniqueName));
-        }
-
-        return $uniqueName;
+        return ApiPlatformHelperFunctions::getShortNameForResource($resourceClass);
     }
 
     /**
