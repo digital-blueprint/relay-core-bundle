@@ -55,6 +55,11 @@ final class LoggingProcessor
                 $request->attributes->set($requestAttributeKey, $requestId);
             }
             $record['context']['relay-request-id'] = $requestId;
+
+            $route = $request->attributes->get('_route');
+            if ($route !== null) {
+                $record['context']['relay-route'] = $route;
+            }
         }
 
         return $record;

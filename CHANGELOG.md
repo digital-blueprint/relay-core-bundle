@@ -1,3 +1,7 @@
+# v0.1.75
+
+* The logging context now includes the active symfony route name
+
 # v0.1.59
 
 * api-docs: compatibility fixes for relay-auth-bundle v0.1.12

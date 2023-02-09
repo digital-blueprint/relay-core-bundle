@@ -42,6 +42,18 @@ class LoggingProcessorTest extends WebTestCase
         $this->assertSame(['message' => 'foobar', 'context' => ['relay-session-id' => 'logging-id']], $record);
     }
 
+    public function testRoute()
+    {
+        $stack = new RequestStack();
+        $request = new Request();
+        $request->attributes->set('_route', 'some_route');
+        $stack->push($request);
+        $processor = new LoggingProcessor(new TestUserSession('log'), $stack);
+        $record = ['message' => 'foobar'];
+        $record = $processor->__invoke($record);
+        $this->assertSame('some_route', $record['context']['relay-route']);
+    }
+
     public function testMaskUserId()
     {
         $processor = new LoggingProcessor(new TestUserSession('some-random-user-id'), new RequestStack());
