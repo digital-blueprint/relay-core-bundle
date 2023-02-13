@@ -16,10 +16,10 @@ class AuthorizationDataMuxer
     /** @var iterable<AuthorizationDataProviderInterface> */
     private $authorizationDataProviders;
 
-    /** @var array<string, array> */
+    /** @var array<int, array> */
     private $providerCache;
 
-    /** @var array<string, string[]> */
+    /** @var array<int, string[]> */
     private $availableCache;
 
     /** @var EventDispatcherInterface */
@@ -73,7 +73,7 @@ class AuthorizationDataMuxer
     private function getProviderAvailableAttributes(AuthorizationDataProviderInterface $prov): array
     {
         // Caches getAvailableAttributes for each provider
-        $provKey = get_class($prov);
+        $provKey = spl_object_id($prov);
         if (!array_key_exists($provKey, $this->availableCache)) {
             $this->availableCache[$provKey] = $prov->getAvailableAttributes();
         }
@@ -89,7 +89,7 @@ class AuthorizationDataMuxer
     private function getProviderUserAttributes(AuthorizationDataProviderInterface $prov, ?string $userIdentifier): array
     {
         // We cache the attributes for each provider, but only for the last userIdentifier
-        $provKey = get_class($prov);
+        $provKey = spl_object_id($prov);
         if (!array_key_exists($provKey, $this->providerCache) || $this->providerCache[$provKey][0] !== $userIdentifier) {
             $this->providerCache[$provKey] = [$userIdentifier, $prov->getUserAttributes($userIdentifier)];
         }
@@ -112,7 +112,7 @@ class AuthorizationDataMuxer
             throw new AuthorizationException(sprintf('attribute \'%s\' undefined', $attributeName), AuthorizationException::ATTRIBUTE_UNDEFINED);
         }
 
-        $value = $defaultValue;
+        $value = null;
         foreach ($this->authorizationDataProviders as $authorizationDataProvider) {
             $availableAttributes = $this->getProviderAvailableAttributes($authorizationDataProvider);
             if (!in_array($attributeName, $availableAttributes, true)) {
@@ -140,6 +140,6 @@ class AuthorizationDataMuxer
             array_pop($this->attributeStack);
         }
 
-        return $event->getAttributeValue();
+        return $event->getAttributeValue() ?? $defaultValue;
     }
 }
