@@ -114,7 +114,6 @@ abstract class AbstractEntityNormalizer extends AbstractAuthorizationService imp
 
         foreach ($mapEntry[self::ATTRIBUTE_NAMES_KEY] as $attributeName) {
             $attributeId = self::toAttributeId($entityShortName, $attributeName);
-            dump($attributeId);
             if ($this->isGranted($attributeId, $object, self::ENTITY_OBJECT_ALIAS)) {
                 $context['groups'][] = $attributeId;
             }
