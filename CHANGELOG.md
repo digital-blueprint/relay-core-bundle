@@ -1,3 +1,12 @@
+# v0.1.76
+
+* cron: The `dbp:relay:core:cron` command will no longer run all jobs the first
+  time it is called when the cache is empty.
+* cron: The `dbp:relay:core:cron` command gained `--force` option which forces
+  it to run all jobs, independent of their schedule.
+* cron: There is a new `dbp:relay:core:cron:list` command which lists all
+  registered cron jobs and related meta data.
+
 # v0.1.75
 
 * The logging context now includes the active symfony route name
