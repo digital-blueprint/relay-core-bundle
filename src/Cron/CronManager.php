@@ -66,6 +66,19 @@ final class CronManager implements LoggerAwareInterface
         return $shouldRun;
     }
 
+    /**
+     * Returns the date and time the job is scheduled to run the next time.
+     */
+    public static function getNextDate(CronJobInterface $job, \DateTimeInterface $currentTime): \DateTimeInterface
+    {
+        $cronExpression = $job->getInterval();
+        $cron = new CronExpression($cronExpression);
+        $nextDate = $cron->getNextRunDate($currentTime, 0, true);
+        $nextDate->setTimezone(new \DateTimeZone('UTC'));
+
+        return \DateTimeImmutable::createFromMutable($nextDate);
+    }
+
     public function getPreviousRun(\DateTimeInterface $currentTime): ?\DateTimeInterface
     {
         $cachePool = $this->cachePool;
