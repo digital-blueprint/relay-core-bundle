@@ -16,8 +16,8 @@ class CronTest extends TestCase
         $isDue = CronManager::isDue(new \DateTimeImmutable('2021-09-07T09:35:59Z'), new \DateTimeImmutable('2021-09-07T09:36:00Z'), '* * * * *');
         $this->assertTrue($isDue);
         $isDue = CronManager::isDue(null, new \DateTimeImmutable('2021-09-07T09:36:00Z'), '0 0 1 1 *');
-        $this->assertTrue($isDue);
+        $this->assertFalse($isDue);
         $isDue = CronManager::isDue(null, new \DateTimeImmutable('2021-09-07T09:36:00Z'), '* * * * *');
-        $this->assertTrue($isDue);
+        $this->assertFalse($isDue);
     }
 }

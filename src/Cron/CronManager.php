@@ -53,9 +53,13 @@ final class CronManager implements LoggerAwareInterface
         $previousExpectedRun->setTimezone(new \DateTimeZone('UTC'));
 
         $shouldRun = false;
-        // If we were scheduled to run between now and the previous run (or just before of no previous run exists)
-        // then we should run
-        if ($previousExpectedRun <= $currentRun && ($previousRun === null || $previousExpectedRun > $previousRun)) {
+        if ($previousRun === null) {
+            // In case there is no previous run we just skip the cron job
+            // This can happen on re-deployments, and we don't want a cron-storm there, or jobs that run
+            // way off their schedule
+            $shouldRun = false;
+        } elseif ($previousExpectedRun > $previousRun && $previousExpectedRun <= $currentRun) {
+            // If we were scheduled to run between now and right the previous run then we should run
             $shouldRun = true;
         }
 
