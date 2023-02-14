@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Authorization\Serializer;
 
 use Dbp\Relay\CoreBundle\Authorization\AbstractAuthorizationService;
-use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Helpers\ApiPlatformHelperFunctions;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Serializer\Normalizer\ContextAwareNormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
@@ -67,6 +65,7 @@ abstract class AbstractEntityNormalizer extends AbstractAuthorizationService imp
     protected function __construct(array $entityClassNames)
     {
         $this->entityClassNames = $entityClassNames;
+        $this->entityClassNameToAttributeNamesMapping = [];
     }
 
     public function setConfig(array $config)
@@ -77,19 +76,17 @@ abstract class AbstractEntityNormalizer extends AbstractAuthorizationService imp
         foreach ($this->entityClassNames as $entityClassName) {
             $entityShortName = ApiPlatformHelperFunctions::getShortNameForResource($entityClassName);
             $entityNode = $configNode[$entityShortName] ?? null;
-            if ($entityNode === null) {
-                throw ApiError::withDetails(Response::HTTP_INTERNAL_SERVER_ERROR, sprintf('attribute access not configured for entity \'%s\'', $entityShortName));
+            if ($entityNode !== null) {
+                $attributeNames = [];
+                foreach ($entityNode as $attributeName => $attributeAuthorizationExpression) {
+                    $rightExpressions[self::toAttributeId($entityShortName, $attributeName)] = $attributeAuthorizationExpression;
+                    $attributeNames[] = $attributeName;
+                }
+                $this->entityClassNameToAttributeNamesMapping[$entityClassName] = [
+                    self::ENTITY_SHORT_NAME_KEY => $entityShortName,
+                    self::ATTRIBUTE_NAMES_KEY => $attributeNames,
+                ];
             }
-
-            $attributeNames = [];
-            foreach ($entityNode as $attributeName => $attributeAuthorizationExpression) {
-                $rightExpressions[self::toAttributeId($entityShortName, $attributeName)] = $attributeAuthorizationExpression;
-                $attributeNames[] = $attributeName;
-            }
-            $this->entityClassNameToAttributeNamesMapping[$entityClassName] = [
-                self::ENTITY_SHORT_NAME_KEY => $entityShortName,
-                self::ATTRIBUTE_NAMES_KEY => $attributeNames,
-            ];
         }
 
         parent::setConfig(parent::createConfig($rightExpressions));
@@ -109,13 +106,15 @@ abstract class AbstractEntityNormalizer extends AbstractAuthorizationService imp
     public function normalize($object, $format = null, array $context = [])
     {
         $entityClassName = get_class($object);
-        $mapEntry = $this->entityClassNameToAttributeNamesMapping[$entityClassName];
-        $entityShortName = $mapEntry[self::ENTITY_SHORT_NAME_KEY];
+        $mapEntry = $this->entityClassNameToAttributeNamesMapping[$entityClassName] ?? null;
+        if ($mapEntry !== null) {
+            $entityShortName = $mapEntry[self::ENTITY_SHORT_NAME_KEY];
 
-        foreach ($mapEntry[self::ATTRIBUTE_NAMES_KEY] as $attributeName) {
-            $attributeId = self::toAttributeId($entityShortName, $attributeName);
-            if ($this->isGranted($attributeId, $object, self::ENTITY_OBJECT_ALIAS)) {
-                $context['groups'][] = $attributeId;
+            foreach ($mapEntry[self::ATTRIBUTE_NAMES_KEY] as $attributeName) {
+                $attributeId = self::toAttributeId($entityShortName, $attributeName);
+                if ($this->isGranted($attributeId, $object, self::ENTITY_OBJECT_ALIAS)) {
+                    $context['groups'][] = $attributeId;
+                }
             }
         }
 
