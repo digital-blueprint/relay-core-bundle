@@ -88,6 +88,14 @@ final class CronManager implements LoggerAwareInterface
     /**
      * @return CronJobInterface[]
      */
+    public function getAllJobs(): array
+    {
+        return $this->jobs;
+    }
+
+    /**
+     * @return CronJobInterface[]
+     */
     public function getDueJobs(): array
     {
         // Get all jobs that should have been run between the last time we were called and now

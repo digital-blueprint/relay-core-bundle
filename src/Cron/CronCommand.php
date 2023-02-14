@@ -10,6 +10,7 @@ use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 final class CronCommand extends Command implements LoggerAwareInterface
@@ -34,19 +35,25 @@ final class CronCommand extends Command implements LoggerAwareInterface
     protected function configure()
     {
         $this->setDescription('Runs various tasks which need to be executed periodically');
+        $this->addOption('force', null, InputOption::VALUE_NONE, 'Run the cron job even if it\'s not due');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // We need to pass the prune command to CachePrune since I didn't find an alternative
         $app = $this->getApplication();
+        $force = $input->getOption('force');
         assert($app !== null);
         $command = $app->find('cache:pool:prune');
         CachePrune::setPruneCommand($command);
 
         // Now run all jobs
-        $dueJobs = $this->manager->getDueJobs();
-        foreach ($dueJobs as $job) {
+        if ($force) {
+            $jobsToRun = $this->manager->getAllJobs();
+        } else {
+            $jobsToRun = $this->manager->getDueJobs();
+        }
+        foreach ($jobsToRun as $job) {
             $name = $job->getName();
             $this->logger->info("cron: Running '$name'");
             try {
