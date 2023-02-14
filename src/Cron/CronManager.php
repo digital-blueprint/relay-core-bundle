@@ -42,13 +42,11 @@ final class CronManager implements LoggerAwareInterface
      * Returns if a job should run or not. Note that there is no feedback channel, so if you skip
      * this run you will only be notified the next time the cron job should run.
      *
-     * @param string $cronExpression A cron expression
-     *
      * @return bool If the job should run
      */
-    public static function isDue(?\DateTimeInterface $previousRun, \DateTimeInterface $currentRun, string $cronExpression): bool
+    public static function isDue(CronJobInterface $job, ?\DateTimeInterface $previousRun, \DateTimeInterface $currentRun): bool
     {
-        $cron = new CronExpression($cronExpression);
+        $cron = new CronExpression($job->getInterval());
         $previousExpectedRun = $cron->getPreviousRunDate($currentRun, 0, true);
         $previousExpectedRun->setTimezone(new \DateTimeZone('UTC'));
 
@@ -58,8 +56,9 @@ final class CronManager implements LoggerAwareInterface
             // This can happen on re-deployments, and we don't want a cron-storm there, or jobs that run
             // way off their schedule
             $shouldRun = false;
-        } elseif ($previousExpectedRun > $previousRun && $previousExpectedRun <= $currentRun) {
+        } elseif ($previousExpectedRun->getTimestamp() > $previousRun->getTimestamp() && $previousExpectedRun->getTimestamp() <= $currentRun->getTimestamp()) {
             // If we were scheduled to run between now and right the previous run then we should run
+            // XXX: We compare the timestamps, since that is what we use to serialize the last execution time (so we get the same rounding)
             $shouldRun = true;
         }
 
@@ -79,59 +78,81 @@ final class CronManager implements LoggerAwareInterface
         return \DateTimeImmutable::createFromMutable($nextDate);
     }
 
-    public function getPreviousRun(\DateTimeInterface $currentTime): ?\DateTimeInterface
+    /**
+     * Returns the last time cron was executed.
+     */
+    public function getLastExecutionDate(): ?\DateTimeInterface
     {
         $cachePool = $this->cachePool;
-        // Store the previous run time in the cache and fetch from there
         assert($cachePool instanceof CacheItemPoolInterface);
         $item = $cachePool->getItem('cron-previous-run');
         $value = $item->get();
         $previousRun = null;
         if ($value !== null) {
             $previousRun = (new \DateTimeImmutable())->setTimezone(new \DateTimeZone('UTC'))->setTimestamp($value);
-            if ($previousRun > $currentTime) {
-                // Something is wrong, cap at the current time
-                $previousRun = $currentTime;
-            }
-        }
-        $item->set($currentTime->getTimestamp());
-        if ($cachePool->save($item) === false) {
-            throw new \RuntimeException('Saving cron timestamp failed');
         }
 
         return $previousRun;
     }
 
     /**
-     * @return CronJobInterface[]
+     * Stores the given time as the new last cron execution time.
      */
-    public function getAllJobs(): array
+    public function setLastExecutionDate(\DateTimeInterface $currentTime): void
     {
-        return $this->jobs;
+        $cachePool = $this->cachePool;
+        assert($cachePool instanceof CacheItemPoolInterface);
+        $item = $cachePool->getItem('cron-previous-run');
+        $item->set($currentTime->getTimestamp());
+        if ($cachePool->save($item) === false) {
+            throw new \RuntimeException('Saving cron timestamp failed');
+        }
     }
 
     /**
      * @return CronJobInterface[]
      */
-    public function getDueJobs(): array
+    public function getJobs(): array
+    {
+        return $this->jobs;
+    }
+
+    public function runDueJobs(bool $force = false, \DateTimeInterface $currentTime = null)
     {
         // Get all jobs that should have been run between the last time we were called and now
-        $currentTime = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
-        // round to full seconds, so we have the same resolution for both date times
-        $currentTime = $currentTime->setTimestamp($currentTime->getTimestamp());
-        $previousRunTime = $this->getPreviousRun($currentTime);
+        if ($currentTime === null) {
+            $currentTime = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+        }
+        $lastDate = $this->getLastExecutionDate();
+        $this->setLastExecutionDate($currentTime);
+
+        if ($lastDate === null) {
+            $this->logger->info('cron: No last execution time available, will no run anything');
+        }
 
         $toRun = [];
         foreach ($this->jobs as $job) {
             $interval = $job->getInterval();
             $name = $job->getName();
             $this->logger->info("cron: Checking '$name' ($interval)");
-            $isDue = self::isDue($previousRunTime, $currentTime, $interval);
-            if ($isDue) {
+            $isDue = self::isDue($job, $lastDate, $currentTime);
+            if ($isDue || $force) {
                 $toRun[] = $job;
             }
         }
 
-        return $toRun;
+        if (count($toRun) === 0) {
+            $this->logger->info('cron: No jobs to run');
+        }
+
+        foreach ($toRun as $job) {
+            $name = $job->getName();
+            $this->logger->info("cron: Running '$name'");
+            try {
+                $job->run(new CronOptions());
+            } catch (\Throwable $e) {
+                $this->logger->error("cron: '$name' failed", ['exception' => $e]);
+            }
+        }
     }
 }

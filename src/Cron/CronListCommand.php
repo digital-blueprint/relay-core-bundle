@@ -38,7 +38,7 @@ final class CronListCommand extends Command implements LoggerAwareInterface
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $currentTime = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
-        $jobs = $this->manager->getAllJobs();
+        $jobs = $this->manager->getJobs();
         foreach ($jobs as $job) {
             $output->writeln('<fg=green;options=bold>['.get_class($job).']</>');
             $output->writeln('<fg=blue;options=bold>Name:</> '.$job->getName());

@@ -47,21 +47,7 @@ final class CronCommand extends Command implements LoggerAwareInterface
         $command = $app->find('cache:pool:prune');
         CachePrune::setPruneCommand($command);
 
-        // Now run all jobs
-        if ($force) {
-            $jobsToRun = $this->manager->getAllJobs();
-        } else {
-            $jobsToRun = $this->manager->getDueJobs();
-        }
-        foreach ($jobsToRun as $job) {
-            $name = $job->getName();
-            $this->logger->info("cron: Running '$name'");
-            try {
-                $job->run(new CronOptions());
-            } catch (\Throwable $e) {
-                $this->logger->error("cron: '$name' failed", ['exception' => $e]);
-            }
-        }
+        $this->manager->runDueJobs($force);
 
         return 0;
     }
