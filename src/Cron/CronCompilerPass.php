@@ -20,10 +20,10 @@ class CronCompilerPass implements CompilerPassInterface
 
     public function process(ContainerBuilder $container)
     {
-        if (!$container->has(CronCommand::class)) {
+        if (!$container->has(CronManager::class)) {
             return;
         }
-        $definition = $container->findDefinition(CronCommand::class);
+        $definition = $container->findDefinition(CronManager::class);
         $taggedServices = $container->findTaggedServiceIds(self::TAG);
         foreach ($taggedServices as $id => $tags) {
             $definition->addMethodCall('addJob', [new Reference($id)]);

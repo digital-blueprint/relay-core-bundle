@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\DependencyInjection;
 
 use Dbp\Relay\CoreBundle\Auth\ProxyAuthenticator;
+use Dbp\Relay\CoreBundle\Cron\CronManager;
 use Dbp\Relay\CoreBundle\DB\MigrateCommand;
 use Dbp\Relay\CoreBundle\Queue\TestMessage;
 use Dbp\Relay\CoreBundle\Queue\Utils as QueueUtils;
@@ -36,7 +37,7 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
         $cronCacheDef->setArguments(['core-cron', 0, '%kernel.cache_dir%/dbp/relay/core-cron']);
         $cronCacheDef->addTag('cache.pool');
 
-        $definition = $container->getDefinition('Dbp\Relay\CoreBundle\Cron\CronCommand');
+        $definition = $container->getDefinition(CronManager::class);
         $definition->addMethodCall('setCache', [$cronCacheDef]);
 
         $definition = $container->getDefinition(MigrateCommand::class);
