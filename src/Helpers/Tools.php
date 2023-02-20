@@ -40,4 +40,13 @@ class Tools
     {
         return $str === null || $str === '';
     }
+
+    public static function pushToSubarray(array &$parentArray, $childArrayKey, $value)
+    {
+        if (!isset($parentArray[$childArrayKey])) {
+            $parentArray[$childArrayKey] = [$value];
+        } else {
+            $parentArray[$childArrayKey][] = $value;
+        }
+    }
 }

@@ -82,9 +82,7 @@ abstract class AbstractLocalDataEventSubscriber extends AbstractAuthorizationSer
             $rightExpressions[$localDataAttributeName] = $configMappingEntry[self::AUTHORIZATION_EXPRESSION_CONFIG_NODE] ?? 'false';
         }
 
-        if (!empty($rightExpressions)) {
-            parent::setConfig(parent::createConfig($rightExpressions));
-        }
+        parent::configure($rightExpressions);
     }
 
     public static function getSubscribedEvents(): array

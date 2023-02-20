@@ -11,9 +11,6 @@ use Dbp\Relay\CoreBundle\ExpressionLanguage\ExpressionLanguage;
  */
 class AuthorizationExpressionChecker
 {
-    public const ROLES_CONFIG_NODE = 'roles';
-    public const ATTRIBUTES_CONFIG_NODE = 'attributes';
-
     private const USER_VARIBLE_NAME = 'user';
     private const DEFAULT_OBJECT_VARIBLE_NAME = 'object';
 
@@ -21,7 +18,7 @@ class AuthorizationExpressionChecker
     private $expressionLanguage;
 
     /** @var array */
-    private $rightExpressions;
+    private $roleExpressions;
 
     /** @var array */
     private $attributeExpressions;
@@ -30,7 +27,7 @@ class AuthorizationExpressionChecker
     private $dataMux;
 
     /** @var array */
-    private $rightExpressionStack;
+    private $roleExpressionStack;
 
     /** @var array */
     private $attributeExpressionStack;
@@ -38,17 +35,17 @@ class AuthorizationExpressionChecker
     public function __construct(AuthorizationDataMuxer $dataMux)
     {
         $this->expressionLanguage = new ExpressionLanguage();
-        $this->rightExpressions = [];
+        $this->roleExpressions = [];
         $this->attributeExpressions = [];
         $this->dataMux = $dataMux;
-        $this->rightExpressionStack = [];
+        $this->roleExpressionStack = [];
         $this->attributeExpressionStack = [];
     }
 
-    public function setConfig(array $config)
+    public function setExpressions(array $roleExpressions, array $attributeExpressions)
     {
-        $this->loadExpressions($config[self::ROLES_CONFIG_NODE] ?? [], $this->rightExpressions);
-        $this->loadExpressions($config[self::ATTRIBUTES_CONFIG_NODE] ?? [], $this->attributeExpressions);
+        $this->roleExpressions = $roleExpressions;
+        $this->attributeExpressions = $attributeExpressions;
     }
 
     /**
@@ -98,13 +95,13 @@ class AuthorizationExpressionChecker
      */
     public function isGranted(AuthorizationUser $currentAuthorizationUser, string $rightName, $object, string $objectAlias = null): bool
     {
-        if (in_array($rightName, $this->rightExpressionStack, true)) {
+        if (in_array($rightName, $this->roleExpressionStack, true)) {
             throw new AuthorizationException(sprintf('infinite loop caused by authorization right expression %s detected', $rightName), AuthorizationException::INFINITE_EXRPESSION_LOOP_DETECTED);
         }
-        array_push($this->rightExpressionStack, $rightName);
+        array_push($this->roleExpressionStack, $rightName);
 
         try {
-            $rightExpression = $this->rightExpressions[$rightName] ?? null;
+            $rightExpression = $this->roleExpressions[$rightName] ?? null;
             if ($rightExpression === null) {
                 throw new AuthorizationException(sprintf('right \'%s\' undefined', $rightName), AuthorizationException::PRIVILEGE_UNDEFINED);
             }
@@ -114,14 +111,7 @@ class AuthorizationExpressionChecker
                 $objectAlias ?? self::DEFAULT_OBJECT_VARIBLE_NAME => $object,
             ]);
         } finally {
-            array_pop($this->rightExpressionStack);
-        }
-    }
-
-    private function loadExpressions(array $expressions, array &$target): void
-    {
-        foreach ($expressions as $name => $expression) {
-            $target[$name] = $expression;
+            array_pop($this->roleExpressionStack);
         }
     }
 }
