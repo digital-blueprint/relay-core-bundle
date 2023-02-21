@@ -55,21 +55,28 @@ abstract class AbstractAuthorizationService implements ContextAwareNormalizerInt
     {
         $this->userAuthorizationChecker = new AuthorizationExpressionChecker($mux);
         $this->currentAuthorizationUser = new AuthorizationUser($userSession, $this->userAuthorizationChecker);
+
         $this->loadConfig();
     }
 
+    /**
+     * Method for bundle config injection. Don't call in your code  (use @see AbstractAuthorizationService::configure()).
+     */
     public function setConfig(array $config)
     {
         $this->config = $config[AuthorizationConfigDefinition::AUTHORIZATION_CONFIG_NODE] ?? [];
+
         $this->loadConfig();
     }
 
-    public function configure(array $roleMapping = [], array $attributeMapping = []): void
+    public function configure(array $roles = [], array $attributes = [], array $entities = []): void
     {
         $this->config = [
-            AuthorizationConfigDefinition::ROLES_CONFIG_NODE => $roleMapping,
-            AuthorizationConfigDefinition::ATTRIBUTES_CONFIG_NODE => $attributeMapping,
+            AuthorizationConfigDefinition::ROLES_CONFIG_NODE => $roles,
+            AuthorizationConfigDefinition::ATTRIBUTES_CONFIG_NODE => $attributes,
+            AuthorizationConfigDefinition::ENTITIES_CONFIG_NODE => $entities,
         ];
+
         $this->loadConfig();
     }
 
@@ -105,6 +112,8 @@ abstract class AbstractAuthorizationService implements ContextAwareNormalizerInt
 
     /**
      * {@inheritdoc}
+     *
+     * @return array|string|int|float|bool|\ArrayObject|null
      */
     public function normalize($object, $format = null, array $context = [])
     {
@@ -144,6 +153,8 @@ abstract class AbstractAuthorizationService implements ContextAwareNormalizerInt
     }
 
     /**
+     * {@inheritdoc}
+     *
      * @return mixed
      */
     public function denormalize($data, string $type, string $format = null, array $context = [])
