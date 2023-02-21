@@ -99,6 +99,7 @@ class AuthorizationConfigDefinition
                 ->defaultValue($entityDefinition[self::ENTITY_CLASS_NAME_KEY])
                 ->info('The entity class name. There is no need to change the default value.')
                 ->end();
+
             $entityReadAccessChildBuilder = $entityChildBuilder->arrayNode(self::ENTITY_READ_ACCESS_CONFIG_NODE)
                 ->children();
             foreach ($entityDefinition[self::ENTITY_READ_ACCESS_KEY] ?? [] as $attributeName) {
@@ -108,7 +109,7 @@ class AuthorizationConfigDefinition
                     ->end();
             }
 
-            $entityWriteAccessChildBuilder = $entitiesNodeChildBuilder->arrayNode(self::ENTITY_WRITE_ACCESS_CONFIG_NODE)
+            $entityWriteAccessChildBuilder = $entityChildBuilder->arrayNode(self::ENTITY_WRITE_ACCESS_CONFIG_NODE)
                 ->children();
             foreach ($entityDefinition[self::ENTITY_WRITE_ACCESS_KEY] ?? [] as $attributeName) {
                 $entityWriteAccessChildBuilder->scalarNode($attributeName)
