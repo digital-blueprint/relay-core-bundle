@@ -10,6 +10,7 @@ use Dbp\Relay\CoreBundle\ExpressionLanguage\ExpressionFunctionProviders\MapExpre
 use Dbp\Relay\CoreBundle\ExpressionLanguage\ExpressionFunctionProviders\PhpArrayExpressionFunctionProvider;
 use Dbp\Relay\CoreBundle\ExpressionLanguage\ExpressionFunctionProviders\PhpNumericExpressionFunctionProvider;
 use Dbp\Relay\CoreBundle\ExpressionLanguage\ExpressionFunctionProviders\PhpStringExpressionFunctionProvider;
+use Dbp\Relay\CoreBundle\ExpressionLanguage\ExpressionFunctionProviders\StringExpressionFunctionProvider;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage as SymfonyExpressionLanguage;
 
@@ -24,6 +25,7 @@ class ExpressionLanguage extends SymfonyExpressionLanguage
             new PhpNumericExpressionFunctionProvider(),
             new PhpStringExpressionFunctionProvider(),
             new ArrayExpressionFunctionProvider(),
+            new StringExpressionFunctionProvider(),
         ], $providers);
 
         parent::__construct($cache, $providers);
