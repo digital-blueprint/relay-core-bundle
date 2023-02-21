@@ -213,7 +213,6 @@ abstract class AbstractAuthorizationService implements ContextAwareNormalizerInt
     {
         $roleExpressions = [];
         foreach ($entitiesConfigNode as $entityShortName => $entityNode) {
-            dump($entityNode);
             $entityClassName = $entityNode[AuthorizationConfigDefinition::ENTITY_CLASS_NAME_CONFIG_NODE];
             $attributeNames = [];
 
