@@ -15,6 +15,7 @@ class PhpArrayExpressionFunctionProvider implements ExpressionFunctionProviderIn
             ExpressionFunction::fromPhp('count'),
             ExpressionFunction::fromPhp('implode'),
             ExpressionFunction::fromPhp('explode'),
+            ExpressionFunction::fromPhp('array_key_exists'),
         ];
     }
 }

@@ -19,13 +19,6 @@ class ArrayExpressionFunctionProvider implements ExpressionFunctionProviderInter
                 function ($arguments, $varName): bool {
                     return empty($varName);
                 }),
-            new ExpressionFunction('array_key_exists',
-                function (string $keyName, string $arrayName): string {
-                    return sprintf('array_key_exists(%s, %s)', $keyName, $arrayName);
-                },
-                function ($arguments, $keyName, $arrayName): bool {
-                    return array_key_exists($keyName, $arrayName);
-                }),
         ];
     }
 }
