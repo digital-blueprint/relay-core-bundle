@@ -141,4 +141,9 @@ class ExpressionExtension
 
         return $filteredResult;
     }
+
+    public static function isNullOrEmpty($value)
+    {
+        return $value === null || $value === '';
+    }
 }

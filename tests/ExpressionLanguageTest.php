@@ -108,6 +108,9 @@ class ExpressionLanguageTest extends TestCase
         $this->assertSame('foo', $lang->evaluate('substr("foobar", 0, 3)'));
         $this->assertSame(1, $lang->evaluate('strpos("foobar", "oo")'));
         $this->assertSame(6, $lang->evaluate('strlen("foobar")'));
+        $this->assertFalse($lang->evaluate('isNullOrEmpty("foobar")'));
+        $this->assertTrue($lang->evaluate('isNullOrEmpty(null)'));
+        $this->assertTrue($lang->evaluate('isNullOrEmpty("")'));
 
         $this->assertTrue($lang->evaluate('relay.str_starts_with("foo", "fo")'));
         $this->assertFalse($lang->evaluate('relay.str_starts_with("foo", "xo")'));
@@ -116,5 +119,8 @@ class ExpressionLanguageTest extends TestCase
         $this->assertSame('foo', $lang->evaluate('relay.substr("foobar", 0, 3)'));
         $this->assertSame(1, $lang->evaluate('relay.strpos("foobar", "oo")'));
         $this->assertSame(6, $lang->evaluate('relay.strlen("foobar")'));
+        $this->assertFalse($lang->evaluate('relay.isNullOrEmpty("foobar")'));
+        $this->assertTrue($lang->evaluate('relay.isNullOrEmpty(null)'));
+        $this->assertTrue($lang->evaluate('relay.isNullOrEmpty("")'));
     }
 }
