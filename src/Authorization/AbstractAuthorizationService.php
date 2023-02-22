@@ -160,7 +160,7 @@ abstract class AbstractAuthorizationService implements ContextAwareNormalizerInt
     public function denormalize($data, string $type, string $format = null, array $context = [])
     {
         $entityClassName = $type;
-        $mapEntry = $this->entityClassNameToReadAttributeNamesMapping[$entityClassName];
+        $mapEntry = $this->entityClassNameToWriteAttributeNamesMapping[$entityClassName];
         $entityShortName = $mapEntry[self::ENTITY_SHORT_NAME_KEY];
 
         foreach ($mapEntry[self::ENTITY_ATTRIBUTE_NAMES_KEY] as $attributeName) {
