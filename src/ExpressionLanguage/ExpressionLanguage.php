@@ -30,4 +30,15 @@ class ExpressionLanguage extends SymfonyExpressionLanguage
 
         parent::__construct($cache, $providers);
     }
+
+    /**
+     * @return mixed
+     */
+    public function evaluate($expression, array $values = [])
+    {
+        $ext = new ExpressionExtension($this);
+        $values['relay'] = $ext;
+
+        return parent::evaluate($expression, $values);
+    }
 }
