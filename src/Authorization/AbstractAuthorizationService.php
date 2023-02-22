@@ -225,6 +225,7 @@ abstract class AbstractAuthorizationService implements ContextAwareNormalizerInt
                 self::ENTITY_ATTRIBUTE_NAMES_KEY => $attributeNames,
             ];
 
+            $attributeNames = [];
             foreach ($entityNode[AuthorizationConfigDefinition::ENTITY_WRITE_ACCESS_CONFIG_NODE] ?? [] as $attributeName => $attributeAuthorizationExpression) {
                 $roleExpressions[self::toWriteAttributeId($entityShortName, $attributeName)] = $attributeAuthorizationExpression;
                 $attributeNames[] = $attributeName;
