@@ -16,9 +16,9 @@ class LoggingProcessorTest extends WebTestCase
     {
         $processor = new LoggingProcessor(new TestUserSession('some-random-user-id'), new RequestStack());
 
-        $record = ['message' => 'http://foo.bar?token=secret'];
+        $record = ['message' => 'http://foo.bar?token=secret', 'channel' => 'app'];
         $record = $processor->__invoke($record);
-        $this->assertSame(['message' => 'http://foo.bar?token=hidden', 'context' => ['relay-session-id' => 'logging-id']], $record);
+        $this->assertSame(['message' => 'http://foo.bar?token=hidden', 'channel' => 'app', 'context' => ['relay-session-id' => 'logging-id']], $record);
     }
 
     public function testRequestId()
@@ -27,7 +27,7 @@ class LoggingProcessorTest extends WebTestCase
         $stack->push(new Request());
         $processor = new LoggingProcessor(new TestUserSession('some-random-user-id'), $stack);
 
-        $record = ['message' => 'foo'];
+        $record = ['message' => 'foo', 'channel' => 'app'];
         $processed = $processor->__invoke($record);
         $this->assertArrayHasKey('relay-request-id', $processed['context']);
         $processed2 = $processor->__invoke($record);
@@ -37,9 +37,9 @@ class LoggingProcessorTest extends WebTestCase
     public function testSessionId()
     {
         $processor = new LoggingProcessor(new TestUserSession('log'), new RequestStack());
-        $record = ['message' => 'foobar'];
+        $record = ['message' => 'foobar', 'channel' => 'app'];
         $record = $processor->__invoke($record);
-        $this->assertSame(['message' => 'foobar', 'context' => ['relay-session-id' => 'logging-id']], $record);
+        $this->assertSame(['message' => 'foobar', 'channel' => 'app', 'context' => ['relay-session-id' => 'logging-id']], $record);
     }
 
     public function testRoute()
@@ -49,7 +49,7 @@ class LoggingProcessorTest extends WebTestCase
         $request->attributes->set('_route', 'some_route');
         $stack->push($request);
         $processor = new LoggingProcessor(new TestUserSession('log'), $stack);
-        $record = ['message' => 'foobar'];
+        $record = ['message' => 'foobar', 'channel' => 'app'];
         $record = $processor->__invoke($record);
         $this->assertSame('some_route', $record['context']['relay-route']);
     }
@@ -62,17 +62,38 @@ class LoggingProcessorTest extends WebTestCase
             'message' => 'hello some-random-user-id!',
             'extra' => ['foo' => 'some-random-user-id'],
             'context' => ['foo' => 'some-random-user-id'],
+            'channel' => 'app',
         ];
         $record = $processor->__invoke($record);
         $this->assertSame([
             'message' => 'hello *****!',
             'extra' => ['foo' => '*****'],
-            'context' => ['foo' => '*****', 'relay-session-id' => 'logging-id'], ], $record);
+            'context' => ['foo' => '*****', 'relay-session-id' => 'logging-id'],
+            'channel' => 'app', ], $record);
 
         // Don't mask when contained in a word
         $processor = new LoggingProcessor(new TestUserSession('log'), new RequestStack());
-        $record = ['message' => 'logging log'];
+        $record = ['message' => 'logging log', 'channel' => 'app'];
         $record = $processor->__invoke($record);
-        $this->assertSame(['message' => 'logging *****', 'context' => ['relay-session-id' => 'logging-id']], $record);
+        $this->assertSame(['message' => 'logging *****', 'channel' => 'app', 'context' => ['relay-session-id' => 'logging-id']], $record);
+    }
+
+    public function testNoMasking()
+    {
+        $processor = new LoggingProcessor(new TestUserSession('some-random-user-id'), new RequestStack());
+        $record = [
+            'message' => 'hello some-random-user-id!',
+            'channel' => 'mychannel',
+        ];
+        $result = $processor->__invoke($record);
+        $this->assertSame('hello *****!', $result['message']);
+
+        $processor->setMaskConfig(['mychannel' => true]);
+        $result = $processor->__invoke($record);
+        $this->assertSame('hello *****!', $result['message']);
+
+        $processor->setMaskConfig(['mychannel' => false]);
+        $result = $processor->__invoke($record);
+        $this->assertSame('hello some-random-user-id!', $result['message']);
     }
 }

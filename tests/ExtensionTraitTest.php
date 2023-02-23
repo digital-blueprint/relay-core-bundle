@@ -30,6 +30,8 @@ class ExtensionTraitTest extends TestCase
         $this->assertTrue($params->has('dbp_api.allow_headers'));
         $this->registerEntityManager($builder, 'some_entity_manager');
         $this->assertTrue($params->has('dbp_api.entity_managers'));
+        $this->registerLoggingChannel($builder, 'mychannel', false);
+        $this->assertTrue($params->has('dbp_api.logging_channels'));
     }
 
     public function testCalledTooLate()
