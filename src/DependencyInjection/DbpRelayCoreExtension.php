@@ -7,6 +7,7 @@ namespace Dbp\Relay\CoreBundle\DependencyInjection;
 use Dbp\Relay\CoreBundle\Auth\ProxyAuthenticator;
 use Dbp\Relay\CoreBundle\Cron\CronManager;
 use Dbp\Relay\CoreBundle\DB\MigrateCommand;
+use Dbp\Relay\CoreBundle\Logging\LoggingProcessor;
 use Dbp\Relay\CoreBundle\Queue\TestMessage;
 use Dbp\Relay\CoreBundle\Queue\Utils as QueueUtils;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
@@ -46,11 +47,35 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
             $entityManagers = $container->getParameter('dbp_api.entity_managers');
         }
         $definition->addMethodCall('setEntityManagers', [$entityManagers]);
+
+        $definition = $container->getDefinition(LoggingProcessor::class);
+        $definition->addMethodCall('setMaskConfig', [self::getLoggingChannels($container)]);
+    }
+
+    /**
+     * Gives a mapping of all register logging channels.
+     *
+     * @return array<string,bool>
+     */
+    private static function getLoggingChannels(ContainerBuilder $container): array
+    {
+        $channels = [];
+        if ($container->hasParameter('dbp_api.logging_channels')) {
+            $data = $container->getParameter('dbp_api.logging_channels');
+
+            foreach ($data as $entry) {
+                $name = $entry[0];
+                $mask = $entry[1];
+                $channels[$name] = $mask;
+            }
+        }
+
+        return $channels;
     }
 
     public function prepend(ContainerBuilder $container)
     {
-        foreach (['api_platform', 'nelmio_cors', 'twig', 'security', 'framework'] as $extKey) {
+        foreach (['api_platform', 'nelmio_cors', 'twig', 'security', 'framework', 'monolog'] as $extKey) {
             if (!$container->hasExtension($extKey)) {
                 throw new \Exception("'".$this->getAlias()."' requires the '$extKey' bundle to be loaded");
             }
@@ -185,6 +210,11 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
                 'app_env' => '%kernel.environment%',
                 'app_debug' => '%kernel.debug%',
             ]),
+        ]);
+
+        // Register extra bundle logging channels
+        $container->loadFromExtension('monolog', [
+            'channels' => array_keys(self::getLoggingChannels($container)),
         ]);
 
         $routing = [

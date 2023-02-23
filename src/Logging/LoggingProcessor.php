@@ -14,10 +14,23 @@ final class LoggingProcessor
     private $userDataProvider;
     private $requestStack;
 
+    /**
+     * @var array<string,bool>
+     */
+    private $maskConfig;
+
     public function __construct(UserSessionInterface $userDataProvider, RequestStack $requestStack)
     {
         $this->userDataProvider = $userDataProvider;
         $this->requestStack = $requestStack;
+    }
+
+    /**
+     * @param array<string,bool> $maskConfig
+     */
+    public function setMaskConfig(array $maskConfig): void
+    {
+        $this->maskConfig = $maskConfig;
     }
 
     private function maskUserId(array &$record)
@@ -36,11 +49,13 @@ final class LoggingProcessor
 
     public function __invoke(array $record)
     {
-        // Try to avoid information leaks (users should still not log sensitive information though...)
-        $record['message'] = CoreTools::filterErrorMessage($record['message']);
+        if ($this->maskConfig[$record['channel']] ?? true) {
+            // Try to avoid information leaks (users should still not log sensitive information though...)
+            $record['message'] = CoreTools::filterErrorMessage($record['message']);
 
-        // Mask the user identifier
-        $this->maskUserId($record);
+            // Mask the user identifier
+            $this->maskUserId($record);
+        }
 
         // Add a session ID (the same during multiple requests for the same user session)
         $record['context']['relay-session-id'] = $this->userDataProvider->getSessionLoggingId();

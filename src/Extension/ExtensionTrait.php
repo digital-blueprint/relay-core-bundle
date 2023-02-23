@@ -110,4 +110,17 @@ trait ExtensionTrait
     {
         $this->addQueueMessageClass($container, $messageClass);
     }
+
+    /**
+     * Registers a new channel with monolog.
+     *
+     * @param $mask - If false potential secrets and PII won't be masked from the logs. For example for audit logs.
+     */
+    public function registerLoggingChannel(ContainerBuilder $container, string $channelName, bool $mask = true): void
+    {
+        $this->ensureInPrepend($container);
+        $this->extendArrayParameter(
+            $container, 'dbp_api.logging_channels', [[$channelName, $mask]]
+        );
+    }
 }
