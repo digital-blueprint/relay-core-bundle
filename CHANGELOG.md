@@ -1,3 +1,9 @@
+# v0.1.82
+
+* extension: add registerLoggingChannel() for registering a new logging channel
+* logging: Allow disabling log masking via registerLoggingChannel() for specific channels
+* bundle: this bundle now depends on the monolog bundle and requires it to be loaded
+
 # v0.1.76
 
 * cron: The `dbp:relay:core:cron` command will no longer run all jobs the first
