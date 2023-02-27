@@ -29,7 +29,6 @@ abstract class AbstractGetAttributeSubscriber implements EventSubscriberInterfac
     public function onGetAttributeEvent(GetAttributeEvent $event)
     {
         try {
-            dump($this->getNewAttributes());
             array_push($this->eventStack, $event);
             $attributeName = $event->getAttributeName();
 
