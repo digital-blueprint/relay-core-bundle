@@ -11,7 +11,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 abstract class AbstractGetAttributeSubscriber implements EventSubscriberInterface
 {
     /** @var array */
-    private $eventStack;
+    private $eventStack = [];
 
     public static function getSubscribedEvents(): array
     {
@@ -19,11 +19,6 @@ abstract class AbstractGetAttributeSubscriber implements EventSubscriberInterfac
             GetAvailableAttributesEvent::class => 'onGetAvailableAttributes',
             GetAttributeEvent::class => 'onGetAttributeEvent',
         ];
-    }
-
-    public function __construct()
-    {
-        $this->eventStack = [];
     }
 
     public function onGetAvailableAttributes(GetAvailableAttributesEvent $event)
@@ -34,6 +29,7 @@ abstract class AbstractGetAttributeSubscriber implements EventSubscriberInterfac
     public function onGetAttributeEvent(GetAttributeEvent $event)
     {
         try {
+            dump($this->getNewAttributes());
             array_push($this->eventStack, $event);
             $attributeName = $event->getAttributeName();
 
