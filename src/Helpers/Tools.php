@@ -41,12 +41,33 @@ class Tools
         return $str === null || $str === '';
     }
 
-    public static function pushToSubarray(array &$parentArray, $childArrayKey, $value)
+    public static function pushToSubarray(array &$parentArray, $childArrayKey, $value): array
     {
         if (!isset($parentArray[$childArrayKey])) {
             $parentArray[$childArrayKey] = [$value];
         } else {
             $parentArray[$childArrayKey][] = $value;
         }
+
+        return $parentArray;
+    }
+
+    /**
+     * Removes all occurrences of @see $value in @see $targetArray.
+     *
+     * @param bool $doReindex         if @see true, array elements will be reindexed, otherwise they will remain unchanged
+     * @param bool $doCompareStrictly if @see true, strict camparison (===) will be for the array search
+     */
+    public static function removeValueFromArray(array &$targetArray, $value, bool $doReindex = false, bool $doCompareStrictly = true): array
+    {
+        foreach (array_keys($targetArray, $value, $doCompareStrictly) as $key) {
+            if ($doReindex) {
+                array_splice($targetArray, $key, 1);
+            } else {
+                unset($targetArray[$key]);
+            }
+        }
+
+        return $targetArray;
     }
 }
