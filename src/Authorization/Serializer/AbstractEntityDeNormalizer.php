@@ -170,7 +170,7 @@ class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements
     {
     }
 
-    private function loadConfig(array $entityConfigNodes): array
+    private function loadConfig(array $entityConfigNodes): void
     {
         $roleExpressions = [];
         foreach ($entityConfigNodes as $entityShortName => $entityNode) {
@@ -197,7 +197,7 @@ class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements
             ];
         }
 
-        return $roleExpressions;
+        $this->configure($roleExpressions);
     }
 
     private static function toReadAttributeId(string $entityShortName, string $attributeName): string
