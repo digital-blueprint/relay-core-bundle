@@ -19,13 +19,12 @@ abstract class AbstractAuthorizationService implements ContextAwareNormalizerInt
     use NormalizerAwareTrait;
     use DenormalizerAwareTrait;
 
-    /* internal array keys */
     private const ENTITY_SHORT_NAME_KEY = 'short_name';
     private const ENTITY_CLASS_NAME_KEY = 'class_name';
-
     private const ENTITY_ATTRIBUTE_NAMES_KEY = 'attribute_names';
-    private const ENTITY_OBJECT_ALIAS = 'entity';
+
     private const CONTEXT_GROUPS_KEY = 'groups';
+    private const ENTITY_OBJECT_ALIAS = 'entity';
 
     /** @var AuthorizationExpressionChecker */
     private $userAuthorizationChecker;
@@ -41,6 +40,13 @@ abstract class AbstractAuthorizationService implements ContextAwareNormalizerInt
 
     /** @var array */
     private $entityClassNameToWriteAttributeNamesMapping;
+
+    public static function showAttributes(array &$context, string $entityShortName, array $attributeNames)
+    {
+        foreach ($attributeNames as $attributeName) {
+            $context[self::CONTEXT_GROUPS_KEY][] = self::toReadAttributeId($entityShortName, $attributeName);
+        }
+    }
 
     public function __construct()
     {
