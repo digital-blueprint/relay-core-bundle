@@ -1,6 +1,6 @@
 # Overview
 
-Source: https://gitlab.tugraz.at/dbp/relay/dbp-relay-core-bundle
+Source: https://github.com/digital-blueprint/relay-core-bundle
 
 The core bundle is the central bundle that needs to be installed in every Relay API
 gateway and also is a dependency of every other API bundle.
