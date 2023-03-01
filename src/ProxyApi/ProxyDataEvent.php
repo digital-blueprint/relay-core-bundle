@@ -8,8 +8,6 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class ProxyDataEvent extends Event
 {
-    public const NAME = 'dbp.relay.core_bundle.proxy_data';
-
     /** @var ProxyDataInterface */
     private $proxyData;
 

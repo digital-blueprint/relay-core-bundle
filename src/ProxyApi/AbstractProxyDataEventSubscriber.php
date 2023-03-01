@@ -15,7 +15,7 @@ abstract class AbstractProxyDataEventSubscriber implements EventSubscriberInterf
     public static function getSubscribedEvents(): array
     {
         return [
-            ProxyDataEvent::NAME.'.'.static::getSubscribedNamespace() => 'onProxyDataEvent',
+            ProxyDataEvent::class.'.'.static::getSubscribedNamespace() => 'onProxyDataEvent',
         ];
     }
 
