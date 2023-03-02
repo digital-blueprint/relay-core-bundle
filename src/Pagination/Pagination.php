@@ -6,11 +6,12 @@ namespace Dbp\Relay\CoreBundle\Pagination;
 
 class Pagination
 {
-    private const CURRENT_PAGE_NUMBER_DEFAULT = 1;
     public const MAX_NUM_ITEMS_PER_PAGE_DEFAULT = 30;
 
-    private const CURRENT_PAGE_NUMBER_PARAMETER_NAME = 'page';
-    private const MAX_NUM_ITEMS_PER_PAGE_PARAMETER_NAME = 'perPage';
+    public const CURRENT_PAGE_NUMBER_PARAMETER_NAME = 'page';
+    public const MAX_NUM_ITEMS_PER_PAGE_PARAMETER_NAME = 'perPage';
+
+    private const CURRENT_PAGE_NUMBER_DEFAULT = 1;
 
     public static function getCurrentPageNumber(array $options): int
     {
