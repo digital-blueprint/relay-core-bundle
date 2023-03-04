@@ -9,7 +9,7 @@
         "ext-intl": "*",
         "ext-json": "*",
         "api-platform/core": "^2.6.8 <2.7.0",
-        "doctrine/annotations": "^1.13",
+        "doctrine/annotations": "^2.0",
         "dragonmantank/cron-expression": "^3.3",
         "guzzlehttp/guzzle": "^7.5",
         "kevinrob/guzzle-cache-middleware": "^4.0",
