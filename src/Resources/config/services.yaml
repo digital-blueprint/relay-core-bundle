@@ -113,7 +113,7 @@ services:
     autowire: true
     autoconfigure: true
 
-  Dbp\Relay\CoreBundle\Authorization\EventSubsriber\ProxyDataEventSubscriber:
+  Dbp\Relay\CoreBundle\Authorization\EventSubscriber\ProxyDataEventSubscriber:
     autowire: true
     autoconfigure: true
 

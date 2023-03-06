@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Authorization\EventSubscriber;
 
-use Dbp\Relay\CoreBundle\Authorization\AuthorizationDataProviderProvider;
+use Dbp\Relay\CoreBundle\Authorization\AuthorizationDataMuxer;
 use Dbp\Relay\CoreBundle\ProxyApi\AbstractProxyDataEventSubscriber;
 use Exception;
 
@@ -17,17 +17,15 @@ class ProxyDataEventSubscriber extends AbstractProxyDataEventSubscriber
 
     public const USER_ID_PARAMETER_NAME = 'userId';
 
-    /**
-     * @var AuthorizationDataProviderProvider
-     */
-    private $provider;
+    /** @var AuthorizationDataMuxer */
+    private $authorizationDataMuxer;
 
     /** @var bool */
     private static $isCurrentlyActive = false;
 
-    public function __construct(AuthorizationDataProviderProvider $provider)
+    public function __construct(AuthorizationDataMuxer $authorizationDataMuxer)
     {
-        $this->provider = $provider;
+        $this->authorizationDataMuxer = $authorizationDataMuxer;
     }
 
     /**
@@ -77,21 +75,15 @@ class ProxyDataEventSubscriber extends AbstractProxyDataEventSubscriber
 
     private function getAvailableAttributes(): array
     {
-        $availableAttributes = [];
-
-        foreach ($this->provider->getAuthorizationDataProviders() as $provider) {
-            $availableAttributes = array_merge($availableAttributes, $provider->getAvailableAttributes());
-        }
-
-        return $availableAttributes;
+        return $this->authorizationDataMuxer->getAvailableAttributes();
     }
 
-    private function getUserAttributes(string $userId): array
+    private function getUserAttributes(string $userIdentifier): array
     {
         $userAttributes = [];
 
-        foreach ($this->provider->getAuthorizationDataProviders() as $provider) {
-            $userAttributes = array_merge($userAttributes, $provider->getUserAttributes($userId));
+        foreach ($this->authorizationDataMuxer->getAvailableAttributes() as $attributeName) {
+            $userAttributes[$attributeName] = $this->authorizationDataMuxer->getAttribute($userIdentifier, $attributeName);
         }
 
         return $userAttributes;
