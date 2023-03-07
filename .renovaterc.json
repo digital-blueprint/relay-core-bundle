@@ -26,6 +26,14 @@
     {
       "matchPackageNames": ["vimeo/psalm"],
       "allowedVersions": "<5"
+    },
+    {
+      "matchPackageNames": ["doctrine/annotations"],
+      "allowedVersions": "<2"
+    },
+    {
+      "matchPackageNames": ["phpunit/phpunit"],
+      "allowedVersions": "<10"
     }
   ],
   "js": {
