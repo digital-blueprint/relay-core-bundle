@@ -17,8 +17,8 @@ class TestEntityLocalDataEventSubscriber extends AbstractLocalDataPostEventSubsc
             ];
     }
 
-    protected function onPreEvent(LocalDataPreEvent $preEvent, array $localQueryParameters)
+    protected function onPreEvent(LocalDataPreEvent $preEvent, array $mappedQueryParameters)
     {
-        $preEvent->setOptions($localQueryParameters);
+        $preEvent->setOptions($mappedQueryParameters);
     }
 }

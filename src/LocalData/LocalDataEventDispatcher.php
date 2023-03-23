@@ -6,49 +6,41 @@ namespace Dbp\Relay\CoreBundle\LocalData;
 
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Helpers\ApiPlatformHelperFunctions;
-use Dbp\Relay\CoreBundle\Helpers\Tools;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\EventDispatcher\Event;
 
 class LocalDataEventDispatcher
 {
-    public const SEPARATOR = ',';
-
-    /** @var array */
-    private $queryParameters;
-
-    /** @var array */
-    private $requestedAttributes;
-
     /** @var string */
-    private $uniqueEntityName;
+    private $resourceClass;
+
+    /** @var array */
+    private $queryAttributes = [];
+
+    /** @var array */
+    private $localDataAttributes = [];
 
     /** @var EventDispatcherInterface */
     private $eventDispatcher;
 
     /**
-     * @param string                   $resourceClass    The class name of the entity (resource) this event dispatcher is responsible for
-     * @param EventDispatcherInterface $eventDispatcher  The inner event dispatcher that this event dispatcher decorates
-     * @param string|null              $uniqueEntityName The unique name of the entity. If not specified or empty, the 'shortName' attribute of the entities @ApiResource annotation is used.
+     * @param string                   $resourceClass   The class name of the entity (resource) this event dispatcher is responsible for
+     * @param EventDispatcherInterface $eventDispatcher The inner event dispatcher that this event dispatcher decorates
      */
-    public function __construct(string $resourceClass, EventDispatcherInterface $eventDispatcher, string $uniqueEntityName = null)
+    public function __construct(string $resourceClass, EventDispatcherInterface $eventDispatcher)
     {
-        $this->queryParameters = [];
-        $this->requestedAttributes = [];
-        $this->uniqueEntityName = !Tools::isNullOrEmpty($uniqueEntityName) ? $uniqueEntityName : self::getUniqueEntityName($resourceClass);
+        $this->resourceClass = $resourceClass;
         $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
      * To be called at the beginning of a new operation.
      */
-    public function onNewOperation(array &$options): void
+    public function onNewOperation(array $options): void
     {
-        $this->initIncludeParameters(LocalData::getIncludeParameter($options));
-        $this->initQueryParameters(LocalData::getQueryParameter($options));
-
-        LocalData::removeOptions($options);
+        $this->queryAttributes = LocalData::getLocalQueryAttributes($options);
+        $this->localDataAttributes = LocalData::getLocalDataAttributes($options);
     }
 
     /**
@@ -56,7 +48,7 @@ class LocalDataEventDispatcher
      */
     public function isAttributeRequested(string $attributeName): bool
     {
-        return in_array($attributeName, $this->requestedAttributes, true);
+        return in_array($attributeName, $this->localDataAttributes, true);
     }
 
     /**
@@ -65,14 +57,12 @@ class LocalDataEventDispatcher
      *
      * @param LocalDataAwareInterface $entity The entity whose local data attributes to check
      */
-    public function checkRequestedAttributesIdentical(LocalDataAwareInterface $entity)
+    public function checkRequestedAttributesIdentical(LocalDataAwareInterface $entity): bool
     {
-        assert(self::getUniqueEntityName(get_class($entity)) === $this->uniqueEntityName);
-
         $availableAttributes = $entity->getLocalData() ? array_keys($entity->getLocalData()) : [];
 
-        return count($this->requestedAttributes) === count($availableAttributes) &&
-            empty(array_diff($this->requestedAttributes, $availableAttributes));
+        return count($this->localDataAttributes) === count($availableAttributes) &&
+            empty(array_diff($this->localDataAttributes, $availableAttributes));
     }
 
     /**
@@ -81,135 +71,23 @@ class LocalDataEventDispatcher
     public function dispatch(Event $event, string $eventName = null): void
     {
         if ($event instanceof LocalDataPreEvent) {
-            $event->initQueryParameters($this->queryParameters);
+            $event->initQueryParameters($this->queryAttributes);
             $this->eventDispatcher->dispatch($event, $eventName);
 
             $pendingAttributes = $event->getPendingQueryParameters();
             if (count($pendingAttributes) !== 0) {
-                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf("the following local query attributes were not acknowledged for resource '%s': %s", $this->uniqueEntityName, implode(', ', array_keys($pendingAttributes))));
+                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf("the following local query attributes were not acknowledged for resource '%s': %s", ApiPlatformHelperFunctions::getShortNameForResource($this->resourceClass), implode(', ', array_keys($pendingAttributes))));
             }
         } elseif ($event instanceof LocalDataPostEvent) {
-            $event->initRequestedAttributes($this->requestedAttributes);
+            $event->initRequestedAttributes($this->localDataAttributes);
             $this->eventDispatcher->dispatch($event, $eventName);
 
             $pendingAttributes = $event->getPendingRequestedAttributes();
             if (count($pendingAttributes) !== 0) {
-                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf("the following requested local data attributes could not be provided for resource '%s': %s", $this->uniqueEntityName, implode(', ', $pendingAttributes)));
+                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf("the following requested local data attributes could not be provided for resource '%s': %s", ApiPlatformHelperFunctions::getShortNameForResource($this->resourceClass), implode(', ', $pendingAttributes)));
             }
         } else {
             $this->eventDispatcher->dispatch($event, $eventName);
         }
-    }
-
-    /**
-     * Returns the unique API resource name, i.e. short name, of this entity. For this to work, the ApiResource annotation
-     * of the entity has to include a non-empty 'shortName' attribute.
-     *
-     * @throws ApiError if the ApiResource annotation of $resourceClass doesn't have a non-empty 'shortName' attribute
-     */
-    public static function getUniqueEntityName(string $resourceClass): string
-    {
-        return ApiPlatformHelperFunctions::getShortNameForResource($resourceClass);
-    }
-
-    /**
-     * Parses the local data request parameter and extracts the list of requested attributes for this event dispatcher's entity (resource).
-     *
-     * @param ?string $includeParameter The value of the 'include' parameter as passed to a GET-operation
-     */
-    private function initIncludeParameters(?string $includeParameter): void
-    {
-        $this->requestedAttributes = [];
-
-        if (!Tools::isNullOrEmpty($includeParameter)) {
-            $requestedAttributes = explode(self::SEPARATOR, $includeParameter);
-
-            foreach ($requestedAttributes as $requestedAttribute) {
-                $requestedAttribute = trim($requestedAttribute);
-                if ($requestedAttribute !== '') {
-                    $uniqueEntityName = null;
-                    $uniqueAttributeName = null;
-                    if (!$this->parseLocalDataAttribute($requestedAttribute, $uniqueEntityName, $uniqueAttributeName)) {
-                        throw new ApiError(400, sprintf("value of '%s' parameter has invalid format: '%s' (Example: 'attr,ResourceName.attr2')", LocalData::INCLUDE_PARAMETER_NAME, $requestedAttribute));
-                    }
-
-                    if ($this->uniqueEntityName === $uniqueEntityName) {
-                        $this->requestedAttributes[] = $uniqueAttributeName;
-                    }
-                }
-            }
-            $this->requestedAttributes = array_unique($this->requestedAttributes);
-        }
-    }
-
-    private function initQueryParameters(?string $queryParameter)
-    {
-        $this->queryParameters = [];
-
-        if (!Tools::isNullOrEmpty($queryParameter)) {
-            $localQueryParameters = explode(self::SEPARATOR, $queryParameter);
-
-            foreach ($localQueryParameters as $localQueryParameter) {
-                $localQueryParameter = trim($localQueryParameter);
-                if ($localQueryParameter !== '') {
-                    $parameterKey = null;
-                    $parameterValue = null;
-                    $uniqueEntityName = null;
-                    $uniqueAttributeName = null;
-                    if (!$this->parseQueryParameterAssignment($localQueryParameter, $parameterKey, $parameterValue) ||
-                        !$this->parseLocalDataAttribute($parameterKey ?? '', $uniqueEntityName, $uniqueAttributeName)) {
-                        throw new ApiError(400, sprintf("'%s' parameter has invalid format: '%s' (Example: 'param1:val1,ResourceName.attr1:val2')", LocalData::QUERY_PARAMETER_NAME, $localQueryParameter));
-                    }
-
-                    if ($uniqueEntityName === $this->uniqueEntityName) {
-                        $this->queryParameters[$parameterKey] = $parameterValue;
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Parses a local data attribute of the form 'UniqueEntityName.attributeName'.
-     * NOTE: Due to possible performance impact, there is currently no regex check for valid entity and attribute names (i.e. PHP type/variable names).
-     *
-     * @retrun true if $localDataAttribute complies with the local attribute format, false otherwise
-     */
-    private function parseQueryParameterAssignment(string $parameterAssignment, ?string &$parameter, ?string &$value): bool
-    {
-        $parameter = null;
-        $value = null;
-
-        $parts = explode(':', $parameterAssignment);
-
-        if (count($parts) === 2) {
-            $parameter = $parts[0];
-            $value = $parts[1];
-        }
-
-        return !Tools::isNullOrEmpty($parameter) && !Tools::isNullOrEmpty($value);
-    }
-
-    /**
-     * Parses a local data attribute of the form 'UniqueEntityName.attributeName'.
-     * NOTE: Due to possible performance impact, there is currently no regex check for valid entity and attribute names (i.e. PHP type/variable names).
-     *
-     * @retrun true if $localDataAttribute complies with the local attribute format, false otherwise
-     */
-    private function parseLocalDataAttribute(string $localDataAttribute, ?string &$uniqueEntityName, ?string &$attributeName): bool
-    {
-        $uniqueEntityName = null;
-        $attributeName = null;
-
-        $parts = explode('.', $localDataAttribute);
-        if (count($parts) === 1) {
-            $uniqueEntityName = $this->uniqueEntityName;
-            $attributeName = $parts[0];
-        } elseif (count($parts) === 2) {
-            $uniqueEntityName = $parts[0];
-            $attributeName = $parts[1];
-        }
-
-        return !Tools::isNullOrEmpty($uniqueEntityName) && !Tools::isNullOrEmpty($attributeName);
     }
 }

@@ -7,15 +7,16 @@ namespace Dbp\Relay\CoreBundle\DataProvider;
 use ApiPlatform\Core\DataProvider\CollectionDataProviderInterface;
 use ApiPlatform\Core\DataProvider\ItemDataProviderInterface;
 use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
+use Dbp\Relay\CoreBundle\Exception\ApiError;
+use Dbp\Relay\CoreBundle\LocalData\AbstractLocalDataAuthorizationService;
 use Dbp\Relay\CoreBundle\LocalData\LocalData;
 use Dbp\Relay\CoreBundle\Locale\Locale;
 use Dbp\Relay\CoreBundle\Pagination\Pagination;
 use Dbp\Relay\CoreBundle\Pagination\PartialPaginator;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Core\Security;
 
-abstract class AbstractDataProvider extends AbstractController implements RestrictedDataProviderInterface, ItemDataProviderInterface, CollectionDataProviderInterface
+abstract class AbstractDataProvider extends AbstractLocalDataAuthorizationService implements RestrictedDataProviderInterface, ItemDataProviderInterface, CollectionDataProviderInterface
 {
     protected const GET_COLLECTION_OPERATION = 1;
     protected const GET_ITEM_OPERATION = 2;
@@ -25,19 +26,16 @@ abstract class AbstractDataProvider extends AbstractController implements Restri
     /** @var Locale */
     private $locale;
 
-    /**
-     * @deprecated Use default constructor
-     */
-    public function __construct(RequestStack $requestStack) /** @phpstan-ignore-line */
-    {
-    }
+    /** @var Security */
+    private $security;
 
     /**
      * @required
      */
-    public function setLocale(Locale $locale): void
+    public function __injectLocaleAndSecurity(Locale $locale, Security $security): void
     {
         $this->locale = $locale;
+        $this->security = $security;
     }
 
     public function supports(string $resourceClass, string $operationName = null, array $context = []): bool
@@ -47,7 +45,7 @@ abstract class AbstractDataProvider extends AbstractController implements Restri
 
     public function getCollection(string $resourceClass, string $operationName = null, array $context = []): PartialPaginator
     {
-        $this->onOperationStart(self::GET_COLLECTION_OPERATION);
+        $this->denyOperationAccessUnlessGranted(self::GET_COLLECTION_OPERATION);
 
         $filters = $context[self::FILTERS_KEY] ?? [];
 
@@ -55,39 +53,53 @@ abstract class AbstractDataProvider extends AbstractController implements Restri
         $maxNumItemsPerPage = Pagination::getMaxNumItemsPerPage($filters);
 
         return new PartialPaginator(
-            $this->getPage($currentPageNumber, $maxNumItemsPerPage, $filters, $this->getOptions($filters)),
+            $this->getPage($currentPageNumber, $maxNumItemsPerPage, $filters, $this->createOptions($filters)),
             $currentPageNumber, $maxNumItemsPerPage);
     }
 
     public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []): ?object
     {
-        $this->onOperationStart(self::GET_ITEM_OPERATION);
+        $this->denyOperationAccessUnlessGranted(self::GET_ITEM_OPERATION);
 
         $filters = $context[self::FILTERS_KEY] ?? [];
 
-        return $this->getItemById($id, $this->getOptions($filters));
+        return $this->getItemById($id, $filters, $this->createOptions($filters));
+    }
+
+    public function isUserAuthenticated(): bool
+    {
+        return $this->security->isGranted('IS_AUTHENTICATED_FULLY');
+    }
+
+    abstract protected function getResourceClass(): string;
+
+    abstract protected function isUserGrantedOperationAccess(int $operation): bool;
+
+    abstract protected function getItemById($id, array $filters = [], array $options = []): object;
+
+    abstract protected function getPage(int $currentPageNumber, int $maxNumItemsPerPage, array $filters = [], array $options = []): array;
+
+    /**
+     * @throws ApiError
+     */
+    private function createOptions(array $filters): array
+    {
+        $options = [];
+        $options[Locale::LANGUAGE_OPTION] = $this->locale->getCurrentPrimaryLanguage();
+
+        LocalData::addOptions($options, $filters);
+        $this->denyLocalDataAccessUnlessGranted($options);
+
+        return $options;
     }
 
     /**
      * @throws AccessDeniedException
      */
-    protected function onOperationStart(int $operation)
+    private function denyOperationAccessUnlessGranted(int $operation)
     {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
-    }
-
-    abstract protected function getResourceClass(): string;
-
-    abstract protected function getItemById($id, array $options = []): object;
-
-    abstract protected function getPage(int $currentPageNumber, int $maxNumItemsPerPage, array $filters = [], array $options = []): array;
-
-    private function getOptions(array $filters): array
-    {
-        $options = [];
-        $options[Locale::LANGUAGE_OPTION] = $this->locale->getCurrentPrimaryLanguage();
-        LocalData::addOptions($options, $filters);
-
-        return $options;
+        if (!$this->isUserGrantedOperationAccess($operation)) {
+            throw new AccessDeniedException();
+        }
     }
 }
