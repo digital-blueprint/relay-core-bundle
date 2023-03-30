@@ -40,13 +40,40 @@ class LocalDataTest extends TestCase
         $this->testLocalDataAuthorizationService->setConfig(self::createAuthzConfig());
     }
 
-    public function testLocalDataMapping()
+    public function testScalarLocalDataMappingWithScalarSourceValue()
     {
-        // source attribute specified in config is present in source data -> return source attribute value
+        // scalar attribute, scalar source attribute  -> return scalar source attribute value
         $localDataAttributeName = 'attribute_1';
         $sourceData = ['src_attribute_1' => 'value_1'];
         $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
         $this->assertEquals('value_1', $testEntity->getLocalDataValue($localDataAttributeName));
+    }
+
+    public function testScalarLocalDataMappingWithArraySourceValue()
+    {
+        // scalar attribute, array source attribute -> return scalar source attribute value (i.e. first array element)
+        $localDataAttributeName = 'attribute_1';
+        $sourceData = ['src_attribute_1' => ['value_1']];
+        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
+        $this->assertEquals('value_1', $testEntity->getLocalDataValue($localDataAttributeName));
+    }
+
+    public function testArrayLocalDataMappingWithArraySourceValue()
+    {
+        // array attribute, array source attribute -> return array source attribute value
+        $localDataAttributeName = 'array_attribute_1';
+        $sourceData = ['array_src_attribute_1' => ['value_1']];
+        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
+        $this->assertEquals(['value_1'], $testEntity->getLocalDataValue($localDataAttributeName));
+    }
+
+    public function testArrayLocalDataMappingWithScalarSourceValue()
+    {
+        // array attribute, array source attribute -> return array with scalar source value as only element
+        $localDataAttributeName = 'array_attribute_1';
+        $sourceData = ['array_src_attribute_1' => 'value_1'];
+        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
+        $this->assertEquals(['value_1'], $testEntity->getLocalDataValue($localDataAttributeName));
     }
 
     public function testLocalDataMappingDefaultValue()
@@ -210,6 +237,7 @@ class LocalDataTest extends TestCase
                 'local_data_attribute' => 'array_attribute_1',
                 'source_attribute' => 'array_src_attribute_1',
                 'default_values' => [0],
+                'is_array' => true,
             ],
         ];
 

@@ -23,11 +23,13 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
     protected const ROOT_CONFIG_NODE = 'local_data_mapping';
     protected const SOURCE_ATTRIBUTE_CONFIG_NODE = 'source_attribute';
     protected const LOCAL_DATA_ATTRIBUTE_CONFIG_NODE = 'local_data_attribute';
+    protected const IS_ARRAY_CONFIG_NODE = 'is_array';
     protected const DEFAULT_VALUE_ATTRIBUTE_CONFIG_NODE = 'default_value';
     protected const DEFAULT_VALUES_ATTRIBUTE_CONFIG_NODE = 'default_values';
 
     private const SOURCE_ATTRIBUTE_KEY = 'source';
     private const DEFAULT_VALUE_KEY = 'default';
+    private const IS_ARRAY_KEY = 'is_array';
 
     /*
      * WORKAROUND: could not find a way to determine whether a Symfony config array node was NOT specified since it provides an empty
@@ -50,6 +52,10 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
             ->end()
             ->scalarNode(self::SOURCE_ATTRIBUTE_CONFIG_NODE)
             ->info('The source attribute to map to the local data attribute. If the source attribute is not found, the default value is used.')
+            ->end()
+            ->booleanNode(self::IS_ARRAY_CONFIG_NODE)
+            ->info('Specifies whether the local data attribute is expected to be of array type. The value of the local data attribute is converted accordingly, if required.')
+            ->defaultValue(false)
             ->end()
             ->scalarNode(self::DEFAULT_VALUE_ATTRIBUTE_CONFIG_NODE)
             ->info('The default value for scalar (i.e. non-array) attributes. If none is specified, an exception is thrown in case the source attribute is not found.')
@@ -92,6 +98,7 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
 
             $attributeMapEntry = [];
             $attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY] = $configMappingEntry[self::SOURCE_ATTRIBUTE_CONFIG_NODE];
+            $attributeMapEntry[self::IS_ARRAY_KEY] = $configMappingEntry[self::IS_ARRAY_CONFIG_NODE] ?? false;
 
             $defaultValue = $configMappingEntry[self::DEFAULT_VALUE_ATTRIBUTE_CONFIG_NODE] ?? null;
             if ($defaultValue === null) {
@@ -126,9 +133,12 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
             foreach ($event->getPendingRequestedAttributes() as $localDataAttributeName) {
                 if (($attributeMapEntry = $this->attributeMapping[$localDataAttributeName] ?? null) !== null) {
                     $attributeValue = $event->getSourceData()[$attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY]] ?? null;
-                    // until we know if the value is an array or not, we assume all values are none-array
+
+                    $is_array_attribute = $attributeMapEntry[self::IS_ARRAY_KEY];
                     if (is_array($attributeValue)) {
-                        $attributeValue = $attributeValue[0] ?? null;
+                        $attributeValue = $is_array_attribute ? $attributeValue : ($attributeValue[0] ?? null);
+                    } else {
+                        $attributeValue = $is_array_attribute ? [$attributeValue] : $attributeValue;
                     }
                     $attributeValue = $attributeValue ?? $attributeMapEntry[self::DEFAULT_VALUE_KEY] ?? null;
 

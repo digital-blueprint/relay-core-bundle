@@ -34,10 +34,8 @@ class AbstractLocalDataAuthorizationService extends AbstractAuthorizationService
             if (isset($this->attributeConfig[$localDataAttributeName])) {
                 throw new \RuntimeException(sprintf('multiple config entries for local data attribute \'%s\'', $localDataAttributeName));
             }
-
             $attributeConfigEntry = [];
-            $attributeConfigEntry[self::ALLOW_LOCAL_QUERY_KEY] = $configEntry[self::ALLOW_LOCAL_QUERY_CONFIG_NODE];
-
+            $attributeConfigEntry[self::ALLOW_LOCAL_QUERY_KEY] = $configEntry[self::ALLOW_LOCAL_QUERY_CONFIG_NODE] ?? false;
             $this->attributeConfig[$localDataAttributeName] = $attributeConfigEntry;
 
             // the name of the local data attribute is used as name for the right to view that attribute
