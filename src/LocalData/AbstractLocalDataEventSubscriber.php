@@ -38,6 +38,47 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
     /** @var array */
     private $attributeMapping = [];
 
+    public static function getLocalDataMappingConfigNodeDefinition(): NodeDefinition
+    {
+        $treeBuilder = new TreeBuilder(self::ROOT_CONFIG_NODE);
+
+        return $treeBuilder->getRootNode()
+            ->arrayPrototype()
+            ->children()
+            ->scalarNode(self::LOCAL_DATA_ATTRIBUTE_CONFIG_NODE)
+            ->info('The name of the local data attribute.')
+            ->end()
+            ->scalarNode(self::SOURCE_ATTRIBUTE_CONFIG_NODE)
+            ->info('The source attribute to map to the local data attribute. If the source attribute is not found, the default value is used.')
+            ->end()
+            ->scalarNode(self::DEFAULT_VALUE_ATTRIBUTE_CONFIG_NODE)
+            ->info('The default value for scalar (i.e. non-array) attributes. If none is specified, an exception is thrown in case the source attribute is not found.')
+            ->end()
+            ->arrayNode(self::DEFAULT_VALUES_ATTRIBUTE_CONFIG_NODE)
+            ->defaultValue(self::ARRAY_VALUE_NOT_SPECIFIED)
+            ->info('The default value for array type attributes. If none is specified, an exception is thrown in case the source attribute is not found.')
+            ->scalarPrototype()->end()
+            ->end()
+            ->end()
+            ->end()
+            ;
+    }
+
+    public static function getSubscribedEvents(): array
+    {
+        $eventMapping = [];
+        foreach (static::getSubscribedEventNames() as $eventName) {
+            $eventMapping[$eventName] = 'onEvent';
+        }
+
+        return $eventMapping;
+    }
+
+    protected static function getSubscribedEventNames(): array
+    {
+        throw new \RuntimeException(sprintf('child classes must implement the \'%s\' method', __METHOD__));
+    }
+
     public function setConfig(array $config)
     {
         $configNode = $config[self::ROOT_CONFIG_NODE] ?? [];
@@ -68,16 +109,6 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
         }
     }
 
-    public static function getSubscribedEvents(): array
-    {
-        $eventMapping = [];
-        foreach (static::getSubscribedEventNames() as $eventName) {
-            $eventMapping[$eventName] = 'onEvent';
-        }
-
-        return $eventMapping;
-    }
-
     public function onEvent(Event $event)
     {
         if ($event instanceof LocalDataPreEvent) {
@@ -89,69 +120,48 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
                     $event->tryPopPendingQueryParameter($localDataAttributeName);
                 }
             }
-
             $this->onPreEvent($event, $localQueryParameters);
         } elseif ($event instanceof LocalDataPostEvent) {
+            $localDataAttributes = [];
             foreach ($event->getPendingRequestedAttributes() as $localDataAttributeName) {
                 if (($attributeMapEntry = $this->attributeMapping[$localDataAttributeName] ?? null) !== null) {
                     $attributeValue = $event->getSourceData()[$attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY]] ?? null;
+                    // until we know if the value is an array or not, we assume all values are none-array
+                    if (is_array($attributeValue)) {
+                        $attributeValue = $attributeValue[0] ?? null;
+                    }
                     $attributeValue = $attributeValue ?? $attributeMapEntry[self::DEFAULT_VALUE_KEY] ?? null;
 
                     if ($attributeValue !== null) {
-                        $event->setLocalDataAttribute($localDataAttributeName, $attributeValue);
+                        $localDataAttributes[$localDataAttributeName] = $attributeValue;
                     } else {
                         throw ApiError::withDetails(Response::HTTP_INTERNAL_SERVER_ERROR, sprintf('none of the source attributes available for local data attribute \'%s\'', $localDataAttributeName));
                     }
                 }
             }
-            $this->onPostEvent($event);
+            $this->onPostEvent($event, $localDataAttributes);
+
+            foreach ($localDataAttributes as $localDataAttributeName => $localDataAttributeValue) {
+                $event->setLocalDataAttribute($localDataAttributeName, $localDataAttributeValue);
+            }
         }
     }
 
     /**
-     * @deprecated Use getLocalDataMappingConfigNodeDefinition instead
+     * Override this if you want to use the mapped local query attributes in your code.
+     *
+     * @param array $mappedQueryParameters The associative array of local query attributes (keys: local query attribute names, values: local query attribute values)
      */
-    public static function getConfigNode(): NodeDefinition
-    {
-        return self::getLocalDataMappingConfigNodeDefinition();
-    }
-
-    public static function getLocalDataMappingConfigNodeDefinition(): NodeDefinition
-    {
-        $treeBuilder = new TreeBuilder(self::ROOT_CONFIG_NODE);
-
-        return $treeBuilder->getRootNode()
-            ->arrayPrototype()
-                ->children()
-                    ->scalarNode(self::LOCAL_DATA_ATTRIBUTE_CONFIG_NODE)
-                        ->info('The name of the local data attribute.')
-                    ->end()
-                    ->scalarNode(self::SOURCE_ATTRIBUTE_CONFIG_NODE)
-                        ->info('The source attribute to map to the local data attribute. If the source attribute is not found, the default value is used.')
-                    ->end()
-                    ->scalarNode(self::DEFAULT_VALUE_ATTRIBUTE_CONFIG_NODE)
-                        ->info('The default value for scalar (i.e. non-array) attributes. If none is specified, an exception is thrown in case the source attribute is not found.')
-                    ->end()
-                    ->arrayNode(self::DEFAULT_VALUES_ATTRIBUTE_CONFIG_NODE)
-                        ->defaultValue(self::ARRAY_VALUE_NOT_SPECIFIED)
-                        ->info('The default value for array type attributes. If none is specified, an exception is thrown in case the source attribute is not found.')
-                        ->scalarPrototype()->end()
-                    ->end()
-                ->end()
-            ->end()
-        ;
-    }
-
-    protected static function getSubscribedEventNames(): array
-    {
-        throw new \RuntimeException(sprintf('child classes must implement the \'%s\' method', __METHOD__));
-    }
-
     protected function onPreEvent(LocalDataPreEvent $preEvent, array $mappedQueryParameters)
     {
     }
 
-    protected function onPostEvent(LocalDataPostEvent $postEvent)
+    /**
+     * Override this if you want to modify the local data attribute values before they are set.
+     *
+     * @param array $localDataAttributes A reference to the associative array of local data attributes (keys: local data attribute names, values: local data attribute values)
+     */
+    protected function onPostEvent(LocalDataPostEvent $postEvent, array &$localDataAttributes)
     {
     }
 }
