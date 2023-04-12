@@ -32,7 +32,7 @@ class Configuration implements ConfigurationInterface
                 ->end()
                 ->scalarNode('docs_description')
                 ->info('The description text of the API docs page (supports markdown)')
-                    ->defaultValue('*part of the [Digital Blueprint](https://gitlab.tugraz.at/dbp) project*')
+                    ->defaultValue('*part of the [Digital Blueprint](https://github.com/digital-blueprint) project*')
                 ->end()
                 ->scalarNode('messenger_transport_dsn')
                     ->defaultValue('')
