@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Swagger;
 
-use ApiPlatform\Core\OpenApi\Factory\OpenApiFactoryInterface;
 use ApiPlatform\Core\OpenApi\Model\Paths;
-use ApiPlatform\Core\OpenApi\OpenApi;
+use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
+use ApiPlatform\OpenApi\OpenApi;
 
-/**
- * see: https://api-platform.com/docs/core/openapi/.
- */
 final class OpenApiDecorator implements OpenApiFactoryInterface
 {
     private $decorated;
