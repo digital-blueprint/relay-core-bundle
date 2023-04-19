@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Authorization;
 
 use Dbp\Relay\CoreBundle\ExpressionLanguage\ExpressionLanguage;
+use Dbp\Relay\CoreBundle\Helpers\Tools;
 
 /**
  * @internal
@@ -106,10 +107,16 @@ class AuthorizationExpressionChecker
                 throw new AuthorizationException(sprintf('right \'%s\' undefined', $rightName), AuthorizationException::PRIVILEGE_UNDEFINED);
             }
 
-            return $this->expressionLanguage->evaluate($rightExpression, [
+            $variables = [
                 self::USER_VARIBLE_NAME => $currentAuthorizationUser,
-                $objectAlias ?? self::DEFAULT_OBJECT_VARIBLE_NAME => $object,
-            ]);
+                self::DEFAULT_OBJECT_VARIBLE_NAME => $object,
+            ];
+
+            if (!Tools::isNullOrEmpty($objectAlias)) {
+                $variables[$objectAlias] = $object;
+            }
+
+            return $this->expressionLanguage->evaluate($rightExpression, $variables);
         } finally {
             array_pop($this->roleExpressionStack);
         }

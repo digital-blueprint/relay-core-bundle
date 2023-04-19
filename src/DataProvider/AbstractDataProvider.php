@@ -48,13 +48,15 @@ abstract class AbstractDataProvider extends AbstractLocalDataAuthorizationServic
         $this->denyOperationAccessUnlessGranted(self::GET_COLLECTION_OPERATION);
 
         $filters = $context[self::FILTERS_KEY] ?? [];
+        $options = $this->createOptions($filters);
 
         $currentPageNumber = Pagination::getCurrentPageNumber($filters);
         $maxNumItemsPerPage = Pagination::getMaxNumItemsPerPage($filters);
 
-        return new PartialPaginator(
-            $this->getPage($currentPageNumber, $maxNumItemsPerPage, $filters, $this->createOptions($filters)),
-            $currentPageNumber, $maxNumItemsPerPage);
+        $pageItems = $this->getPage($currentPageNumber, $maxNumItemsPerPage, $filters, $options);
+        $this->denyLocalDataAccessUnlessGranted($pageItems, $options);
+
+        return new PartialPaginator($pageItems, $currentPageNumber, $maxNumItemsPerPage);
     }
 
     public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []): ?object
@@ -62,8 +64,12 @@ abstract class AbstractDataProvider extends AbstractLocalDataAuthorizationServic
         $this->denyOperationAccessUnlessGranted(self::GET_ITEM_OPERATION);
 
         $filters = $context[self::FILTERS_KEY] ?? [];
+        $options = $this->createOptions($filters);
 
-        return $this->getItemById($id, $filters, $this->createOptions($filters));
+        $item = $this->getItemById($id, $filters, $options);
+        $this->denyLocalDataAccessUnlessGranted([$item], $options);
+
+        return $item;
     }
 
     public function isUserAuthenticated(): bool
@@ -88,7 +94,7 @@ abstract class AbstractDataProvider extends AbstractLocalDataAuthorizationServic
         $options[Locale::LANGUAGE_OPTION] = $this->locale->getCurrentPrimaryLanguage();
 
         LocalData::addOptions($options, $filters);
-        $this->denyLocalDataAccessUnlessGranted($options);
+        $this->checkRequestedLocalDataAttributes($options);
 
         return $options;
     }

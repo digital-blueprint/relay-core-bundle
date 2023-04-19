@@ -45,7 +45,7 @@ class LocalDataTest extends TestCase
         // scalar attribute, scalar source attribute  -> return scalar source attribute value
         $localDataAttributeName = 'attribute_1';
         $sourceData = ['src_attribute_1' => 'value_1'];
-        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
+        $testEntity = $this->getTestEntities($localDataAttributeName, $sourceData)[0];
         $this->assertEquals('value_1', $testEntity->getLocalDataValue($localDataAttributeName));
     }
 
@@ -54,7 +54,7 @@ class LocalDataTest extends TestCase
         // scalar attribute, array source attribute -> return scalar source attribute value (i.e. first array element)
         $localDataAttributeName = 'attribute_1';
         $sourceData = ['src_attribute_1' => ['value_1']];
-        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
+        $testEntity = $this->getTestEntities($localDataAttributeName, $sourceData)[0];
         $this->assertEquals('value_1', $testEntity->getLocalDataValue($localDataAttributeName));
     }
 
@@ -63,7 +63,7 @@ class LocalDataTest extends TestCase
         // array attribute, array source attribute -> return array source attribute value
         $localDataAttributeName = 'array_attribute_1';
         $sourceData = ['array_src_attribute_1' => ['value_1']];
-        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
+        $testEntity = $this->getTestEntities($localDataAttributeName, $sourceData)[0];
         $this->assertEquals(['value_1'], $testEntity->getLocalDataValue($localDataAttributeName));
     }
 
@@ -72,7 +72,7 @@ class LocalDataTest extends TestCase
         // array attribute, array source attribute -> return array with scalar source value as only element
         $localDataAttributeName = 'array_attribute_1';
         $sourceData = ['array_src_attribute_1' => 'value_1'];
-        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
+        $testEntity = $this->getTestEntities($localDataAttributeName, $sourceData)[0];
         $this->assertEquals(['value_1'], $testEntity->getLocalDataValue($localDataAttributeName));
     }
 
@@ -81,7 +81,7 @@ class LocalDataTest extends TestCase
         // default value specified in config -> return default value
         $localDataAttributeName = 'attribute_1';
         $sourceData = [];
-        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
+        $testEntity = $this->getTestEntities($localDataAttributeName, $sourceData)[0];
         $this->assertEquals(0, $testEntity->getLocalDataValue($localDataAttributeName));
     }
 
@@ -91,7 +91,7 @@ class LocalDataTest extends TestCase
         $localDataAttributeName = 'attribute_2';
         $sourceData = [];
         try {
-            $this->getTestEntity($localDataAttributeName, $sourceData);
+            $this->getTestEntities($localDataAttributeName, $sourceData)[0];
         } catch (ApiError $exception) {
             $this->assertEquals(Response::HTTP_INTERNAL_SERVER_ERROR, $exception->getStatusCode());
         }
@@ -102,7 +102,7 @@ class LocalDataTest extends TestCase
         // default array value specified in config -> return default array value
         $localDataAttributeName = 'array_attribute_1';
         $sourceData = [];
-        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
+        $testEntity = $this->getTestEntities($localDataAttributeName, $sourceData)[0];
         $this->assertEquals([0], $testEntity->getLocalDataValue($localDataAttributeName));
     }
 
@@ -110,9 +110,21 @@ class LocalDataTest extends TestCase
     {
         // authorization expression of attribute evaluates to false -> deny access
         $localDataAttributeName = 'attribute_3';
-        $sourceData = ['src_attribute_2_1' => 'value_2_1', 'src_attribute_2_2' => 'value_2_2'];
+        $sourceData = ['src_attribute_3' => 'value_3'];
         try {
-            $this->getTestEntity($localDataAttributeName, $sourceData);
+            $this->getTestEntities($localDataAttributeName, $sourceData)[0];
+        } catch (ApiError $exception) {
+            $this->assertEquals(Response::HTTP_UNAUTHORIZED, $exception->getStatusCode());
+        }
+    }
+
+    public function testLocalDataMappingAccessDeniedCollection()
+    {
+        // authorization expression of attribute evaluates to false -> deny access
+        $localDataAttributeName = 'attribute_3';
+        $sourceData = ['src_attribute_3' => 'value_3'];
+        try {
+            $this->getTestEntities($localDataAttributeName, $sourceData, null, 3);
         } catch (ApiError $exception) {
             $this->assertEquals(Response::HTTP_UNAUTHORIZED, $exception->getStatusCode());
         }
@@ -164,10 +176,29 @@ class LocalDataTest extends TestCase
     {
         // authorization expression of local data attribute 'attribute_3' evaluates to false -> deny access
         $localDataAttributeName = 'attribute_3';
-        $queryLocal = $localDataAttributeName.':value_1';
+        $localQuery = $localDataAttributeName.':value_3';
+        $sourceData = ['src_attribute_3' => 'value_3'];
+
+        self::createAndValidateOptions($localDataAttributeName, $localQuery);
 
         try {
-            self::createAndValidateOptions($localDataAttributeName, $queryLocal);
+            $this->getTestEntities($localDataAttributeName, $sourceData, $localQuery);
+        } catch (ApiError $exception) {
+            $this->assertEquals(Response::HTTP_UNAUTHORIZED, $exception->getStatusCode());
+        }
+    }
+
+    public function testLocalDataQueryAccessDeniedCollection()
+    {
+        // authorization expression of local data attribute 'attribute_3' evaluates to false -> deny access
+        $localDataAttributeName = 'attribute_3';
+        $localQuery = $localDataAttributeName.':value_3';
+        $sourceData = ['src_attribute_3' => 'value_3'];
+
+        self::createAndValidateOptions($localDataAttributeName, $localQuery);
+
+        try {
+            $this->getTestEntities($localDataAttributeName, $sourceData, $localQuery, 3);
         } catch (ApiError $exception) {
             $this->assertEquals(Response::HTTP_UNAUTHORIZED, $exception->getStatusCode());
         }
@@ -180,7 +211,7 @@ class LocalDataTest extends TestCase
         $options = [];
         LocalData::addOptions($options, $filters);
 
-        $this->testLocalDataAuthorizationService->denyLocalDataAccessUnlessGranted($options);
+        $this->testLocalDataAuthorizationService->checkRequestedLocalDataAttributes($options);
 
         return $options;
     }
@@ -244,21 +275,32 @@ class LocalDataTest extends TestCase
         return $config;
     }
 
-    private function getTestEntity(string $includeLocal, array $sourceData): TestEntity
+    private function getTestEntities(string $includeLocal, array $sourceData, string $queryLocal = null, int $numEntities = 1): array
     {
-        $testEntity = new TestEntity();
+        $testEntities = [];
+        for ($i = 0; $i <= $numEntities; ++$i) {
+            $testEntities[] = new TestEntity();
+        }
 
         $filters = [];
         $filters[LocalData::INCLUDE_PARAMETER_NAME] = $includeLocal;
+        if ($queryLocal) {
+            $filters[LocalData::QUERY_PARAMETER_NAME] = $queryLocal;
+        }
 
         $options = [];
         LocalData::addOptions($options, $filters);
 
-        $this->testLocalDataAuthorizationService->denyLocalDataAccessUnlessGranted($options);
+        $this->testLocalDataAuthorizationService->checkRequestedLocalDataAttributes($options);
 
         $this->localDataEventDispatcher->onNewOperation($options);
-        $this->localDataEventDispatcher->dispatch(new TestEntityPostEvent($testEntity, $sourceData));
 
-        return $testEntity;
+        foreach ($testEntities as $testEntity) {
+            $this->localDataEventDispatcher->dispatch(new TestEntityPostEvent($testEntity, $sourceData));
+        }
+
+        $this->testLocalDataAuthorizationService->denyLocalDataAccessUnlessGranted($testEntities, $options);
+
+        return $testEntities;
     }
 }

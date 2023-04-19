@@ -18,9 +18,10 @@ class AbstractLocalDataAuthorizationService extends AbstractAuthorizationService
     protected const ALLOW_LOCAL_QUERY_CONFIG_NODE = 'allow_query';
 
     private const ALLOW_LOCAL_QUERY_KEY = 'allow_query';
+    private const ENTITY_OBJECT_ALIAS = 'entity';
 
     /** @var array */
-    private $attributeConfig;
+    private $attributeConfig = [];
 
     public function setConfig(array $config)
     {
@@ -49,18 +50,35 @@ class AbstractLocalDataAuthorizationService extends AbstractAuthorizationService
     /**
      * @throws ApiError
      */
-    public function denyLocalDataAccessUnlessGranted(array $options): void
+    public function checkRequestedLocalDataAttributes(array $options): void
     {
         foreach (LocalData::getLocalDataAttributes($options) as $localDataAttribute) {
-            $this->denyAttributeAccessUnlessGranted($localDataAttribute, false);
+            $this->checkRequestedLocalDataAttribute($localDataAttribute, false);
         }
 
         foreach (array_keys(LocalData::getLocalQueryAttributes($options)) as $localQueryAttribute) {
-            $this->denyAttributeAccessUnlessGranted($localQueryAttribute, true);
+            $this->checkRequestedLocalDataAttribute($localQueryAttribute, true);
         }
     }
 
-    private function denyAttributeAccessUnlessGranted(string $attributeName, bool $checkQueryAllowed)
+    /**
+     * @throws ApiError
+     */
+    public function denyLocalDataAccessUnlessGranted(array $entities, array $options): void
+    {
+        $localDataAwareEntities = array_filter($entities, function ($entity) {
+            return $entity instanceof LocalDataAwareInterface;
+        });
+
+        foreach (LocalData::getLocalDataAttributes($options) as $localDataAttribute) {
+            $this->denyAttributeAccessUnlessGranted($localDataAwareEntities, $localDataAttribute);
+        }
+    }
+
+    /**
+     * @throws ApiError
+     */
+    private function checkRequestedLocalDataAttribute(string $attributeName, bool $checkQueryAllowed)
     {
         $attributeConfigEntry = $this->attributeConfig[$attributeName] ?? null;
         if ($attributeConfigEntry === null) {
@@ -70,9 +88,19 @@ class AbstractLocalDataAuthorizationService extends AbstractAuthorizationService
         if ($checkQueryAllowed && !$attributeConfigEntry[self::ALLOW_LOCAL_QUERY_KEY]) {
             throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf('local data attribute \'%s\' not queryable', $attributeName));
         }
+    }
 
-        if (!$this->isGranted($attributeName)) {
-            throw ApiError::withDetails(Response::HTTP_UNAUTHORIZED, sprintf('access to local data attribute \'%s\' denied', $attributeName));
+    /**
+     * @param LocalDataAwareInterface[] $localDataAwareEntities
+     *
+     * @throws ApiError
+     */
+    private function denyAttributeAccessUnlessGranted(array $localDataAwareEntities, string $attributeName)
+    {
+        foreach ($localDataAwareEntities as $localDataAwareEntity) {
+            if (!$this->isGranted($attributeName, $localDataAwareEntity, self::ENTITY_OBJECT_ALIAS)) {
+                throw ApiError::withDetails(Response::HTTP_UNAUTHORIZED, sprintf('access to local data attribute \'%s\' denied', $attributeName));
+            }
         }
     }
 
@@ -91,7 +119,7 @@ class AbstractLocalDataAuthorizationService extends AbstractAuthorizationService
             ->info('A boolean expression evaluable by the Symfony Expression Language determining whether the current user may request read the local data attribute.')
             ->end()
             ->booleanNode(self::ALLOW_LOCAL_QUERY_CONFIG_NODE)
-            ->defaultValue('false')
+            ->defaultValue(false)
             ->info('Indicates whether the local data attribute can be used in local queries.')
             ->end()
             ->end()
