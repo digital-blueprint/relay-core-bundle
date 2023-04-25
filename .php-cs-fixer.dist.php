@@ -3,6 +3,7 @@
 $finder = PhpCsFixer\Finder::create()
     ->in(__DIR__)
     ->exclude('var')
+    ->exclude('src/Resources/auth')
 ;
 
 $config = new PhpCsFixer\Config();
