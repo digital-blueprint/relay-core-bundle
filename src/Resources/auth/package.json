@@ -34,10 +34,10 @@
   },
   "scripts": {
     "clean": "rm dist/*",
-    "build": "yarn run build-local",
+    "build": "npm run build-local",
     "build-test": "rollup --bundleConfigAsCjs -c --environment BUILD:test",
     "watch": "rollup --bundleConfigAsCjs -c --watch",
-    "test": "yarn run build-test && karma start --singleRun",
+    "test": "npm run build-test && karma start --singleRun",
     "lint": "eslint ."
   }
 }
