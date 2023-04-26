@@ -2,13 +2,14 @@ import glob from 'glob';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import copy from 'rollup-plugin-copy';
-import {terser} from "@rollup/plugin-terser";
+import terser from "@rollup/plugin-terser";
 import json from '@rollup/plugin-json';
 import serve from 'rollup-plugin-serve';
 import del from 'rollup-plugin-delete';
 
 const build = (typeof process.env.BUILD !== 'undefined') ? process.env.BUILD : 'local';
 console.log("build: " + build);
+const useTerser = (process.env.ROLLUP_WATCH !== 'true' && build !== 'test')
 
 export default (async () => {
     return {
@@ -35,7 +36,7 @@ export default (async () => {
             resolve(),
             commonjs(),
             json(),
-            (build !== 'local' && build !== 'test') ? terser() : false,
+            useTerser ? terser() : false,
             copy({
                 targets: [
                     {src: 'assets/index.html', dest: '../public/auth'},
