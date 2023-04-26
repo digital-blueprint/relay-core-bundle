@@ -1,3 +1,7 @@
+# v0.1.95
+
+* The OpenAPI docs now use their own Keycloak client Javascript module instead of using the one from the configured Keycloak server. This change was required due to Keycloak 22 planning to no longer provide the Javscript module.
+
 # v0.1.82
 
 * extension: add registerLoggingChannel() for registering a new logging channel
