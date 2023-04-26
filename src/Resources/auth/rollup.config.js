@@ -7,7 +7,6 @@ import json from '@rollup/plugin-json';
 import serve from 'rollup-plugin-serve';
 import del from 'rollup-plugin-delete';
 
-const pkg = require('./package.json');
 const build = (typeof process.env.BUILD !== 'undefined') ? process.env.BUILD : 'local';
 console.log("build: " + build);
 
@@ -41,8 +40,6 @@ export default (async () => {
                 targets: [
                     {src: 'assets/index.html', dest: '../public/auth'},
                     {src: 'assets/silent-check-sso.html', dest: '../public/auth'},
-                    // {src: 'assets/favicon.ico', dest: '../public/auth'},
-                    // {src: 'node_modules/@dbp-toolkit/common/assets/icons/*.svg', dest: '../public/auth/@dbp-toolkit/common/icons'},
                 ],
             }),
             (process.env.ROLLUP_WATCH === 'true') ? serve({contentBase: '../public/auth', host: '127.0.0.1', port: 8002}) : false

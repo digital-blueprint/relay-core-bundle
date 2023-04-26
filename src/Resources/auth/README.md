@@ -21,7 +21,7 @@ to `windows` every time the auth information changes (e.g. when the token is upd
 yarn install
 
 # constantly build dist/bundle.js and run a local web-server on port 8002 
-yarn run watch-local
+yarn run watch
 
 # build local packages in dist directory
 yarn run build
