@@ -1,9 +1,10 @@
-import {html} from 'lit-element';
+import '@webcomponents/scoped-custom-element-registry';
+import {html} from 'lit';
 import {ScopedElementsMixin} from '@open-wc/scoped-elements';
 import {AuthKeycloak} from '@dbp-toolkit/auth/src/auth-keycloak';
 import {LoginButton} from '@dbp-toolkit/auth/src/login-button';
 import * as commonUtils from '@dbp-toolkit/common/utils';
-import {AdapterLitElement} from "@dbp-toolkit/provider/src/adapter-lit-element";
+import {AdapterLitElement} from "@dbp-toolkit/common";
 
 export class ApiPlatformAuth extends ScopedElementsMixin(AdapterLitElement) {
     constructor() {
@@ -57,8 +58,8 @@ export class ApiPlatformAuth extends ScopedElementsMixin(AdapterLitElement) {
                                url="${this.url}"
                                realm="${this.realm}"
                                client-id="${this.clientId}"
-                               load-person try-login></dbp-auth-keycloak>
-            <dbp-login-button subscribe="auth" lang="${this.lang}" show-image></dbp-login-button>
+                               try-login></dbp-auth-keycloak>
+            <dbp-login-button subscribe="auth" lang="${this.lang}"></dbp-login-button>
         `;
     }
 }

@@ -23,7 +23,11 @@ export default (async () => {
         },
         onwarn: function (warning, warn) {
             // ignore chai warnings
-            if (warning.code === 'CIRCULAR_DEPENDENCY') {
+            if (warning.code === 'CIRCULAR_DEPENDENCY' && warning.message.includes('/chai/')) {
+                return;
+            }
+            // keycloak bundled code uses eval
+            if (warning.code === 'EVAL' && warning.id.includes('sha256.js')) {
                 return;
             }
             warn(warning);
