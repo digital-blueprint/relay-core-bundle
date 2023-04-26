@@ -6,7 +6,6 @@ import {terser} from "rollup-plugin-terser";
 import json from '@rollup/plugin-json';
 import serve from 'rollup-plugin-serve';
 import del from 'rollup-plugin-delete';
-import {getPackagePath, getDistPath} from './rollup.utils.js';
 
 const pkg = require('./package.json');
 const build = (typeof process.env.BUILD !== 'undefined') ? process.env.BUILD : 'local';
