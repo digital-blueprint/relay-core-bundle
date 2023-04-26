@@ -105,9 +105,19 @@
   resolved "https://registry.yarnpkg.com/@colors/colors/-/colors-1.5.0.tgz#bb504579c1cae923e6576a4f5da43d25f97bdbd9"
   integrity sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==
 
-"@dbp-toolkit/auth@^0.2.5", "@dbp-toolkit/auth@dev-master as 0.2.5":
+"@dbp-toolkit/auth@0.2.6":
+  version "0.2.6"
+  resolved "https://registry.yarnpkg.com/@dbp-toolkit/auth/-/auth-0.2.6.tgz#e4acc5f515967c49b624276f018f3081ba28ddb8"
+  integrity sha512-kJ1T7ZfHCdkiRhBPcxusYhuTdG9i2nCMQD0I0QVU1r35p4vZX0Nar6RLMInLlziinuoHR78piE7PrmG3n63qzg==
+  dependencies:
+    "@dbp-toolkit/common" "^0.2.12"
+    "@open-wc/scoped-elements" "^1.3.3"
+    event-target-shim "^6.0.0"
+    lit-element "^2.4.0"
+
+"@dbp-toolkit/auth@^0.2.5":
   version "0.2.5"
-  resolved "https://registry.npmjs.org/@dbp-toolkit/auth/-/auth-0.2.5.tgz#9079b8a64f787f50c78103a36567c1b253146bd3"
+  resolved "https://registry.yarnpkg.com/@dbp-toolkit/auth/-/auth-0.2.5.tgz#9079b8a64f787f50c78103a36567c1b253146bd3"
   integrity sha512-SOKZIdtb48quWp6TwiNKEQykrv2OdF/68t6/oCTU7bfBqwGZl9DUDgZH74jR7NrZZEEk757HVq8wZoLWjprsrg==
   dependencies:
     "@dbp-toolkit/common" "^0.2.12"
@@ -115,7 +125,17 @@
     event-target-shim "^6.0.0"
     lit-element "^2.4.0"
 
-"@dbp-toolkit/common@^0.2.12", "@dbp-toolkit/common@dev-master as 0.2.12":
+"@dbp-toolkit/common@0.2.13    ":
+  version "0.2.13"
+  resolved "https://registry.yarnpkg.com/@dbp-toolkit/common/-/common-0.2.13.tgz#6d9b2e8287c0e4a3b9e3add1fceea5910471bbe1"
+  integrity sha512-pHKxgvXOLR/6PV7RJwe/HkDflRseJNd2cYmXWdM3Yu2xbs8SXlqsoqUMZ2N9H66FvJMvLFDyGe9FWgiTJaq4yQ==
+  dependencies:
+    "@open-wc/scoped-elements" "^1.3.3"
+    "@sentry/browser" "^6.0.0"
+    i18next "^20.0.0"
+    lit-element "^2.4.0"
+
+"@dbp-toolkit/common@^0.2.12":
   version "0.2.12"
   resolved "https://registry.npmjs.org/@dbp-toolkit/common/-/common-0.2.12.tgz#68e854bb1ff181ac52417b9cb5bfa64a47a9bc3e"
   integrity sha512-d+vkStH3VFVEaLMtJyj6DYzrlqb8X3cmK6Ijra26/2DzVDEu91w/oyQI0b/hiQYPsNFaU5UWHorGV4YKsvht/g==
@@ -125,9 +145,9 @@
     i18next "^20.0.0"
     lit-element "^2.4.0"
 
-"@dbp-toolkit/provider@dev-master as 0.2.5":
+"@dbp-toolkit/provider@0.2.5":
   version "0.2.5"
-  resolved "https://registry.npmjs.org/@dbp-toolkit/provider/-/provider-0.2.5.tgz#9ebce84701269359808e51444aa621479ebf4440"
+  resolved "https://registry.yarnpkg.com/@dbp-toolkit/provider/-/provider-0.2.5.tgz#9ebce84701269359808e51444aa621479ebf4440"
   integrity sha512-Qb7qdJTWWB0L2Zs5mDbLuGmLoIvnjZQABk9iEzkJpvQlSgi+KTPHK37ML25iqDLyHWwQIj77McTnSdnv1LYsjA==
   dependencies:
     "@dbp-toolkit/auth" "^0.2.5"
