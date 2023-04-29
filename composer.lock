@@ -2322,16 +2322,16 @@
         },
         {
             "name": "symfony/doctrine-messenger",
-            "version": "v5.4.21",
+            "version": "v5.4.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/doctrine-messenger.git",
-                "reference": "29aa49b02542503bbcc978c73625d05a9e4ffe4a"
+                "reference": "1667cc4d3b2741ada859f76743d25936d3617909"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/doctrine-messenger/zipball/29aa49b02542503bbcc978c73625d05a9e4ffe4a",
-                "reference": "29aa49b02542503bbcc978c73625d05a9e4ffe4a",
+                "url": "https://api.github.com/repos/symfony/doctrine-messenger/zipball/1667cc4d3b2741ada859f76743d25936d3617909",
+                "reference": "1667cc4d3b2741ada859f76743d25936d3617909",
                 "shasum": ""
             },
             "require": {
@@ -2375,7 +2375,7 @@
             "description": "Symfony Doctrine Messenger Bridge",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/doctrine-messenger/tree/v5.4.21"
+                "source": "https://github.com/symfony/doctrine-messenger/tree/v5.4.23"
             },
             "funding": [
                 {
@@ -2391,7 +2391,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-02-16T09:33:00+00:00"
+            "time": "2023-04-18T08:26:30+00:00"
         },
         {
             "name": "symfony/error-handler",
@@ -3238,16 +3238,16 @@
         },
         {
             "name": "symfony/messenger",
-            "version": "v5.4.22",
+            "version": "v5.4.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/messenger.git",
-                "reference": "5763e92e94908089654bf19cb339c451bde71692"
+                "reference": "f81b9dab3d9a2f0519a4e1d077a0d40f8978bcb0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/messenger/zipball/5763e92e94908089654bf19cb339c451bde71692",
-                "reference": "5763e92e94908089654bf19cb339c451bde71692",
+                "url": "https://api.github.com/repos/symfony/messenger/zipball/f81b9dab3d9a2f0519a4e1d077a0d40f8978bcb0",
+                "reference": "f81b9dab3d9a2f0519a4e1d077a0d40f8978bcb0",
                 "shasum": ""
             },
             "require": {
@@ -3308,7 +3308,7 @@
             "description": "Helps applications send and receive messages to/from other applications or via message queues",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/messenger/tree/v5.4.22"
+                "source": "https://github.com/symfony/messenger/tree/v5.4.23"
             },
             "funding": [
                 {
@@ -3324,20 +3324,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-03-10T10:27:29+00:00"
+            "time": "2023-04-18T12:56:00+00:00"
         },
         {
             "name": "symfony/mime",
-            "version": "v5.4.21",
+            "version": "v5.4.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/mime.git",
-                "reference": "ef57d9fb9cdd5e6b2ffc567d109865d10b6920cd"
+                "reference": "ae0a1032a450a3abf305ee44fc55ed423fbf16e3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/mime/zipball/ef57d9fb9cdd5e6b2ffc567d109865d10b6920cd",
-                "reference": "ef57d9fb9cdd5e6b2ffc567d109865d10b6920cd",
+                "url": "https://api.github.com/repos/symfony/mime/zipball/ae0a1032a450a3abf305ee44fc55ed423fbf16e3",
+                "reference": "ae0a1032a450a3abf305ee44fc55ed423fbf16e3",
                 "shasum": ""
             },
             "require": {
@@ -3392,7 +3392,7 @@
                 "mime-type"
             ],
             "support": {
-                "source": "https://github.com/symfony/mime/tree/v5.4.21"
+                "source": "https://github.com/symfony/mime/tree/v5.4.23"
             },
             "funding": [
                 {
@@ -3408,7 +3408,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-02-21T19:46:44+00:00"
+            "time": "2023-04-19T09:49:13+00:00"
         },
         {
             "name": "symfony/monolog-bridge",
@@ -4466,16 +4466,16 @@
         },
         {
             "name": "symfony/process",
-            "version": "v5.4.22",
+            "version": "v5.4.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/process.git",
-                "reference": "4b850da0cc3a2a9181c1ed407adbca4733dc839b"
+                "reference": "4b842fc4b61609e0a155a114082bd94e31e98287"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/process/zipball/4b850da0cc3a2a9181c1ed407adbca4733dc839b",
-                "reference": "4b850da0cc3a2a9181c1ed407adbca4733dc839b",
+                "url": "https://api.github.com/repos/symfony/process/zipball/4b842fc4b61609e0a155a114082bd94e31e98287",
+                "reference": "4b842fc4b61609e0a155a114082bd94e31e98287",
                 "shasum": ""
             },
             "require": {
@@ -4508,7 +4508,7 @@
             "description": "Executes commands in sub-processes",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/process/tree/v5.4.22"
+                "source": "https://github.com/symfony/process/tree/v5.4.23"
             },
             "funding": [
                 {
@@ -4524,7 +4524,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-03-06T21:29:33+00:00"
+            "time": "2023-04-18T13:50:24+00:00"
         },
         {
             "name": "symfony/property-access",
@@ -4700,16 +4700,16 @@
         },
         {
             "name": "symfony/redis-messenger",
-            "version": "v5.4.22",
+            "version": "v5.4.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/redis-messenger.git",
-                "reference": "b511d76ae72bff8d3a316f632c200368e52bcf61"
+                "reference": "d9c0a6d7e3e925817f1ce7ec7416cc0e29b331e1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/redis-messenger/zipball/b511d76ae72bff8d3a316f632c200368e52bcf61",
-                "reference": "b511d76ae72bff8d3a316f632c200368e52bcf61",
+                "url": "https://api.github.com/repos/symfony/redis-messenger/zipball/d9c0a6d7e3e925817f1ce7ec7416cc0e29b331e1",
+                "reference": "d9c0a6d7e3e925817f1ce7ec7416cc0e29b331e1",
                 "shasum": ""
             },
             "require": {
@@ -4747,7 +4747,7 @@
             "description": "Symfony Redis extension Messenger Bridge",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/redis-messenger/tree/v5.4.22"
+                "source": "https://github.com/symfony/redis-messenger/tree/v5.4.23"
             },
             "funding": [
                 {
@@ -4763,7 +4763,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-03-10T09:58:14+00:00"
+            "time": "2023-04-18T09:57:31+00:00"
         },
         {
             "name": "symfony/routing",
@@ -5910,16 +5910,16 @@
         },
         {
             "name": "symfony/validator",
-            "version": "v5.4.22",
+            "version": "v5.4.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/validator.git",
-                "reference": "7c953a48f436bb180d8f5ae471f2665d7dd245da"
+                "reference": "ca71f5562a3876a153250f638124b6b95452985f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/validator/zipball/7c953a48f436bb180d8f5ae471f2665d7dd245da",
-                "reference": "7c953a48f436bb180d8f5ae471f2665d7dd245da",
+                "url": "https://api.github.com/repos/symfony/validator/zipball/ca71f5562a3876a153250f638124b6b95452985f",
+                "reference": "ca71f5562a3876a153250f638124b6b95452985f",
                 "shasum": ""
             },
             "require": {
@@ -6003,7 +6003,7 @@
             "description": "Provides tools to validate values",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/validator/tree/v5.4.22"
+                "source": "https://github.com/symfony/validator/tree/v5.4.23"
             },
             "funding": [
                 {
@@ -6019,7 +6019,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-03-17T15:39:32+00:00"
+            "time": "2023-04-19T07:52:21+00:00"
         },
         {
             "name": "symfony/var-dumper",
@@ -6272,16 +6272,16 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v5.4.21",
+            "version": "v5.4.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "3713e20d93e46e681e51605d213027e48dab3469"
+                "reference": "4cd2e3ea301aadd76a4172756296fe552fb45b0b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/3713e20d93e46e681e51605d213027e48dab3469",
-                "reference": "3713e20d93e46e681e51605d213027e48dab3469",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/4cd2e3ea301aadd76a4172756296fe552fb45b0b",
+                "reference": "4cd2e3ea301aadd76a4172756296fe552fb45b0b",
                 "shasum": ""
             },
             "require": {
@@ -6327,7 +6327,7 @@
             "description": "Loads and dumps YAML files",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/yaml/tree/v5.4.21"
+                "source": "https://github.com/symfony/yaml/tree/v5.4.23"
             },
             "funding": [
                 {
@@ -6343,7 +6343,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-02-21T19:46:44+00:00"
+            "time": "2023-04-23T19:33:36+00:00"
         },
         {
             "name": "twig/twig",
@@ -9565,16 +9565,16 @@
         },
         {
             "name": "symfony/http-client",
-            "version": "v5.4.22",
+            "version": "v5.4.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-client.git",
-                "reference": "4cd1b7e7ee846c8b22cb47cbc435344af9b2a8bf"
+                "reference": "617c98e46b54e43ca76945a908b1749bb82f4478"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-client/zipball/4cd1b7e7ee846c8b22cb47cbc435344af9b2a8bf",
-                "reference": "4cd1b7e7ee846c8b22cb47cbc435344af9b2a8bf",
+                "url": "https://api.github.com/repos/symfony/http-client/zipball/617c98e46b54e43ca76945a908b1749bb82f4478",
+                "reference": "617c98e46b54e43ca76945a908b1749bb82f4478",
                 "shasum": ""
             },
             "require": {
@@ -9635,7 +9635,7 @@
                 "http"
             ],
             "support": {
-                "source": "https://github.com/symfony/http-client/tree/v5.4.22"
+                "source": "https://github.com/symfony/http-client/tree/v5.4.23"
             },
             "funding": [
                 {
@@ -9651,7 +9651,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-03-24T15:16:26+00:00"
+            "time": "2023-04-20T13:04:04+00:00"
         },
         {
             "name": "symfony/http-client-contracts",
@@ -9802,16 +9802,16 @@
         },
         {
             "name": "symfony/phpunit-bridge",
-            "version": "v5.4.21",
+            "version": "v5.4.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/phpunit-bridge.git",
-                "reference": "28d8a15a0b4c7186042fa4e0ddea94d561e7ea9e"
+                "reference": "1572c5b7cad812bdf0414d89a32a33a2dafb38ba"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/phpunit-bridge/zipball/28d8a15a0b4c7186042fa4e0ddea94d561e7ea9e",
-                "reference": "28d8a15a0b4c7186042fa4e0ddea94d561e7ea9e",
+                "url": "https://api.github.com/repos/symfony/phpunit-bridge/zipball/1572c5b7cad812bdf0414d89a32a33a2dafb38ba",
+                "reference": "1572c5b7cad812bdf0414d89a32a33a2dafb38ba",
                 "shasum": ""
             },
             "require": {
@@ -9865,7 +9865,7 @@
             "description": "Provides utilities for PHPUnit, especially user deprecation notices management",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/phpunit-bridge/tree/v5.4.21"
+                "source": "https://github.com/symfony/phpunit-bridge/tree/v5.4.23"
             },
             "funding": [
                 {
@@ -9881,7 +9881,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-02-16T09:33:00+00:00"
+            "time": "2023-04-18T09:42:03+00:00"
         },
         {
             "name": "symfony/stopwatch",
