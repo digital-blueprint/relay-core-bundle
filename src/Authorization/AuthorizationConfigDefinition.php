@@ -19,7 +19,7 @@ class AuthorizationConfigDefinition
     public const ENTITY_WRITE_ACCESS_CONFIG_NODE = 'write_access';
     public const ENTITY_CLASS_NAME_CONFIG_NODE = 'class_name';
 
-    private const ROLES_KEY = 'roles';
+    private const POLICIES_KEY = 'policies';
     private const ATTRIBUTES_KEY = 'attributes';
     private const ENTITIES_KEY = 'entities';
     private const ENTITY_READ_ACCESS_KEY = 'read_access';
@@ -40,9 +40,9 @@ class AuthorizationConfigDefinition
         $this->configDefinition = [];
     }
 
-    public function addRole(string $roleName, string $defaultExpression = 'false', string $info = ''): AuthorizationConfigDefinition
+    public function addPolicy(string $policyName, string $defaultExpression = 'false', string $info = ''): AuthorizationConfigDefinition
     {
-        Tools::pushToSubarray($this->configDefinition, self::ROLES_KEY, [$roleName, $defaultExpression, $info]);
+        Tools::pushToSubarray($this->configDefinition, self::POLICIES_KEY, [$policyName, $defaultExpression, $info]);
 
         return $this;
     }
@@ -73,10 +73,10 @@ class AuthorizationConfigDefinition
         $rightsNodeChildBuilder = $treeBuilder->getRootNode()->children()->arrayNode(self::POLICIES_CONFIG_NODE)
             ->addDefaultsIfNotSet()
             ->children();
-        foreach ($this->configDefinition[self::ROLES_KEY] ?? [] as $roleDefinition) {
-            $rightsNodeChildBuilder->scalarNode($roleDefinition[0])
-                ->defaultValue($roleDefinition[1] ?? 'false')
-                ->info($roleDefinition[2] ?? '')
+        foreach ($this->configDefinition[self::POLICIES_KEY] ?? [] as $policyDefinition) {
+            $rightsNodeChildBuilder->scalarNode($policyDefinition[0])
+                ->defaultValue($policyDefinition[1] ?? 'false')
+                ->info($policyDefinition[2] ?? '')
                 ->end();
         }
 
@@ -105,7 +105,7 @@ class AuthorizationConfigDefinition
             foreach ($entityDefinition[self::ENTITY_READ_ACCESS_KEY] ?? [] as $attributeName) {
                 $entityReadAccessChildBuilder->scalarNode($attributeName)
                     ->defaultValue('false')
-                    ->info(sprintf('The conditional reader role expression for attribute \'%s\'.', $attributeName))
+                    ->info(sprintf('The conditional read policy expression for attribute \'%s\'.', $attributeName))
                     ->end();
             }
 
@@ -114,7 +114,7 @@ class AuthorizationConfigDefinition
             foreach ($entityDefinition[self::ENTITY_WRITE_ACCESS_KEY] ?? [] as $attributeName) {
                 $entityWriteAccessChildBuilder->scalarNode($attributeName)
                     ->defaultValue('false')
-                    ->info(sprintf('The conditional writer role expression for attribute \'%s\'.', $attributeName))
+                    ->info(sprintf('The conditional write policy expression for attribute \'%s\'.', $attributeName))
                     ->end();
             }
         }
