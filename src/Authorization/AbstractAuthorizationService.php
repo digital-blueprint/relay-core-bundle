@@ -40,10 +40,10 @@ abstract class AbstractAuthorizationService
         $this->loadConfig();
     }
 
-    public function configure(array $roles = [], array $attributes = []): void
+    public function configure(array $policies = [], array $attributes = []): void
     {
         $this->config = [
-            AuthorizationConfigDefinition::ROLES_CONFIG_NODE => $roles,
+            AuthorizationConfigDefinition::POLICIES_CONFIG_NODE => $policies,
             AuthorizationConfigDefinition::ATTRIBUTES_CONFIG_NODE => $attributes,
         ];
 
@@ -51,23 +51,23 @@ abstract class AbstractAuthorizationService
     }
 
     /**
-     * @param mixed $object
+     * @param mixed $resource
      *
      * @throws ApiError
      */
-    public function denyAccessUnlessIsGranted(string $rightName, $object = null, string $objectAlias = null): void
+    public function denyAccessUnlessIsGranted(string $policyName, $resource = null, string $resourceAlias = null): void
     {
-        if ($this->isGrantedInternal($rightName, $object, $objectAlias) === false) {
-            throw new ApiError(Response::HTTP_FORBIDDEN, 'access denied. missing right '.$rightName);
+        if ($this->isGrantedInternal($policyName, $resource, $resourceAlias) === false) {
+            throw new ApiError(Response::HTTP_FORBIDDEN, 'access denied. policy failed: '.$policyName);
         }
     }
 
     /**
-     * @param mixed $object
+     * @param mixed $resource
      */
-    public function isGranted(string $expressionName, $object = null, string $objectAlias = null): bool
+    public function isGranted(string $expressionName, $resource = null, string $resourceAlias = null): bool
     {
-        return $this->isGrantedInternal($expressionName, $object, $objectAlias);
+        return $this->isGrantedInternal($expressionName, $resource, $resourceAlias);
     }
 
     /**
@@ -83,7 +83,7 @@ abstract class AbstractAuthorizationService
     private function loadConfig()
     {
         if ($this->userAuthorizationChecker !== null && $this->config !== null) {
-            $roleExpressions = $this->config[AuthorizationConfigDefinition::ROLES_CONFIG_NODE] ?? [];
+            $roleExpressions = $this->config[AuthorizationConfigDefinition::POLICIES_CONFIG_NODE] ?? [];
             $attributeExpressions = $this->config[AuthorizationConfigDefinition::ATTRIBUTES_CONFIG_NODE] ?? [];
 
             $this->userAuthorizationChecker->setExpressions($roleExpressions, $attributeExpressions);
@@ -101,8 +101,8 @@ abstract class AbstractAuthorizationService
     /**
      * @throws AuthorizationException
      */
-    private function isGrantedInternal(string $rightName, $object, string $objectAlias = null): bool
+    private function isGrantedInternal(string $policyName, $resource, string $resourceAlias = null): bool
     {
-        return $this->userAuthorizationChecker->isGranted($this->currentAuthorizationUser, $rightName, $object, $objectAlias);
+        return $this->userAuthorizationChecker->isGranted($this->currentAuthorizationUser, $policyName, $resource, $resourceAlias);
     }
 }

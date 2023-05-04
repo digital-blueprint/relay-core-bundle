@@ -22,14 +22,14 @@ class FilterExpressionFunctionProvider implements ExpressionFunctionProviderInte
     {
         return [
             new ExpressionFunction('filter',
-                function (string $iterableName, string $expression): string {
-                    return sprintf('filter(%s, %s)', $iterableName, $expression);
+                function (string $array, string $expression): string {
+                    return sprintf('filter(%s, %s)', $array, $expression);
                 },
-                function ($arguments, iterable $iterable, string $expression): array {
+                function ($arguments, array $array, ?string $expression = null): array {
                     $filteredResult = [];
-                    foreach ($iterable as $key => $value) {
-                        if ($this->expressionLanguage->evaluate($expression, ['key' => $key, 'value' => $value])) {
-                            $filteredResult[] = $value;
+                    foreach ($array as $key => $value) {
+                        if ($expression !== null ? $this->expressionLanguage->evaluate($expression, ['key' => $key, 'value' => $value]) : !empty($value)) {
+                            $filteredResult[$key] = $value;
                         }
                     }
 

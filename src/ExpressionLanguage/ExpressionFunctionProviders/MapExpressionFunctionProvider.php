@@ -22,16 +22,20 @@ class MapExpressionFunctionProvider implements ExpressionFunctionProviderInterfa
     {
         return [
             new ExpressionFunction('map',
-                function (string $iterableName, string $expression): string {
-                    return sprintf('map(%s, %s)', $iterableName, $expression);
+                function (string $expression, string $array): string {
+                    return sprintf('map(%s, %s)', $expression, $array);
                 },
-                function ($arguments, iterable $iterable, string $expression): array {
-                    $transformedResult = [];
-                    foreach ($iterable as $key => $value) {
-                        $transformedResult[$key] = $this->expressionLanguage->evaluate($expression, ['key' => $key, 'value' => $value]);
+                function ($arguments, ?string $expression, array $array): array {
+                    if ($expression === null) {
+                        $transformedArray = $array;
+                    } else {
+                        $transformedArray = [];
+                        foreach ($array as $key => $value) {
+                            $transformedArray[$key] = $this->expressionLanguage->evaluate($expression, ['key' => $key, 'value' => $value]);
+                        }
                     }
 
-                    return $transformedResult;
+                    return $transformedArray;
                 }),
         ];
     }

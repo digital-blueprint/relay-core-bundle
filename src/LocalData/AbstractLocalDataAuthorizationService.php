@@ -99,7 +99,7 @@ class AbstractLocalDataAuthorizationService extends AbstractAuthorizationService
     {
         foreach ($localDataAwareEntities as $localDataAwareEntity) {
             if (!$this->isGranted($attributeName, $localDataAwareEntity, self::ENTITY_OBJECT_ALIAS)) {
-                throw ApiError::withDetails(Response::HTTP_UNAUTHORIZED, sprintf('access to local data attribute \'%s\' denied', $attributeName));
+                throw ApiError::withDetails(Response::HTTP_FORBIDDEN, sprintf('access to local data attribute \'%s\' denied', $attributeName));
             }
         }
     }

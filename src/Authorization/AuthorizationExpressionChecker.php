@@ -19,7 +19,7 @@ class AuthorizationExpressionChecker
     private $expressionLanguage;
 
     /** @var array */
-    private $roleExpressions;
+    private $policyExpressions;
 
     /** @var array */
     private $attributeExpressions;
@@ -36,16 +36,16 @@ class AuthorizationExpressionChecker
     public function __construct(AuthorizationDataMuxer $dataMux)
     {
         $this->expressionLanguage = new ExpressionLanguage();
-        $this->roleExpressions = [];
+        $this->policyExpressions = [];
         $this->attributeExpressions = [];
         $this->dataMux = $dataMux;
         $this->roleExpressionStack = [];
         $this->attributeExpressionStack = [];
     }
 
-    public function setExpressions(array $roleExpressions, array $attributeExpressions)
+    public function setExpressions(array $policyExpressions, array $attributeExpressions)
     {
-        $this->roleExpressions = $roleExpressions;
+        $this->policyExpressions = $policyExpressions;
         $this->attributeExpressions = $attributeExpressions;
     }
 
@@ -94,29 +94,29 @@ class AuthorizationExpressionChecker
      *
      * @throws AuthorizationException
      */
-    public function isGranted(AuthorizationUser $currentAuthorizationUser, string $rightName, $object, string $objectAlias = null): bool
+    public function isGranted(AuthorizationUser $currentAuthorizationUser, string $policyName, $resource, string $resourceAlias = null): bool
     {
-        if (in_array($rightName, $this->roleExpressionStack, true)) {
-            throw new AuthorizationException(sprintf('infinite loop caused by authorization right expression %s detected', $rightName), AuthorizationException::INFINITE_EXRPESSION_LOOP_DETECTED);
+        if (in_array($policyName, $this->roleExpressionStack, true)) {
+            throw new AuthorizationException(sprintf('infinite loop caused by authorization right expression %s detected', $policyName), AuthorizationException::INFINITE_EXRPESSION_LOOP_DETECTED);
         }
-        array_push($this->roleExpressionStack, $rightName);
+        array_push($this->roleExpressionStack, $policyName);
 
         try {
-            $rightExpression = $this->roleExpressions[$rightName] ?? null;
-            if ($rightExpression === null) {
-                throw new AuthorizationException(sprintf('right \'%s\' undefined', $rightName), AuthorizationException::PRIVILEGE_UNDEFINED);
+            $policyExpression = $this->policyExpressions[$policyName] ?? null;
+            if ($policyExpression === null) {
+                throw new AuthorizationException(sprintf('policy \'%s\' undefined', $policyName), AuthorizationException::POLICY_UNDEFINED);
             }
 
             $variables = [
                 self::USER_VARIBLE_NAME => $currentAuthorizationUser,
-                self::DEFAULT_OBJECT_VARIBLE_NAME => $object,
+                self::DEFAULT_OBJECT_VARIBLE_NAME => $resource,
             ];
 
-            if (!Tools::isNullOrEmpty($objectAlias)) {
-                $variables[$objectAlias] = $object;
+            if (!Tools::isNullOrEmpty($resourceAlias)) {
+                $variables[$resourceAlias] = $resource;
             }
 
-            return $this->expressionLanguage->evaluate($rightExpression, $variables);
+            return $this->expressionLanguage->evaluate($policyExpression, $variables);
         } finally {
             array_pop($this->roleExpressionStack);
         }

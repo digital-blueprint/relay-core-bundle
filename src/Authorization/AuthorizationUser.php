@@ -41,13 +41,13 @@ class AuthorizationUser
     }
 
     /**
-     * @param mixed $subject
+     * @param mixed $resource
      *
      * @throws AuthorizationException
      */
-    public function isGranted(string $rightName, $subject = null): bool
+    public function isGranted(string $policyName, $resource = null): bool
     {
-        return $this->authorizationChecker->isGranted($this, $rightName, $subject);
+        return $this->authorizationChecker->isGranted($this, $policyName, $resource);
     }
 
     /**

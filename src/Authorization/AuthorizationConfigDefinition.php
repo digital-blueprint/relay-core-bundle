@@ -12,7 +12,7 @@ class AuthorizationConfigDefinition
 {
     /* config array keys */
     public const AUTHORIZATION_CONFIG_NODE = 'authorization';
-    public const ROLES_CONFIG_NODE = 'roles';
+    public const POLICIES_CONFIG_NODE = 'policies';
     public const ATTRIBUTES_CONFIG_NODE = 'attributes';
     public const ENTITIES_CONFIG_NODE = 'entities';
     public const ENTITY_READ_ACCESS_CONFIG_NODE = 'read_access';
@@ -70,7 +70,7 @@ class AuthorizationConfigDefinition
     {
         $treeBuilder = new TreeBuilder(self::AUTHORIZATION_CONFIG_NODE);
 
-        $rightsNodeChildBuilder = $treeBuilder->getRootNode()->children()->arrayNode(self::ROLES_CONFIG_NODE)
+        $rightsNodeChildBuilder = $treeBuilder->getRootNode()->children()->arrayNode(self::POLICIES_CONFIG_NODE)
             ->addDefaultsIfNotSet()
             ->children();
         foreach ($this->configDefinition[self::ROLES_KEY] ?? [] as $roleDefinition) {

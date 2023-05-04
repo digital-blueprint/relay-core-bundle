@@ -120,7 +120,7 @@ class ExpressionExtension
         return empty($value);
     }
 
-    public function map(iterable $iterable, string $expression): array
+    public function map(string $expression, iterable $iterable): array
     {
         $transformedResult = [];
         foreach ($iterable as $key => $value) {
@@ -135,7 +135,7 @@ class ExpressionExtension
         $filteredResult = [];
         foreach ($iterable as $key => $value) {
             if ($this->lang->evaluate($expression, ['key' => $key, 'value' => $value])) {
-                $filteredResult[] = $value;
+                $filteredResult[$key] = $value;
             }
         }
 

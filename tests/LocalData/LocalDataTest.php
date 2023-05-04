@@ -114,7 +114,7 @@ class LocalDataTest extends TestCase
         try {
             $this->getTestEntities($localDataAttributeName, $sourceData)[0];
         } catch (ApiError $exception) {
-            $this->assertEquals(Response::HTTP_UNAUTHORIZED, $exception->getStatusCode());
+            $this->assertEquals(Response::HTTP_FORBIDDEN, $exception->getStatusCode());
         }
     }
 
@@ -126,7 +126,7 @@ class LocalDataTest extends TestCase
         try {
             $this->getTestEntities($localDataAttributeName, $sourceData, null, 3);
         } catch (ApiError $exception) {
-            $this->assertEquals(Response::HTTP_UNAUTHORIZED, $exception->getStatusCode());
+            $this->assertEquals(Response::HTTP_FORBIDDEN, $exception->getStatusCode());
         }
     }
 
@@ -184,7 +184,7 @@ class LocalDataTest extends TestCase
         try {
             $this->getTestEntities($localDataAttributeName, $sourceData, $localQuery);
         } catch (ApiError $exception) {
-            $this->assertEquals(Response::HTTP_UNAUTHORIZED, $exception->getStatusCode());
+            $this->assertEquals(Response::HTTP_FORBIDDEN, $exception->getStatusCode());
         }
     }
 
@@ -200,7 +200,7 @@ class LocalDataTest extends TestCase
         try {
             $this->getTestEntities($localDataAttributeName, $sourceData, $localQuery, 3);
         } catch (ApiError $exception) {
-            $this->assertEquals(Response::HTTP_UNAUTHORIZED, $exception->getStatusCode());
+            $this->assertEquals(Response::HTTP_FORBIDDEN, $exception->getStatusCode());
         }
     }
 

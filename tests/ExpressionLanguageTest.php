@@ -23,35 +23,35 @@ class ExpressionLanguageTest extends TestCase
         $this->assertSame([], $lang->evaluate('filter([1, 5, 2, 4], "false")'));
         $this->assertSame([1, 5, 2, 4], $lang->evaluate('filter([1, 5, 2, 4], "true")'));
         $this->assertSame([1, 5, 2, 4], $lang->evaluate('filter([1, 5, 2, 4], "42")'));
-        $this->assertSame([5, 4], $lang->evaluate('filter([1, 5, 2, 4], "value > 2")'));
-        $this->assertSame([2, 4], $lang->evaluate('filter({1: 2, 3: 4}, "true")'));
-        $this->assertSame([5, 2, 4], $lang->evaluate('filter([0.5, 5, 2, 4], "floor(value)")'));
+        $this->assertSame([1 => 5, 3 => 4], $lang->evaluate('filter([1, 5, 2, 4], "value > 2")'));
+        $this->assertSame([1 => 2, 3 => 4], $lang->evaluate('filter({1: 2, 3: 4}, "true")'));
+        $this->assertSame([1 => 5, 2 => 2, 3 => 4], $lang->evaluate('filter([0.5, 5, 2, 4], "floor(value)")'));
 
         $this->assertSame([], $lang->evaluate('relay.filter([], "true")'));
         $this->assertSame([], $lang->evaluate('relay.filter([1, 5, 2, 4], "false")'));
         $this->assertSame([1, 5, 2, 4], $lang->evaluate('relay.filter([1, 5, 2, 4], "true")'));
         $this->assertSame([1, 5, 2, 4], $lang->evaluate('relay.filter([1, 5, 2, 4], "42")'));
-        $this->assertSame([5, 4], $lang->evaluate('relay.filter([1, 5, 2, 4], "value > 2")'));
-        $this->assertSame([2, 4], $lang->evaluate('relay.filter({1: 2, 3: 4}, "true")'));
-        $this->assertSame([5, 2, 4], $lang->evaluate('relay.filter([0.5, 5, 2, 4], "relay.floor(value)")'));
+        $this->assertSame([1 => 5, 3 => 4], $lang->evaluate('relay.filter([1, 5, 2, 4], "value > 2")'));
+        $this->assertSame([1 => 2, 3 => 4], $lang->evaluate('relay.filter({1: 2, 3: 4}, "true")'));
+        $this->assertSame([1 => 5, 2 => 2, 3 => 4], $lang->evaluate('relay.filter([0.5, 5, 2, 4], "floor(value)")'));
     }
 
     public function testMap()
     {
         $lang = new ExpressionLanguage();
-        $this->assertSame([], $lang->evaluate('map([], "true")'));
-        $this->assertSame([false], $lang->evaluate('map([1], "false")'));
-        $this->assertSame([2, 6, 3, 5], $lang->evaluate('map([1, 5, 2, 4], "value + 1")'));
-        $this->assertSame([1 => 3, 3 => 7], $lang->evaluate('map({1: 2, 3: 4}, "key + value")'));
-        $this->assertSame([1 => 42, 3 => 42], $lang->evaluate('map({1: 2, 3: 4}, "42")'));
-        $this->assertSame([1.0], $lang->evaluate('map([0.5], "ceil(value)")'));
+        $this->assertSame([], $lang->evaluate('map("true", [])'));
+        $this->assertSame([false], $lang->evaluate('map("false", [1])'));
+        $this->assertSame([2, 6, 3, 5], $lang->evaluate('map("value + 1", [1, 5, 2, 4])'));
+        $this->assertSame([1 => 3, 3 => 7], $lang->evaluate('map("key + value", {1: 2, 3: 4})'));
+        $this->assertSame([1 => 42, 3 => 42], $lang->evaluate('map("42", {1: 2, 3: 4})'));
+        $this->assertSame([1.0], $lang->evaluate('map( "ceil(value)", [0.5])'));
 
-        $this->assertSame([], $lang->evaluate('relay.map([], "true")'));
-        $this->assertSame([false], $lang->evaluate('relay.map([1], "false")'));
-        $this->assertSame([2, 6, 3, 5], $lang->evaluate('relay.map([1, 5, 2, 4], "value + 1")'));
-        $this->assertSame([1 => 3, 3 => 7], $lang->evaluate('relay.map({1: 2, 3: 4}, "key + value")'));
-        $this->assertSame([1 => 42, 3 => 42], $lang->evaluate('relay.map({1: 2, 3: 4}, "42")'));
-        $this->assertSame([1.0], $lang->evaluate('relay.map([0.5], "relay.ceil(value)")'));
+        $this->assertSame([], $lang->evaluate('relay.map("true", [])'));
+        $this->assertSame([false], $lang->evaluate('relay.map("false", [1])'));
+        $this->assertSame([2, 6, 3, 5], $lang->evaluate('relay.map("value + 1", [1, 5, 2, 4])'));
+        $this->assertSame([1 => 3, 3 => 7], $lang->evaluate('relay.map("key + value", {1: 2, 3: 4})'));
+        $this->assertSame([1 => 42, 3 => 42], $lang->evaluate('relay.map("42", {1: 2, 3: 4})'));
+        $this->assertSame([1.0], $lang->evaluate('relay.map( "ceil(value)", [0.5])'));
     }
 
     public function testEmpty()
