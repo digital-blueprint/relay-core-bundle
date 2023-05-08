@@ -103,7 +103,7 @@ class LocalData
                     throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf('multiple definition of local query attribute \'%s\'', $parameterKey));
                 }
 
-                $localQueryAttributes[$parameterKey] = $parameterValue;
+                $localQueryAttributes[$parameterKey] = urldecode((string) $parameterValue);
             }
         }
 
@@ -123,11 +123,10 @@ class LocalData
 
         $parts = explode(':', $parameterAssignment);
 
-        if (count($parts) === 2) {
-            $parameter = $parts[0];
-            $value = $parts[1];
-        }
+        $parameter = $parts[0] ?? null;
+        $value = $parts[1] ?? null;
+        $numParts = count($parts);
 
-        return !Tools::isNullOrEmpty($parameter) && !Tools::isNullOrEmpty($value);
+        return !Tools::isNullOrEmpty($parameter) && ($numParts === 1 || ($numParts === 2 && !Tools::isNullOrEmpty($value)));
     }
 }
