@@ -6,4 +6,4 @@
 
 The core bundle is the central bundle that needs to be installed in every Relay API gateway and also is a dependency of every other API bundle.
 
-Docs: see <https://github.com/digital-blueprint/relay-core-bundle/tree/main/docs>
+See the [documentation](./docs/README.md) for more information.
