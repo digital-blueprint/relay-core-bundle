@@ -1,3 +1,11 @@
+# v0.1.98
+
+* Update and require api-platform 2.7
+  See https://api-platform.com/docs/core/upgrade-guide/ for changes and
+  how to migrate to the newer systems.
+  Note that we don't set metadata_backward_compatibility_layer to false yet,
+  so all old interfaces should still work.
+
 # v0.1.95
 
 * The OpenAPI docs now use their own Keycloak client Javascript module instead of using the one from the configured Keycloak server. This change was required due to Keycloak 22 planning to no longer provide the Javscript module.
