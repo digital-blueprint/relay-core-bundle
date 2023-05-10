@@ -107,6 +107,13 @@ class AuthorizationExpressionChecker
                 throw new AuthorizationException(sprintf('policy \'%s\' undefined', $policyName), AuthorizationException::POLICY_UNDEFINED);
             }
 
+            // shortcuts for popular (default) policies:
+            if ($policyExpression === 'true') {
+                return true;
+            } elseif ($policyExpression === 'false') {
+                return false;
+            }
+
             $variables = [
                 self::USER_VARIBLE_NAME => $currentAuthorizationUser,
                 self::DEFAULT_OBJECT_VARIBLE_NAME => $resource,
