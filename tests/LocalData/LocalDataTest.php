@@ -232,27 +232,27 @@ class LocalDataTest extends TestCase
         $config['local_data'] = [
             [
                 'local_data_attribute' => 'attribute_1',
-                'authorization_expression' => 'true',
+                'read_policy' => 'true',
                 'allow_query' => true,
             ],
             [
                 'local_data_attribute' => 'attribute_2',
-                'authorization_expression' => 'true',
+                'read_policy' => 'true',
                 'allow_query' => false,
             ],
             [
                 'local_data_attribute' => 'attribute_3',
-                'authorization_expression' => 'false',
+                'read_policy' => 'false',
                 'allow_query' => true,
             ],
             [
                 'local_data_attribute' => 'attribute_4',
-                'authorization_expression' => 'true',
+                'read_policy' => 'true',
                 'allow_query' => true,
             ],
             [
                 'local_data_attribute' => 'array_attribute_1',
-                'authorization_expression' => 'true',
+                'read_policy' => 'true',
                 'allow_query' => false,
             ],
         ];

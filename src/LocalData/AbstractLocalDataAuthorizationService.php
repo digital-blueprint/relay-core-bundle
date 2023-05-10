@@ -14,7 +14,7 @@ class AbstractLocalDataAuthorizationService extends AbstractAuthorizationService
 {
     protected const LOCAL_DATA_CONFIG_NODE = 'local_data';
     protected const LOCAL_DATA_ATTRIBUTE_NAME_CONFIG_NODE = 'local_data_attribute';
-    protected const AUTHORIZATION_EXPRESSION_CONFIG_NODE = 'authorization_expression';
+    protected const READ_POLICY_CONFIG_NODE = 'read_policy';
     protected const ALLOW_LOCAL_QUERY_CONFIG_NODE = 'allow_query';
 
     private const ALLOW_LOCAL_QUERY_KEY = 'allow_query';
@@ -41,7 +41,7 @@ class AbstractLocalDataAuthorizationService extends AbstractAuthorizationService
 
             // the name of the local data attribute is used as name for the right to view that attribute
             // the attribute is visible false by default
-            $rightExpressions[$localDataAttributeName] = $configEntry[self::AUTHORIZATION_EXPRESSION_CONFIG_NODE] ?? 'false';
+            $rightExpressions[$localDataAttributeName] = $configEntry[self::READ_POLICY_CONFIG_NODE] ?? 'false';
         }
 
         parent::configure($rightExpressions);
@@ -130,7 +130,7 @@ class AbstractLocalDataAuthorizationService extends AbstractAuthorizationService
             ->scalarNode(self::LOCAL_DATA_ATTRIBUTE_NAME_CONFIG_NODE)
             ->info('The name of the local data attribute.')
             ->end()
-            ->scalarNode(self::AUTHORIZATION_EXPRESSION_CONFIG_NODE)
+            ->scalarNode(self::READ_POLICY_CONFIG_NODE)
             ->defaultValue('false')
             ->info('A boolean expression evaluable by the Symfony Expression Language determining whether the current user may request read the local data attribute.')
             ->end()
