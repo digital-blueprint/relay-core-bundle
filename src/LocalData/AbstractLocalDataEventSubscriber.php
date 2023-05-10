@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\LocalData;
 
-use Dbp\Relay\CoreBundle\Exception\ApiError;
+use Dbp\Relay\CoreBundle\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /*
@@ -24,18 +23,21 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
     protected const SOURCE_ATTRIBUTE_CONFIG_NODE = 'source_attribute';
     protected const LOCAL_DATA_ATTRIBUTE_CONFIG_NODE = 'local_data_attribute';
     protected const IS_ARRAY_CONFIG_NODE = 'is_array';
-    protected const DEFAULT_VALUE_ATTRIBUTE_CONFIG_NODE = 'default_value';
-    protected const DEFAULT_VALUES_ATTRIBUTE_CONFIG_NODE = 'default_values';
+    protected const MAP_VALUE_CONFIG_NODE = 'map_value';
+    protected const MAP_QUERY_VALUE_CONFIG_NODE = 'map_query';
+
+    protected const LOCAL_QUERY_PARAMETER_LOCAL_DATA_ATTRIBUTE_KEY = 'local_data_attribute';
+    protected const LOCAL_QUERY_PARAMETER_SOURCE_ATTRIBUTE_KEY = 'source_attribute';
+    protected const LOCAL_QUERY_PARAMETER_VALUE_KEY = 'value';
+    protected const LOCAL_QUERY_PARAMETER_OPERATOR_KEY = 'operator';
 
     private const SOURCE_ATTRIBUTE_KEY = 'source';
-    private const DEFAULT_VALUE_KEY = 'default';
     private const IS_ARRAY_KEY = 'is_array';
+    private const MAP_VALUE_KEY = 'map_value';
+    private const MAP_QUERY_VALUE_KEY = 'map_query';
 
-    /*
-     * WORKAROUND: could not find a way to determine whether a Symfony config array node was NOT specified since it provides an empty
-     * array in case it is not specified. So I use an array value as default which does not seem to be reproducible by the configurator.
-     */
-    private const ARRAY_VALUE_NOT_SPECIFIED = [null => null];
+    private const MAP_VALUE_VALUE_PARAMETER = 'value';
+    private const MAP_QUERY_VALUES_PARAMETER = 'values';
 
     /** @var array */
     private $attributeMapping = [];
@@ -46,26 +48,24 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
 
         return $treeBuilder->getRootNode()
             ->arrayPrototype()
-            ->children()
-            ->scalarNode(self::LOCAL_DATA_ATTRIBUTE_CONFIG_NODE)
-            ->info('The name of the local data attribute.')
-            ->end()
-            ->scalarNode(self::SOURCE_ATTRIBUTE_CONFIG_NODE)
-            ->info('The source attribute to map to the local data attribute. If the source attribute is not found, the default value is used.')
-            ->end()
-            ->booleanNode(self::IS_ARRAY_CONFIG_NODE)
-            ->info('Specifies whether the local data attribute is expected to be of array type. The value of the local data attribute is converted accordingly, if required.')
-            ->defaultValue(false)
-            ->end()
-            ->scalarNode(self::DEFAULT_VALUE_ATTRIBUTE_CONFIG_NODE)
-            ->info('The default value for scalar (i.e. non-array) attributes. If none is specified, an exception is thrown in case the source attribute is not found.')
-            ->end()
-            ->arrayNode(self::DEFAULT_VALUES_ATTRIBUTE_CONFIG_NODE)
-            ->defaultValue(self::ARRAY_VALUE_NOT_SPECIFIED)
-            ->info('The default value for array type attributes. If none is specified, an exception is thrown in case the source attribute is not found.')
-            ->scalarPrototype()->end()
-            ->end()
-            ->end()
+                ->children()
+                    ->scalarNode(self::LOCAL_DATA_ATTRIBUTE_CONFIG_NODE)
+                       ->info('The name of the local data attribute.')
+                    ->end()
+                    ->scalarNode(self::SOURCE_ATTRIBUTE_CONFIG_NODE)
+                        ->info('The source attribute to map to the local data attribute. If the source attribute is not found, the default value is used.')
+                    ->end()
+                    ->booleanNode(self::IS_ARRAY_CONFIG_NODE)
+                        ->info('Specifies whether the local data attribute is expected to be of array type. The value of the local data attribute is converted accordingly, if required.')
+                        ->defaultValue(false)
+                    ->end()
+                    ->scalarNode(self::MAP_VALUE_CONFIG_NODE)
+                         ->info('An attribute expression that takes the source attribute\'s value (\'value\' parameter, can be null) as an input and returns the transformed value of the local data attribute.')
+                    ->end()
+                    ->scalarNode(self::MAP_QUERY_VALUE_CONFIG_NODE)
+                        ->info('An attribute expression that takes the given list of values for the query parameter (\'values\' parameter of type string array, can contain null values) as an input and returns the desired transformed list of values for the query parameter.')
+                    ->end()
+                ->end()
             ->end()
             ;
     }
@@ -99,18 +99,8 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
             $attributeMapEntry = [];
             $attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY] = $configMappingEntry[self::SOURCE_ATTRIBUTE_CONFIG_NODE];
             $attributeMapEntry[self::IS_ARRAY_KEY] = $configMappingEntry[self::IS_ARRAY_CONFIG_NODE] ?? false;
-
-            $defaultValue = $configMappingEntry[self::DEFAULT_VALUE_ATTRIBUTE_CONFIG_NODE] ?? null;
-            if ($defaultValue === null) {
-                $defaultArray = $configMappingEntry[self::DEFAULT_VALUES_ATTRIBUTE_CONFIG_NODE] ?? null;
-                if ($defaultArray !== null && $defaultArray !== self::ARRAY_VALUE_NOT_SPECIFIED) {
-                    $defaultValue = $defaultArray;
-                }
-            }
-
-            if ($defaultValue !== null) {
-                $attributeMapEntry[self::DEFAULT_VALUE_KEY] = $defaultValue;
-            }
+            $attributeMapEntry[self::MAP_VALUE_KEY] = $configMappingEntry[self::MAP_VALUE_CONFIG_NODE] ?? null;
+            $attributeMapEntry[self::MAP_QUERY_VALUE_KEY] = $configMappingEntry[self::MAP_QUERY_VALUE_CONFIG_NODE] ?? null;
 
             $this->attributeMapping[$localDataAttributeName] = $attributeMapEntry;
         }
@@ -118,15 +108,31 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
 
     public function onEvent(Event $event)
     {
+        $expressionLanguage = null;
+
         if ($event instanceof LocalDataPreEvent) {
             $localQueryParameters = [];
-            foreach ($event->getPendingQueryParameters() as $localDataAttributeName => $localDataAttributeValue) {
-                if (($attributeMapEntry = $this->attributeMapping[$localDataAttributeName] ?? null) !== null) {
+            foreach ($event->getPendingQueryParameters() as $localQueryAttributeName => $localQueryAttributeValues) {
+                if (($attributeMapEntry = $this->attributeMapping[$localQueryAttributeName] ?? null) !== null) {
+                    if (($mappingExpression = $attributeMapEntry[self::MAP_QUERY_VALUE_KEY]) !== null) {
+                        $expressionLanguage = $expressionLanguage ?? new ExpressionLanguage();
+                        $localQueryAttributeValues = $expressionLanguage->evaluate($mappingExpression, [
+                            self::MAP_QUERY_VALUES_PARAMETER => $localQueryAttributeValues,
+                        ]);
+                    }
                     $sourceAttributeName = $attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY];
-                    $localQueryParameters[$sourceAttributeName] = $localDataAttributeValue;
-                    $event->tryPopPendingQueryParameter($localDataAttributeName);
+                    foreach ($localQueryAttributeValues as $localDataAttributeValue) {
+                        $localQueryParameters[] = [
+                            self::LOCAL_QUERY_PARAMETER_LOCAL_DATA_ATTRIBUTE_KEY => $localQueryAttributeName,
+                            self::LOCAL_QUERY_PARAMETER_SOURCE_ATTRIBUTE_KEY => $sourceAttributeName,
+                            self::LOCAL_QUERY_PARAMETER_VALUE_KEY => $localDataAttributeValue,
+                            self::LOCAL_QUERY_PARAMETER_OPERATOR_KEY => LocalData::LOCAL_QUERY_OPERATOR_CONTAINS_CI,
+                        ];
+                    }
+                    $event->tryPopPendingQueryParameter($localQueryAttributeName);
                 }
             }
+
             $this->onPreEvent($event, $localQueryParameters);
         } elseif ($event instanceof LocalDataPostEvent) {
             $localDataAttributes = [];
@@ -134,21 +140,25 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
                 if (($attributeMapEntry = $this->attributeMapping[$localDataAttributeName] ?? null) !== null) {
                     $attributeValue = $event->getSourceData()[$attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY]] ?? null;
 
-                    $is_array_attribute = $attributeMapEntry[self::IS_ARRAY_KEY];
-                    if (is_array($attributeValue)) {
-                        $attributeValue = $is_array_attribute ? $attributeValue : ($attributeValue[0] ?? null);
-                    } else {
-                        $attributeValue = $is_array_attribute ? [$attributeValue] : $attributeValue;
-                    }
-                    $attributeValue = $attributeValue ?? $attributeMapEntry[self::DEFAULT_VALUE_KEY] ?? null;
-
                     if ($attributeValue !== null) {
-                        $localDataAttributes[$localDataAttributeName] = $attributeValue;
-                    } else {
-                        throw ApiError::withDetails(Response::HTTP_INTERNAL_SERVER_ERROR, sprintf('none of the source attributes available for local data attribute \'%s\'', $localDataAttributeName));
+                        $is_array_attribute = $attributeMapEntry[self::IS_ARRAY_KEY];
+                        if (is_array($attributeValue)) {
+                            $attributeValue = $is_array_attribute ? $attributeValue : ($attributeValue[0] ?? null);
+                        } else {
+                            $attributeValue = $is_array_attribute ? [$attributeValue] : $attributeValue;
+                        }
                     }
+
+                    if (($mappingExpression = $attributeMapEntry[self::MAP_VALUE_KEY]) !== null) {
+                        $expressionLanguage = $expressionLanguage ?? new ExpressionLanguage();
+                        $attributeValue = $expressionLanguage->evaluate($mappingExpression, [
+                            self::MAP_VALUE_VALUE_PARAMETER => $attributeValue,
+                        ]);
+                    }
+                    $localDataAttributes[$localDataAttributeName] = $attributeValue;
                 }
             }
+
             $this->onPostEvent($event, $localDataAttributes);
 
             foreach ($localDataAttributes as $localDataAttributeName => $localDataAttributeValue) {
@@ -160,16 +170,23 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
     /**
      * Override this if you want to use the mapped local query attributes in your code.
      *
-     * @param array $mappedQueryParameters The associative array of local query attributes (keys: local query attribute names, values: local query attribute values)
+     * @param array $localQueryAttributes The array of local query attributes in the form:
+     *                                    [
+     *                                    self::LOCAL_QUERY_PARAMETER_LOCAL_DATA_ATTRIBUTE_KEY => <local data attribute name>,
+     *                                    self::LOCAL_QUERY_PARAMETER_SOURCE_ATTRIBUTE_KEY => <source attribute name>,
+     *                                    self::LOCAL_QUERY_PARAMETER_VALUE_KEY => <query attribute value>,
+     *                                    self::LOCAL_QUERY_PARAMETER_OPERATOR_KEY => <operator>,
+     *                                    ]
      */
-    protected function onPreEvent(LocalDataPreEvent $preEvent, array $mappedQueryParameters)
+    protected function onPreEvent(LocalDataPreEvent $preEvent, array $localQueryAttributes)
     {
     }
 
     /**
-     * Override this if you want to modify the local data attribute values before they are set.
+     * Override this if you want to modify the local data attribute values before they are set in the entity.
      *
-     * @param array $localDataAttributes A reference to the associative array of local data attributes (keys: local data attribute names, values: local data attribute values)
+     * @param array $localDataAttributes A reference to the associative array of local data attributes
+     *                                   (keys: local data attribute names, values: local data attribute values)
      */
     protected function onPostEvent(LocalDataPostEvent $postEvent, array &$localDataAttributes)
     {

@@ -18,6 +18,8 @@ class LocalData
     public const LOCAL_DATA_ATTRIBUTES = 'local_data_attributes';
     public const LOCAL_QUERY_ATTRIBUTES = 'local_query_attributes';
 
+    public const LOCAL_QUERY_OPERATOR_CONTAINS_CI = 'contains_ci';
+
     public static function getIncludeParameter(array $options): ?string
     {
         return $options[self::INCLUDE_PARAMETER_NAME] ?? null;
@@ -99,11 +101,7 @@ class LocalData
                     throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf("'%s' parameter has invalid format: '%s' (Example: 'param1:val1,attr1:val2')", LocalData::QUERY_PARAMETER_NAME, $queryAttributeAssignment));
                 }
 
-                if (isset($localQueryAttributes[$parameterKey])) {
-                    throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf('multiple definition of local query attribute \'%s\'', $parameterKey));
-                }
-
-                $localQueryAttributes[$parameterKey] = urldecode((string) $parameterValue);
+                Tools::pushToSubarray($localQueryAttributes, $parameterKey, urldecode((string) $parameterValue));
             }
         }
 

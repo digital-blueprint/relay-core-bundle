@@ -18,15 +18,15 @@ class ExpressionLanguage extends SymfonyExpressionLanguage
 {
     public function __construct(CacheItemPoolInterface $cache = null, array $providers = [])
     {
-        $providers = array_merge([
-            new FilterExpressionFunctionProvider($this),
-            new MapExpressionFunctionProvider($this),
-            new PhpArrayExpressionFunctionProvider(),
-            new PhpNumericExpressionFunctionProvider(),
-            new PhpStringExpressionFunctionProvider(),
-            new ArrayExpressionFunctionProvider(),
-            new StringExpressionFunctionProvider(),
-        ], $providers);
+//        $providers = array_merge([
+//            new FilterExpressionFunctionProvider($this),
+//            new MapExpressionFunctionProvider($this),
+//            new PhpArrayExpressionFunctionProvider(),
+//            new PhpNumericExpressionFunctionProvider(),
+//            new PhpStringExpressionFunctionProvider(),
+//            new ArrayExpressionFunctionProvider(),
+//            new StringExpressionFunctionProvider(),
+//        ], $providers);
 
         parent::__construct($cache, $providers);
     }

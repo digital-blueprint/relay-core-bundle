@@ -58,6 +58,34 @@ class ExpressionExtension
         return call_user_func_array('strlen', $args);
     }
 
+    public static function trim()
+    {
+        $args = func_get_args();
+
+        return call_user_func_array('trim', $args);
+    }
+
+    public static function sprintf()
+    {
+        $args = func_get_args();
+
+        return call_user_func_array('sprintf', $args);
+    }
+
+    public static function vsprintf()
+    {
+        $args = func_get_args();
+
+        return call_user_func_array('vsprintf', $args);
+    }
+
+    public static function preg_match()
+    {
+        $args = func_get_args();
+
+        return call_user_func_array('preg_match', $args);
+    }
+
     public static function ceil()
     {
         $args = func_get_args();
@@ -120,30 +148,59 @@ class ExpressionExtension
         return empty($value);
     }
 
-    public function map(string $expression, iterable $iterable): array
+    public static function isNullOrEmptyArray(?array $array): bool
     {
-        $transformedResult = [];
-        foreach ($iterable as $key => $value) {
-            $transformedResult[$key] = $this->lang->evaluate($expression, ['key' => $key, 'value' => $value]);
-        }
-
-        return $transformedResult;
+        return $array === null || count($array) === 0;
     }
 
-    public function filter(iterable $iterable, string $expression): array
+    public static function isNullOrEmptyString(?string $string): bool
     {
-        $filteredResult = [];
+        return $string === null || $string === '';
+    }
+
+    public static function ternaryOperator(bool $condition, $valueIfTrue, $valueIfFalse)
+    {
+        return $condition ? $valueIfTrue : $valueIfFalse;
+    }
+
+    public static function nullCoalescingOperator($value, $valueIfNull)
+    {
+        return $value === null ? $valueIfNull : $value;
+    }
+
+    public function regexFormat(string $pattern, string $subject, string $formatString, string $default = null): ?string
+    {
+        $matches = [];
+        if (preg_match($pattern, $subject, $matches)) {
+            return vsprintf($formatString, $matches);
+        } else {
+            return $default;
+        }
+    }
+
+    public function map(iterable $iterable, string $expression): array
+    {
+        $transformedValues = [];
+        foreach ($iterable as $key => $value) {
+            $transformedValues[$key] = $this->lang->evaluate($expression, ['key' => $key, 'value' => $value]);
+        }
+
+        return $transformedValues;
+    }
+
+    public function filter(iterable $iterable, string $expression, bool $preserveKeys = false): array
+    {
+        $filteredValues = [];
         foreach ($iterable as $key => $value) {
             if ($this->lang->evaluate($expression, ['key' => $key, 'value' => $value])) {
-                $filteredResult[$key] = $value;
+                if ($preserveKeys) {
+                    $filteredValues[$key] = $value;
+                } else {
+                    $filteredValues[] = $value;
+                }
             }
         }
 
-        return $filteredResult;
-    }
-
-    public static function isNullOrEmpty($value)
-    {
-        return $value === null || $value === '';
+        return $filteredValues;
     }
 }

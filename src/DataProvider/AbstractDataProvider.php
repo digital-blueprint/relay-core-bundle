@@ -54,7 +54,7 @@ abstract class AbstractDataProvider extends AbstractLocalDataAuthorizationServic
         $maxNumItemsPerPage = Pagination::getMaxNumItemsPerPage($filters);
 
         $pageItems = $this->getPage($currentPageNumber, $maxNumItemsPerPage, $filters, $options);
-        $this->denyLocalDataAccessUnlessGranted($pageItems, $options);
+        $pageItems = $this->enforceLocalDataAccessControlPolicies($pageItems, $options);
 
         return new PartialPaginator($pageItems, $currentPageNumber, $maxNumItemsPerPage);
     }
@@ -67,9 +67,9 @@ abstract class AbstractDataProvider extends AbstractLocalDataAuthorizationServic
         $options = $this->createOptions($filters);
 
         $item = $this->getItemById($id, $filters, $options);
-        $this->denyLocalDataAccessUnlessGranted([$item], $options);
+        $items = $this->enforceLocalDataAccessControlPolicies([$item], $options);
 
-        return $item;
+        return $items[0] ?? null;
     }
 
     public function isUserAuthenticated(): bool
