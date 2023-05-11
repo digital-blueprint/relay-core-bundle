@@ -101,7 +101,8 @@ class LocalData
                     throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf("'%s' parameter has invalid format: '%s' (Example: 'param1:val1,attr1:val2')", LocalData::QUERY_PARAMETER_NAME, $queryAttributeAssignment));
                 }
 
-                Tools::pushToSubarray($localQueryAttributes, $parameterKey, urldecode((string) $parameterValue));
+                Tools::pushToSubarray($localQueryAttributes, $parameterKey,
+                    $parameterValue !== null ? urldecode($parameterValue) : null);
             }
         }
 
