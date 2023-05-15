@@ -10,6 +10,7 @@ use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\LocalData\LocalData;
 use Dbp\Relay\CoreBundle\LocalData\LocalDataEventDispatcher;
 use Dbp\Relay\CoreBundle\LocalData\TestLocalDataAuthorizationService;
+use Dbp\Relay\CoreBundle\Query\Operator;
 use Dbp\Relay\CoreBundle\TestUtils\TestUserSession;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -129,10 +130,9 @@ class LocalDataTest extends TestCase
         $this->localDataEventDispatcher->dispatch($preEvent);
 
         $localQueryParameter = $preEvent->getOptions()[0];
-        $this->assertEquals($localDataAttributeName, $localQueryParameter['local_data_attribute']);
-        $this->assertEquals('value_1', $localQueryParameter['value']);
-        $this->assertEquals('src_attribute_1', $localQueryParameter['source_attribute']);
-        $this->assertEquals(LocalData::LOCAL_QUERY_OPERATOR_CONTAINS_CI, $localQueryParameter['operator']);
+        $this->assertEquals('value_1', $localQueryParameter->getValue());
+        $this->assertEquals('src_attribute_1', $localQueryParameter->getField());
+        $this->assertEquals(Operator::ICONTAINS, $localQueryParameter->getOperator());
     }
 
     public function testLocalDataQueryAttributeUnacknowledgedNotConfigured()
@@ -199,10 +199,9 @@ class LocalDataTest extends TestCase
         $this->localDataEventDispatcher->dispatch($preEvent);
 
         $localQueryParameter = $preEvent->getOptions()[0];
-        $this->assertEquals($localDataAttributeName, $localQueryParameter['local_data_attribute']);
-        $this->assertEquals('5', $localQueryParameter['value']);
-        $this->assertEquals('src_attribute_4', $localQueryParameter['source_attribute']);
-        $this->assertEquals(LocalData::LOCAL_QUERY_OPERATOR_CONTAINS_CI, $localQueryParameter['operator']);
+        $this->assertEquals('5', $localQueryParameter->getValue());
+        $this->assertEquals('src_attribute_4', $localQueryParameter->getField());
+        $this->assertEquals(Operator::ICONTAINS, $localQueryParameter->getOperator());
     }
 
     public function testMappingSourceDataValue()
@@ -282,7 +281,7 @@ class LocalDataTest extends TestCase
                 'local_data_attribute' => 'attribute_4',
                 'source_attribute' => 'src_attribute_4',
                 'map_value' => 'value + 1',
-                'map_query' => 'relay.map(values, "value + 1")',
+                'map_filters' => 'relay.map(filters, "Filter.create(value.getValue() + 1)")',
             ],
             [
                 'local_data_attribute' => 'array_attribute_1',

@@ -6,6 +6,9 @@ namespace Dbp\Relay\CoreBundle\LocalData;
 
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Helpers\Tools;
+use Dbp\Relay\CoreBundle\Query\Filter;
+use Dbp\Relay\CoreBundle\Query\LogicalOperator;
+use Dbp\Relay\CoreBundle\Query\Operator;
 use Symfony\Component\HttpFoundation\Response;
 
 class LocalData
@@ -96,13 +99,16 @@ class LocalData
             if ($queryAttributeAssignment !== '') {
                 $parameterKey = null;
                 $parameterValue = null;
-
                 if (!self::parseQueryParameterAssignment($queryAttributeAssignment, $parameterKey, $parameterValue)) {
                     throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf("'%s' parameter has invalid format: '%s' (Example: 'param1:val1,attr1:val2')", LocalData::QUERY_PARAMETER_NAME, $queryAttributeAssignment));
                 }
 
-                Tools::pushToSubarray($localQueryAttributes, $parameterKey,
-                    $parameterValue !== null ? urldecode($parameterValue) : null);
+                if ($parameterKey !== null) {
+                    // currently, the 'queryLocal' parameter format only supports one default operator (case-insensitive contains) and logical operator (and)
+                    Tools::pushToSubarray($localQueryAttributes, $parameterKey, Filter::create(
+                        $parameterKey, Operator::ICONTAINS, $parameterValue !== null ? urldecode($parameterValue) : null,
+                        LogicalOperator::AND));
+                }
             }
         }
 

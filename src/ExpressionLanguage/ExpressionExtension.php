@@ -13,9 +13,7 @@ namespace Dbp\Relay\CoreBundle\ExpressionLanguage;
  */
 class ExpressionExtension
 {
-    /**
-     * @var ExpressionLanguage
-     */
+    /* @var ExpressionLanguage */
     private $lang;
 
     public function __construct(ExpressionLanguage $lang)
@@ -148,6 +146,11 @@ class ExpressionExtension
         return empty($value);
     }
 
+    public static function hasElements(?array $array): bool
+    {
+        return $array !== null && count($array) > 0;
+    }
+
     public static function isNullOrEmptyArray(?array $array): bool
     {
         return $array === null || count($array) === 0;
@@ -178,8 +181,12 @@ class ExpressionExtension
         }
     }
 
-    public function map(iterable $iterable, string $expression): array
+    public function map(?iterable $iterable, string $expression): ?array
     {
+        if ($iterable === null) {
+            return null;
+        }
+
         $transformedValues = [];
         foreach ($iterable as $key => $value) {
             $transformedValues[$key] = $this->lang->evaluate($expression, ['key' => $key, 'value' => $value]);
@@ -188,8 +195,12 @@ class ExpressionExtension
         return $transformedValues;
     }
 
-    public function filter(iterable $iterable, string $expression, bool $preserveKeys = false): array
+    public function filter(?iterable $iterable, string $expression, bool $preserveKeys = false): ?array
     {
+        if ($iterable === null) {
+            return null;
+        }
+
         $filteredValues = [];
         foreach ($iterable as $key => $value) {
             if ($this->lang->evaluate($expression, ['key' => $key, 'value' => $value])) {

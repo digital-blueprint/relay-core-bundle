@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\LocalData;
 
 use Dbp\Relay\CoreBundle\ExpressionLanguage\ExpressionLanguage;
+use Dbp\Relay\CoreBundle\Query\Filter;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -24,20 +25,15 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
     protected const LOCAL_DATA_ATTRIBUTE_CONFIG_NODE = 'local_data_attribute';
     protected const IS_ARRAY_CONFIG_NODE = 'is_array';
     protected const MAP_VALUE_CONFIG_NODE = 'map_value';
-    protected const MAP_QUERY_VALUE_CONFIG_NODE = 'map_query';
-
-    protected const LOCAL_QUERY_PARAMETER_LOCAL_DATA_ATTRIBUTE_KEY = 'local_data_attribute';
-    protected const LOCAL_QUERY_PARAMETER_SOURCE_ATTRIBUTE_KEY = 'source_attribute';
-    protected const LOCAL_QUERY_PARAMETER_VALUE_KEY = 'value';
-    protected const LOCAL_QUERY_PARAMETER_OPERATOR_KEY = 'operator';
+    protected const MAP_FILTERS_CONFIG_NODE = 'map_filters';
 
     private const SOURCE_ATTRIBUTE_KEY = 'source';
     private const IS_ARRAY_KEY = 'is_array';
     private const MAP_VALUE_KEY = 'map_value';
-    private const MAP_QUERY_VALUE_KEY = 'map_query';
+    private const MAP_FILTERS_KEY = 'map_query';
 
     private const MAP_VALUE_VALUE_PARAMETER = 'value';
-    private const MAP_QUERY_VALUES_PARAMETER = 'values';
+    private const MAP_FILTERS_FILTERS_PARAMETER = 'filters';
 
     /** @var array */
     private $attributeMapping = [];
@@ -60,10 +56,10 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
                         ->defaultValue(false)
                     ->end()
                     ->scalarNode(self::MAP_VALUE_CONFIG_NODE)
-                         ->info('An attribute expression that takes the source attribute\'s value (\'value\' parameter, can be null) as an input and returns the transformed value of the local data attribute.')
+                         ->info('An attribute expression that takes the source attribute\'s value (\''.self::MAP_VALUE_VALUE_PARAMETER.'\' parameter, can be null) as an input and returns the desired (transformed) value for the local data attribute.')
                     ->end()
-                    ->scalarNode(self::MAP_QUERY_VALUE_CONFIG_NODE)
-                        ->info('An attribute expression that takes the given list of values for the query parameter (\'values\' parameter of type string array, can contain null values) as an input and returns the desired transformed list of values for the query parameter.')
+                    ->scalarNode(self::MAP_FILTERS_CONFIG_NODE)
+                        ->info('An attribute expression that takes the given list of filters for the attribute (\''.self::MAP_FILTERS_FILTERS_PARAMETER.'\' parameter of type Filter array, can be empty) as an input and returns the desired (transformed) list of filters for the attribute.')
                     ->end()
                 ->end()
             ->end()
@@ -100,7 +96,7 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
             $attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY] = $configMappingEntry[self::SOURCE_ATTRIBUTE_CONFIG_NODE];
             $attributeMapEntry[self::IS_ARRAY_KEY] = $configMappingEntry[self::IS_ARRAY_CONFIG_NODE] ?? false;
             $attributeMapEntry[self::MAP_VALUE_KEY] = $configMappingEntry[self::MAP_VALUE_CONFIG_NODE] ?? null;
-            $attributeMapEntry[self::MAP_QUERY_VALUE_KEY] = $configMappingEntry[self::MAP_QUERY_VALUE_CONFIG_NODE] ?? null;
+            $attributeMapEntry[self::MAP_FILTERS_KEY] = $configMappingEntry[self::MAP_FILTERS_CONFIG_NODE] ?? null;
 
             $this->attributeMapping[$localDataAttributeName] = $attributeMapEntry;
         }
@@ -111,34 +107,41 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
         $expressionLanguage = null;
 
         if ($event instanceof LocalDataPreEvent) {
-            $localQueryParameters = [];
-            foreach ($event->getPendingQueryParameters() as $localQueryAttributeName => $localQueryAttributeValues) {
+            $localQueryFilters = [];
+            foreach ($event->getPendingQueryParameters() as $localQueryAttributeName => $localQueryAttributeFilters) {
                 if (($attributeMapEntry = $this->attributeMapping[$localQueryAttributeName] ?? null) !== null) {
-                    if (($mappingExpression = $attributeMapEntry[self::MAP_QUERY_VALUE_KEY]) !== null) {
-                        $expressionLanguage = $expressionLanguage ?? new ExpressionLanguage();
-                        $localQueryAttributeValues = $expressionLanguage->evaluate($mappingExpression, [
-                            self::MAP_QUERY_VALUES_PARAMETER => $localQueryAttributeValues,
-                        ]);
+                    if (($mappingExpression = $attributeMapEntry[self::MAP_FILTERS_KEY]) !== null) {
+                        $expressionLanguage = $expressionLanguage ?? $this->getExpressionLanguage();
+                        $localQueryAttributeFilters = $expressionLanguage->evaluate($mappingExpression, [
+                            self::MAP_FILTERS_FILTERS_PARAMETER => $localQueryAttributeFilters,
+                            ]);
                     }
                     $sourceAttributeName = $attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY];
-                    foreach ($localQueryAttributeValues as $localDataAttributeValue) {
-                        $localQueryParameters[] = [
-                            self::LOCAL_QUERY_PARAMETER_LOCAL_DATA_ATTRIBUTE_KEY => $localQueryAttributeName,
-                            self::LOCAL_QUERY_PARAMETER_SOURCE_ATTRIBUTE_KEY => $sourceAttributeName,
-                            self::LOCAL_QUERY_PARAMETER_VALUE_KEY => $localDataAttributeValue,
-                            self::LOCAL_QUERY_PARAMETER_OPERATOR_KEY => LocalData::LOCAL_QUERY_OPERATOR_CONTAINS_CI,
-                        ];
+                    foreach ($localQueryAttributeFilters as $localDataAttributeFilter) {
+                        $localQueryFilters[] = Filter::create(
+                            $sourceAttributeName,
+                            $localDataAttributeFilter->getOperator(),
+                            $localDataAttributeFilter->getValue(),
+                            $localDataAttributeFilter->getLogicalOperator()
+                        );
                     }
                     $event->tryPopPendingQueryParameter($localQueryAttributeName);
                 }
             }
 
-            $this->onPreEvent($event, $localQueryParameters);
+            $this->onPreEvent($event, $localQueryFilters);
         } elseif ($event instanceof LocalDataPostEvent) {
             $localDataAttributes = [];
             foreach ($event->getPendingRequestedAttributes() as $localDataAttributeName) {
                 if (($attributeMapEntry = $this->attributeMapping[$localDataAttributeName] ?? null) !== null) {
                     $attributeValue = $event->getSourceData()[$attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY]] ?? null;
+
+                    if (($mappingExpression = $attributeMapEntry[self::MAP_VALUE_KEY]) !== null) {
+                        $expressionLanguage = $expressionLanguage ?? $this->getExpressionLanguage();
+                        $attributeValue = $expressionLanguage->evaluate($mappingExpression, [
+                            self::MAP_VALUE_VALUE_PARAMETER => $attributeValue,
+                        ]);
+                    }
 
                     if ($attributeValue !== null) {
                         $is_array_attribute = $attributeMapEntry[self::IS_ARRAY_KEY];
@@ -149,12 +152,6 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
                         }
                     }
 
-                    if (($mappingExpression = $attributeMapEntry[self::MAP_VALUE_KEY]) !== null) {
-                        $expressionLanguage = $expressionLanguage ?? new ExpressionLanguage();
-                        $attributeValue = $expressionLanguage->evaluate($mappingExpression, [
-                            self::MAP_VALUE_VALUE_PARAMETER => $attributeValue,
-                        ]);
-                    }
                     $localDataAttributes[$localDataAttributeName] = $attributeValue;
                 }
             }
@@ -170,15 +167,9 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
     /**
      * Override this if you want to use the mapped local query attributes in your code.
      *
-     * @param array $localQueryAttributes The array of local query attributes in the form:
-     *                                    [
-     *                                    self::LOCAL_QUERY_PARAMETER_LOCAL_DATA_ATTRIBUTE_KEY => <local data attribute name>,
-     *                                    self::LOCAL_QUERY_PARAMETER_SOURCE_ATTRIBUTE_KEY => <source attribute name>,
-     *                                    self::LOCAL_QUERY_PARAMETER_VALUE_KEY => <query attribute value>,
-     *                                    self::LOCAL_QUERY_PARAMETER_OPERATOR_KEY => <operator>,
-     *                                    ]
+     * @param Filter[] $localQueryFilters The array of local query filters
      */
-    protected function onPreEvent(LocalDataPreEvent $preEvent, array $localQueryAttributes)
+    protected function onPreEvent(LocalDataPreEvent $preEvent, array $localQueryFilters)
     {
     }
 
@@ -190,5 +181,10 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
      */
     protected function onPostEvent(LocalDataPostEvent $postEvent, array &$localDataAttributes)
     {
+    }
+
+    private function getExpressionLanguage(): ExpressionLanguage
+    {
+        return new ExpressionLanguage(['Filter' => new LocalQueryFilterFactory()]);
     }
 }
