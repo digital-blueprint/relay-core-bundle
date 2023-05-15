@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Helpers;
 
-use ApiPlatform\Core\DataProvider\PaginatorInterface;
+use ApiPlatform\State\Pagination\PaginatorInterface;
 use Iterator;
 
 /**

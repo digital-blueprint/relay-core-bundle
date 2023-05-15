@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Pagination;
 
-use ApiPlatform\Core\DataProvider\PartialPaginatorInterface;
+use ApiPlatform\State\Pagination\PartialPaginatorInterface;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Iterator;
 

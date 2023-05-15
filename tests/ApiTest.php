@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests;
 
-use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
+use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use Dbp\Relay\CoreBundle\TestUtils\UserAuthTrait;
 use Symfony\Component\HttpFoundation\Response;
 

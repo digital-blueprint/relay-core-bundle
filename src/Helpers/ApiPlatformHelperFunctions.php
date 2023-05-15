@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Helpers;
 
-use ApiPlatform\Core\Exception\ResourceClassNotFoundException;
 use ApiPlatform\Core\Metadata\Resource\Factory\AnnotationResourceMetadataFactory;
+use ApiPlatform\Exception\ResourceClassNotFoundException;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Doctrine\Common\Annotations\AnnotationReader;
 

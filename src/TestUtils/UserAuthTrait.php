@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\TestUtils;
 
-use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
-use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\Client;
+use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
+use ApiPlatform\Symfony\Bundle\Test\Client;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Security\Core\User\UserInterface;
 
