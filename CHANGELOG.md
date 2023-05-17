@@ -1,3 +1,10 @@
+# v0.1.103
+
+* Sets 'metadata_backward_compatibility_layer' for api-platform to 'false'. This disables some legacy services and
+  enables the new metadata system, which is the default in api-platform 3.x.
+  See https://api-platform.com/docs/core/upgrade-guide/#the-metadata_backward_compatibility_layer-flag
+  for more information in case there are any incompatibilities with your code.
+
 # v0.1.98
 
 * Update and require api-platform 2.7

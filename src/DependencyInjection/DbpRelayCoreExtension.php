@@ -120,6 +120,7 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
                 ],
             ],
             'path_segment_name_generator' => 'api_platform.path_segment_name_generator.dash',
+            'metadata_backward_compatibility_layer' => false,
         ]);
 
         $container->loadFromExtension('framework', [
