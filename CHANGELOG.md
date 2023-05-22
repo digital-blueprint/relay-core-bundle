@@ -1,3 +1,7 @@
+# v0.1.104
+
+* Use the global "cache.app" adapter for caching instead of always using the filesystem adapter
+
 # v0.1.103
 
 * Sets 'metadata_backward_compatibility_layer' for api-platform to 'false'. This disables some legacy services and
