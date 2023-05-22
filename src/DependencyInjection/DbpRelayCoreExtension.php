@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\DependencyInjection;
 
 use Dbp\Relay\CoreBundle\Auth\ProxyAuthenticator;
-use Dbp\Relay\CoreBundle\Cron\CronManager;
 use Dbp\Relay\CoreBundle\DB\MigrateCommand;
 use Dbp\Relay\CoreBundle\Logging\LoggingProcessor;
 use Dbp\Relay\CoreBundle\Queue\TestMessage;
 use Dbp\Relay\CoreBundle\Queue\Utils as QueueUtils;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
@@ -33,13 +31,6 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
         if ($container->hasParameter('dbp_api.paths_to_hide')) {
             $definition->addMethodCall('setPathsToHide', [$container->getParameter('dbp_api.paths_to_hide')]);
         }
-
-        $cronCacheDef = $container->register('dbp.relay.cache.core.cron', FilesystemAdapter::class);
-        $cronCacheDef->setArguments(['core-cron', 0, '%kernel.cache_dir%/dbp/relay/core-cron']);
-        $cronCacheDef->addTag('cache.pool');
-
-        $definition = $container->getDefinition(CronManager::class);
-        $definition->addMethodCall('setCache', [$cronCacheDef]);
 
         $definition = $container->getDefinition(MigrateCommand::class);
         $entityManagers = [];

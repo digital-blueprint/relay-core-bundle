@@ -18,9 +18,16 @@ services:
     autowire: true
     autoconfigure: true
 
+  dbp.relay.core.cache.cron:
+    parent: cache.app
+    tags:
+      - { name: 'cache.pool', default_lifetime: 0 }
+
   Dbp\Relay\CoreBundle\Cron\CronManager:
     autowire: true
     autoconfigure: true
+    calls:
+      - setCache: [ '@dbp.relay.core.cache.cron' ]
 
   Dbp\Relay\CoreBundle\Cron\CronJobs\:
     resource: '../../Cron/CronJobs'
