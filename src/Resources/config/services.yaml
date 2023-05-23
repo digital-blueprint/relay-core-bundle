@@ -132,3 +132,7 @@ services:
     abstract:  true
     calls:
       - setLocale: ['@locale']
+
+  Dbp\Relay\CoreBundle\Internal\CacheWarmer:
+    autowire: true
+    autoconfigure: true
