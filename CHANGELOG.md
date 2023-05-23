@@ -1,3 +1,9 @@
+# v0.1.105
+
+* Implement a workaround for Symfony not auto-creating the application cache for
+  PDO backends, leading to lots of SQL errors in the logs on cache accesses.
+* Add a health check for the application cache.
+
 # v0.1.104
 
 * Use the global "cache.app" adapter for caching instead of always using the filesystem adapter
