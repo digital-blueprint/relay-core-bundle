@@ -16,6 +16,9 @@ use Dbp\Relay\CoreBundle\Pagination\PartialPaginator;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\Security;
 
+/**
+ * @deprecated Shouldn't be used in new code since DataProviders are going away
+ */
 abstract class AbstractDataProvider extends AbstractLocalDataAuthorizationService implements RestrictedDataProviderInterface, ItemDataProviderInterface, CollectionDataProviderInterface
 {
     protected const GET_COLLECTION_OPERATION = 1;
