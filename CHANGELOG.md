@@ -1,3 +1,7 @@
+# v0.1.106
+
+* Deprecate AbstractDataProvider
+
 # v0.1.105
 
 * Implement a workaround for Symfony not auto-creating the application cache for
