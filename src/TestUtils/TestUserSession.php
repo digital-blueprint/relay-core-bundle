@@ -14,13 +14,13 @@ class TestUserSession implements UserSessionInterface
     /** @var array */
     private $roles;
 
-    public function __construct(?string $id = 'id', array $roles = [])
+    public function __construct(string $id = null, array $roles = [])
     {
         $this->userSessionProvider = new TestUserSessionProvider($id);
         $this->roles = $roles;
     }
 
-    public function setIdentifier(?string $identifier)
+    public function setIdentifier(string $identifier)
     {
         $this->userSessionProvider->setUserIdentifier($identifier);
     }
@@ -46,7 +46,7 @@ class TestUserSession implements UserSessionInterface
 
     public function isAuthenticated(): bool
     {
-        return true;
+        return $this->userSessionProvider->getUserIdentifier() !== null;
     }
 
     public function getSessionLoggingId(): string
