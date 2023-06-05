@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Auth;
 
+use Dbp\Relay\CoreBundle\API\UserSessionProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -17,16 +18,20 @@ class ProxyAuthenticator extends AbstractAuthenticator
     /**
      * @var AuthenticatorInterface[]
      */
-    private $authenticators;
+    private $authenticators = [];
 
     /**
      * @var UserSession
      */
     private $userSession;
 
+    /**
+     * @var UserSessionProviderInterface|null
+     */
+    private $userSessionProvider;
+
     public function __construct(UserSession $userSession)
     {
-        $this->authenticators = [];
         $this->userSession = $userSession;
     }
 
@@ -37,13 +42,13 @@ class ProxyAuthenticator extends AbstractAuthenticator
 
     private function getAuthenticator(Request $request): ?AuthenticatorInterface
     {
-        foreach ($this->authenticators as $auth) {
-            $supports = $auth->supports($request);
+        foreach ($this->authenticators as $authenticator) {
+            $supports = $authenticator->supports($request);
             if ($supports === null) {
-                throw new \RuntimeException('Lazy authenticators not supported atm');
+                throw new AuthenticationException('Lazy authenticators not supported atm');
             }
             if ($supports === true) {
-                return $auth;
+                return $authenticator;
             }
         }
 
@@ -57,31 +62,32 @@ class ProxyAuthenticator extends AbstractAuthenticator
 
     public function authenticate(Request $request): Passport
     {
-        $auth = $this->getAuthenticator($request);
-        assert($auth !== null);
+        $authenticator = $this->getAuthenticator($request);
+        if ($authenticator === null) {
+            throw new AuthenticationException('no suitable authenticator found for request');
+        }
 
-        $passport = $auth->authenticate($request);
-        $provider = $passport->getAttribute('relay_user_session_provider');
-        $this->userSession->setProvider($provider);
+        $passport = $authenticator->authenticate($request);
+
+        $this->userSessionProvider = $passport->getAttribute('relay_user_session_provider');
+        if ($this->userSessionProvider === null) {
+            throw new AuthenticationException('failed to get user session provider for current authenticator');
+        }
 
         return $passport;
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        $auth = $this->getAuthenticator($request);
-        assert($auth !== null);
+        $this->userSession->setProvider($this->userSessionProvider);
 
-        return $auth->onAuthenticationSuccess($request, $token, $firewallName);
+        return $this->getAuthenticator($request)->onAuthenticationSuccess($request, $token, $firewallName);
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
         $this->userSession->setProvider(null);
 
-        $auth = $this->getAuthenticator($request);
-        assert($auth !== null);
-
-        return $auth->onAuthenticationFailure($request, $exception);
+        return $this->getAuthenticator($request)->onAuthenticationFailure($request, $exception);
     }
 }

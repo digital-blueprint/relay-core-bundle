@@ -62,9 +62,13 @@ class TestAuthenticator extends AbstractAuthenticator
             }
         }
 
-        return new SelfValidatingPassport(new UserBadge($this->token, function ($token) {
+        $passport = new SelfValidatingPassport(new UserBadge($this->token, function ($token) {
             return $this->user;
         }));
+
+        $passport->setAttribute('relay_user_session_provider', new TestUserSessionProvider($this->user->getUserIdentifier()));
+
+        return $passport;
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response

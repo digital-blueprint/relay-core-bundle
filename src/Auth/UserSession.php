@@ -44,6 +44,13 @@ class UserSession implements UserSessionInterface
         return $this->provider->getUserIdentifier();
     }
 
+    public function isAuthenticated(): bool
+    {
+        return $this->provider !== null /* this criterion alone would suffice */ &&
+            $this->security !== null &&
+            $this->security->isGranted('IS_AUTHENTICATED_FULLY');
+    }
+
     public function getSessionLoggingId(): string
     {
         $id = null;

@@ -13,6 +13,11 @@ interface UserSessionInterface
     public function getUserIdentifier(): ?string;
 
     /**
+     * Indicates whether the user is authenticated.
+     */
+    public function isAuthenticated(): bool;
+
+    /**
      * Returns an ID represents a "session" of a user which can be used for logging. It should not be possible to
      * figure out which user is behind the ID based on the ID itself and the ID should change regularly.
      * This is useful for connecting various requests together for logging while not exposing details about the user.

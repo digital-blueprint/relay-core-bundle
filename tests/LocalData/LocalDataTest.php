@@ -37,7 +37,9 @@ class LocalDataTest extends TestCase
         $this->localDataEventDispatcher = new LocalDataEventDispatcher(TestEntity::class, $eventDispatcher);
 
         $this->testLocalDataAuthorizationService = new TestLocalDataAuthorizationService();
-        $this->testLocalDataAuthorizationService->_injectServices(new TestUserSession('testuser'), new AuthorizationDataMuxer(new AuthorizationDataProviderProvider([]), new EventDispatcher()));
+        $this->testLocalDataAuthorizationService->__injectServices(
+            new TestUserSession('testuser'),
+            new AuthorizationDataMuxer(new AuthorizationDataProviderProvider([]), new EventDispatcher()));
         $this->testLocalDataAuthorizationService->setConfig(self::createAuthzConfig());
     }
 

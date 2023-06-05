@@ -13,6 +13,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Core\Authentication\Token\NullToken;
 
 class AuthenticatorTest extends TestCase
 {
@@ -24,15 +25,24 @@ class AuthenticatorTest extends TestCase
 
     public function testSingle()
     {
-        $auth = new ProxyAuthenticator(new UserSession());
-        $user = new TestUser();
-        $sub = new TestAuthenticator($user, 'bla');
-        $auth->addAuthenticator($sub);
+        $userIdentifier = 'userIdentifier';
+        $user = new TestUser($userIdentifier);
+        $this->assertSame($userIdentifier, $user->getUserIdentifier());
+
+        $userSession = new UserSession();
+        $proxyAuthenticator = new ProxyAuthenticator($userSession);
+        $testAuthenticator = new TestAuthenticator($user, 'bla');
+        $proxyAuthenticator->addAuthenticator($testAuthenticator);
+
         $request = new Request();
         $request->headers->add(['Authorization' => 'Bearer bla']);
-        $this->assertTrue($auth->supports($request));
-        $passport = $auth->authenticate($request);
+        $this->assertTrue($proxyAuthenticator->supports($request));
+
+        $passport = $proxyAuthenticator->authenticate($request);
         $this->assertSame($passport->getUser(), $user);
+
+        $proxyAuthenticator->onAuthenticationSuccess($request, new NullToken(), 'firewall');
+        $this->assertSame($userIdentifier, $userSession->getUserIdentifier());
     }
 
     public function testCompilerPass()

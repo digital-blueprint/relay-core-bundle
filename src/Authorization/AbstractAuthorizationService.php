@@ -22,7 +22,7 @@ abstract class AbstractAuthorizationService
     /**
      * @required
      */
-    public function _injectServices(UserSessionInterface $userSession, AuthorizationDataMuxer $mux)
+    public function __injectServices(UserSessionInterface $userSession, AuthorizationDataMuxer $mux)
     {
         $this->userAuthorizationChecker = new AuthorizationExpressionChecker($mux);
         $this->currentAuthorizationUser = new AuthorizationUser($userSession, $this->userAuthorizationChecker);
@@ -51,33 +51,85 @@ abstract class AbstractAuthorizationService
     }
 
     /**
+     * Checks the given policy for the current user and the resource $resource. Throws a 'forbidden' exception if
+     * access is not granted.
+     *
      * @param mixed $resource
      *
-     * @throws ApiError
+     * @throws ApiError               HTTP Forbidden exception if access is not granted
+     * @throws AuthorizationException If the policy is not declared
      */
     public function denyAccessUnlessIsGranted(string $policyName, $resource = null, string $resourceAlias = null): void
     {
         if ($this->isGrantedInternal($policyName, $resource, $resourceAlias) === false) {
-            throw new ApiError(Response::HTTP_FORBIDDEN, 'access denied. policy failed: '.$policyName);
+            throw ApiError::withDetails(Response::HTTP_FORBIDDEN, 'access denied. policy failed: '.$policyName);
         }
     }
 
     /**
+     * Checks the given policy for the current user and the resource $resource. Returns true if access is granted, false otherwise.
+     *
      * @param mixed $resource
+     *
+     * @throws AuthorizationException If the policy is not declared
      */
-    public function isGranted(string $expressionName, $resource = null, string $resourceAlias = null): bool
+    public function isGranted(string $policyName, $resource = null, string $resourceAlias = null): bool
     {
-        return $this->isGrantedInternal($expressionName, $resource, $resourceAlias);
+        return $this->isGrantedInternal($policyName, $resource, $resourceAlias);
     }
 
     /**
-     * @param mixed|null $defaultValue
+     * @throws ApiError Http Unauthorized if the user is not authenticated
+     */
+    public function denyAccessUnlessIsAuthenticated()
+    {
+        if ($this->currentAuthorizationUser->isAuthenticated() === false) {
+            throw ApiError::withDetails(Response::HTTP_UNAUTHORIZED, 'authentication required');
+        }
+    }
+
+    /**
+     * @deprecated Use isAuthenticated instead
+     */
+    public function isUserAuthenticated(): bool
+    {
+        return $this->currentAuthorizationUser->isAuthenticated();
+    }
+
+    /**
+     * Indicates whether the current user is authenticated.
+     */
+    public function isAuthenticated(): bool
+    {
+        return $this->currentAuthorizationUser->isAuthenticated();
+    }
+
+    /**
+     * Evaluates the attribute expression $attributeName und returns its result.
+     *
+     * @param mixed|null $defaultValue The value to return if the expression evaluates to 'null'
      *
      * @return mixed|null
+     *
+     * @throws AuthorizationException If the attribute is not declared
      */
     public function getAttribute(string $attributeName, $defaultValue = null)
     {
         return $this->getAttributeInternal($attributeName, $defaultValue);
+    }
+
+    /**
+     * Gets a user attribute directly.
+     *
+     * @param mixed|null $defaultValue The value to return if the user attribute is declared but not specified for the current user
+     *
+     * @return mixed|null
+     *
+     * @throws AuthorizationException If the user attribute is undeclared
+     */
+    public function getUserAttribute(string $userAttributeName, $defaultValue = null)
+    {
+        return $this->userAuthorizationChecker->getUserAttribute($this->currentAuthorizationUser, $userAttributeName, $defaultValue);
     }
 
     private function loadConfig()

@@ -8,18 +8,21 @@ use Dbp\Relay\CoreBundle\API\UserSessionInterface;
 
 class TestUserSession implements UserSessionInterface
 {
-    private $id;
+    /** @var TestUserSessionProvider */
+    private $userSessionProvider;
+
+    /** @var array */
     private $roles;
 
     public function __construct(?string $id = 'id', array $roles = [])
     {
-        $this->id = $id;
+        $this->userSessionProvider = new TestUserSessionProvider($id);
         $this->roles = $roles;
     }
 
     public function setIdentifier(?string $identifier)
     {
-        $this->id = $identifier;
+        $this->userSessionProvider->setUserIdentifier($identifier);
     }
 
     public function setRoles(array $roles)
@@ -31,28 +34,33 @@ class TestUserSession implements UserSessionInterface
     {
     }
 
-    public function getUserIdentifier(): ?string
-    {
-        return $this->id;
-    }
-
     public function getUserRoles(): array
     {
         return $this->roles;
     }
 
+    public function getUserIdentifier(): ?string
+    {
+        return $this->userSessionProvider->getUserIdentifier();
+    }
+
+    public function isAuthenticated(): bool
+    {
+        return true;
+    }
+
     public function getSessionLoggingId(): string
     {
-        return 'logging-id';
+        return $this->userSessionProvider->getSessionLoggingId();
     }
 
     public function getSessionCacheKey(): string
     {
-        return 'cache';
+        return $this->userSessionProvider->getSessionCacheKey();
     }
 
     public function getSessionTTL(): int
     {
-        return 42;
+        return $this->userSessionProvider->getSessionTTL();
     }
 }

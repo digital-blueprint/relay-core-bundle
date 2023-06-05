@@ -47,7 +47,7 @@ class AuthorizationConfigDefinition
         return $this;
     }
 
-    public function addAttribute(string $attributeName, string $defaultExpression = 'false', string $info = ''): AuthorizationConfigDefinition
+    public function addAttribute(string $attributeName, string $defaultExpression = 'null', string $info = ''): AuthorizationConfigDefinition
     {
         Tools::pushToSubarray($this->configDefinition, self::ATTRIBUTES_KEY, [$attributeName, $defaultExpression, $info]);
 

@@ -23,9 +23,20 @@ class AuthorizationUser
         $this->authorizationChecker = $authorizationChecker;
     }
 
+    /**
+     * @return string|null The current authenticated user's identifier or null if the user is not authenticated or is a system
+     */
     public function getIdentifier(): ?string
     {
         return $this->userSession->getUserIdentifier();
+    }
+
+    /**
+     * @return bool Indicates whether the current user is authenticated
+     */
+    public function isAuthenticated(): bool
+    {
+        return $this->userSession->isAuthenticated();
     }
 
     /**
