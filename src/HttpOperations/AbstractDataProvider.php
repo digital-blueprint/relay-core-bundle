@@ -2,11 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\HttpRequestMethods;
+namespace Dbp\Relay\CoreBundle\HttpOperations;
 
-use ApiPlatform\Core\DataProvider\CollectionDataProviderInterface;
-use ApiPlatform\Core\DataProvider\ItemDataProviderInterface;
-use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\LocalData\AbstractLocalDataAuthorizationService;
 use Dbp\Relay\CoreBundle\LocalData\LocalData;
@@ -14,14 +11,12 @@ use Dbp\Relay\CoreBundle\Locale\Locale;
 use Dbp\Relay\CoreBundle\Pagination\Pagination;
 use Dbp\Relay\CoreBundle\Pagination\PartialPaginator;
 
-abstract class AbstractDataProvider extends AbstractLocalDataAuthorizationService implements RestrictedDataProviderInterface, ItemDataProviderInterface, CollectionDataProviderInterface
+abstract class AbstractDataProvider extends AbstractLocalDataAuthorizationService
 {
     use DataOperationTrait;
 
     protected const GET_COLLECTION_OPERATION = 1;
     protected const GET_ITEM_OPERATION = 2;
-
-    private const FILTERS_KEY = 'filters';
 
     /** @var Locale */
     private $locale;
@@ -34,35 +29,28 @@ abstract class AbstractDataProvider extends AbstractLocalDataAuthorizationServic
         $this->locale = $locale;
     }
 
-    public function supports(string $resourceClass, string $operationName = null, array $context = []): bool
-    {
-        return $resourceClass === $this->getResourceClass();
-    }
-
-    public function getCollection(string $resourceClass, string $operationName = null, array $context = []): PartialPaginator
+    protected function getCollectionInternal(array $uriVariables = []): PartialPaginator
     {
         $this->denyOperationAccessUnlessGranted(self::GET_COLLECTION_OPERATION);
 
-        $filters = $context[self::FILTERS_KEY] ?? [];
-        $options = $this->createOptions($filters);
+        $options = $this->createOptions($uriVariables);
 
-        $currentPageNumber = Pagination::getCurrentPageNumber($filters);
-        $maxNumItemsPerPage = Pagination::getMaxNumItemsPerPage($filters);
+        $currentPageNumber = Pagination::getCurrentPageNumber($uriVariables);
+        $maxNumItemsPerPage = Pagination::getMaxNumItemsPerPage($uriVariables);
 
-        $pageItems = $this->getPage($currentPageNumber, $maxNumItemsPerPage, $filters, $options);
+        $pageItems = $this->getPage($currentPageNumber, $maxNumItemsPerPage, $uriVariables, $options);
         $pageItems = $this->enforceLocalDataAccessControlPolicies($pageItems, $options);
 
         return new PartialPaginator($pageItems, $currentPageNumber, $maxNumItemsPerPage);
     }
 
-    public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []): ?object
+    protected function getItemInternal($id, array $uriVariables = []): ?object
     {
         $this->denyOperationAccessUnlessGranted(self::GET_ITEM_OPERATION);
 
-        $filters = $context[self::FILTERS_KEY] ?? [];
-        $options = $this->createOptions($filters);
+        $options = $this->createOptions($uriVariables);
 
-        $item = $this->getItemById($id, $filters, $options);
+        $item = $this->getItemById($id, $uriVariables, $options);
         $items = $this->enforceLocalDataAccessControlPolicies([$item], $options);
 
         return $items[0] ?? null;

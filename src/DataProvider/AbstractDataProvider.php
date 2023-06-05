@@ -4,9 +4,32 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\DataProvider;
 
+use ApiPlatform\Core\DataProvider\CollectionDataProviderInterface;
+use ApiPlatform\Core\DataProvider\ItemDataProviderInterface;
+use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
+use Dbp\Relay\CoreBundle\Pagination\PartialPaginator;
+
 /**
- * @deprecated Shouldn't be used in new code since DataProviders are going away
+ * @deprecated Implemented ApiPlatform interfaces are deprecated. Use AbstractStateProvider instead.
  */
-abstract class AbstractDataProvider extends \Dbp\Relay\CoreBundle\HttpRequestMethods\AbstractDataProvider
+abstract class AbstractDataProvider extends \Dbp\Relay\CoreBundle\HttpOperations\AbstractDataProvider implements RestrictedDataProviderInterface, ItemDataProviderInterface, CollectionDataProviderInterface
 {
+    private const FILTERS_KEY = 'filters';
+
+    public function supports(string $resourceClass, string $operationName = null, array $context = []): bool
+    {
+        return $resourceClass === $this->getResourceClass();
+    }
+
+    public function getCollection(string $resourceClass, string $operationName = null, array $context = []): PartialPaginator
+    {
+        return $this->getCollectionInternal($context[self::FILTERS_KEY] ?? []);
+    }
+
+    public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []): ?object
+    {
+        return $this->getItemInternal($id, $context[self::FILTERS_KEY] ?? []);
+    }
+
+    abstract protected function getResourceClass(): string;
 }
