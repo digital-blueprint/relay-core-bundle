@@ -18,7 +18,7 @@ trait DataOperationTrait
     private function denyOperationAccessUnlessGranted(int $operation)
     {
         if (!$this->isUserGrantedOperationAccess($operation)) {
-            throw ApiError::withDetails(Response::HTTP_FORBIDDEN, 'access denied');
+            throw ApiError::withDetails(Response::HTTP_UNAUTHORIZED, 'access denied');
         }
     }
 }
