@@ -14,14 +14,15 @@ use Symfony\Component\HttpFoundation\Response;
 
 abstract class AbstractStateProvider extends AbstractDataProvider implements ProviderInterface
 {
-    private const ID_URI_VARIABLE = 'id';
+    private const IDENTIFIER_URI_VARIABLES_KEY = 'identifier';
+    private const FILTERS_CONTEXT_KEY = 'filters';
 
     public function provide(Operation $operation, array $uriVariables = [], array $context = [])
     {
         if ($operation instanceof GetCollection) {
-            return $this->getCollectionInternal($uriVariables);
+            return $this->getCollectionInternal($context[self::FILTERS_CONTEXT_KEY]);
         } elseif ($operation instanceof Get) {
-            return $this->getItemInternal($uriVariables[self::ID_URI_VARIABLE], $uriVariables);
+            return $this->getItemInternal($uriVariables[self::IDENTIFIER_URI_VARIABLES_KEY], $context[self::FILTERS_CONTEXT_KEY]);
         }
 
         throw ApiError::withDetails(Response::HTTP_INTERNAL_SERVER_ERROR, 'unknown provider operation: '.$operation->getShortName());
