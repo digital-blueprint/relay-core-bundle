@@ -9,6 +9,7 @@ use Dbp\Relay\CoreBundle\Auth\ProxyAuthenticator;
 use Dbp\Relay\CoreBundle\Auth\UserSession;
 use Dbp\Relay\CoreBundle\TestUtils\TestAuthenticator;
 use Dbp\Relay\CoreBundle\TestUtils\TestUser;
+use Dbp\Relay\CoreBundle\TestUtils\TestUserSession;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
@@ -31,7 +32,9 @@ class AuthenticatorTest extends TestCase
 
         $userSession = new UserSession();
         $proxyAuthenticator = new ProxyAuthenticator($userSession);
-        $testAuthenticator = new TestAuthenticator($user, 'bla');
+        $testAuthenticator = new TestAuthenticator(new TestUserSession());
+        $testAuthenticator->setUser($user);
+        $testAuthenticator->setToken('bla');
         $proxyAuthenticator->addAuthenticator($testAuthenticator);
 
         $request = new Request();

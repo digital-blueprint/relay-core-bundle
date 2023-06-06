@@ -18,13 +18,18 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 
 class TestAuthenticator extends AbstractAuthenticator
 {
+    /** @var TestUser */
     private $user;
+
+    /** @var string */
     private $token;
 
-    public function __construct(?UserInterface $user = null, ?string $token = null)
+    /** @var TestUserSession */
+    private $userSession;
+
+    public function __construct(TestUserSession $userSession)
     {
-        $this->user = $user;
-        $this->token = $token;
+        $this->userSession = $userSession;
     }
 
     public function setToken(?string $token)
@@ -32,7 +37,7 @@ class TestAuthenticator extends AbstractAuthenticator
         $this->token = $token;
     }
 
-    public function setUser(?UserInterface $user)
+    public function setUser(TestUser $user)
     {
         $this->user = $user;
     }
@@ -50,13 +55,16 @@ class TestAuthenticator extends AbstractAuthenticator
     public function authenticate(Request $request): PassportInterface
     {
         assert($this->user !== null);
-        // In case a token is set we check if it matches the header
-        if ($this->token !== null) {
+
+        if ($this->token === null) {
+            throw new BadCredentialsException('Invalid token');
+        } else {
             $auth = $request->headers->get('Authorization', '');
             if ($auth === '') {
                 throw new BadCredentialsException('Token is not present in the request headers');
             }
             $token = trim(preg_replace('/^(?:\s+)?Bearer\s/', '', $auth));
+
             if ($token !== $this->token) {
                 throw new BadCredentialsException('Invalid token');
             }
@@ -73,6 +81,10 @@ class TestAuthenticator extends AbstractAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
+        $this->userSession->setIdentifier($this->user->getUserIdentifier());
+        $this->userSession->setRoles($this->user->getRoles());
+        $this->userSession->setIsAuthenticated(true);
+
         return null;
     }
 

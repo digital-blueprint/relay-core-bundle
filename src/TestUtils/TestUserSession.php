@@ -8,21 +8,24 @@ use Dbp\Relay\CoreBundle\API\UserSessionInterface;
 
 class TestUserSession implements UserSessionInterface
 {
-    /** @var TestUserSessionProvider */
-    private $userSessionProvider;
+    /** @var string */
+    private $userIdentifier;
 
     /** @var array */
     private $roles;
 
-    public function __construct(string $id = null, array $roles = [])
+    /** @var bool */
+    private $isAuthenticated = false;
+
+    public function __construct(string $identifier = null, array $roles = [])
     {
-        $this->userSessionProvider = new TestUserSessionProvider($id);
+        $this->userIdentifier = $identifier;
         $this->roles = $roles;
     }
 
     public function setIdentifier(string $identifier)
     {
-        $this->userSessionProvider->setUserIdentifier($identifier);
+        $this->userIdentifier = $identifier;
     }
 
     public function setRoles(array $roles)
@@ -41,26 +44,31 @@ class TestUserSession implements UserSessionInterface
 
     public function getUserIdentifier(): ?string
     {
-        return $this->userSessionProvider->getUserIdentifier();
+        return $this->userIdentifier;
     }
 
     public function isAuthenticated(): bool
     {
-        return $this->userSessionProvider->getUserIdentifier() !== null;
+        return $this->isAuthenticated;
+    }
+
+    public function setIsAuthenticated(bool $isAuthenticated): void
+    {
+        $this->isAuthenticated = $isAuthenticated;
     }
 
     public function getSessionLoggingId(): string
     {
-        return $this->userSessionProvider->getSessionLoggingId();
+        return 'logging-id';
     }
 
     public function getSessionCacheKey(): string
     {
-        return $this->userSessionProvider->getSessionCacheKey();
+        return 'cache';
     }
 
     public function getSessionTTL(): int
     {
-        return $this->userSessionProvider->getSessionTTL();
+        return 42;
     }
 }

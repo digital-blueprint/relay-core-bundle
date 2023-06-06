@@ -11,7 +11,7 @@ class TestUser implements UserInterface
     private $id;
     private $roles;
 
-    public function __construct(string $id = 'id', array $roles = [])
+    public function __construct(string $id, array $roles = [])
     {
         $this->id = $id;
         $this->roles = $roles;
