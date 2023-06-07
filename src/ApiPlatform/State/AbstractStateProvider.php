@@ -20,9 +20,9 @@ abstract class AbstractStateProvider extends AbstractDataProvider implements Pro
     public function provide(Operation $operation, array $uriVariables = [], array $context = [])
     {
         if ($operation instanceof GetCollection) {
-            return $this->getCollectionInternal($context[self::FILTERS_CONTEXT_KEY]);
+            return $this->getCollectionInternal($context[self::FILTERS_CONTEXT_KEY] ?? []);
         } elseif ($operation instanceof Get) {
-            return $this->getItemInternal($uriVariables[self::IDENTIFIER_URI_VARIABLES_KEY], $context[self::FILTERS_CONTEXT_KEY]);
+            return $this->getItemInternal($uriVariables[self::IDENTIFIER_URI_VARIABLES_KEY], $context[self::FILTERS_CONTEXT_KEY] ?? []);
         }
 
         throw ApiError::withDetails(Response::HTTP_INTERNAL_SERVER_ERROR, 'unknown provider operation: '.$operation->getShortName());
