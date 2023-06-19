@@ -84,7 +84,11 @@ class LocalData
     {
         $localDataAttributes = explode(self::SEPARATOR, $includeParameter);
 
-        return array_unique($localDataAttributes);
+        return array_unique(
+            array_map(function ($localDataAttribute) {
+                return trim($localDataAttribute);
+            }, $localDataAttributes)
+        );
     }
 
     /**

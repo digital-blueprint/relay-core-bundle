@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\LocalData;
 
 use Dbp\Relay\CoreBundle\Exception\ApiError;
-use Dbp\Relay\CoreBundle\Helpers\ApiPlatformHelperFunctions;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\EventDispatcher\Event;
@@ -76,7 +75,7 @@ class LocalDataEventDispatcher
 
             $pendingAttributes = $event->getPendingQueryParameters();
             if (count($pendingAttributes) !== 0) {
-                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf("the following local query attributes were not acknowledged for resource '%s': %s", ApiPlatformHelperFunctions::getShortNameForResource($this->resourceClass), implode(', ', array_keys($pendingAttributes))));
+                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf('the following local query attributes were not acknowledged: %s', implode(', ', array_keys($pendingAttributes))));
             }
         } elseif ($event instanceof LocalDataPostEvent) {
             $event->initRequestedAttributes($this->localDataAttributes);
@@ -84,7 +83,7 @@ class LocalDataEventDispatcher
 
             $pendingAttributes = $event->getPendingRequestedAttributes();
             if (count($pendingAttributes) !== 0) {
-                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf("the following requested local data attributes could not be provided for resource '%s': %s", ApiPlatformHelperFunctions::getShortNameForResource($this->resourceClass), implode(', ', $pendingAttributes)));
+                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf('the following requested local data attributes could not be provided: %s', implode(', ', $pendingAttributes)));
             }
         } else {
             $this->eventDispatcher->dispatch($event, $eventName);

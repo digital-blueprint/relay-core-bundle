@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\LocalData;
 
 use Dbp\Relay\CoreBundle\Exception\ApiError;
-use Dbp\Relay\CoreBundle\Helpers\ApiPlatformHelperFunctions;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Symfony\Contracts\EventDispatcher\Event;
@@ -110,7 +109,7 @@ class LocalDataPostEvent extends Event implements LoggerAwareInterface
         if ($arrayKey === false) {
             if ($warnIfNotFound) {
                 if ($this->logger !== null) {
-                    $this->logger->warning(sprintf("trying to set local data attribute '%s', which was not requested for entity '%s'", $key, ApiPlatformHelperFunctions::getShortNameForResource(get_class($this->entity))));
+                    $this->logger->warning(sprintf("trying to set unrequested local data attribute '%s'", $key));
                 }
                 assert(false);
             } else {
