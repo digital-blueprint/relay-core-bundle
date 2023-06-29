@@ -87,17 +87,21 @@ class AbstractLocalDataAuthorizationService extends AbstractAuthorizationService
         if (count($localDataAttributes) === 0) {
             $resultEntities = $entities;
         } else {
-            foreach ($localDataAttributes as $localDataAttribute => $isRequestedInQuery) {
-                foreach ($entities as $entity) {
-                    if ($entity instanceof LocalDataAwareInterface &&
-                        !$this->isGranted($localDataAttribute, $entity, self::ENTITY_OBJECT_ALIAS)) {
-                        if (!$isRequestedInQuery) {
-                            $entity->setLocalDataValue($localDataAttribute, null);
-                            $resultEntities[] = $entity;
+            foreach ($entities as $entity) {
+                $includeInResult = true;
+                if ($entity instanceof LocalDataAwareInterface) {
+                    foreach ($localDataAttributes as $localDataAttribute => $isRequestedInQuery) {
+                        if ($this->isGranted($localDataAttribute, $entity, self::ENTITY_OBJECT_ALIAS) === false) {
+                            if ($isRequestedInQuery) {
+                                $includeInResult = false;
+                            } else {
+                                $entity->setLocalDataValue($localDataAttribute, null);
+                            }
                         }
-                    } else {
-                        $resultEntities[] = $entity;
                     }
+                }
+                if ($includeInResult) {
+                    $resultEntities[] = $entity;
                 }
             }
         }
