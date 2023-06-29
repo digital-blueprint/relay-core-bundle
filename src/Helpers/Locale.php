@@ -24,7 +24,7 @@ class Locale
 
     public function addLanguageOption(array &$targetOptions)
     {
-        $targetOptions[self::LANGUAGE_OPTION] = $this->getCurrentRequestLanguage();
+        $targetOptions['lang'] = $this->getCurrentRequestLanguage();
     }
 
     public function getCurrentRequestLanguage(): string

@@ -32,11 +32,13 @@ class LocalDataPreEvent extends Event
 
     public function tryPopPendingQueryParameter(string $queryParameterName, &$queryParameterValue = null): bool
     {
-        if (($queryParameterValue = $this->queryParametersIn[$queryParameterName] ?? null) !== null) {
+        if (array_key_exists($queryParameterName, $this->queryParametersIn)) {
             unset($this->queryParametersIn[$queryParameterName]);
+
+            return true;
         }
 
-        return $queryParameterValue !== null;
+        return false;
     }
 
     public function getOptions(): array

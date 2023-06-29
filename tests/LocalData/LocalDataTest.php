@@ -7,10 +7,14 @@ namespace Dbp\Relay\CoreBundle\Tests\LocalData;
 use Dbp\Relay\CoreBundle\Authorization\AuthorizationDataMuxer;
 use Dbp\Relay\CoreBundle\Authorization\AuthorizationDataProviderProvider;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
+use Dbp\Relay\CoreBundle\HttpOperations\Options;
 use Dbp\Relay\CoreBundle\LocalData\LocalData;
 use Dbp\Relay\CoreBundle\LocalData\LocalDataEventDispatcher;
 use Dbp\Relay\CoreBundle\LocalData\TestLocalDataAuthorizationService;
-use Dbp\Relay\CoreBundle\Query\Operator;
+use Dbp\Relay\CoreBundle\Query\Filter\Filter;
+use Dbp\Relay\CoreBundle\Query\Filter\Nodes\AndNode;
+use Dbp\Relay\CoreBundle\Query\Filter\Nodes\ConditionNode;
+use Dbp\Relay\CoreBundle\Query\Filter\Nodes\OrNode;
 use Dbp\Relay\CoreBundle\TestUtils\TestUserSession;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -119,6 +123,9 @@ class LocalDataTest extends TestCase
         $this->assertNull($entities[2]->getLocalDataValue($localDataAttributeName));
     }
 
+    /**
+     * @throws \Exception
+     */
     public function testLocalDataQuery()
     {
         // 'attribute_1' has a configured source attribute 'src_attribute_1'.
@@ -131,10 +138,13 @@ class LocalDataTest extends TestCase
         $preEvent = new TestEntityPreEvent($options);
         $this->localDataEventDispatcher->dispatch($preEvent);
 
-        $localQueryParameter = $preEvent->getOptions()[0];
-        $this->assertEquals('value_1', $localQueryParameter->getValue());
-        $this->assertEquals('src_attribute_1', $localQueryParameter->getField());
-        $this->assertEquals(Operator::ICONTAINS, $localQueryParameter->getOperator());
+        $localFilter = $preEvent->getOptions()[Options::FILTER_OPTION];
+        $this->assertInstanceOf(Filter::class, $localFilter);
+        $conditionNode = $localFilter->getChildren()[0];
+        $this->assertInstanceOf(ConditionNode::class, $conditionNode);
+        $this->assertEquals('value_1', $conditionNode->getValue());
+        $this->assertEquals('src_attribute_1', $conditionNode->getField());
+        $this->assertEquals(ConditionNode::ICONTAINS_OPERATOR, $conditionNode->getOperator());
     }
 
     public function testLocalDataQueryAttributeUnacknowledgedNotConfigured()
@@ -188,9 +198,9 @@ class LocalDataTest extends TestCase
         $this->assertEmpty($entities);
     }
 
-    public function testMappingLocalQueryParameterValue()
+    public function testLocalFilter()
     {
-        // a query value mapping expression is defined for 'attribute_4' ("value + 1"). assert that the query value is incremented by 1.
+        // a local filter is defined for 'attribute_4'
         $localDataAttributeName = 'attribute_4';
         $localQuery = $localDataAttributeName.':4';
 
@@ -200,10 +210,41 @@ class LocalDataTest extends TestCase
         $preEvent = new TestEntityPreEvent($options);
         $this->localDataEventDispatcher->dispatch($preEvent);
 
-        $localQueryParameter = $preEvent->getOptions()[0];
-        $this->assertEquals('5', $localQueryParameter->getValue());
-        $this->assertEquals('src_attribute_4', $localQueryParameter->getField());
-        $this->assertEquals(Operator::ICONTAINS, $localQueryParameter->getOperator());
+        $localFilter = $preEvent->getOptions()[Options::FILTER_OPTION];
+        $this->assertInstanceOf(Filter::class, $localFilter);
+
+        $andNode = $localFilter->getChildren()[0];
+        $this->assertInstanceOf(AndNode::class, $andNode);
+
+        $orNode = $andNode->getChildren()[0];
+        $this->assertInstanceOf(OrNode::class, $orNode);
+
+        $conditionNode = $orNode->getChildren()[0];
+        $this->assertInstanceOf(ConditionNode::class, $conditionNode);
+        $this->assertEquals('1', $conditionNode->getValue());
+        $this->assertEquals('src_attribute_1', $conditionNode->getField());
+        $this->assertEquals(ConditionNode::ICONTAINS_OPERATOR, $conditionNode->getOperator());
+
+        $conditionNode = $orNode->getChildren()[1];
+        $this->assertInstanceOf(ConditionNode::class, $conditionNode);
+        $this->assertEquals('2', $conditionNode->getValue());
+        $this->assertEquals('src_attribute_2', $conditionNode->getField());
+        $this->assertEquals(ConditionNode::EQUALS_OPERATOR, $conditionNode->getOperator());
+
+        $orNode = $andNode->getChildren()[1];
+        $this->assertInstanceOf(OrNode::class, $orNode);
+
+        $conditionNode = $orNode->getChildren()[0];
+        $this->assertInstanceOf(ConditionNode::class, $conditionNode);
+        $this->assertEquals('1', $conditionNode->getValue());
+        $this->assertEquals('src_attribute_1', $conditionNode->getField());
+        $this->assertEquals(ConditionNode::CONTAINS_OPERATOR, $conditionNode->getOperator());
+
+        $conditionNode = $orNode->getChildren()[1];
+        $this->assertInstanceOf(ConditionNode::class, $conditionNode);
+        $this->assertEquals('2', $conditionNode->getValue());
+        $this->assertEquals('src_attribute_2', $conditionNode->getField());
+        $this->assertEquals(ConditionNode::IEQAULS_OPERATOR, $conditionNode->getOperator());
     }
 
     public function testMappingSourceDataValue()
@@ -283,7 +324,7 @@ class LocalDataTest extends TestCase
                 'local_data_attribute' => 'attribute_4',
                 'source_attribute' => 'src_attribute_4',
                 'map_value' => 'value + 1',
-                'map_filters' => 'relay.map(filters, "Filter.create(value.getValue() + 1)")',
+                'map_filters' => 'Filter.create().and().or().icontains("src_attribute_1", "1").equals("src_attribute_2", "2").end().or().contains("src_attribute_1", "1").iequals("src_attribute_2", "2").end().end()',
             ],
             [
                 'local_data_attribute' => 'array_attribute_1',

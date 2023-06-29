@@ -6,9 +6,6 @@ namespace Dbp\Relay\CoreBundle\LocalData;
 
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Helpers\Tools;
-use Dbp\Relay\CoreBundle\Query\Filter;
-use Dbp\Relay\CoreBundle\Query\LogicalOperator;
-use Dbp\Relay\CoreBundle\Query\Operator;
 use Symfony\Component\HttpFoundation\Response;
 
 class LocalData
@@ -108,10 +105,7 @@ class LocalData
                 }
 
                 if ($parameterKey !== null) {
-                    // currently, the 'queryLocal' parameter format only supports one default operator (case-insensitive contains) and logical operator (and)
-                    Tools::pushToSubarray($localQueryAttributes, $parameterKey, Filter::create(
-                        $parameterKey, Operator::ICONTAINS, $parameterValue !== null ? urldecode($parameterValue) : null,
-                        LogicalOperator::AND));
+                    $localQueryAttributes[$parameterKey] = $parameterValue !== null ? urldecode($parameterValue) : null;
                 }
             }
         }

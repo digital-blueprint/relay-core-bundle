@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\LocalData;
 
-/*
+/**
  * @deprecated Use AbstractLocalDataEventSubscriber
  *
  * Abstract implementation of a configurable local data provider post event subscriber.

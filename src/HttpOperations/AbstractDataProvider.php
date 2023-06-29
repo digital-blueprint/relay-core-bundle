@@ -66,7 +66,7 @@ abstract class AbstractDataProvider extends AbstractLocalDataAuthorizationServic
     private function createOptions(array $filters): array
     {
         $options = [];
-        $options[Locale::LANGUAGE_OPTION] = $this->locale->getCurrentPrimaryLanguage();
+        $options[Options::LANGUAGE_OPTION] = $this->locale->getCurrentPrimaryLanguage();
 
         LocalData::addOptions($options, $filters);
         $this->checkRequestedLocalDataAttributes($options);

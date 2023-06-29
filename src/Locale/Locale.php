@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
  */
 class Locale
 {
+    /** @deprecated Use Dbp\Relay\CoreBundle\HttpOperations\Options::LANGUAGE_OPTION instead */
     public const LANGUAGE_OPTION = 'lang';
 
     /** @var RequestStack */

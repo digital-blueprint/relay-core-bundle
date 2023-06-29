@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\LocalData;
 
+use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\ExpressionLanguage\ExpressionLanguage;
-use Dbp\Relay\CoreBundle\Query\Filter;
+use Dbp\Relay\CoreBundle\HttpOperations\Options;
+use Dbp\Relay\CoreBundle\Query\Filter\Filter;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /*
@@ -102,34 +105,42 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     public function onEvent(Event $event)
     {
         $expressionLanguage = null;
 
         if ($event instanceof LocalDataPreEvent) {
-            $localQueryFilters = [];
-            foreach ($event->getPendingQueryParameters() as $localQueryAttributeName => $localQueryAttributeFilters) {
+            $combinedFilter = null;
+            foreach ($event->getPendingQueryParameters() as $localQueryAttributeName => $localQueryAttributeValue) {
                 if (($attributeMapEntry = $this->attributeMapping[$localQueryAttributeName] ?? null) !== null) {
                     if (($mappingExpression = $attributeMapEntry[self::MAP_FILTERS_KEY]) !== null) {
+                        // prepared filter expression:
                         $expressionLanguage = $expressionLanguage ?? $this->getExpressionLanguage();
-                        $localQueryAttributeFilters = $expressionLanguage->evaluate($mappingExpression, [
-                            self::MAP_FILTERS_FILTERS_PARAMETER => $localQueryAttributeFilters,
-                            ]);
+                        $localFilter = $expressionLanguage->evaluate($mappingExpression);
+                        if ($localFilter instanceof Filter === false) {
+                            throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR);
+                        }
+                    } else {
+                        // filter by local data attribute:
+                        $sourceAttributeName = $attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY];
+                        $localFilter =
+                                Filter::create()
+                                    ->icontains($sourceAttributeName, $localQueryAttributeValue);
                     }
-                    $sourceAttributeName = $attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY];
-                    foreach ($localQueryAttributeFilters as $localDataAttributeFilter) {
-                        $localQueryFilters[] = Filter::create(
-                            $sourceAttributeName,
-                            $localDataAttributeFilter->getOperator(),
-                            $localDataAttributeFilter->getValue(),
-                            $localDataAttributeFilter->getLogicalOperator()
-                        );
+                    if ($localFilter !== null) {
+                        $combinedFilter = $combinedFilter === null ?
+                            $localFilter :
+                            $combinedFilter->combineWith($localFilter);
                     }
+
                     $event->tryPopPendingQueryParameter($localQueryAttributeName);
                 }
             }
 
-            $this->onPreEvent($event, $localQueryFilters);
+            $this->onPreEvent($event, $combinedFilter);
         } elseif ($event instanceof LocalDataPostEvent) {
             $localDataAttributes = [];
             foreach ($event->getPendingRequestedAttributes() as $localDataAttributeName) {
@@ -165,12 +176,20 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
     }
 
     /**
-     * Override this if you want to use the mapped local query attributes in your code.
-     *
-     * @param Filter[] $localQueryFilters The array of local query filters
+     * Override this if you want to add the filter definition to the request.
      */
-    protected function onPreEvent(LocalDataPreEvent $preEvent, array $localQueryFilters)
+    protected function onPreEvent(LocalDataPreEvent $preEvent, ?Filter $localFilter)
     {
+        if ($localFilter !== null) {
+            $options = $preEvent->getOptions();
+            if ($existingFilter = $options[Options::FILTER_OPTION] ?? null) {
+                $existingFilter->combineWith($localFilter);
+            } else {
+                $options[Options::FILTER_OPTION] = $localFilter;
+            }
+
+            $preEvent->setOptions($options);
+        }
     }
 
     /**
@@ -185,6 +204,6 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
 
     private function getExpressionLanguage(): ExpressionLanguage
     {
-        return new ExpressionLanguage(['Filter' => new LocalQueryFilterFactory()]);
+        return new ExpressionLanguage(['Filter' => Filter::create()]);
     }
 }
