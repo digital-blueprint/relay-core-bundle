@@ -6,6 +6,7 @@ namespace Dbp\Relay\CoreBundle\Tests\Query;
 
 use Dbp\Relay\CoreBundle\Query\Filter\Filter;
 use Dbp\Relay\CoreBundle\Query\Filter\Nodes\ConditionNode;
+use Dbp\Relay\CoreBundle\Query\Filter\QueryParameterFilterCreator;
 use PHPUnit\Framework\TestCase;
 
 class FilterTest extends TestCase
@@ -175,5 +176,23 @@ class FilterTest extends TestCase
         $filter1->combineWith(Filter::create());
 
         $this->assertEquals($filter1OriginalArray, $filter1->toArray());
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testCreateFromQueryParameters()
+    {
+        $queryParameters = [];
+
+        $queryParameters['foo'] = [
+            'path' => 'field0',
+            'operator' => 'CONTAINS',
+            'value' => 'value0',
+            ];
+
+        $filter = QueryParameterFilterCreator::createFilter($queryParameters);
+
+        $this->assertEquals(Filter::create()->contains('field0', 'value0')->toArray(), $filter->toArray());
     }
 }

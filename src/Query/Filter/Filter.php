@@ -13,6 +13,11 @@ class Filter extends AndNode
         return new self();
     }
 
+    public static function createFromQueryParameter(array $queryParameter): Filter
+    {
+        return QueryParameterFilterCreator::createFilter($queryParameter);
+    }
+
     protected function __construct()
     {
         parent::__construct(null);

@@ -10,6 +10,7 @@ use Dbp\Relay\CoreBundle\LocalData\LocalData;
 use Dbp\Relay\CoreBundle\Locale\Locale;
 use Dbp\Relay\CoreBundle\Pagination\Pagination;
 use Dbp\Relay\CoreBundle\Pagination\PartialPaginator;
+use Dbp\Relay\CoreBundle\Query\Filter\Filter;
 
 abstract class AbstractDataProvider extends AbstractLocalDataAuthorizationService
 {
@@ -17,6 +18,8 @@ abstract class AbstractDataProvider extends AbstractLocalDataAuthorizationServic
 
     protected const GET_COLLECTION_OPERATION = 1;
     protected const GET_ITEM_OPERATION = 2;
+
+    private const FILTER_PARAMETER_NAME = 'filter';
 
     /** @var Locale */
     private $locale;
@@ -70,6 +73,10 @@ abstract class AbstractDataProvider extends AbstractLocalDataAuthorizationServic
 
         LocalData::addOptions($options, $filters);
         $this->checkRequestedLocalDataAttributes($options);
+
+        if ($filterParameter = $filters[self::FILTER_PARAMETER_NAME] ?? null) {
+            $options[Options::FILTER_OPTION] = Filter::createFromQueryParameter($filterParameter);
+        }
 
         return $options;
     }
