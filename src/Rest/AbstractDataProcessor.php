@@ -2,13 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\HttpOperations;
+namespace Dbp\Relay\CoreBundle\Rest;
 
+use Dbp\Relay\CoreBundle\ApiPlatform\State\StateProcessorInterface;
+use Dbp\Relay\CoreBundle\ApiPlatform\State\StateProcessorTrait;
 use Dbp\Relay\CoreBundle\Authorization\AbstractAuthorizationService;
 
-abstract class AbstractDataProcessor extends AbstractAuthorizationService
+abstract class AbstractDataProcessor extends AbstractAuthorizationService implements StateProcessorInterface
 {
     use DataOperationTrait;
+    use StateProcessorTrait;
 
     protected const ADD_ITEM_OPERATION = 1;
     protected const REPLACE_ITEM_OPERATION = 2;

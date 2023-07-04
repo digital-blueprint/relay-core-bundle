@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\Query\Filter\Nodes;
+namespace Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes;
 
 /**
  * An internal node is a node with child nodes.
@@ -48,7 +48,7 @@ abstract class LogicalNode extends Node
      */
     public function icontains(string $column, string $value): Node
     {
-        $this->childNodes[] = new ConditionNode($column, ConditionNode::ICONTAINS_OPERATOR, $value);
+        $this->childNodes[] = new ConditionNode($column, OperatorType::ICONTAINS_OPERATOR, $value);
 
         return $this;
     }
@@ -60,7 +60,7 @@ abstract class LogicalNode extends Node
      */
     public function contains(string $column, string $value): Node
     {
-        $this->childNodes[] = new ConditionNode($column, ConditionNode::CONTAINS_OPERATOR, $value);
+        $this->childNodes[] = new ConditionNode($column, OperatorType::CONTAINS_OPERATOR, $value);
 
         return $this;
     }
@@ -72,7 +72,7 @@ abstract class LogicalNode extends Node
      */
     public function iequals(string $column, string $value): Node
     {
-        $this->childNodes[] = new ConditionNode($column, ConditionNode::IEQAULS_OPERATOR, $value);
+        $this->childNodes[] = new ConditionNode($column, OperatorType::IEQAULS_OPERATOR, $value);
 
         return $this;
     }
@@ -84,7 +84,7 @@ abstract class LogicalNode extends Node
      */
     public function equals(string $column, string $value): Node
     {
-        $this->childNodes[] = new ConditionNode($column, ConditionNode::EQUALS_OPERATOR, $value);
+        $this->childNodes[] = new ConditionNode($column, OperatorType::EQUALS_OPERATOR, $value);
 
         return $this;
     }
@@ -121,15 +121,15 @@ abstract class LogicalNode extends Node
                 $childNodeType = $childNode->getNodeType();
                 switch ($childNodeType) {
                     // and under and, or under or -> can be reduced to one
-                    case self::AND_NODE_TYPE:
-                    case self::OR_NODE_TYPE:
+                    case NodeType::AND:
+                    case NodeType::OR:
                         if ($childNodeType === static::NODE_TYPE) {
                             $childNodes = array_merge($childNodes, $childNode->getChildren());
                             $appendChild = false;
                         }
                         break;
                     // not under not -> both can be removed
-                    case self::NOT_NODE_TYPE:
+                    case NodeType::NOT:
                         $grandChildNode = $childNode->getChildren()[0];
                         if ($grandChildNode instanceof NotNode) {
                             $childNodes[] = $grandChildNode->getChildren()[0];
@@ -145,15 +145,15 @@ abstract class LogicalNode extends Node
         $this->childNodes = $childNodes;
     }
 
-    protected function toArrayInternal(): array
+    public function toArray(): array
     {
         $childArray = [];
         $currentChildIndex = 0;
-        foreach ($this->childNodes as $childNodeDefinition) {
-            $arrayKey = $childNodeDefinition instanceof LogicalNode ?
-                $childNodeDefinition->getNodeType() : null;
+        foreach ($this->childNodes as $childNode) {
+            $arrayKey = $childNode instanceof LogicalNode ?
+                $childNode->getNodeType() : null;
             $childArray[$arrayKey !== null ? $arrayKey.'_'.$currentChildIndex : $currentChildIndex] =
-                $childNodeDefinition->toArrayInternal();
+                $childNode->toArray();
             ++$currentChildIndex;
         }
 

@@ -9,10 +9,8 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
-use ApiPlatform\State\ProcessorInterface;
-use Dbp\Relay\CoreBundle\HttpOperations\AbstractDataProcessor;
 
-abstract class AbstractStateProcessor extends AbstractDataProcessor implements ProcessorInterface
+trait StateProcessorTrait
 {
     public function process($data, Operation $operation, array $uriVariables = [], array $context = [])
     {

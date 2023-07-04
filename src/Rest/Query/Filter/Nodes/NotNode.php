@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\Query\Filter\Nodes;
+namespace Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes;
 
 class NotNode extends LogicalNode
 {
-    protected const NODE_TYPE = self::NOT_NODE_TYPE;
+    protected const NODE_TYPE = NodeType::NOT;
 
     public function __construct(LogicalNode $parent)
     {

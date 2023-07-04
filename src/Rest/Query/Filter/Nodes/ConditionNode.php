@@ -2,27 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\Query\Filter\Nodes;
+namespace Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes;
 
 class ConditionNode extends Node
 {
-    public const ICONTAINS_OPERATOR = 'icontains';
-    public const CONTAINS_OPERATOR = 'contains';
-    public const IEQAULS_OPERATOR = 'iequals';
-    public const EQUALS_OPERATOR = 'equals';
-
     public const FIELD_KEY = 'field';
     public const OPERATOR_KEY = 'operator';
     public const VALUE_KEY = 'value';
 
-    protected const NODE_TYPE = self::CONDITION_NODE_TYPE;
-
-    private const OPERATORS = [
-        self::ICONTAINS_OPERATOR,
-        self::CONTAINS_OPERATOR,
-        self::IEQAULS_OPERATOR,
-        self::EQUALS_OPERATOR,
-    ];
+    protected const NODE_TYPE = NodeType::CONDITION;
 
     /** @var string */
     private $field;
@@ -36,17 +24,17 @@ class ConditionNode extends Node
     /**
      * @throws \Exception
      */
-    public function __construct(string $column, string $operator, $value)
+    public function __construct(string $field, string $operator, $value)
     {
-        if ($column === '') {
-            throw new \Exception('condition column must not be empty');
+        if ($field === '') {
+            throw new \InvalidArgumentException('condition field must not be empty');
         }
 
-        if (!in_array($operator, self::OPERATORS, true)) {
-            throw new \Exception('unknown condition operator: '.$operator);
+        if (OperatorType::exists($operator) === false) {
+            throw new \InvalidArgumentException('undefined condition operator: '.$operator);
         }
 
-        $this->field = $column;
+        $this->field = $field;
         $this->operator = $operator;
         $this->value = $value;
     }
@@ -75,7 +63,7 @@ class ConditionNode extends Node
             $reason = 'column must not be empty';
 
             return false;
-        } elseif (in_array($this->operator, self::OPERATORS, true) === false) {
+        } elseif (OperatorType::exists($this->operator) === false) {
             $reason = 'unknown operator: '.$this->operator;
 
             return false;
@@ -91,20 +79,20 @@ class ConditionNode extends Node
     {
         $columnValue = $rowData[$this->field] ?? null;
         switch ($this->operator) {
-            case self::ICONTAINS_OPERATOR:
+            case OperatorType::ICONTAINS_OPERATOR:
                 return \str_contains(strtolower($columnValue), strtolower($this->value));
-            case self::CONTAINS_OPERATOR:
+            case OperatorType::CONTAINS_OPERATOR:
                 return \str_contains($columnValue, $this->value);
-            case self::IEQAULS_OPERATOR:
+            case OperatorType::IEQAULS_OPERATOR:
                 return strtolower($columnValue) === strtolower($this->value);
-            case self::EQUALS_OPERATOR:
+            case OperatorType::EQUALS_OPERATOR:
                 return $columnValue === $this->value;
             default:
                 throw new \Exception('unimplemented condition operator: '.$this->operator);
         }
     }
 
-    protected function toArrayInternal(): array
+    public function toArray(): array
     {
         return [
             self::FIELD_KEY => $this->field,

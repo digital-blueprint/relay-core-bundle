@@ -6,8 +6,8 @@ namespace Dbp\Relay\CoreBundle\LocalData;
 
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\ExpressionLanguage\ExpressionLanguage;
-use Dbp\Relay\CoreBundle\HttpOperations\Options;
-use Dbp\Relay\CoreBundle\Query\Filter\Filter;
+use Dbp\Relay\CoreBundle\Rest\Options;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -113,7 +113,7 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
         $expressionLanguage = null;
 
         if ($event instanceof LocalDataPreEvent) {
-            $combinedFilter = null;
+            $combinedFilter = Filter::create();
             foreach ($event->getPendingQueryParameters() as $localQueryAttributeName => $localQueryAttributeValue) {
                 if (($attributeMapEntry = $this->attributeMapping[$localQueryAttributeName] ?? null) !== null) {
                     if (($mappingExpression = $attributeMapEntry[self::MAP_FILTERS_KEY]) !== null) {
@@ -123,17 +123,12 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
                         if ($localFilter instanceof Filter === false) {
                             throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR);
                         }
+                        $combinedFilter->combineWith($localFilter);
                     } else {
                         // filter by local data attribute:
                         $sourceAttributeName = $attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY];
-                        $localFilter =
-                                Filter::create()
+                        $combinedFilter->getRootNode()
                                     ->icontains($sourceAttributeName, $localQueryAttributeValue);
-                    }
-                    if ($localFilter !== null) {
-                        $combinedFilter = $combinedFilter === null ?
-                            $localFilter :
-                            $combinedFilter->combineWith($localFilter);
                     }
 
                     $event->tryPopPendingQueryParameter($localQueryAttributeName);
@@ -178,14 +173,14 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
     /**
      * Override this if you want to add the filter definition to the request.
      */
-    protected function onPreEvent(LocalDataPreEvent $preEvent, ?Filter $localFilter)
+    protected function onPreEvent(LocalDataPreEvent $preEvent, Filter $localFilter)
     {
-        if ($localFilter !== null) {
+        if ($localFilter->isEmpty() === false) {
             $options = $preEvent->getOptions();
-            if ($existingFilter = $options[Options::FILTER_OPTION] ?? null) {
+            if ($existingFilter = $options[Options::FILTER] ?? null) {
                 $existingFilter->combineWith($localFilter);
             } else {
-                $options[Options::FILTER_OPTION] = $localFilter;
+                $options[Options::FILTER] = $localFilter;
             }
 
             $preEvent->setOptions($options);

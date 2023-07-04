@@ -2,15 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\Query\Filter;
+namespace Dbp\Relay\CoreBundle\Rest\Query\Filter;
 
-use Dbp\Relay\CoreBundle\Query\Filter\Nodes\AndNode;
-use Dbp\Relay\CoreBundle\Query\Filter\Nodes\ConditionNode;
-use Dbp\Relay\CoreBundle\Query\Filter\Nodes\LogicalNode;
-use Dbp\Relay\CoreBundle\Query\Filter\Nodes\NotNode;
-use Dbp\Relay\CoreBundle\Query\Filter\Nodes\OrNode;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\AndNode;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\ConditionNode;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\LogicalNode;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\NotNode;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\OperatorType;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\OrNode;
 
-class QueryParameterFilterCreator
+class FromQueryParameterFilterCreator
 {
     /**
      * The key for the implicit root group.
@@ -77,19 +78,12 @@ class QueryParameterFilterCreator
 
     /**
      * Creates a Filter object from an query parameter.
+     *
+     * @throws \Exception
      */
-    public static function createFilter(array $queryParameters): Filter
+    public static function createFilter(array $filterQueryParameters): Filter
     {
-        $expanded = static::expand($queryParameters);
-//        foreach ($expanded as &$filterItem) {
-//            if (isset($filterItem[static::CONDITION_KEY][self::PATH_KEY])) {
-//                $unresolved = $filterItem[static::CONDITION_KEY][self::PATH_KEY];
-//                $operator = $filterItem[static::CONDITION_KEY][self::OPERATOR_KEY];
-//                $filterItem[static::CONDITION_KEY][self::PATH_KEY] = $field_resolver->resolveInternalEntityQueryPath($resource_type, $unresolved, $operator);
-//            }
-//        }
-
-        return static::buildFilter($expanded);
+        return static::buildFilter(static::expand($filterQueryParameters));
     }
 
     /**
@@ -169,6 +163,9 @@ class QueryParameterFilterCreator
         return $filterItem;
     }
 
+    /**
+     * @throws \Exception
+     */
     protected static function buildFilter(array $items): Filter
     {
         $rootGroup = [
@@ -176,8 +173,10 @@ class QueryParameterFilterCreator
             self::GROUP_KEY => ['conjunction' => 'AND'],
         ];
 
-        /** @var Filter */
-        return self::buildTreeRecursively($rootGroup, null, $items);
+        /** @var AndNode */
+        $rootNode = self::buildTreeRecursively($rootGroup, null, $items);
+
+        return Filter::create($rootNode);
     }
 
     /**
@@ -189,7 +188,7 @@ class QueryParameterFilterCreator
 
         switch ($currentItem[self::GROUP_KEY]['conjunction']) {
             case 'AND':
-                $logicalNode = $currentParentNode === null ? Filter::create() : new AndNode($currentParentNode);
+                $logicalNode = new AndNode($currentParentNode);
                 break;
             case 'OR':
                 $logicalNode = new OrNode($currentParentNode);
@@ -198,7 +197,7 @@ class QueryParameterFilterCreator
                 $logicalNode = new NotNode($currentParentNode);
                 break;
             default:
-                throw new \InvalidArgumentException('invalid logical operator: '.$currentItem[self::GROUP_KEY]['conjunction']);
+                throw new \InvalidArgumentException('invalid conjunction: '.$currentItem[self::GROUP_KEY]['conjunction']);
         }
 
         foreach ($items as $item) {
@@ -239,9 +238,9 @@ class QueryParameterFilterCreator
     {
         switch ($operator) {
             case 'CONTAINS':
-                return ConditionNode::CONTAINS_OPERATOR;
+                return OperatorType::CONTAINS_OPERATOR;
             case '=':
-                return ConditionNode::EQUALS_OPERATOR;
+                return OperatorType::EQUALS_OPERATOR;
             default:
                 throw new \InvalidArgumentException('unsupported operator type: '.$operator);
         }

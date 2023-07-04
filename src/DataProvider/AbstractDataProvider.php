@@ -12,7 +12,7 @@ use Dbp\Relay\CoreBundle\Pagination\PartialPaginator;
 /**
  * @deprecated Implemented ApiPlatform interfaces are deprecated. Use AbstractStateProvider instead.
  */
-abstract class AbstractDataProvider extends \Dbp\Relay\CoreBundle\HttpOperations\AbstractDataProvider implements RestrictedDataProviderInterface, ItemDataProviderInterface, CollectionDataProviderInterface
+abstract class AbstractDataProvider extends \Dbp\Relay\CoreBundle\Rest\AbstractDataProvider implements RestrictedDataProviderInterface, ItemDataProviderInterface, CollectionDataProviderInterface
 {
     private const FILTERS_KEY = 'filters';
 

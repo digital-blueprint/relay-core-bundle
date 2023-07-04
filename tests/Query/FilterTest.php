@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\Query;
 
-use Dbp\Relay\CoreBundle\Query\Filter\Filter;
-use Dbp\Relay\CoreBundle\Query\Filter\Nodes\ConditionNode;
-use Dbp\Relay\CoreBundle\Query\Filter\QueryParameterFilterCreator;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\ConditionNode;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\OperatorType;
 use PHPUnit\Framework\TestCase;
 
 class FilterTest extends TestCase
@@ -16,7 +16,8 @@ class FilterTest extends TestCase
      */
     public function testFilterToArray()
     {
-        $filter = Filter::create()
+        $filter = Filter::create();
+        $filter->getRootNode()
             ->or()
                 ->icontains('field_1', '1')
                 ->equals('field_2', '2')
@@ -28,6 +29,7 @@ class FilterTest extends TestCase
 
         $this->assertInstanceOf(Filter::class, $filter);
         $this->assertTrue($filter->isValid());
+
         $filterArray = $filter->toArray();
 
         $andNode = $filterArray['and_0'];
@@ -39,13 +41,13 @@ class FilterTest extends TestCase
         $this->assertIsArray($conditionNode);
         $this->assertEquals('1', $conditionNode[ConditionNode::VALUE_KEY]);
         $this->assertEquals('field_1', $conditionNode[ConditionNode::FIELD_KEY]);
-        $this->assertEquals(ConditionNode::ICONTAINS_OPERATOR, $conditionNode[ConditionNode::OPERATOR_KEY]);
+        $this->assertEquals(OperatorType::ICONTAINS_OPERATOR, $conditionNode[ConditionNode::OPERATOR_KEY]);
 
         $conditionNode = $orNode[1];
         $this->assertIsArray($conditionNode);
         $this->assertEquals('2', $conditionNode[ConditionNode::VALUE_KEY]);
         $this->assertEquals('field_2', $conditionNode[ConditionNode::FIELD_KEY]);
-        $this->assertEquals(ConditionNode::EQUALS_OPERATOR, $conditionNode[ConditionNode::OPERATOR_KEY]);
+        $this->assertEquals(OperatorType::EQUALS_OPERATOR, $conditionNode[ConditionNode::OPERATOR_KEY]);
 
         $orNode = $andNode['or_1'];
         $this->assertIsArray($orNode);
@@ -54,19 +56,20 @@ class FilterTest extends TestCase
         $this->assertIsArray($conditionNode);
         $this->assertEquals('3', $conditionNode[ConditionNode::VALUE_KEY]);
         $this->assertEquals('field_3', $conditionNode[ConditionNode::FIELD_KEY]);
-        $this->assertEquals(ConditionNode::CONTAINS_OPERATOR, $conditionNode[ConditionNode::OPERATOR_KEY]);
+        $this->assertEquals(OperatorType::CONTAINS_OPERATOR, $conditionNode[ConditionNode::OPERATOR_KEY]);
 
         $conditionNode = $orNode[1];
         $this->assertIsArray($conditionNode);
         $this->assertEquals('4', $conditionNode[ConditionNode::VALUE_KEY]);
         $this->assertEquals('field_4', $conditionNode[ConditionNode::FIELD_KEY]);
-        $this->assertEquals(ConditionNode::IEQAULS_OPERATOR, $conditionNode[ConditionNode::OPERATOR_KEY]);
+        $this->assertEquals(OperatorType::IEQAULS_OPERATOR, $conditionNode[ConditionNode::OPERATOR_KEY]);
     }
 
     public function testCombineWith()
     {
         /** @var Filter */
-        $referenceFilter = Filter::create()
+        $referenceFilter = Filter::create();
+        $referenceFilter->getRootNode()
             ->or()
                 ->icontains('field_1', '1')
                 ->equals('field_2', '2')
@@ -77,14 +80,16 @@ class FilterTest extends TestCase
             ->end();
 
         /** @var Filter */
-        $filter1 = Filter::create()
+        $filter1 = Filter::create();
+        $filter1->getRootNode()
             ->or()
                 ->icontains('field_1', '1')
                 ->equals('field_2', '2')
             ->end();
 
         /** @var Filter */
-        $filter2 = Filter::create()
+        $filter2 = Filter::create();
+        $filter2->getRootNode()
             ->or()
                 ->contains('field_3', '3')
                 ->iequals('field_4', '4')
@@ -98,7 +103,8 @@ class FilterTest extends TestCase
     public function testSimplify()
     {
         /** @var Filter */
-        $filter = Filter::create()
+        $filter = Filter::create();
+        $filter->getRootNode()
             ->and()
             ->icontains('field_1', '1')
             ->equals('field_2', '2')
@@ -111,7 +117,8 @@ class FilterTest extends TestCase
             ->end();
 
         /** @var Filter */
-        $desiredResultFilter = Filter::create()
+        $desiredResultFilter = Filter::create();
+        $desiredResultFilter->getRootNode()
             ->icontains('field_1', '1')
             ->equals('field_2', '2')
             ->or()
@@ -135,7 +142,7 @@ class FilterTest extends TestCase
     {
         /** @var Filter */
         $filter = Filter::create();
-        $filter->or();
+        $filter->getRootNode()->or();
 
         $reason = null;
         $this->assertFalse($filter->isValid($reason));
@@ -151,7 +158,8 @@ class FilterTest extends TestCase
         $filter1 = Filter::create();
 
         /** @var Filter */
-        $filter2 = Filter::create()
+        $filter2 = Filter::create();
+        $filter2->getRootNode()
             ->or()
                 ->icontains('field_1', '1')
                 ->equals('field_2', '2')
@@ -165,7 +173,8 @@ class FilterTest extends TestCase
     public function testCombineWithSecondEmpty()
     {
         /** @var Filter */
-        $filter1 = Filter::create()
+        $filter1 = Filter::create();
+        $filter1->getRootNode()
             ->or()
             ->icontains('field_1', '1')
             ->equals('field_2', '2')
@@ -191,8 +200,11 @@ class FilterTest extends TestCase
             'value' => 'value0',
             ];
 
-        $filter = QueryParameterFilterCreator::createFilter($queryParameters);
+        $filter = Filter::createFromQueryParameters($queryParameters);
 
-        $this->assertEquals(Filter::create()->contains('field0', 'value0')->toArray(), $filter->toArray());
+        $expectedFilter = Filter::create();
+        $expectedFilter->getRootNode()->contains('field0', 'value0');
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
     }
 }

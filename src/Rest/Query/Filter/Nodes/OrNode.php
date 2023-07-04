@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\Query\Filter\Nodes;
+namespace Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes;
 
-class AndNode extends LogicalNode
+class OrNode extends LogicalNode
 {
-    protected const NODE_TYPE = self::AND_NODE_TYPE;
+    protected const NODE_TYPE = NodeType::OR;
 
-    public function __construct(?LogicalNode $parent)
+    public function __construct(LogicalNode $parent)
     {
         parent::__construct($parent);
     }
@@ -16,7 +16,7 @@ class AndNode extends LogicalNode
     public function isValid(string &$reason = null): bool
     {
         if (count($this->childNodes) === 0) {
-            $reason = 'logical \'and\' node must have at least one child';
+            $reason = 'logical \'or\' node must have at least one child';
 
             return false;
         }
@@ -30,15 +30,15 @@ class AndNode extends LogicalNode
     public function apply(array $rowData): bool
     {
         if (count($this->childNodes) === 0) {
-            throw new \Exception('filter invalid: \'and\' must have at least one child');
+            throw new \Exception('filter invalid: \'or\' must have at least one child');
         }
 
         foreach ($this->childNodes as $child) {
-            if ($child->apply($rowData) === false) {
-                return false;
+            if ($child->apply($rowData) === true) {
+                return true;
             }
         }
 
-        return true;
+        return false;
     }
 }

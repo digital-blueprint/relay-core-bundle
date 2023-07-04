@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\LocalData;
 
 use Dbp\Relay\CoreBundle\Exception\ApiError;
+use Dbp\Relay\CoreBundle\Rest\Options;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\EventDispatcher\Event;
@@ -13,9 +14,6 @@ class LocalDataEventDispatcher
 {
     /** @var string */
     private $resourceClass;
-
-    /** @var array */
-    private $queryAttributes = [];
 
     /** @var array */
     private $localDataAttributes = [];
@@ -38,8 +36,7 @@ class LocalDataEventDispatcher
      */
     public function onNewOperation(array $options): void
     {
-        $this->queryAttributes = LocalData::getLocalQueryAttributes($options);
-        $this->localDataAttributes = LocalData::getLocalDataAttributes($options);
+        $this->localDataAttributes = Options::getLocalDataAttributes($options);
     }
 
     /**
@@ -69,15 +66,7 @@ class LocalDataEventDispatcher
      */
     public function dispatch(Event $event, string $eventName = null): void
     {
-        if ($event instanceof LocalDataPreEvent) {
-            $event->initQueryParameters($this->queryAttributes);
-            $this->eventDispatcher->dispatch($event, $eventName);
-
-            $pendingAttributes = $event->getPendingQueryParameters();
-            if (count($pendingAttributes) !== 0) {
-                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf('the following local query attributes were not acknowledged: %s', implode(', ', array_keys($pendingAttributes))));
-            }
-        } elseif ($event instanceof LocalDataPostEvent) {
+        if ($event instanceof LocalDataPostEvent) {
             $event->initRequestedAttributes($this->localDataAttributes);
             $this->eventDispatcher->dispatch($event, $eventName);
 

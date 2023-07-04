@@ -2,16 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\Query\Filter\Nodes;
+namespace Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes;
 
 abstract class Node
 {
-    public const ROOT_NODE_TYPE = 'root';
-    public const CONDITION_NODE_TYPE = 'condition';
-    public const AND_NODE_TYPE = 'and';
-    public const OR_NODE_TYPE = 'or';
-    public const NOT_NODE_TYPE = 'not';
-
     protected const NODE_TYPE = null;
 
     /** @var LogicalNode|null */
@@ -41,5 +35,5 @@ abstract class Node
 
     abstract public function apply(array $rowData): bool;
 
-    abstract protected function toArrayInternal(): array;
+    abstract public function toArray(): array;
 }
