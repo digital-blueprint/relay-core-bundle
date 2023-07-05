@@ -8,7 +8,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Operation;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
-use Dbp\Relay\CoreBundle\Pagination\PartialPaginator;
+use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
 use Symfony\Component\HttpFoundation\Response;
 
 trait StateProviderTrait

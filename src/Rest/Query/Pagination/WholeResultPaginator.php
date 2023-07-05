@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\Pagination;
+namespace Dbp\Relay\CoreBundle\Rest\Query\Pagination;
 
 /**
  * Paginator that holds the whole set of result items.

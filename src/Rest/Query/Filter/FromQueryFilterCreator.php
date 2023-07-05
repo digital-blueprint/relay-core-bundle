@@ -11,7 +11,7 @@ use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\NotNode;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\OperatorType;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\OrNode;
 
-class FromQueryParameterFilterCreator
+class FromQueryFilterCreator
 {
     /**
      * The key for the implicit root group.
@@ -81,7 +81,7 @@ class FromQueryParameterFilterCreator
      *
      * @throws \Exception
      */
-    public static function createFilter(array $filterQueryParameters): Filter
+    public static function createFilterFromQueryParameters(array $filterQueryParameters): Filter
     {
         return static::buildFilter(static::expand($filterQueryParameters));
     }

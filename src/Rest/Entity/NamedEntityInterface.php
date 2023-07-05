@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\Entity;
+namespace Dbp\Relay\CoreBundle\Rest\Entity;
 
 /**
  * Interface for entities with an identifier and a name.

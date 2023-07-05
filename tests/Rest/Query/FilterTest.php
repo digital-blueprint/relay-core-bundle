@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\Tests\Query;
+namespace Dbp\Relay\CoreBundle\Tests\Rest\Query;
 
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\FromQueryFilterCreator;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\ConditionNode;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\OperatorType;
 use PHPUnit\Framework\TestCase;
@@ -200,7 +201,7 @@ class FilterTest extends TestCase
             'value' => 'value0',
             ];
 
-        $filter = Filter::createFromQueryParameters($queryParameters);
+        $filter = FromQueryFilterCreator::createFilterFromQueryParameters($queryParameters);
 
         $expectedFilter = Filter::create();
         $expectedFilter->getRootNode()->contains('field0', 'value0');

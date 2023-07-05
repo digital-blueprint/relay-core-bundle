@@ -11,10 +11,10 @@ use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\LocalData\LocalData;
 use Dbp\Relay\CoreBundle\LocalData\LocalDataAccessChecker;
 use Dbp\Relay\CoreBundle\Locale\Locale;
-use Dbp\Relay\CoreBundle\Pagination\Pagination;
-use Dbp\Relay\CoreBundle\Pagination\PartialPaginator;
-use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
-use Dbp\Relay\CoreBundle\Rest\Query\Filter\PreparedFilterController;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\FromQueryFilterCreator;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\PreparedFilterProvider;
+use Dbp\Relay\CoreBundle\Rest\Query\Pagination\Pagination;
+use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
 use Dbp\Relay\CoreBundle\Rest\Query\Parameters;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
@@ -30,7 +30,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     /** @var Locale */
     private $locale;
 
-    /** @var PreparedFilterController */
+    /** @var PreparedFilterProvider */
     private $preparedFilterController;
 
     /** @var LocalDataAccessChecker */
@@ -47,12 +47,12 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     public static function appendConfigNodeDefinitions(ArrayNodeDefinition $rootNode)
     {
         $rootNode->append(LocalDataAccessChecker::getConfigNodeDefinition());
-        $rootNode->append(PreparedFilterController::getConfigNodeDefinition());
+        $rootNode->append(PreparedFilterProvider::getConfigNodeDefinition());
     }
 
     protected function __construct()
     {
-        $this->preparedFilterController = new PreparedFilterController();
+        $this->preparedFilterController = new PreparedFilterProvider();
         $this->localDataAccessChecker = new LocalDataAccessChecker();
     }
 
@@ -108,7 +108,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     abstract protected function getPage(int $currentPageNumber, int $maxNumItemsPerPage, array $filters = [], array $options = []): array;
 
     /**
-     * @throws ApiError
+     * @throws ApiError|\Exception
      */
     private function createOptions(array $filters): array
     {
@@ -122,10 +122,10 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
             $this->localDataAccessChecker->checkRequestedLocalDataAttributes($localDataAttributes);
         }
         if ($filterParameter = $filters[Parameters::FILTER] ?? null) {
-            Options::addFilter($options, Filter::createFromQueryParameters($filterParameter));
+            Options::addFilter($options, FromQueryFilterCreator::createFilterFromQueryParameters($filterParameter));
         }
         if ($preparedFilterParameter = $filters[Parameters::PREPARED_FILTER] ?? null) {
-            Options::addFilter($options, $this->preparedFilterController->getPreparedFilter($preparedFilterParameter));
+            Options::addFilter($options, $this->preparedFilterController->getPreparedFilterById($preparedFilterParameter));
         }
 
         return $options;

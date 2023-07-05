@@ -6,7 +6,7 @@ namespace Dbp\Relay\CoreBundle\Tests\Rest;
 
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
-use Dbp\Relay\CoreBundle\Pagination\PartialPaginator;
+use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 

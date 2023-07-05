@@ -17,11 +17,6 @@ class Filter
         return new self($rootNode ?? new AndNode(null));
     }
 
-    public static function createFromQueryParameters(array $filterQueryParameters): Filter
-    {
-        return FromQueryParameterFilterCreator::createFilter($filterQueryParameters);
-    }
-
     protected function __construct(AndNode $rootNode)
     {
         $this->rootNode = $rootNode;

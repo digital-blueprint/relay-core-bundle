@@ -5,24 +5,24 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Rest\Query\Filter;
 
 use Dbp\Relay\CoreBundle\Exception\ApiError;
-use Dbp\Relay\CoreBundle\Rest\Query\Parameters;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\HttpFoundation\Response;
 
-class PreparedFilterController
+class PreparedFilterProvider
 {
     private const ROOT_CONFIG_NODE = 'prepared_filters';
     private const NAME_CONFIG_NODE = 'name';
     private const FILTER_CONFIG_NODE = 'filter';
     private const APPLY_POLICY_CONFIG_NODE = 'apply_policy';
 
-    private const FILTER_KEY = 'filter';
+    private const FILTER_CONFIG_KEY = 'filter';
+    private const FILTER_PARAMETER_PREFIX = 'filter';
 
     private const POLICY_PREFIX = '@apply-filter:';
 
     /** @var array */
-    private $attributeConfig = [];
+    private $config = [];
 
     /** @var array */
     private $policies = [];
@@ -55,12 +55,12 @@ class PreparedFilterController
         foreach ($config[self::ROOT_CONFIG_NODE] ?? [] as $configEntry) {
             $filterName = $configEntry[self::NAME_CONFIG_NODE];
 
-            if (isset($this->attributeConfig[$filterName])) {
+            if (isset($this->config[$filterName])) {
                 throw new \RuntimeException(sprintf('multiple config entries for prepared filter \'%s\'', $filterName));
             }
             $attributeConfigEntry = [];
-            $attributeConfigEntry[self::FILTER_KEY] = $configEntry[self::FILTER_CONFIG_NODE] ?? '';
-            $this->attributeConfig[$filterName] = $attributeConfigEntry;
+            $attributeConfigEntry[self::FILTER_CONFIG_KEY] = $configEntry[self::FILTER_CONFIG_NODE] ?? '';
+            $this->config[$filterName] = $attributeConfigEntry;
 
             // the filter is not applicable by default
             $this->policies[self::POLICY_PREFIX.$filterName] = $configEntry[self::APPLY_POLICY_CONFIG_NODE] ?? 'false';
@@ -72,20 +72,19 @@ class PreparedFilterController
         return $this->policies;
     }
 
-    public function getPreparedFilter(string $preparedFilterName): Filter
+    /**
+     * @throws \Exception
+     */
+    public function getPreparedFilterById(string $id): Filter
     {
-        $preparedFilterConfigEntry = $this->attributeConfig[$preparedFilterName] ?? null;
-        if ($preparedFilterConfigEntry === null) {
-            throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, 'undefined prepared filter');
+        $preparedFilterConfig = $this->config[$id] ?? null;
+        if ($preparedFilterConfig === null) {
+            throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, 'prepared filter undefined: '.$id);
         }
 
-        dump($preparedFilterConfigEntry[self::FILTER_KEY]);
-
         $filterQueryParameters = [];
-        parse_str($preparedFilterConfigEntry[self::FILTER_KEY], $filterQueryParameters);
+        parse_str($preparedFilterConfig[self::FILTER_CONFIG_KEY], $filterQueryParameters);
 
-        dump($filterQueryParameters);
-
-        return Filter::createFromQueryParameters($filterQueryParameters[Parameters::FILTER] ?? []);
+        return FromQueryFilterCreator::createFilterFromQueryParameters($filterQueryParameters[self::FILTER_PARAMETER_PREFIX]);
     }
 }

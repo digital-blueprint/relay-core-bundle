@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Tests\Rest;
 
 use Dbp\Relay\CoreBundle\LocalData\LocalDataEventDispatcher;
-use Dbp\Relay\CoreBundle\Pagination\Pagination;
 use Dbp\Relay\CoreBundle\Rest\AbstractDataProvider;
+use Dbp\Relay\CoreBundle\Rest\Query\Pagination\Pagination;
 use Dbp\Relay\CoreBundle\Tests\Locale\TestLocale;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 

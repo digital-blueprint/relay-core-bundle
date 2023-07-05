@@ -7,7 +7,7 @@ namespace Dbp\Relay\CoreBundle\DataProvider;
 use ApiPlatform\Core\DataProvider\CollectionDataProviderInterface;
 use ApiPlatform\Core\DataProvider\ItemDataProviderInterface;
 use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
-use Dbp\Relay\CoreBundle\Pagination\PartialPaginator;
+use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
 
 /**
  * @deprecated Implemented ApiPlatform interfaces are deprecated. Use AbstractStateProvider instead.
