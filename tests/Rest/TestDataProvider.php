@@ -4,10 +4,16 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\Rest;
 
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use Dbp\Relay\CoreBundle\Authorization\AuthorizationDataMuxer;
+use Dbp\Relay\CoreBundle\Authorization\AuthorizationDataProviderProvider;
 use Dbp\Relay\CoreBundle\LocalData\LocalDataEventDispatcher;
 use Dbp\Relay\CoreBundle\Rest\AbstractDataProvider;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\Pagination;
+use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
 use Dbp\Relay\CoreBundle\Tests\Locale\TestLocale;
+use Dbp\Relay\CoreBundle\TestUtils\TestUserSession;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class TestDataProvider extends AbstractDataProvider
@@ -17,6 +23,19 @@ class TestDataProvider extends AbstractDataProvider
 
     /** @var array[] */
     private $sourceData = [];
+
+    /** @var array The options to test */
+    private $options = [];
+
+    public static function create(EventDispatcher $eventDispatcher = null): TestDataProvider
+    {
+        $testDataProvider = new TestDataProvider($eventDispatcher ?? new EventDispatcher());
+        $testDataProvider->__injectServices(
+            new TestUserSession('testuser'),
+            new AuthorizationDataMuxer(new AuthorizationDataProviderProvider([]), new EventDispatcher()));
+
+        return $testDataProvider;
+    }
 
     public function __construct(EventDispatcher $eventDispatcher)
     {
@@ -34,13 +53,48 @@ class TestDataProvider extends AbstractDataProvider
         $this->sourceData = $sourceData;
     }
 
-    protected function getItemById($id, array $filters = [], array $options = []): object
+    public function getTestEntity(string $id, array $filters = [], array $sourceData = []): ?TestEntity
+    {
+        $this->setSourceData($sourceData);
+
+        /** @var TestEntity */
+        return $this->provide(new Get(), ['identifier' => $id], ['filters' => $filters]);
+    }
+
+    public function getTestEntities(array $filters = [], array $sourceData = []): array
+    {
+        return $this->getTestEntityPaginator($filters, $sourceData)->getItems();
+    }
+
+    public function getTestEntityPaginator(array $filters = [], array $sourceData = []): PartialPaginator
+    {
+        $this->setSourceData($sourceData);
+
+        /** @var PartialPaginator */
+        return $this->provide(new GetCollection(), [], ['filters' => $filters]);
+    }
+
+    /**
+     * The $options parameter from the last getItemById or getPage call. Use to test for expected options.
+     */
+    public function getOptions(): array
+    {
+        return $this->options;
+    }
+
+    protected function getItemById(string $id, array $filters = [], array $options = []): ?object
     {
         $this->localDataEventDispatcher->onNewOperation($options);
 
-        $testEntity = new TestEntity($id);
+        $testEntity = null;
+        $entitySourceData = $this->sourceData[$id] ?? null;
+        if ($entitySourceData !== null) {
+            $testEntity = new TestEntity($id);
 
-        $this->localDataEventDispatcher->dispatch(new TestEntityPostEvent($testEntity, $this->sourceData[$id] ?? []));
+            $this->localDataEventDispatcher->dispatch(new TestEntityPostEvent($testEntity, $entitySourceData));
+        }
+
+        $this->options = $options;
 
         return $testEntity;
     }
@@ -51,16 +105,23 @@ class TestDataProvider extends AbstractDataProvider
 
         $this->localDataEventDispatcher->onNewOperation($options);
 
-        $firstIndex = Pagination::getFirstItemIndex($currentPageNumber, $maxNumItemsPerPage);
-        $breakIndex = min($firstIndex + $maxNumItemsPerPage, count($this->sourceData));
+        $pageStartIndex = Pagination::getFirstItemIndex($currentPageNumber, $maxNumItemsPerPage);
 
-        for ($index = $firstIndex; $index < $breakIndex; ++$index) {
-            $testEntity = new TestEntity(strval($index));
+        $currentIndex = 0;
+        foreach ($this->sourceData as $entityId => $entitySourceData) {
+            if ($currentIndex++ >= $pageStartIndex) {
+                $testEntity = new TestEntity(strval($entityId));
 
-            $this->localDataEventDispatcher->dispatch(new TestEntityPostEvent($testEntity, $this->sourceData[$index] ?? []));
+                $this->localDataEventDispatcher->dispatch(new TestEntityPostEvent($testEntity, $entitySourceData));
 
-            $pageEntities[] = $testEntity;
+                $pageEntities[] = $testEntity;
+                if (count($pageEntities) === $maxNumItemsPerPage) {
+                    break;
+                }
+            }
         }
+
+        $this->options = $options;
 
         return $pageEntities;
     }

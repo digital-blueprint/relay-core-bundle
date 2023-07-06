@@ -4,12 +4,8 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\LocalData;
 
-use Dbp\Relay\CoreBundle\Authorization\AuthorizationDataMuxer;
-use Dbp\Relay\CoreBundle\Authorization\AuthorizationDataProviderProvider;
-use Dbp\Relay\CoreBundle\Tests\Rest\AbstractDataProviderTest;
 use Dbp\Relay\CoreBundle\Tests\Rest\TestDataProvider;
 use Dbp\Relay\CoreBundle\Tests\Rest\TestEntity;
-use Dbp\Relay\CoreBundle\TestUtils\TestUserSession;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
@@ -28,10 +24,7 @@ class LocalDataTest extends TestCase
         $eventDispatcher = new EventDispatcher();
         $eventDispatcher->addSubscriber($localDataEventSubscriber);
 
-        $this->testDataProvider = new TestDataProvider($eventDispatcher);
-        $this->testDataProvider->__injectServices(
-            new TestUserSession('testuser'),
-            new AuthorizationDataMuxer(new AuthorizationDataProviderProvider([]), new EventDispatcher()));
+        $this->testDataProvider = TestDataProvider::create($eventDispatcher);
         $this->testDataProvider->setConfig(self::createAuthzConfig());
     }
 
@@ -40,7 +33,7 @@ class LocalDataTest extends TestCase
         // scalar attribute, scalar source attribute  -> return scalar source attribute value
         $localDataAttributeName = 'attribute_1';
         $sourceData = ['src_attribute_1' => 'value_1'];
-        $testEntity = $this->getTestEntity($localDataAttributeName, ['0' => $sourceData]);
+        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
         $this->assertEquals('value_1', $testEntity->getLocalDataValue($localDataAttributeName));
     }
 
@@ -49,7 +42,7 @@ class LocalDataTest extends TestCase
         // scalar attribute, array source attribute -> return scalar source attribute value (i.e. first array element)
         $localDataAttributeName = 'attribute_1';
         $sourceData = ['src_attribute_1' => ['value_1']];
-        $testEntity = $this->getTestEntity($localDataAttributeName, ['0' => $sourceData]);
+        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
         $this->assertEquals('value_1', $testEntity->getLocalDataValue($localDataAttributeName));
     }
 
@@ -58,7 +51,7 @@ class LocalDataTest extends TestCase
         // array attribute, array source attribute -> return array source attribute value
         $localDataAttributeName = 'array_attribute_1';
         $sourceData = ['array_src_attribute_1' => ['value_1']];
-        $testEntity = $this->getTestEntity($localDataAttributeName, ['0' => $sourceData]);
+        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
         $this->assertEquals(['value_1'], $testEntity->getLocalDataValue($localDataAttributeName));
     }
 
@@ -67,7 +60,7 @@ class LocalDataTest extends TestCase
         // array attribute, array source attribute -> return array with scalar source value as only element
         $localDataAttributeName = 'array_attribute_1';
         $sourceData = ['array_src_attribute_1' => 'value_1'];
-        $testEntity = $this->getTestEntity($localDataAttributeName, ['0' => $sourceData]);
+        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
         $this->assertEquals(['value_1'], $testEntity->getLocalDataValue($localDataAttributeName));
     }
 
@@ -76,7 +69,7 @@ class LocalDataTest extends TestCase
         // source data attribute of non-array attribute not available -> local data attribute of entity must be null
         $localDataAttributeName = 'attribute_1';
         $sourceData = [];
-        $testEntity = $this->getTestEntity($localDataAttributeName, ['0' => $sourceData]);
+        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
         $this->assertNull($testEntity->getLocalDataValue($localDataAttributeName));
     }
 
@@ -85,7 +78,7 @@ class LocalDataTest extends TestCase
         // source data attribute of array type attribute not available -> local data attribute of entity must be null
         $localDataAttributeName = 'array_attribute_1';
         $sourceData = [];
-        $testEntity = $this->getTestEntity($localDataAttributeName, ['0' => $sourceData]);
+        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
         $this->assertNull($testEntity->getLocalDataValue($localDataAttributeName));
     }
 
@@ -95,7 +88,7 @@ class LocalDataTest extends TestCase
         $localDataAttributeName = 'attribute_3';
         $sourceData = ['src_attribute_3' => 'value_3'];
 
-        $entity = $this->getTestEntity($localDataAttributeName, ['0' => $sourceData]);
+        $entity = $this->getTestEntity($localDataAttributeName, $sourceData);
         $this->assertNull($entity->getLocalDataValue($localDataAttributeName));
     }
 
@@ -245,7 +238,7 @@ class LocalDataTest extends TestCase
         // a value mapping expression is defined for 'attribute_4' ("value + 1"). assert that the source value is incremented by 1.
         $localDataAttributeName = 'attribute_4';
         $sourceData = ['src_attribute_4' => '4'];
-        $testEntity = $this->getTestEntity($localDataAttributeName, ['0' => $sourceData]);
+        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
         $this->assertEquals('5', $testEntity->getLocalDataValue($localDataAttributeName));
     }
 
@@ -327,13 +320,13 @@ class LocalDataTest extends TestCase
         return $config;
     }
 
-    private function getTestEntity(string $includeLocal, array $sourceData): TestEntity
+    private function getTestEntity(string $includeLocal, array $sourceData): ?TestEntity
     {
         $filters = [
             'includeLocal' => $includeLocal,
         ];
 
-        return AbstractDataProviderTest::getTestEntity($this->testDataProvider, $filters, $sourceData);
+        return $this->testDataProvider->getTestEntity('id', $filters, ['id' => $sourceData]);
     }
 
     private function getTestEntities(string $includeLocal, array $sourceData): array
@@ -342,6 +335,6 @@ class LocalDataTest extends TestCase
             'includeLocal' => $includeLocal,
         ];
 
-        return AbstractDataProviderTest::getTestEntities($this->testDataProvider, $filters, $sourceData);
+        return $this->testDataProvider->getTestEntities($filters, $sourceData);
     }
 }

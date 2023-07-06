@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Rest;
 
-use Dbp\Relay\CoreBundle\LocalData\LocalData;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
 
 class Options
@@ -54,17 +53,16 @@ class Options
     }
 
     /**
-     * Adds the 'include Local Data' parameter to the set of options in order to request the local data attributes with the given names.
+     * Request the given list of local data attributes by adding the 'local data attributes' option
+     * to the given set of options.
      *
-     * @param array $targetOptions  the set of options to add the 'include Local Data' parameter to
-     * @param array $attributeNames the names of the local data attributes to request
+     * @param array $targetOptions       a reference to the set of options to add the 'local data attributes' option to
+     * @param array $localDataAttributes the list of names of local data attributes to request
      *
      * @return array the resultant $targetOptions
      */
-    public static function requestLocalDataAttributes(array &$targetOptions, array $attributeNames): array
+    public static function requestLocalDataAttributes(array &$targetOptions, array $localDataAttributes): array
     {
-        $targetOptions[self::LOCAL_DATA_ATTRIBUTES] = LocalData::getLocalDataAttributesFromAttributeNames($attributeNames);
-
-        return $targetOptions;
+        return self::setLocalDataAttributes($targetOptions, $localDataAttributes);
     }
 }

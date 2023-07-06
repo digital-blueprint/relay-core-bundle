@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\Tests\Rest\Query;
+namespace Dbp\Relay\CoreBundle\Tests\Rest\Query\Filter;
 
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FromQueryFilterCreator;
@@ -63,7 +63,7 @@ class FilterTest extends TestCase
         $this->assertIsArray($conditionNode);
         $this->assertEquals('4', $conditionNode[ConditionNode::VALUE_KEY]);
         $this->assertEquals('field_4', $conditionNode[ConditionNode::FIELD_KEY]);
-        $this->assertEquals(OperatorType::IEQAULS_OPERATOR, $conditionNode[ConditionNode::OPERATOR_KEY]);
+        $this->assertEquals(OperatorType::IEQUALS_OPERATOR, $conditionNode[ConditionNode::OPERATOR_KEY]);
     }
 
     public function testCombineWith()

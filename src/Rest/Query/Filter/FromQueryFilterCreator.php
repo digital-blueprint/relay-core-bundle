@@ -231,10 +231,10 @@ class FromQueryFilterCreator
         $value = (isset($parameter[self::VALUE_KEY])) ? $parameter[self::VALUE_KEY] : null;
         $operator = (isset($parameter[self::OPERATOR_KEY])) ? $parameter[self::OPERATOR_KEY] : null;
 
-        return new ConditionNode($field, self::toConditionNodeOpertor($operator), $value);
+        return new ConditionNode($field, self::toConditionNodeOperator($operator), $value);
     }
 
-    protected static function toConditionNodeOpertor(string $operator): string
+    protected static function toConditionNodeOperator(string $operator): string
     {
         switch ($operator) {
             case 'CONTAINS':

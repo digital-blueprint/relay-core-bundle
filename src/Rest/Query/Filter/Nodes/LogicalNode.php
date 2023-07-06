@@ -72,7 +72,7 @@ abstract class LogicalNode extends Node
      */
     public function iequals(string $column, string $value): Node
     {
-        $this->childNodes[] = new ConditionNode($column, OperatorType::IEQAULS_OPERATOR, $value);
+        $this->childNodes[] = new ConditionNode($column, OperatorType::IEQUALS_OPERATOR, $value);
 
         return $this;
     }

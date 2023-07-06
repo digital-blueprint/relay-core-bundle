@@ -83,7 +83,7 @@ class ConditionNode extends Node
                 return \str_contains(strtolower($columnValue), strtolower($this->value));
             case OperatorType::CONTAINS_OPERATOR:
                 return \str_contains($columnValue, $this->value);
-            case OperatorType::IEQAULS_OPERATOR:
+            case OperatorType::IEQUALS_OPERATOR:
                 return strtolower($columnValue) === strtolower($this->value);
             case OperatorType::EQUALS_OPERATOR:
                 return $columnValue === $this->value;

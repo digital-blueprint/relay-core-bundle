@@ -16,8 +16,10 @@ use Dbp\Relay\CoreBundle\Rest\Query\Filter\PreparedFilterProvider;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\Pagination;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
 use Dbp\Relay\CoreBundle\Rest\Query\Parameters;
+use Exception;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
+use Symfony\Component\HttpFoundation\Response;
 
 abstract class AbstractDataProvider extends AbstractAuthorizationService implements StateProviderInterface
 {
@@ -76,6 +78,9 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
             $this->preparedFilterController->getPolicies()));
     }
 
+    /**
+     * @throws ApiError|Exception
+     */
     protected function getCollectionInternal(array $filters = []): PartialPaginator
     {
         $this->denyOperationAccessUnlessGranted(self::GET_COLLECTION_OPERATION);
@@ -91,6 +96,9 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         return new PartialPaginator($pageItems, $currentPageNumber, $maxNumItemsPerPage);
     }
 
+    /**
+     * @throws ApiError|Exception
+     */
     protected function getItemInternal(string $id, array $filters = []): ?object
     {
         $this->denyOperationAccessUnlessGranted(self::GET_ITEM_OPERATION);
@@ -98,17 +106,19 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $options = $this->createOptions($filters);
 
         $item = $this->getItemById($id, $filters, $options);
-        $this->localDataAccessChecker->enforceLocalDataAccessControlPolicies([$item], $options, $this);
+        if ($item !== null) {
+            $this->localDataAccessChecker->enforceLocalDataAccessControlPolicies([$item], $options, $this);
+        }
 
         return $item;
     }
 
-    abstract protected function getItemById(string $id, array $filters = [], array $options = []): object;
+    abstract protected function getItemById(string $id, array $filters = [], array $options = []): ?object;
 
     abstract protected function getPage(int $currentPageNumber, int $maxNumItemsPerPage, array $filters = [], array $options = []): array;
 
     /**
-     * @throws ApiError|\Exception
+     * @throws ApiError|Exception
      */
     private function createOptions(array $filters): array
     {
@@ -116,16 +126,30 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
         Options::setLanguage($options, $this->locale->getCurrentPrimaryLanguage());
 
-        if ($filterParameter = $filters[Parameters::INCLUDE_LOCAL] ?? null) {
+        if ($filterParameter = Parameters::getIncludeLocal($filters)) {
             $localDataAttributes = LocalData::getLocalDataAttributesFromQueryParameter($filterParameter);
             Options::setLocalDataAttributes($options, $localDataAttributes);
             $this->localDataAccessChecker->checkRequestedLocalDataAttributes($localDataAttributes);
         }
-        if ($filterParameter = $filters[Parameters::FILTER] ?? null) {
-            Options::addFilter($options, FromQueryFilterCreator::createFilterFromQueryParameters($filterParameter));
+        if ($filterParameter = Parameters::getFilter($filters)) {
+            if (is_array($filterParameter) === false) {
+                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, Parameters::FILTER.' parameter key lacks square brackets', ErrorIds::FILTER_INVALID_FILTER_KEY_SQUARE_BRACKETS_MISSING);
+            }
+            try {
+                Options::addFilter($options, FromQueryFilterCreator::createFilterFromQueryParameters($filterParameter));
+            } catch (Exception $exception) {
+                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, 'invalid filter: '.$exception->getMessage(), ErrorIds::FILTER_INVALID);
+            }
         }
-        if ($preparedFilterParameter = $filters[Parameters::PREPARED_FILTER] ?? null) {
-            Options::addFilter($options, $this->preparedFilterController->getPreparedFilterById($preparedFilterParameter));
+        if ($preparedFilterId = $filters[Parameters::PREPARED_FILTER] ?? null) {
+            $filter = $this->preparedFilterController->getPreparedFilterById($preparedFilterId);
+            if ($filter === null) {
+                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, 'prepared filter undefined', ErrorIds::PREPARED_FILTER_UNDEFINED);
+            }
+            if ($this->isGranted(PreparedFilterProvider::getPolicyNameByFilterId($preparedFilterId)) === false) {
+                throw ApiError::withDetails(Response::HTTP_FORBIDDEN, 'prepared filter access denied', ErrorIds::PREPARED_FILTER_ACCESS_DENIED);
+            }
+            Options::addFilter($options, $filter);
         }
 
         return $options;

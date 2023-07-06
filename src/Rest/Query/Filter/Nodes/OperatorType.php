@@ -8,13 +8,13 @@ class OperatorType
 {
     public const ICONTAINS_OPERATOR = 'icontains';
     public const CONTAINS_OPERATOR = 'contains';
-    public const IEQAULS_OPERATOR = 'iequals';
+    public const IEQUALS_OPERATOR = 'iequals';
     public const EQUALS_OPERATOR = 'equals';
 
     private const OPERATORS = [
         self::ICONTAINS_OPERATOR,
         self::CONTAINS_OPERATOR,
-        self::IEQAULS_OPERATOR,
+        self::IEQUALS_OPERATOR,
         self::EQUALS_OPERATOR,
     ];
 

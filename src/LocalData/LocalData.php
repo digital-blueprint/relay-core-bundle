@@ -10,7 +10,7 @@ use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 
 class LocalData
 {
-    public const SEPARATOR = ',';
+    private const SEPARATOR = ',';
 
     public static function getConfigNodeDefinition(): NodeDefinition
     {
@@ -25,9 +25,9 @@ class LocalData
         return self::parseIncludeParameter($queryParameter);
     }
 
-    public static function getLocalDataAttributesFromAttributeNames(array $attributeNames): array
+    public static function getQueryParameterFromLocalDataAttributes(array $attributes): string
     {
-        return $attributeNames;
+        return implode(self::SEPARATOR, $attributes);
     }
 
     /**

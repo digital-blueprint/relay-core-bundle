@@ -49,4 +49,11 @@ class ApiError extends HttpException
 
         return new ApiError(self::WITHDETAILSSTATUS, json_encode($message));
     }
+
+    public function getErrorId(): string
+    {
+        $decoded = json_decode($this->getMessage(), true, 512, JSON_THROW_ON_ERROR);
+
+        return $decoded['errorId'];
+    }
 }
