@@ -63,6 +63,8 @@ class LocalDataEventDispatcher
 
     /**
      * Dispatches the given event.
+     *
+     * @throws ApiError
      */
     public function dispatch(Event $event, string $eventName = null): void
     {
