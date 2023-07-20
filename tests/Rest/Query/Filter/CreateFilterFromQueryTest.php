@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Tests\Rest\Query\Filter;
 
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterException;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FromQueryFilterCreator;
-use Dbp\Relay\CoreBundle\Rest\Query\Utilities;
+use Dbp\Relay\CoreBundle\Rest\Query\Parameters;
 use PHPUnit\Framework\TestCase;
 
 class CreateFilterFromQueryTest extends TestCase
@@ -16,32 +17,30 @@ class CreateFilterFromQueryTest extends TestCase
      */
     public function testCreateFromQueryParameters()
     {
-        $queryParameters = [];
+        $queryParameters = ['foo' => ['condition' => [
+                'path' => 'field0',
+                'operator' => 'I_CONTAINS',
+                'value' => 'value0',
+            ]]];
 
-        $queryParameters['foo'] = ['condition' => [
-            'path' => 'field0',
-            'operator' => 'CONTAINS',
-            'value' => 'value0',
-        ]];
-
-        $filter = FromQueryFilterCreator::createFilterFromQueryParameters($queryParameters);
+        $filter = FromQueryFilterCreator::createFilterFromQueryParameters($queryParameters, ['field0']);
 
         $expectedFilter = Filter::create();
-        $expectedFilter->getRootNode()->contains('field0', 'value0');
+        $expectedFilter->getRootNode()->icontains('field0', 'value0');
 
         $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
     }
 
     public function testGetQueryParametersFromQueryString()
     {
-        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=CONTAINS&filter[foo][condition][value]=value0';
+        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0';
 
         $filterParameters =
-            Utilities::getQueryParametersFromQueryString($querySting, 'filter');
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter');
 
         $queryParameters['foo'] = ['condition' => [
             'path' => 'field0',
-            'operator' => 'CONTAINS',
+            'operator' => 'I_CONTAINS',
             'value' => 'value0',
         ]];
 
@@ -53,13 +52,31 @@ class CreateFilterFromQueryTest extends TestCase
      */
     public function testCreateFromQueryString()
     {
-        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=CONTAINS&filter[foo][condition][value]=value0';
+        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0';
 
+        $usedAttributePaths = [];
         $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
-            Utilities::getQueryParametersFromQueryString($querySting, 'filter'));
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0'], $usedAttributePaths);
+        $this->assertEquals(['field0'], $usedAttributePaths);
 
         $expectedFilter = Filter::create();
-        $expectedFilter->getRootNode()->contains('field0', 'value0');
+        $expectedFilter->getRootNode()->icontains('field0', 'value0');
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testConditionDefaultOperatorEquals()
+    {
+        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][value]=value0';
+
+        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
+
+        $expectedFilter = Filter::create();
+        $expectedFilter->getRootNode()->equals('field0', 'value0');
 
         $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
     }
@@ -69,15 +86,150 @@ class CreateFilterFromQueryTest extends TestCase
      */
     public function testCreateFromShortcut()
     {
-        $queryParameters = [];
+        $querySting = 'filter[field0][value]=value0';
 
-        $queryParameters['field0'] = 'value0';
-
-        $filter = FromQueryFilterCreator::createFilterFromQueryParameters($queryParameters);
+        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
 
         $expectedFilter = Filter::create();
         $expectedFilter->getRootNode()->equals('field0', 'value0');
 
         $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testCreateFromUltraShortcut()
+    {
+        $querySting = 'filter[field0]=value0';
+
+        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
+
+        $expectedFilter = Filter::create();
+        $expectedFilter->getRootNode()->equals('field0', 'value0');
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testAttributePathUndefinedException()
+    {
+        $querySting = 'filter[field0]=value0';
+
+        try {
+            FromQueryFilterCreator::createFilterFromQueryParameters(
+                Parameters::getQueryParametersFromQueryString($querySting, 'filter'), []);
+        } catch (FilterException $exception) {
+            $this->assertEquals(FilterException::ATTRIBUTE_PATH_UNDEFINED, $exception->getCode());
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testConditionFilterItemInvalidPathMissing()
+    {
+        $querySting = 'filter[foo][condition][value]=1';
+
+        try {
+            FromQueryFilterCreator::createFilterFromQueryParameters(
+                Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
+        } catch (FilterException $exception) {
+            $this->assertEquals(FilterException::CONDITION_FILTER_ITEM_INVALID, $exception->getCode());
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testConditionFilterItemInvalidValueMissing()
+    {
+        $querySting = 'filter[foo][condition][path]=field0';
+
+        try {
+            FromQueryFilterCreator::createFilterFromQueryParameters(
+                Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
+        } catch (FilterException $exception) {
+            $this->assertEquals(FilterException::CONDITION_FILTER_ITEM_INVALID, $exception->getCode());
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testConditionFilterItemInvalidIsNullOperatorWithValue()
+    {
+        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=IS_NULL&filter[foo][condition][value]=value0';
+
+        try {
+            FromQueryFilterCreator::createFilterFromQueryParameters(
+                Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
+        } catch (FilterException $exception) {
+            $this->assertEquals(FilterException::CONDITION_FILTER_ITEM_INVALID, $exception->getCode());
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testFilterItemInvalid()
+    {
+        $querySting = 'filter[foo][bar]=1';
+
+        try {
+            FromQueryFilterCreator::createFilterFromQueryParameters(
+                Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
+        } catch (FilterException $exception) {
+            $this->assertEquals(FilterException::FILTER_ITEM_INVALID, $exception->getCode());
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testConditionOperatorUndefinedException()
+    {
+        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=foobar&filter[foo][condition][value]=value0';
+
+        try {
+            FromQueryFilterCreator::createFilterFromQueryParameters(
+                Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
+        } catch (FilterException $exception) {
+            $this->assertEquals(FilterException::CONDITION_OPERATOR_UNDEFINED, $exception->getCode());
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testReservedFilterItemId()
+    {
+        $querySting = 'filter[@root][condition][path]=field0&filter[@root][condition][operator]=EQ&filter[@root][condition][value]=value0';
+
+        try {
+            FromQueryFilterCreator::createFilterFromQueryParameters(
+                Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
+        } catch (FilterException $exception) {
+            $this->assertEquals(FilterException::RESERVED_FILTER_ITEM_ID, $exception->getCode());
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testConjunctionUndefined()
+    {
+        $querySting = 'filter[or_group][group][conjunction]=ORISH&filter[foo][condition][path]=field0&filter[foo][condition][operator]=EQ&filter[foo][condition][value]=value0&filter[bar][condition][path]=field0&filter[bar][condition][operator]=EQ&filter[bar][condition][value]=value1';
+
+        try {
+            FromQueryFilterCreator::createFilterFromQueryParameters(
+                Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
+        } catch (FilterException $exception) {
+            $this->assertEquals(FilterException::CONJUNCTION_UNDEFINED, $exception->getCode());
+        }
     }
 }

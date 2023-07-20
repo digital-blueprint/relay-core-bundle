@@ -6,21 +6,38 @@ namespace Dbp\Relay\CoreBundle\Tests\Rest;
 
 use Dbp\Relay\CoreBundle\LocalData\LocalDataAwareInterface;
 use Dbp\Relay\CoreBundle\LocalData\LocalDataAwareTrait;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 class TestEntity implements LocalDataAwareInterface
 {
     use LocalDataAwareTrait;
 
-    /** @var string */
-    private $id;
+    /**
+     * @Groups({"TestEntity:output"})
+     *
+     * @var string
+     */
+    private $identifier;
+
+    /**
+     * @Groups({"TestEntity:output"})
+     *
+     * @var string
+     */
+    private $field0;
 
     public function __construct(string $id)
     {
-        $this->id = $id;
+        $this->identifier = $id;
     }
 
-    public function getId(): string
+    public function getIdentifier(): string
     {
-        return $this->id;
+        return $this->identifier;
+    }
+
+    public function getField0(): string
+    {
+        return $this->field0;
     }
 }

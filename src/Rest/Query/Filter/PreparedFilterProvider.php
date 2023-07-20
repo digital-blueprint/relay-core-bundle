@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Rest\Query\Filter;
 
-use Dbp\Relay\CoreBundle\Rest\Query\Utilities;
 use Exception;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -12,13 +11,11 @@ use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 class PreparedFilterProvider
 {
     private const ROOT_CONFIG_NODE = 'prepared_filters';
-    private const ID_CONFIG_NODE = 'id';
+    private const IDENTIFIER_CONFIG_NODE = 'id';
     private const FILTER_CONFIG_NODE = 'filter';
     private const APPLY_POLICY_CONFIG_NODE = 'apply_policy';
 
     private const FILTER_CONFIG_KEY = 'filter';
-    private const FILTER_PARAMETER_NAME = 'filter';
-
     private const POLICY_PREFIX = '@apply-filter:';
 
     /** @var array */
@@ -34,8 +31,8 @@ class PreparedFilterProvider
         return $treeBuilder->getRootNode()
             ->arrayPrototype()
             ->children()
-            ->scalarNode(self::ID_CONFIG_NODE)
-            ->info('The name of the prepared filter.')
+            ->scalarNode(self::IDENTIFIER_CONFIG_NODE)
+            ->info('The identifier of the prepared filter.')
             ->end()
             ->scalarNode(self::APPLY_POLICY_CONFIG_NODE)
             ->defaultValue('false')
@@ -53,7 +50,7 @@ class PreparedFilterProvider
     public function loadConfig(array $config): void
     {
         foreach ($config[self::ROOT_CONFIG_NODE] ?? [] as $configEntry) {
-            $filterId = $configEntry[self::ID_CONFIG_NODE];
+            $filterId = $configEntry[self::IDENTIFIER_CONFIG_NODE];
 
             if (isset($this->config[$filterId])) {
                 throw new \RuntimeException(sprintf('multiple config entries for prepared filter \'%s\'', $filterId));
@@ -63,7 +60,7 @@ class PreparedFilterProvider
             $this->config[$filterId] = $attributeConfigEntry;
 
             // applying the filter is forbidden by default
-            $this->policies[self::getPolicyNameByFilterId($filterId)] = $configEntry[self::APPLY_POLICY_CONFIG_NODE] ?? 'false';
+            $this->policies[self::getPolicyNameByFilterIdentifier($filterId)] = $configEntry[self::APPLY_POLICY_CONFIG_NODE] ?? 'false';
         }
     }
 
@@ -72,23 +69,21 @@ class PreparedFilterProvider
         return $this->policies;
     }
 
-    public static function getPolicyNameByFilterId(string $filterId): string
+    public static function getPolicyNameByFilterIdentifier(string $filterIdentifier): string
     {
-        return self::POLICY_PREFIX.$filterId;
+        return self::POLICY_PREFIX.$filterIdentifier;
     }
 
     /**
      * @throws Exception
      */
-    public function getPreparedFilterById(string $id): ?Filter
+    public function getPreparedFilterQueryString(string $filterIdentifier): ?string
     {
-        $preparedFilterConfig = $this->config[$id] ?? null;
+        $preparedFilterConfig = $this->config[$filterIdentifier] ?? null;
         if ($preparedFilterConfig === null) {
             return null;
         }
 
-        return FromQueryFilterCreator::createFilterFromQueryParameters(
-            Utilities::getQueryParametersFromQueryString(
-                $preparedFilterConfig[self::FILTER_CONFIG_KEY], self::FILTER_PARAMETER_NAME));
+        return $preparedFilterConfig[self::FILTER_CONFIG_KEY];
     }
 }

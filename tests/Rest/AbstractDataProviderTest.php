@@ -22,18 +22,26 @@ class AbstractDataProviderTest extends TestCase
 
         $this->testDataProvider = TestDataProvider::create();
 
-        $config = ['prepared_filters' => [
-            [
-                'id' => 'filter0',
-                'filter' => 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=CONTAINS&filter[foo][condition][value]=value0',
-                'apply_policy' => 'true',
+        $config = [
+            'prepared_filters' => [
+                [
+                    'id' => 'filter0',
+                    'filter' => 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0',
+                    'apply_policy' => 'user.get("ROLE_TEST_USER")',
+                ],
+                [
+                    'id' => 'filterForbidden',
+                    'filter' => 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0',
+                    'apply_policy' => 'user.get("ROLE_ADMIN")',
+                ],
             ],
-            [
-                'id' => 'filterForbidden',
-                'filter' => 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=CONTAINS&filter[foo][condition][value]=value0',
-                'apply_policy' => 'false',
+            'local_data' => [
+                [
+                    'local_data_attribute' => 'attribute0',
+                    'read_policy' => 'true',
+                ],
             ],
-        ]];
+        ];
 
         $this->testDataProvider->setConfig($config);
     }
@@ -43,7 +51,7 @@ class AbstractDataProviderTest extends TestCase
         // provide source data for 'id'
         $testEntity = $this->testDataProvider->getTestEntity('id', [], ['id' => []]);
 
-        $this->assertEquals('id', $testEntity->getId());
+        $this->assertEquals('id', $testEntity->getIdentifier());
     }
 
     public function testGetEntityNotFound()
@@ -166,7 +174,7 @@ class AbstractDataProviderTest extends TestCase
         $preparedFilter = $this->testDataProvider->getOptions()[Options::FILTER];
 
         $expectedFilter = Filter::create();
-        $expectedFilter->getRootNode()->contains('field0', 'value0');
+        $expectedFilter->getRootNode()->icontains('field0', 'value0');
 
         $this->assertEquals($expectedFilter->toArray(), $preparedFilter->toArray());
     }

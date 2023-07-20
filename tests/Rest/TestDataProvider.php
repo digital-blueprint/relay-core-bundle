@@ -12,6 +12,7 @@ use Dbp\Relay\CoreBundle\LocalData\LocalDataEventDispatcher;
 use Dbp\Relay\CoreBundle\Rest\AbstractDataProvider;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\Pagination;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
+use Dbp\Relay\CoreBundle\Tests\Authorization\DummyAuthorizationDataProvider;
 use Dbp\Relay\CoreBundle\Tests\Locale\TestLocale;
 use Dbp\Relay\CoreBundle\TestUtils\TestUserSession;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -30,9 +31,17 @@ class TestDataProvider extends AbstractDataProvider
     public static function create(EventDispatcher $eventDispatcher = null): TestDataProvider
     {
         $testDataProvider = new TestDataProvider($eventDispatcher ?? new EventDispatcher());
+
+        $authorizationDataProvider = new DummyAuthorizationDataProvider([
+            'ROLE_TEST_USER' => true,
+            'ROLE_ADMIN' => false,
+        ]);
+
         $testDataProvider->__injectServices(
             new TestUserSession('testuser'),
-            new AuthorizationDataMuxer(new AuthorizationDataProviderProvider([]), new EventDispatcher()));
+            new AuthorizationDataMuxer(new AuthorizationDataProviderProvider([$authorizationDataProvider]), new EventDispatcher()));
+        $testDataProvider->__injectLocale(new TestLocale('en'));
+        $testDataProvider->__injectPropertyNameCollectionFactory(new TestPropertyNameCollectionFactory());
 
         return $testDataProvider;
     }
@@ -42,7 +51,15 @@ class TestDataProvider extends AbstractDataProvider
         parent::__construct();
 
         $this->localDataEventDispatcher = new LocalDataEventDispatcher(TestEntity::class, $eventDispatcher);
-        $this->__injectLocale(new TestLocale('en'));
+    }
+
+    private static function createContext(array $filters): array
+    {
+        return [
+            'filters' => $filters,
+            'resource_class' => TestEntity::class,
+            'groups' => ['TestEntity:output', 'LocalData:output'],
+        ];
     }
 
     /**
@@ -58,7 +75,7 @@ class TestDataProvider extends AbstractDataProvider
         $this->setSourceData($sourceData);
 
         /** @var TestEntity */
-        return $this->provide(new Get(), ['identifier' => $id], ['filters' => $filters]);
+        return $this->provide(new Get(), ['identifier' => $id], self::createContext($filters));
     }
 
     public function getTestEntities(array $filters = [], array $sourceData = []): array
@@ -71,7 +88,7 @@ class TestDataProvider extends AbstractDataProvider
         $this->setSourceData($sourceData);
 
         /** @var PartialPaginator */
-        return $this->provide(new GetCollection(), [], ['filters' => $filters]);
+        return $this->provide(new GetCollection(), [], self::createContext($filters));
     }
 
     /**

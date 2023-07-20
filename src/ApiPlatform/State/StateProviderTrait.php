@@ -15,13 +15,15 @@ trait StateProviderTrait
 {
     /**
      * @return PartialPaginator|object|null
+     *
+     * @throws \Exception
      */
     public function provide(Operation $operation, array $uriVariables = [], array $context = [])
     {
         if ($operation instanceof GetCollection) {
-            return $this->getCollectionInternal($context['filters'] ?? []);
+            return $this->getCollectionInternal($context);
         } elseif ($operation instanceof Get) {
-            return $this->getItemInternal($uriVariables['identifier'], $context['filters'] ?? []);
+            return $this->getItemInternal($uriVariables['identifier'], $context);
         }
 
         throw ApiError::withDetails(Response::HTTP_INTERNAL_SERVER_ERROR, 'unknown provider operation: '.$operation->getShortName());

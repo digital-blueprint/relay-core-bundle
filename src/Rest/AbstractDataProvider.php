@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Rest;
 
+use ApiPlatform\Exception\ResourceClassNotFoundException;
+use ApiPlatform\Metadata\Property\Factory\PropertyNameCollectionFactoryInterface;
 use Dbp\Relay\CoreBundle\ApiPlatform\State\StateProviderInterface;
 use Dbp\Relay\CoreBundle\ApiPlatform\State\StateProviderTrait;
 use Dbp\Relay\CoreBundle\Authorization\AbstractAuthorizationService;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
+use Dbp\Relay\CoreBundle\Helpers\Tools;
 use Dbp\Relay\CoreBundle\LocalData\LocalData;
 use Dbp\Relay\CoreBundle\LocalData\LocalDataAccessChecker;
 use Dbp\Relay\CoreBundle\Locale\Locale;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterException;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FromQueryFilterCreator;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\PreparedFilterProvider;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\Pagination;
@@ -29,6 +34,11 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     protected const GET_COLLECTION_OPERATION = 1;
     protected const GET_ITEM_OPERATION = 2;
 
+    private const FILTERS_CONTEXT_KEY = 'filters';
+    private const GROUPS_CONTEXT_KEY = 'groups';
+    private const RESOURCE_CLASS_CONTEXT_KEY = 'resource_class';
+    private const LOCAL_DATA_BASE_PATH = 'localData.';
+
     /** @var Locale */
     private $locale;
 
@@ -37,6 +47,9 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
     /** @var LocalDataAccessChecker */
     private $localDataAccessChecker;
+
+    /** @var PropertyNameCollectionFactoryInterface */
+    private $propertyNameCollectionFactory;
 
     /**
      * @deprecated Use self::appendConfigNodeDefinitions instead
@@ -66,6 +79,14 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $this->locale = $locale;
     }
 
+    /**
+     * @required
+     */
+    public function __injectPropertyNameCollectionFactory(PropertyNameCollectionFactoryInterface $propertyNameCollectionFactory): void
+    {
+        $this->propertyNameCollectionFactory = $propertyNameCollectionFactory;
+    }
+
     public function setConfig(array $config)
     {
         parent::setConfig($config);
@@ -81,11 +102,12 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     /**
      * @throws ApiError|Exception
      */
-    protected function getCollectionInternal(array $filters = []): PartialPaginator
+    protected function getCollectionInternal(array $context): PartialPaginator
     {
         $this->denyOperationAccessUnlessGranted(self::GET_COLLECTION_OPERATION);
 
-        $options = $this->createOptions($filters);
+        $filters = $context[self::FILTERS_CONTEXT_KEY] ?? [];
+        $options = $this->createOptions($filters, $context);
 
         $currentPageNumber = Pagination::getCurrentPageNumber($filters);
         $maxNumItemsPerPage = Pagination::getMaxNumItemsPerPage($filters);
@@ -99,11 +121,12 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     /**
      * @throws ApiError|Exception
      */
-    protected function getItemInternal(string $id, array $filters = []): ?object
+    protected function getItemInternal(string $id, array $context): ?object
     {
         $this->denyOperationAccessUnlessGranted(self::GET_ITEM_OPERATION);
 
-        $options = $this->createOptions($filters);
+        $filters = $context[self::FILTERS_CONTEXT_KEY] ?? [];
+        $options = $this->createOptions($filters, $context);
 
         $item = $this->getItemById($id, $filters, $options);
         if ($item !== null) {
@@ -120,38 +143,95 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     /**
      * @throws ApiError|Exception
      */
-    private function createOptions(array $filters): array
+    private function createOptions(array $filters, array $context): array
     {
         $options = [];
 
         Options::setLanguage($options, $this->locale->getCurrentPrimaryLanguage());
 
-        if ($filterParameter = Parameters::getIncludeLocal($filters)) {
-            $localDataAttributes = LocalData::getLocalDataAttributesFromQueryParameter($filterParameter);
-            Options::setLocalDataAttributes($options, $localDataAttributes);
-            $this->localDataAccessChecker->checkRequestedLocalDataAttributes($localDataAttributes);
+        $usedLocalDataAttributes = [];
+        if ($includeLocalParameter = Parameters::getIncludeLocal($filters)) {
+            $usedLocalDataAttributes = LocalData::getLocalDataAttributesFromQueryParameter($includeLocalParameter);
+            Options::setLocalDataAttributes($options, $usedLocalDataAttributes);
         }
         if ($filterParameter = Parameters::getFilter($filters)) {
-            if (is_array($filterParameter) === false) {
-                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, Parameters::FILTER.' parameter key lacks square brackets', ErrorIds::FILTER_INVALID_FILTER_KEY_SQUARE_BRACKETS_MISSING);
-            }
-            try {
-                Options::addFilter($options, FromQueryFilterCreator::createFilterFromQueryParameters($filterParameter));
-            } catch (Exception $exception) {
-                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, 'invalid filter: '.$exception->getMessage(), ErrorIds::FILTER_INVALID);
-            }
+            $usedAttributePaths = [];
+            Options::addFilter($options, $this->createFilter($filterParameter, $context, $usedAttributePaths));
+//            foreach ($usedAttributePaths as $usedAttributePath) {
+//                $matches = [];
+//                if (preg_match('/^'.self::LOCAL_DATA_BASE_PATH.'([a-zA-Z0-9-_]+)$/', $usedAttributePath, $matches)) {
+//                    $usedLocalDataAttributes[] = $matches[1];
+//                }
+//            }
         }
-        if ($preparedFilterId = $filters[Parameters::PREPARED_FILTER] ?? null) {
-            $filter = $this->preparedFilterController->getPreparedFilterById($preparedFilterId);
-            if ($filter === null) {
-                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, 'prepared filter undefined', ErrorIds::PREPARED_FILTER_UNDEFINED);
-            }
-            if ($this->isGranted(PreparedFilterProvider::getPolicyNameByFilterId($preparedFilterId)) === false) {
-                throw ApiError::withDetails(Response::HTTP_FORBIDDEN, 'prepared filter access denied', ErrorIds::PREPARED_FILTER_ACCESS_DENIED);
-            }
-            Options::addFilter($options, $filter);
+        if ($preparedFilterParameter = $filters[Parameters::PREPARED_FILTER] ?? null) {
+            // TODO: decide whether to enforce local data access control policies for prepared filters.
+            // Currently, they are not, considering that local data attributes used in prepared filters are not known to the client.
+            Options::addFilter($options, $this->createPreparedFilter($preparedFilterParameter, $context));
         }
 
+        $this->localDataAccessChecker->checkRequestedLocalDataAttributes($usedLocalDataAttributes);
+
         return $options;
+    }
+
+    /**
+     * @throws ApiError|Exception
+     */
+    private function createFilter($filterParameter, array $context, array &$usedAttributePaths = null): Filter
+    {
+        if (is_array($filterParameter) === false) {
+            throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, Parameters::FILTER.' parameter key lacks square brackets', ErrorIds::FILTER_INVALID_FILTER_KEY_SQUARE_BRACKETS_MISSING);
+        }
+        try {
+            return FromQueryFilterCreator::createFilterFromQueryParameters($filterParameter, $this->getAvailableAttributePaths($context), $usedAttributePaths);
+        } catch (FilterException $exception) {
+            throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, $exception->getMessage(), ErrorIds::FILTER_INVALID);
+        }
+    }
+
+    /**
+     * @throws ApiError|Exception
+     */
+    private function createPreparedFilter(string $preparedFilterId, array $context): Filter
+    {
+        $filterQueryString = $this->preparedFilterController->getPreparedFilterQueryString($preparedFilterId);
+        if ($filterQueryString === null) {
+            throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, 'prepared filter undefined', ErrorIds::PREPARED_FILTER_UNDEFINED);
+        }
+        if ($this->isGranted(PreparedFilterProvider::getPolicyNameByFilterIdentifier($preparedFilterId)) === false) {
+            throw ApiError::withDetails(Response::HTTP_FORBIDDEN, 'prepared filter access denied', ErrorIds::PREPARED_FILTER_ACCESS_DENIED);
+        }
+
+        return $this->createFilter(
+            Parameters::getQueryParametersFromQueryString($filterQueryString, Parameters::FILTER), $context);
+    }
+
+    /**
+     * @param array $context The context of the current request
+     *
+     * @return string[]
+     *
+     * @throws ResourceClassNotFoundException
+     */
+    private function getAvailableAttributePaths(array $context): array
+    {
+        $availableAttributePaths = [];
+
+        $propertyNamesFactoryOptions = [];
+        if ($groups = $context[self::GROUPS_CONTEXT_KEY] ?? null) {
+            Tools::removeValueFromArray($groups, 'LocalData:output');
+            $propertyNamesFactoryOptions['serializer_groups'] = $groups;
+        }
+        foreach ($this->propertyNameCollectionFactory->create(
+            $context[self::RESOURCE_CLASS_CONTEXT_KEY], $propertyNamesFactoryOptions) as $propertyName) {
+            $availableAttributePaths[] = $propertyName;
+        }
+
+        foreach ($this->localDataAccessChecker->getConfiguredLocalDataAttributeNames() as $localDataAttributeName) {
+            $availableAttributePaths[] = self::LOCAL_DATA_BASE_PATH.$localDataAttributeName;
+        }
+
+        return $availableAttributePaths;
     }
 }

@@ -70,6 +70,11 @@ class LocalDataAccessChecker
         }
     }
 
+    public function getConfiguredLocalDataAttributeNames(): array
+    {
+        return array_keys($this->attributeConfig);
+    }
+
     public function getPolicies(): array
     {
         return $this->policies;

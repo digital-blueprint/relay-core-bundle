@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes;
 
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterException;
+
 class ConditionNode extends Node
 {
     public const FIELD_KEY = 'field';
@@ -22,16 +24,16 @@ class ConditionNode extends Node
     private $value;
 
     /**
-     * @throws \Exception
+     * @throws FilterException
      */
     public function __construct(string $field, string $operator, $value)
     {
         if ($field === '') {
-            throw new \InvalidArgumentException('condition field must not be empty');
+            throw new FilterException('condition field must not be empty', FilterException::CONDITION_FIELD_EMPTY);
         }
 
         if (OperatorType::exists($operator) === false) {
-            throw new \InvalidArgumentException('undefined condition operator: '.$operator);
+            throw new FilterException('undefined condition operator: '.$operator, FilterException::CONDITION_OPERATOR_UNDEFINED);
         }
 
         $this->field = $field;
@@ -79,16 +81,12 @@ class ConditionNode extends Node
     {
         $columnValue = $rowData[$this->field] ?? null;
         switch ($this->operator) {
-            case OperatorType::ICONTAINS_OPERATOR:
+            case OperatorType::I_CONTAINS_OPERATOR:
                 return \str_contains(strtolower($columnValue), strtolower($this->value));
-            case OperatorType::CONTAINS_OPERATOR:
-                return \str_contains($columnValue, $this->value);
-            case OperatorType::IEQUALS_OPERATOR:
-                return strtolower($columnValue) === strtolower($this->value);
             case OperatorType::EQUALS_OPERATOR:
                 return $columnValue === $this->value;
             default:
-                throw new \Exception('unimplemented condition operator: '.$this->operator);
+                throw new \RuntimeException('unimplemented condition operator: '.$this->operator);
         }
     }
 

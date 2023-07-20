@@ -48,31 +48,7 @@ abstract class LogicalNode extends Node
      */
     public function icontains(string $column, string $value): Node
     {
-        $this->childNodes[] = new ConditionNode($column, OperatorType::ICONTAINS_OPERATOR, $value);
-
-        return $this;
-    }
-
-    /**
-     * @return $this
-     *
-     * @throws \Exception
-     */
-    public function contains(string $column, string $value): Node
-    {
-        $this->childNodes[] = new ConditionNode($column, OperatorType::CONTAINS_OPERATOR, $value);
-
-        return $this;
-    }
-
-    /**
-     * @return $this
-     *
-     * @throws \Exception
-     */
-    public function iequals(string $column, string $value): Node
-    {
-        $this->childNodes[] = new ConditionNode($column, OperatorType::IEQUALS_OPERATOR, $value);
+        $this->childNodes[] = new ConditionNode($column, OperatorType::I_CONTAINS_OPERATOR, $value);
 
         return $this;
     }
