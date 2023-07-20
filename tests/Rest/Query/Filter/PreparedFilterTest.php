@@ -58,7 +58,7 @@ class PreparedFilterTest extends TestCase
             Parameters::getQueryParametersFromQueryString($preparedFilterQueryString, Parameters::FILTER), ['field0']);
 
         $expectedFilter = Filter::create();
-        $expectedFilter->getRootNode()->icontains('field0', 'value0');
+        $expectedFilter->getRootNode()->iContains('field0', 'value0');
 
         $this->assertEquals($expectedFilter->toArray(), $preparedFilter->toArray());
     }

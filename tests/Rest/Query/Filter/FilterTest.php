@@ -20,11 +20,11 @@ class FilterTest extends TestCase
         $filter = Filter::create();
         $filter->getRootNode()
             ->or()
-                ->icontains('field_1', '1')
+                ->iContains('field_1', '1')
                 ->equals('field_2', '2')
             ->end()
             ->or()
-                ->icontains('field_3', '3')
+                ->iContains('field_3', '3')
                 ->equals('field_4', '4')
             ->end();
 
@@ -72,11 +72,11 @@ class FilterTest extends TestCase
         $referenceFilter = Filter::create();
         $referenceFilter->getRootNode()
             ->or()
-                ->icontains('field_1', '1')
+                ->iContains('field_1', '1')
                 ->equals('field_2', '2')
             ->end()
             ->or()
-                ->icontains('field_3', '3')
+                ->iContains('field_3', '3')
                 ->equals('field_4', '4')
             ->end();
 
@@ -84,7 +84,7 @@ class FilterTest extends TestCase
         $filter1 = Filter::create();
         $filter1->getRootNode()
             ->or()
-                ->icontains('field_1', '1')
+                ->iContains('field_1', '1')
                 ->equals('field_2', '2')
             ->end();
 
@@ -92,7 +92,7 @@ class FilterTest extends TestCase
         $filter2 = Filter::create();
         $filter2->getRootNode()
             ->or()
-                ->icontains('field_3', '3')
+                ->iContains('field_3', '3')
                 ->equals('field_4', '4')
             ->end();
 
@@ -107,12 +107,12 @@ class FilterTest extends TestCase
         $filter = Filter::create();
         $filter->getRootNode()
             ->and()
-            ->icontains('field_1', '1')
+            ->iContains('field_1', '1')
             ->equals('field_2', '2')
             ->end()
             ->or()
             ->or()
-            ->icontains('field_3', '3')
+            ->iContains('field_3', '3')
             ->not()->not()->equals('field_4', '4')->end()->end()
             ->end()
             ->end();
@@ -120,10 +120,10 @@ class FilterTest extends TestCase
         /** @var Filter */
         $desiredResultFilter = Filter::create();
         $desiredResultFilter->getRootNode()
-            ->icontains('field_1', '1')
+            ->iContains('field_1', '1')
             ->equals('field_2', '2')
             ->or()
-            ->icontains('field_3', '3')
+            ->iContains('field_3', '3')
             ->equals('field_4', '4')
             ->end();
 
@@ -162,7 +162,7 @@ class FilterTest extends TestCase
         $filter2 = Filter::create();
         $filter2->getRootNode()
             ->or()
-                ->icontains('field_1', '1')
+                ->iContains('field_1', '1')
                 ->equals('field_2', '2')
             ->end();
 
@@ -177,7 +177,7 @@ class FilterTest extends TestCase
         $filter1 = Filter::create();
         $filter1->getRootNode()
             ->or()
-            ->icontains('field_1', '1')
+            ->iContains('field_1', '1')
             ->equals('field_2', '2')
             ->end();
 
@@ -194,7 +194,7 @@ class FilterTest extends TestCase
             /** @var Filter */
             $filter1 = Filter::create();
             $filter1->getRootNode()
-                ->icontains('', '1');
+                ->iContains('', '1');
         } catch (FilterException $exception) {
             $this->assertEquals(FilterException::CONDITION_FIELD_EMPTY, $exception->getCode());
         }

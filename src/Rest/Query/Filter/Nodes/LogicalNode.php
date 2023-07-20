@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes;
 
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterException;
+
 /**
  * An internal node is a node with child nodes.
  */
@@ -44,11 +46,11 @@ abstract class LogicalNode extends Node
     /**
      * @return $this
      *
-     * @throws \Exception
+     * @throws FilterException
      */
-    public function icontains(string $column, string $value): Node
+    public function iContains(string $field, string $value): Node
     {
-        $this->childNodes[] = new ConditionNode($column, OperatorType::I_CONTAINS_OPERATOR, $value);
+        $this->childNodes[] = new ConditionNode($field, OperatorType::I_CONTAINS_OPERATOR, $value);
 
         return $this;
     }
@@ -56,11 +58,35 @@ abstract class LogicalNode extends Node
     /**
      * @return $this
      *
-     * @throws \Exception
+     * @throws FilterException
      */
-    public function equals(string $column, string $value): Node
+    public function equals(string $field, $value): Node
     {
-        $this->childNodes[] = new ConditionNode($column, OperatorType::EQUALS_OPERATOR, $value);
+        $this->childNodes[] = new ConditionNode($field, OperatorType::EQUALS_OPERATOR, $value);
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     *
+     * @throws FilterException
+     */
+    public function inArray(string $field, array $value): Node
+    {
+        $this->childNodes[] = new ConditionNode($field, OperatorType::IN_ARRAY_OPERATOR, $value);
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     *
+     * @throws FilterException
+     */
+    public function isNull(string $field): Node
+    {
+        $this->childNodes[] = new ConditionNode($field, OperatorType::IS_NULL_OPERATOR, null);
 
         return $this;
     }

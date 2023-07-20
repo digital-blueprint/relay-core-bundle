@@ -128,7 +128,7 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
                         // filter by local data attribute:
                         $sourceAttributeName = $attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY];
                         $combinedFilter->getRootNode()
-                                    ->icontains($sourceAttributeName, $localQueryAttributeValue);
+                                    ->iContains($sourceAttributeName, $localQueryAttributeValue);
                     }
 
                     $event->tryPopPendingQueryParameter($localQueryAttributeName);

@@ -12,5 +12,6 @@ class FilterException extends \Exception
     public const CONJUNCTION_UNDEFINED = 4;
     public const ATTRIBUTE_PATH_UNDEFINED = 5;
     public const FILTER_ITEM_INVALID = 6;
-    public const CONDITION_FILTER_ITEM_INVALID = 7;
+    public const CONDITION_PATH_MISSING = 7;
+    public const CONDITION_VALUE_ERROR = 8;
 }

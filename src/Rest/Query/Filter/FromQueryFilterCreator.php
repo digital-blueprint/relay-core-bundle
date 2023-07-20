@@ -67,13 +67,11 @@ class FromQueryFilterCreator
     private const OPERATOR_KEY = 'operator';
 
     private const EQUALS_OPERATOR = 'EQ';
-    private const LESS_THAN_OPERATOR = 'LT';
     private const LESS_THAN_OR_EQUAL_OPERATOR = 'LTE';
-    private const GREATER_THAN_OPERATOR = 'GT';
     private const GREATER_THAN_OR_EQUAL_OPERATOR = 'GTE';
-    private const I_STARTS_WITH_OPERATOR = 'I_STARTS_WITH';
     private const I_CONTAINS_OPERATOR = 'I_CONTAINS';
     private const I_ENDS_WITH_OPERATOR = 'I_ENDS_WITH';
+    private const I_STARTS_WITH_OPERATOR = 'I_STARTS_WITH';
     private const IN_ARRAY_OPERATOR = 'IN';
     private const IS_NULL_OPERATOR = 'IS_NULL';
 
@@ -84,13 +82,11 @@ class FromQueryFilterCreator
      */
     private static $allowedOperators = [
         self::EQUALS_OPERATOR,
-        self::LESS_THAN_OPERATOR,
         self::LESS_THAN_OR_EQUAL_OPERATOR,
-        self::GREATER_THAN_OPERATOR,
         self::GREATER_THAN_OR_EQUAL_OPERATOR,
-        self::I_STARTS_WITH_OPERATOR,
         self::I_CONTAINS_OPERATOR,
         self::I_ENDS_WITH_OPERATOR,
+        self::I_STARTS_WITH_OPERATOR,
         self::IN_ARRAY_OPERATOR,
         self::IS_NULL_OPERATOR,
     ];
@@ -269,12 +265,8 @@ class FromQueryFilterCreator
         switch ($operator) {
             case self::EQUALS_OPERATOR:
                 return OperatorType::EQUALS_OPERATOR;
-            case self::LESS_THAN_OPERATOR:
-                return OperatorType::LESS_THAN_OPERATOR;
             case self::LESS_THAN_OR_EQUAL_OPERATOR:
                 return OperatorType::LESS_THAN_OR_EQUAL_OPERATOR;
-            case self::GREATER_THAN_OPERATOR:
-                return OperatorType::GREATER_THAN_OPERATOR;
             case self::GREATER_THAN_OR_EQUAL_OPERATOR:
                 return OperatorType::GREATER_THAN_OR_EQUAL_OPERATOR;
             case self::I_STARTS_WITH_OPERATOR:
@@ -300,16 +292,21 @@ class FromQueryFilterCreator
     private static function validateConditionFilterItem(array $conditionFilterItem)
     {
         if (!isset($conditionFilterItem[self::PATH_KEY])) {
-            throw new FilterException("Filter parameter is missing a '".self::PATH_KEY."' key.", FilterException::CONDITION_FILTER_ITEM_INVALID);
+            throw new FilterException("Filter parameter is missing a '".self::PATH_KEY."' key.", FilterException::CONDITION_PATH_MISSING);
         }
 
         $operator = $conditionFilterItem[self::OPERATOR_KEY];
-        if (!isset($conditionFilterItem[self::VALUE_KEY])) {
+        $value = $conditionFilterItem[self::VALUE_KEY] ?? null;
+        if ($value === null) {
             if ($operator !== self::IS_NULL_OPERATOR) {
-                throw new FilterException("Filter parameter is missing a '".self::VALUE_KEY."' key.", FilterException::CONDITION_FILTER_ITEM_INVALID);
+                throw new FilterException("Filter parameter is missing a '".self::VALUE_KEY."' key.", FilterException::CONDITION_VALUE_ERROR);
             }
         } elseif ($operator === self::IS_NULL_OPERATOR) {
-            throw new FilterException('Filters using the '.$operator.' operator must not provide a value.', FilterException::CONDITION_FILTER_ITEM_INVALID);
+            throw new FilterException('Filters using the '.$operator.' operator must not provide a value.', FilterException::CONDITION_VALUE_ERROR);
+        } elseif ($operator === self::IN_ARRAY_OPERATOR) {
+            if (!is_array($value)) {
+                throw new FilterException('Filters using the "'.$operator.'"" operator must provide an array type value.', FilterException::CONDITION_VALUE_ERROR);
+            }
         }
 
         if (!in_array($operator, self::$allowedOperators, true)) {

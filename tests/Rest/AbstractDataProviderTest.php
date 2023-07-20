@@ -174,7 +174,7 @@ class AbstractDataProviderTest extends TestCase
         $preparedFilter = $this->testDataProvider->getOptions()[Options::FILTER];
 
         $expectedFilter = Filter::create();
-        $expectedFilter->getRootNode()->icontains('field0', 'value0');
+        $expectedFilter->getRootNode()->iContains('field0', 'value0');
 
         $this->assertEquals($expectedFilter->toArray(), $preparedFilter->toArray());
     }
