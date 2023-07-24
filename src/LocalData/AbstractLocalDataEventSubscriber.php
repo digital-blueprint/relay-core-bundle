@@ -8,6 +8,7 @@ use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\ExpressionLanguage\ExpressionLanguage;
 use Dbp\Relay\CoreBundle\Rest\Options;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTreeBuilder;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -113,29 +114,27 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
         $expressionLanguage = null;
 
         if ($event instanceof LocalDataPreEvent) {
-            $combinedFilter = Filter::create();
+            $filterTreeBuilder = new FilterTreeBuilder();
             foreach ($event->getPendingQueryParameters() as $localQueryAttributeName => $localQueryAttributeValue) {
                 if (($attributeMapEntry = $this->attributeMapping[$localQueryAttributeName] ?? null) !== null) {
-                    if (($mappingExpression = $attributeMapEntry[self::MAP_FILTERS_KEY]) !== null) {
-                        // prepared filter expression:
-                        $expressionLanguage = $expressionLanguage ?? $this->getExpressionLanguage();
-                        $localFilter = $expressionLanguage->evaluate($mappingExpression);
-                        if ($localFilter instanceof Filter === false) {
-                            throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR);
-                        }
-                        $combinedFilter->combineWith($localFilter);
-                    } else {
-                        // filter by local data attribute:
-                        $sourceAttributeName = $attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY];
-                        $combinedFilter->getRootNode()
-                                    ->iContains($sourceAttributeName, $localQueryAttributeValue);
-                    }
-
-                    $event->tryPopPendingQueryParameter($localQueryAttributeName);
+//                    if (($mappingExpression = $attributeMapEntry[self::MAP_FILTERS_KEY]) !== null) {
+//                        // prepared filter expression:
+//                        $expressionLanguage = $expressionLanguage ?? $this->getExpressionLanguage();
+//                        $localFilter = $expressionLanguage->evaluate($mappingExpression);
+//                        if ($localFilter instanceof Filter === false) {
+//                            throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR);
+//                        }
+//                        $combinedFilter->combineWith($localFilter);
+//                    } else {
+                    // filter by local data attribute:
+                    $sourceAttributeName = $attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY];
+                    $filterTreeBuilder->iContains($sourceAttributeName, $localQueryAttributeValue);
                 }
+
+                $event->tryPopPendingQueryParameter($localQueryAttributeName);
             }
 
-            $this->onPreEvent($event, $combinedFilter);
+            $this->onPreEvent($event, $filterTreeBuilder->createFilter());
         } elseif ($event instanceof LocalDataPostEvent) {
             $localDataAttributes = [];
             foreach ($event->getPendingRequestedAttributes() as $localDataAttributeName) {

@@ -11,11 +11,6 @@ abstract class Node
     /** @var LogicalNode|null */
     protected $parentNodeDefinition;
 
-    public function end(): ?LogicalNode
-    {
-        return $this->parentNodeDefinition;
-    }
-
     public function getParent(): ?LogicalNode
     {
         return $this->parentNodeDefinition;

@@ -74,9 +74,6 @@ class ConditionNode extends Node
         return true;
     }
 
-    /**
-     * @throws \Exception
-     */
     public function apply(array $rowData): bool
     {
         $columnValue = $rowData[$this->field] ?? null;
@@ -86,7 +83,7 @@ class ConditionNode extends Node
             case OperatorType::EQUALS_OPERATOR:
                 return $columnValue === $this->value;
             default:
-                throw new \RuntimeException('unimplemented condition operator: '.$this->operator);
+                throw new \UnexpectedValueException('unimplemented condition operator: '.$this->operator);
         }
     }
 

@@ -7,7 +7,7 @@ namespace Dbp\Relay\CoreBundle\Tests\Rest;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Rest\ErrorIds;
 use Dbp\Relay\CoreBundle\Rest\Options;
-use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTreeBuilder;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -130,8 +130,7 @@ class AbstractDataProviderTest extends TestCase
         $this->testDataProvider->getTestEntities($filterParameters, [[]]);
         $filter = $this->testDataProvider->getOptions()[Options::FILTER];
 
-        $expectedFilter = Filter::create();
-        $expectedFilter->getRootNode()->equals('field0', 'value0');
+        $expectedFilter = FilterTreeBuilder::create()->equals('field0', 'value0')->createFilter();
 
         $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
     }
@@ -173,8 +172,7 @@ class AbstractDataProviderTest extends TestCase
         $this->testDataProvider->getTestEntities(['preparedFilter' => 'filter0'], [[]]);
         $preparedFilter = $this->testDataProvider->getOptions()[Options::FILTER];
 
-        $expectedFilter = Filter::create();
-        $expectedFilter->getRootNode()->iContains('field0', 'value0');
+        $expectedFilter = FilterTreeBuilder::create()->iContains('field0', 'value0')->createFilter();
 
         $this->assertEquals($expectedFilter->toArray(), $preparedFilter->toArray());
     }

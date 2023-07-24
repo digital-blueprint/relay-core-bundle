@@ -6,6 +6,7 @@ namespace Dbp\Relay\CoreBundle\Tests\Rest\Query\Filter;
 
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterException;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTreeBuilder;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\ConditionNode;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\OperatorType;
 use PHPUnit\Framework\TestCase;
@@ -17,8 +18,7 @@ class FilterTest extends TestCase
      */
     public function testFilterToArray()
     {
-        $filter = Filter::create();
-        $filter->getRootNode()
+        $filter = FilterTreeBuilder::create()
             ->or()
                 ->iContains('field_1', '1')
                 ->equals('field_2', '2')
@@ -26,7 +26,7 @@ class FilterTest extends TestCase
             ->or()
                 ->iContains('field_3', '3')
                 ->equals('field_4', '4')
-            ->end();
+            ->end()->createFilter();
 
         $this->assertInstanceOf(Filter::class, $filter);
         $this->assertTrue($filter->isValid());
@@ -66,11 +66,14 @@ class FilterTest extends TestCase
         $this->assertEquals(OperatorType::EQUALS_OPERATOR, $conditionNode[ConditionNode::OPERATOR_KEY]);
     }
 
+    /**
+     * @throws FilterException
+     * @throws \Exception
+     */
     public function testCombineWith()
     {
         /** @var Filter */
-        $referenceFilter = Filter::create();
-        $referenceFilter->getRootNode()
+        $filter = FilterTreeBuilder::create()
             ->or()
                 ->iContains('field_1', '1')
                 ->equals('field_2', '2')
@@ -78,34 +81,35 @@ class FilterTest extends TestCase
             ->or()
                 ->iContains('field_3', '3')
                 ->equals('field_4', '4')
-            ->end();
+            ->end()->createFilter();
 
         /** @var Filter */
-        $filter1 = Filter::create();
-        $filter1->getRootNode()
+        $filter1 = FilterTreeBuilder::create()
             ->or()
                 ->iContains('field_1', '1')
                 ->equals('field_2', '2')
-            ->end();
+            ->end()->createFilter();
 
         /** @var Filter */
-        $filter2 = Filter::create();
-        $filter2->getRootNode()
+        $filter2 = FilterTreeBuilder::create()
             ->or()
                 ->iContains('field_3', '3')
                 ->equals('field_4', '4')
-            ->end();
+            ->end()->createFilter();
 
         $filter1->combineWith($filter2);
 
-        $this->assertEquals($referenceFilter->toArray(), $filter1->toArray());
+        $this->assertEquals($filter->toArray(), $filter1->toArray());
     }
 
+    /**
+     * @throws FilterException
+     * @throws \Exception
+     */
     public function testSimplify()
     {
         /** @var Filter */
-        $filter = Filter::create();
-        $filter->getRootNode()
+        $filter = FilterTreeBuilder::create()
             ->and()
             ->iContains('field_1', '1')
             ->equals('field_2', '2')
@@ -115,17 +119,16 @@ class FilterTest extends TestCase
             ->iContains('field_3', '3')
             ->not()->not()->equals('field_4', '4')->end()->end()
             ->end()
-            ->end();
+            ->end()->createFilter();
 
         /** @var Filter */
-        $desiredResultFilter = Filter::create();
-        $desiredResultFilter->getRootNode()
+        $desiredResultFilter = FilterTreeBuilder::create()
             ->iContains('field_1', '1')
             ->equals('field_2', '2')
             ->or()
             ->iContains('field_3', '3')
             ->equals('field_4', '4')
-            ->end();
+            ->end()->createFilter();
 
         $filter->simplify();
 
@@ -139,11 +142,24 @@ class FilterTest extends TestCase
         $this->assertTrue($filter->isValid());
     }
 
+    /**
+     * @throws FilterException
+     */
+    public function testEmptyFilterWithTreeBuilder()
+    {
+        $filter = FilterTreeBuilder::create()->createFilter();
+        $this->assertTrue($filter->isEmpty());
+        $this->assertTrue($filter->isValid());
+    }
+
+    /**
+     * @throws FilterException
+     */
     public function testFilterInvalid()
     {
+        // missing children under 'or' node
         /** @var Filter */
-        $filter = Filter::create();
-        $filter->getRootNode()->or();
+        $filter = FilterTreeBuilder::create()->or()->end()->createFilter();
 
         $reason = null;
         $this->assertFalse($filter->isValid($reason));
@@ -159,27 +175,29 @@ class FilterTest extends TestCase
         $filter1 = Filter::create();
 
         /** @var Filter */
-        $filter2 = Filter::create();
-        $filter2->getRootNode()
+        $filter2 = FilterTreeBuilder::create()
             ->or()
                 ->iContains('field_1', '1')
                 ->equals('field_2', '2')
-            ->end();
+            ->end()->createFilter();
 
         $filter1->combineWith($filter2);
 
         $this->assertEquals($filter1->toArray(), $filter2->toArray());
     }
 
+    /**
+     * @throws FilterException
+     * @throws \Exception
+     */
     public function testCombineWithSecondEmpty()
     {
         /** @var Filter */
-        $filter1 = Filter::create();
-        $filter1->getRootNode()
+        $filter1 = FilterTreeBuilder::create()
             ->or()
             ->iContains('field_1', '1')
             ->equals('field_2', '2')
-            ->end();
+            ->end()->createFilter();
 
         $filter1OriginalArray = $filter1->toArray();
 
@@ -192,8 +210,7 @@ class FilterTest extends TestCase
     {
         try {
             /** @var Filter */
-            $filter1 = Filter::create();
-            $filter1->getRootNode()
+            $filter1 = FilterTreeBuilder::create()
                 ->iContains('', '1');
         } catch (FilterException $exception) {
             $this->assertEquals(FilterException::CONDITION_FIELD_EMPTY, $exception->getCode());

@@ -6,6 +6,7 @@ namespace Dbp\Relay\CoreBundle\Tests\Rest\Query\Filter;
 
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterException;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTreeBuilder;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FromQueryFilterCreator;
 use Dbp\Relay\CoreBundle\Rest\Query\Parameters;
 use PHPUnit\Framework\TestCase;
@@ -25,8 +26,7 @@ class CreateFilterFromQueryTest extends TestCase
 
         $filter = FromQueryFilterCreator::createFilterFromQueryParameters($queryParameters, ['field0']);
 
-        $expectedFilter = Filter::create();
-        $expectedFilter->getRootNode()->iContains('field0', 'value0');
+        $expectedFilter = FilterTreeBuilder::create()->iContains('field0', 'value0')->createFilter();
 
         $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
     }
@@ -59,8 +59,7 @@ class CreateFilterFromQueryTest extends TestCase
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0'], $usedAttributePaths);
         $this->assertEquals(['field0'], $usedAttributePaths);
 
-        $expectedFilter = Filter::create();
-        $expectedFilter->getRootNode()->iContains('field0', 'value0');
+        $expectedFilter = FilterTreeBuilder::create()->iContains('field0', 'value0')->createFilter();
 
         $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
     }
@@ -75,8 +74,7 @@ class CreateFilterFromQueryTest extends TestCase
         $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
 
-        $expectedFilter = Filter::create();
-        $expectedFilter->getRootNode()->equals('field0', 'value0');
+        $expectedFilter = FilterTreeBuilder::create()->equals('field0', 'value0')->createFilter();
 
         $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
     }
@@ -91,8 +89,7 @@ class CreateFilterFromQueryTest extends TestCase
         $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
 
-        $expectedFilter = Filter::create();
-        $expectedFilter->getRootNode()->equals('field0', 'value0');
+        $expectedFilter = FilterTreeBuilder::create()->equals('field0', 'value0')->createFilter();
 
         $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
     }
@@ -107,8 +104,7 @@ class CreateFilterFromQueryTest extends TestCase
         $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
 
-        $expectedFilter = Filter::create();
-        $expectedFilter->getRootNode()->equals('field0', 'value0');
+        $expectedFilter = FilterTreeBuilder::create()->equals('field0', 'value0')->createFilter();
 
         $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
     }
@@ -165,8 +161,7 @@ class CreateFilterFromQueryTest extends TestCase
         $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
 
-        $expectedFilter = Filter::create();
-        $expectedFilter->getRootNode()->isNull('field0');
+        $expectedFilter = FilterTreeBuilder::create()->isNull('field0')->createFilter();
 
         $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
     }
@@ -197,7 +192,7 @@ class CreateFilterFromQueryTest extends TestCase
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
 
         $expectedFilter = Filter::create();
-        $expectedFilter->getRootNode()->inArray('field0', ['value0', 'value1']);
+        $expectedFilter = FilterTreeBuilder::create()->inArray('field0', ['value0', 'value1'])->createFilter();
 
         $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
     }

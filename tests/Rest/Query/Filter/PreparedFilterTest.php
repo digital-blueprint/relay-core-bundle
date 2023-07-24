@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\Rest\Query\Filter;
 
-use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTreeBuilder;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FromQueryFilterCreator;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\PreparedFilterProvider;
 use Dbp\Relay\CoreBundle\Rest\Query\Parameters;
@@ -57,8 +57,7 @@ class PreparedFilterTest extends TestCase
         $preparedFilter = FromQueryFilterCreator::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($preparedFilterQueryString, Parameters::FILTER), ['field0']);
 
-        $expectedFilter = Filter::create();
-        $expectedFilter->getRootNode()->iContains('field0', 'value0');
+        $expectedFilter = FilterTreeBuilder::create()->iContains('field0', 'value0')->createFilter();
 
         $this->assertEquals($expectedFilter->toArray(), $preparedFilter->toArray());
     }
@@ -74,8 +73,7 @@ class PreparedFilterTest extends TestCase
         $preparedFilter = FromQueryFilterCreator::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($preparedFilterQueryString, Parameters::FILTER), ['field0']);
 
-        $expectedFilter = Filter::create();
-        $expectedFilter->getRootNode()->equals('field0', 'value0');
+        $expectedFilter = FilterTreeBuilder::create()->equals('field0', 'value0')->createFilter();
 
         $this->assertEquals($expectedFilter->toArray(), $preparedFilter->toArray());
     }

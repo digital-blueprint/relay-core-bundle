@@ -24,15 +24,8 @@ class NotNode extends LogicalNode
         return parent::isValid($reason);
     }
 
-    /**
-     * @throws \Exception
-     */
     public function apply(array $rowData): bool
     {
-        if (count($this->childNodes) !== 1) {
-            throw new \Exception('filter invalid: \'not\' must have exactly one child');
-        }
-
         return $this->childNodes[0]->apply($rowData) === false;
     }
 }

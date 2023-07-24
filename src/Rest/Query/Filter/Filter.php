@@ -43,11 +43,11 @@ class Filter
     }
 
     /**
-     * @throws \Exception
+     * @throws FilterException
      */
     public function simplify(): void
     {
-        $this->assertIsValid();
+        $this->assertIsValid(__METHOD__.': ');
 
         $this->rootNode->simplifyRecursively();
     }
@@ -60,14 +60,14 @@ class Filter
     /**
      * @return $this
      *
-     * @throws \Exception If this filter of the other filter is invalid
+     * @throws FilterException If this filter or the other filter is invalid
      */
     public function combineWith(Filter $otherFilter): Filter
     {
-        $this->assertIsValid();
+        $this->assertIsValid(__METHOD__.': ');
 
         if ($otherFilter->isValid($reason) === false) {
-            throw new \Exception('other filter is invalid: '.$reason);
+            throw new FilterException(__METHOD__.': other filter is invalid: '.$reason, FilterException::FILTER_INVALID);
         }
 
         foreach ($otherFilter->getRootNode()->getChildren() as $otherFiltersChild) {
@@ -80,12 +80,22 @@ class Filter
     }
 
     /**
-     * @throws \Exception
+     * @throws FilterException
      */
-    protected function assertIsValid(): void
+    public function apply(array $rowData): bool
+    {
+        $this->assertIsValid(__METHOD__.': ');
+
+        return $this->rootNode->apply($rowData);
+    }
+
+    /**
+     * @throws FilterException
+     */
+    private function assertIsValid(string $reasonPrefix = ''): void
     {
         if ($this->isValid($reason) === false) {
-            throw new \Exception('filter is invalid: '.$reason);
+            throw new FilterException($reasonPrefix.'filter is invalid: '.$reason, FilterException::FILTER_INVALID);
         }
     }
 }

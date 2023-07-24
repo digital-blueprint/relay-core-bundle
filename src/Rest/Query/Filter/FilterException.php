@@ -14,4 +14,6 @@ class FilterException extends \Exception
     public const FILTER_ITEM_INVALID = 6;
     public const CONDITION_PATH_MISSING = 7;
     public const CONDITION_VALUE_ERROR = 8;
+    public const FILTER_TREE_INVALID = 9;
+    public const FILTER_INVALID = 10;
 }

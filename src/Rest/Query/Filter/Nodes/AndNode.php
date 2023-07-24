@@ -24,15 +24,8 @@ class AndNode extends LogicalNode
         return parent::isValid($reason);
     }
 
-    /**
-     * @throws \Exception
-     */
     public function apply(array $rowData): bool
     {
-        if (count($this->childNodes) === 0) {
-            throw new \Exception('filter invalid: \'and\' must have at least one child');
-        }
-
         foreach ($this->childNodes as $child) {
             if ($child->apply($rowData) === false) {
                 return false;
