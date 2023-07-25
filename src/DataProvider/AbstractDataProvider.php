@@ -14,8 +14,6 @@ use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
  */
 abstract class AbstractDataProvider extends \Dbp\Relay\CoreBundle\Rest\AbstractDataProvider implements RestrictedDataProviderInterface, ItemDataProviderInterface, CollectionDataProviderInterface
 {
-    private const FILTERS_KEY = 'filters';
-
     public function supports(string $resourceClass, string $operationName = null, array $context = []): bool
     {
         return $resourceClass === $this->getResourceClass();
@@ -23,12 +21,12 @@ abstract class AbstractDataProvider extends \Dbp\Relay\CoreBundle\Rest\AbstractD
 
     public function getCollection(string $resourceClass, string $operationName = null, array $context = []): PartialPaginator
     {
-        return $this->getCollectionInternal($context[self::FILTERS_KEY] ?? []);
+        return $this->getCollectionInternal($context);
     }
 
     public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []): ?object
     {
-        return $this->getItemInternal($id, $context[self::FILTERS_KEY] ?? []);
+        return $this->getItemInternal($id, $context);
     }
 
     abstract protected function getResourceClass(): string;
