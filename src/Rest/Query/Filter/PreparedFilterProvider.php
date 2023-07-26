@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Rest\Query\Filter;
 
-use Exception;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 
@@ -74,9 +73,6 @@ class PreparedFilterProvider
         return self::POLICY_PREFIX.$filterIdentifier;
     }
 
-    /**
-     * @throws Exception
-     */
     public function getPreparedFilterQueryString(string $filterIdentifier): ?string
     {
         $preparedFilterConfig = $this->config[$filterIdentifier] ?? null;

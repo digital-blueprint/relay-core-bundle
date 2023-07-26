@@ -39,6 +39,11 @@ class LocalDataEventDispatcher
         $this->localDataAttributes = Options::getLocalDataAttributes($options);
     }
 
+    public function getRequestedAttributes(): array
+    {
+        return $this->localDataAttributes;
+    }
+
     /**
      * Returns, whether the attribute with the given name was requested.
      */

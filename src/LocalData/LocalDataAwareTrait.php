@@ -14,7 +14,7 @@ trait LocalDataAwareTrait
      * @ApiProperty(iri="https://schema.org/additionalProperty")
      * @Groups({"LocalData:output"})
      *
-     * @var array
+     * @var array|null
      */
     private $localData;
 

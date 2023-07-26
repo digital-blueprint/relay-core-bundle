@@ -21,7 +21,6 @@ use Dbp\Relay\CoreBundle\Rest\Query\Filter\PreparedFilterProvider;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\Pagination;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
 use Dbp\Relay\CoreBundle\Rest\Query\Parameters;
-use Exception;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\HttpFoundation\Response;
@@ -100,7 +99,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     }
 
     /**
-     * @throws ApiError|Exception
+     * @throws ApiError
      */
     protected function getCollectionInternal(array $context): PartialPaginator
     {
@@ -119,7 +118,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     }
 
     /**
-     * @throws ApiError|Exception
+     * @throws ApiError
      */
     protected function getItemInternal(string $id, array $context): ?object
     {
@@ -141,7 +140,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     abstract protected function getPage(int $currentPageNumber, int $maxNumItemsPerPage, array $filters = [], array $options = []): array;
 
     /**
-     * @throws ApiError|Exception
+     * @throws ApiError
      */
     private function createOptions(array $filters, array $context): array
     {
@@ -176,7 +175,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     }
 
     /**
-     * @throws ApiError|Exception
+     * @throws ApiError
      */
     private function createFilter($filterParameter, array $context, array &$usedAttributePaths = null): Filter
     {
@@ -191,7 +190,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     }
 
     /**
-     * @throws ApiError|Exception
+     * @throws ApiError
      */
     private function createPreparedFilter(string $preparedFilterId, array $context): Filter
     {
@@ -211,8 +210,6 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
      * @param array $context The context of the current request
      *
      * @return string[]
-     *
-     * @throws ResourceClassNotFoundException
      */
     private function getAvailableAttributePaths(array $context): array
     {
@@ -223,9 +220,14 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
             Tools::removeValueFromArray($groups, 'LocalData:output');
             $propertyNamesFactoryOptions['serializer_groups'] = $groups;
         }
-        foreach ($this->propertyNameCollectionFactory->create(
-            $context[self::RESOURCE_CLASS_CONTEXT_KEY], $propertyNamesFactoryOptions) as $propertyName) {
-            $availableAttributePaths[] = $propertyName;
+
+        try {
+            foreach ($this->propertyNameCollectionFactory->create(
+                $context[self::RESOURCE_CLASS_CONTEXT_KEY], $propertyNamesFactoryOptions) as $propertyName) {
+                $availableAttributePaths[] = $propertyName;
+            }
+        } catch (ResourceClassNotFoundException $exception) {
+            throw new \RuntimeException($exception->getMessage());
         }
 
         foreach ($this->localDataAccessChecker->getConfiguredLocalDataAttributeNames() as $localDataAttributeName) {
