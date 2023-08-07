@@ -106,13 +106,12 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $this->denyOperationAccessUnlessGranted(self::GET_COLLECTION_OPERATION);
 
         $filters = $context[self::FILTERS_CONTEXT_KEY] ?? [];
-        $options = $this->createOptions($filters, $context);
+        $options = $this->createOptions($filters, $context[self::RESOURCE_CLASS_CONTEXT_KEY], $context[self::GROUPS_CONTEXT_KEY]);
 
         $currentPageNumber = Pagination::getCurrentPageNumber($filters);
         $maxNumItemsPerPage = Pagination::getMaxNumItemsPerPage($filters);
 
         $pageItems = $this->getPage($currentPageNumber, $maxNumItemsPerPage, $filters, $options);
-        $this->localDataAccessChecker->enforceLocalDataAccessControlPolicies($pageItems, $options, $this);
 
         return new PartialPaginator($pageItems, $currentPageNumber, $maxNumItemsPerPage);
     }
@@ -125,14 +124,9 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $this->denyOperationAccessUnlessGranted(self::GET_ITEM_OPERATION);
 
         $filters = $context[self::FILTERS_CONTEXT_KEY] ?? [];
-        $options = $this->createOptions($filters, $context);
+        $options = $this->createOptions($filters, $context[self::RESOURCE_CLASS_CONTEXT_KEY], $context[self::GROUPS_CONTEXT_KEY]);
 
-        $item = $this->getItemById($id, $filters, $options);
-        if ($item !== null) {
-            $this->localDataAccessChecker->enforceLocalDataAccessControlPolicies([$item], $options, $this);
-        }
-
-        return $item;
+        return $this->getItemById($id, $filters, $options);
     }
 
     abstract protected function getItemById(string $id, array $filters = [], array $options = []): ?object;
@@ -142,34 +136,37 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     /**
      * @throws ApiError
      */
-    private function createOptions(array $filters, array $context): array
+    private function createOptions(array $filters, string $resourceClass, array $denormalizationGroups): array
     {
         $options = [];
 
         Options::setLanguage($options, $this->locale->getCurrentPrimaryLanguage());
 
-        $usedLocalDataAttributes = [];
+        $referencedLocalDataAttributes = [];
         if ($includeLocalParameter = Parameters::getIncludeLocal($filters)) {
-            $usedLocalDataAttributes = LocalData::getLocalDataAttributesFromQueryParameter($includeLocalParameter);
-            Options::setLocalDataAttributes($options, $usedLocalDataAttributes);
-        }
-        if ($filterParameter = Parameters::getFilter($filters)) {
-            $usedAttributePaths = [];
-            Options::addFilter($options, $this->createFilter($filterParameter, $context, $usedAttributePaths));
-//            foreach ($usedAttributePaths as $usedAttributePath) {
-//                $matches = [];
-//                if (preg_match('/^'.self::LOCAL_DATA_BASE_PATH.'([a-zA-Z0-9-_]+)$/', $usedAttributePath, $matches)) {
-//                    $usedLocalDataAttributes[] = $matches[1];
-//                }
-//            }
-        }
-        if ($preparedFilterParameter = $filters[Parameters::PREPARED_FILTER] ?? null) {
-            // TODO: decide whether to enforce local data access control policies for prepared filters.
-            // Currently, they are not, considering that local data attributes used in prepared filters are not known to the client.
-            Options::addFilter($options, $this->createPreparedFilter($preparedFilterParameter, $context));
+            $referencedLocalDataAttributes = LocalData::getLocalDataAttributesFromQueryParameter($includeLocalParameter);
+            Options::setLocalDataAttributes($options, $referencedLocalDataAttributes);
         }
 
-        $this->localDataAccessChecker->checkRequestedLocalDataAttributes($usedLocalDataAttributes);
+        if ($filterParameter = Parameters::getFilter($filters)) {
+            $usedAttributePaths = [];
+            Options::addFilter($options, $this->createFilter($filterParameter, $resourceClass, $denormalizationGroups, $usedAttributePaths));
+            $basePathLength = strlen(self::LOCAL_DATA_BASE_PATH);
+            $referencedLocalDataAttributes = array_unique(array_merge($referencedLocalDataAttributes,
+                Tools::arrayFilterAndMap($usedAttributePaths,
+                    function ($attributePath) {
+                        return str_starts_with($attributePath, self::LOCAL_DATA_BASE_PATH);
+                    },
+                    function ($attributePath) use ($basePathLength) {
+                        return substr($attributePath, $basePathLength);
+                    })));
+        }
+
+        if ($preparedFilterParameter = $filters[Parameters::PREPARED_FILTER] ?? null) {
+            Options::addFilter($options, $this->createPreparedFilter($preparedFilterParameter, $resourceClass, $denormalizationGroups));
+        }
+
+        $this->localDataAccessChecker->denyAccessUnlessIsGrantedReadAccess($referencedLocalDataAttributes, $this);
 
         return $options;
     }
@@ -177,13 +174,13 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     /**
      * @throws ApiError
      */
-    private function createFilter($filterParameter, array $context, array &$usedAttributePaths = null): Filter
+    private function createFilter($filterParameter, string $resourceClass, array $denormalizationGroups, array &$usedAttributePaths = null): Filter
     {
         if (is_array($filterParameter) === false) {
             throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, Parameters::FILTER.' parameter key lacks square brackets', ErrorIds::FILTER_INVALID_FILTER_KEY_SQUARE_BRACKETS_MISSING);
         }
         try {
-            return FromQueryFilterCreator::createFilterFromQueryParameters($filterParameter, $this->getAvailableAttributePaths($context), $usedAttributePaths);
+            return FromQueryFilterCreator::createFilterFromQueryParameters($filterParameter, $this->getAvailableAttributePaths($resourceClass, $denormalizationGroups), $usedAttributePaths);
         } catch (FilterException $exception) {
             throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, $exception->getMessage(), ErrorIds::FILTER_INVALID);
         }
@@ -192,7 +189,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     /**
      * @throws ApiError
      */
-    private function createPreparedFilter(string $preparedFilterId, array $context): Filter
+    private function createPreparedFilter(string $preparedFilterId, string $resourceClass, array $denormalizationGroups): Filter
     {
         $filterQueryString = $this->preparedFilterController->getPreparedFilterQueryString($preparedFilterId);
         if ($filterQueryString === null) {
@@ -203,27 +200,23 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         }
 
         return $this->createFilter(
-            Parameters::getQueryParametersFromQueryString($filterQueryString, Parameters::FILTER), $context);
+            Parameters::getQueryParametersFromQueryString($filterQueryString, Parameters::FILTER), $resourceClass, $denormalizationGroups);
     }
 
     /**
-     * @param array $context The context of the current request
-     *
      * @return string[]
      */
-    private function getAvailableAttributePaths(array $context): array
+    private function getAvailableAttributePaths(string $resourceClass, array $denormalizationGroups): array
     {
         $availableAttributePaths = [];
 
         $propertyNamesFactoryOptions = [];
-        if ($groups = $context[self::GROUPS_CONTEXT_KEY] ?? null) {
-            Tools::removeValueFromArray($groups, 'LocalData:output');
-            $propertyNamesFactoryOptions['serializer_groups'] = $groups;
-        }
+        Tools::removeValueFromArray($denormalizationGroups, 'LocalData:output');
+        $propertyNamesFactoryOptions['serializer_groups'] = $denormalizationGroups;
 
         try {
             foreach ($this->propertyNameCollectionFactory->create(
-                $context[self::RESOURCE_CLASS_CONTEXT_KEY], $propertyNamesFactoryOptions) as $propertyName) {
+                $resourceClass, $propertyNamesFactoryOptions) as $propertyName) {
                 $availableAttributePaths[] = $propertyName;
             }
         } catch (ResourceClassNotFoundException $exception) {

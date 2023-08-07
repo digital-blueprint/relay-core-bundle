@@ -70,4 +70,20 @@ class Tools
 
         return $targetArray;
     }
+
+    public static function arrayFilterAndMap(array $sourceArray, callable $filterCallback, callable $mapCallback, bool $preserveKeys = false): array
+    {
+        $targetArray = [];
+        foreach ($sourceArray as $key => $value) {
+            if ($filterCallback($value)) {
+                if ($preserveKeys) {
+                    $targetArray[$key] = $mapCallback($value);
+                } else {
+                    $targetArray[] = $mapCallback($value);
+                }
+            }
+        }
+
+        return $targetArray;
+    }
 }

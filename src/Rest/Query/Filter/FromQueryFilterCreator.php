@@ -253,7 +253,7 @@ class FromQueryFilterCreator
             throw new FilterException('undefined attribute: '.$attributePath, FilterException::ATTRIBUTE_PATH_UNDEFINED);
         }
 
-        if ($usedAttributePaths !== null) {
+        if ($usedAttributePaths !== null && !in_array($attributePath, $usedAttributePaths, true)) {
             $usedAttributePaths[] = $attributePath;
         }
 

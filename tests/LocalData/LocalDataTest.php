@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\LocalData;
 
+use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Tests\Rest\TestDataProvider;
 use Dbp\Relay\CoreBundle\Tests\Rest\TestEntity;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\HttpFoundation\Response;
 
 class LocalDataTest extends TestCase
 {
@@ -84,12 +86,15 @@ class LocalDataTest extends TestCase
 
     public function testLocalDataAttributeUnauthorized()
     {
-        // authorization expression of attribute evaluates to false -> local data attribute of entity must be null
+        // authorization expression of attribute evaluates to false -> forbidden exception
         $localDataAttributeName = 'attribute_3';
         $sourceData = ['src_attribute_3' => 'value_3'];
 
-        $entity = $this->getTestEntity($localDataAttributeName, $sourceData);
-        $this->assertNull($entity->getLocalDataValue($localDataAttributeName));
+        try {
+            $this->getTestEntity($localDataAttributeName, $sourceData);
+        } catch (ApiError $exception) {
+            $this->assertEquals(Response::HTTP_FORBIDDEN, $exception->getStatusCode());
+        }
     }
 
     public function testLocalDataAttributeUnauthorizedCollection()
@@ -98,159 +103,16 @@ class LocalDataTest extends TestCase
         $localDataAttributeName = 'attribute_3';
         $sourceData = ['src_attribute_3' => 'value_3'];
 
-        $entities = $this->getTestEntities($localDataAttributeName, [
-            '0' => $sourceData,
-            '1' => $sourceData,
-            '2' => $sourceData,
-        ]);
-
-        $this->assertNull($entities[0]->getLocalDataValue($localDataAttributeName));
-        $this->assertNull($entities[1]->getLocalDataValue($localDataAttributeName));
-        $this->assertNull($entities[2]->getLocalDataValue($localDataAttributeName));
+        try {
+            $this->getTestEntities($localDataAttributeName, [
+                '0' => $sourceData,
+                '1' => $sourceData,
+                '2' => $sourceData,
+            ]);
+        } catch (ApiError $exception) {
+            $this->assertEquals(Response::HTTP_FORBIDDEN, $exception->getStatusCode());
+        }
     }
-
-//    /**
-//     * @throws \Exception
-//     */
-//    public function testLocalDataQuery()
-//    {
-//        // 'attribute_1' has a configured source attribute 'src_attribute_1'.
-//        // Post-condition: options contain the mapped attribute 'src_attribute_1' as a key  with the given value 'value_1'.
-//        $localDataAttributeName = 'attribute_1';
-//        $queryLocal = $localDataAttributeName.':value_1';
-//        $options = $this->createAndValidateOptions($localDataAttributeName, $queryLocal);
-//
-//        $this->localDataEventDispatcher->onNewOperation($options);
-//        $preEvent = new TestEntityPreEvent($options);
-//        $this->localDataEventDispatcher->dispatch($preEvent);
-//
-//        $localFilter = $preEvent->getOptions()[Options::FILTER_OPTION];
-//        $this->assertInstanceOf(Filter::class, $localFilter);
-//        $conditionNode = $localFilter->getRootNode()->getChildren()[0];
-//        $this->assertInstanceOf(ConditionNode::class, $conditionNode);
-//        $this->assertEquals('value_1', $conditionNode->getValue());
-//        $this->assertEquals('src_attribute_1', $conditionNode->getField());
-//        $this->assertEquals(ConditionNode::ICONTAINS_OPERATOR, $conditionNode->getOperator());
-//    }
-
-//    public function testLocalDataQueryAttributeUnacknowledgedNotConfigured()
-//    {
-//        // Throw bad request error since '404' is not a configured local data attribute.
-//        $localDataAttributeName = '404';
-//        $queryLocal = $localDataAttributeName.':no_value';
-//        try {
-//            $this->createAndValidateOptions($localDataAttributeName, $queryLocal);
-//        } catch (ApiError $exception) {
-//            $this->assertEquals(Response::HTTP_BAD_REQUEST, $exception->getStatusCode());
-//        }
-//    }
-
-//    public function testLocalDataQueryAttributeUnacknowledgedNotQueryable()
-//    {
-//        // Throw bad request error since 'attribute_2' is configured 'allow_query': false
-//        $localDataAttributeName = 'attribute_2';
-//        $queryLocal = $localDataAttributeName.':value_2';
-//
-//        try {
-//            $this->createAndValidateOptions($localDataAttributeName, $queryLocal);
-//        } catch (ApiError $exception) {
-//            $this->assertEquals(Response::HTTP_BAD_REQUEST, $exception->getStatusCode());
-//        }
-//    }
-
-//    public function testLocalDataQueryUnauthorized()
-//    {
-//        // authorization expression of local data attribute 'attribute_3' evaluates to false -> remove entity from result set
-//        $localDataAttributeName = 'attribute_3';
-//        $localQuery = $localDataAttributeName.':value_3';
-//        $sourceData = ['src_attribute_3' => 'value_3'];
-//
-//        self::createAndValidateOptions($localDataAttributeName, $localQuery);
-//
-//        $entities = $this->getTestEntities($localDataAttributeName, $sourceData, $localQuery);
-//        $this->assertEmpty($entities);
-//    }
-
-//    public function testLocalDataQueryUnauthorizedCollection()
-//    {
-//        // authorization expression of local data attribute 'attribute_3' evaluates to false -> remove entities from result set
-//        $localDataAttributeName = 'attribute_3';
-//        $localQuery = $localDataAttributeName.':value_3';
-//        $sourceData = ['src_attribute_3' => 'value_3'];
-//
-//        self::createAndValidateOptions($localDataAttributeName, $localQuery);
-//
-//        $entities = $this->getTestEntities($localDataAttributeName, $sourceData, $localQuery, 3);
-//        $this->assertEmpty($entities);
-//    }
-
-//    public function testLocalFilter()
-//    {
-//        // a local filter is defined for 'attribute_4'
-//        $localDataAttributeName = 'attribute_4';
-//        $localQuery = $localDataAttributeName.':4';
-//
-//        $options = $this->createAndValidateOptions($localDataAttributeName, $localQuery);
-//
-//        $this->localDataEventDispatcher->onNewOperation($options);
-//        $preEvent = new TestEntityPreEvent($options);
-//        $this->localDataEventDispatcher->dispatch($preEvent);
-//
-//        $localFilter = $preEvent->getOptions()[Options::FILTER_OPTION];
-//        $this->assertInstanceOf(Filter::class, $localFilter);
-//
-//        $andNode = $localFilter->getChildren()[0];
-//        $this->assertInstanceOf(AndNode::class, $andNode);
-//
-//        $orNode = $andNode->getChildren()[0];
-//        $this->assertInstanceOf(OrNode::class, $orNode);
-//
-//        $conditionNode = $orNode->getChildren()[0];
-//        $this->assertInstanceOf(ConditionNode::class, $conditionNode);
-//        $this->assertEquals('1', $conditionNode->getValue());
-//        $this->assertEquals('src_attribute_1', $conditionNode->getField());
-//        $this->assertEquals(ConditionNode::ICONTAINS_OPERATOR, $conditionNode->getOperator());
-//
-//        $conditionNode = $orNode->getChildren()[1];
-//        $this->assertInstanceOf(ConditionNode::class, $conditionNode);
-//        $this->assertEquals('2', $conditionNode->getValue());
-//        $this->assertEquals('src_attribute_2', $conditionNode->getField());
-//        $this->assertEquals(ConditionNode::EQUALS_OPERATOR, $conditionNode->getOperator());
-//
-//        $orNode = $andNode->getChildren()[1];
-//        $this->assertInstanceOf(OrNode::class, $orNode);
-//
-//        $conditionNode = $orNode->getChildren()[0];
-//        $this->assertInstanceOf(ConditionNode::class, $conditionNode);
-//        $this->assertEquals('1', $conditionNode->getValue());
-//        $this->assertEquals('src_attribute_1', $conditionNode->getField());
-//        $this->assertEquals(ConditionNode::CONTAINS_OPERATOR, $conditionNode->getOperator());
-//
-//        $conditionNode = $orNode->getChildren()[1];
-//        $this->assertInstanceOf(ConditionNode::class, $conditionNode);
-//        $this->assertEquals('2', $conditionNode->getValue());
-//        $this->assertEquals('src_attribute_2', $conditionNode->getField());
-//        $this->assertEquals(ConditionNode::IEQAULS_OPERATOR, $conditionNode->getOperator());
-//    }
-
-    public function testMappingSourceDataValue()
-    {
-        // a value mapping expression is defined for 'attribute_4' ("value + 1"). assert that the source value is incremented by 1.
-        $localDataAttributeName = 'attribute_4';
-        $sourceData = ['src_attribute_4' => '4'];
-        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
-        $this->assertEquals('5', $testEntity->getLocalDataValue($localDataAttributeName));
-    }
-
-//    private function createAndValidateOptions(string $includeLocal, string $queryLocal): array
-//    {
-//        $options = [];
-//        Options::setLocalDataAttributes($options, LocalData::getLocalDataAttributesFromQueryParameter($includeLocal));
-//
-//        $this->testDataProvider->checkRequestedLocalDataAttributes($options);
-//
-//        return $options;
-//    }
 
     private static function createAuthzConfig(): array
     {
@@ -259,27 +121,22 @@ class LocalDataTest extends TestCase
             [
                 'local_data_attribute' => 'attribute_1',
                 'read_policy' => 'true',
-                'allow_query' => true,
             ],
             [
                 'local_data_attribute' => 'attribute_2',
                 'read_policy' => 'true',
-                'allow_query' => false,
             ],
             [
                 'local_data_attribute' => 'attribute_3',
                 'read_policy' => 'false',
-                'allow_query' => true,
             ],
             [
                 'local_data_attribute' => 'attribute_4',
                 'read_policy' => 'true',
-                'allow_query' => true,
             ],
             [
                 'local_data_attribute' => 'array_attribute_1',
                 'read_policy' => 'true',
-                'allow_query' => false,
             ],
         ];
 
@@ -297,18 +154,14 @@ class LocalDataTest extends TestCase
             [
                 'local_data_attribute' => 'attribute_2',
                 'source_attribute' => 'src_attribute_2_1',
-                'allow_query' => false,
             ],
             [
                 'local_data_attribute' => 'attribute_3',
                 'source_attribute' => 'src_attribute_3',
-                'allow_query' => true,
             ],
             [
                 'local_data_attribute' => 'attribute_4',
                 'source_attribute' => 'src_attribute_4',
-                'map_value' => 'value + 1',
-                'map_filters' => 'Filter.create().and().or().icontains("src_attribute_1", "1").equals("src_attribute_2", "2").end().or().contains("src_attribute_1", "1").iequals("src_attribute_2", "2").end().end()',
             ],
             [
                 'local_data_attribute' => 'array_attribute_1',

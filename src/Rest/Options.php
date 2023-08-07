@@ -29,6 +29,10 @@ class Options
         return $options[self::FILTER] ?? null;
     }
 
+    /**
+     * Sets the filter option in the given target options. If the filter option is already set, the existing filter and
+     * the given filter combined with a logical AND operator.
+     */
     public static function addFilter(array &$targetOptions, Filter $filter): array
     {
         if ($existingFilter = $targetOptions[Options::FILTER] ?? null) {

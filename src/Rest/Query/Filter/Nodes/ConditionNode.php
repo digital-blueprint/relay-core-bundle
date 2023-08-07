@@ -29,7 +29,7 @@ class ConditionNode extends Node
     public function __construct(string $field, string $operator, $value)
     {
         if ($field === '') {
-            throw new FilterException('condition field must not be empty', FilterException::CONDITION_FIELD_EMPTY);
+            throw new FilterException('field must not be empty', FilterException::CONDITION_FIELD_EMPTY);
         }
 
         if (OperatorType::exists($operator) === false) {
@@ -46,9 +46,33 @@ class ConditionNode extends Node
         return $this->field;
     }
 
+    /**
+     * @throws FilterException
+     */
+    public function setField(string $field): void
+    {
+        if ($field === '') {
+            throw new FilterException('field must not be empty', FilterException::CONDITION_FIELD_EMPTY);
+        }
+
+        $this->field = $field;
+    }
+
     public function getOperator(): string
     {
         return $this->operator;
+    }
+
+    /**
+     * @throws FilterException
+     */
+    public function setOperator(string $operator): void
+    {
+        if (OperatorType::exists($operator) === false) {
+            throw new FilterException('undefined condition operator: '.$operator, FilterException::CONDITION_OPERATOR_UNDEFINED);
+        }
+
+        $this->operator = $operator;
     }
 
     /**
@@ -59,10 +83,18 @@ class ConditionNode extends Node
         return $this->value;
     }
 
+    /**
+     * @param mixed $value
+     */
+    public function setValue($value): void
+    {
+        $this->value = $value;
+    }
+
     public function isValid(string &$reason = null): bool
     {
         if ($this->field === '') {
-            $reason = 'column must not be empty';
+            $reason = 'field must not be empty';
 
             return false;
         } elseif (OperatorType::exists($this->operator) === false) {

@@ -12,9 +12,6 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class LocalDataEventDispatcher
 {
-    /** @var string */
-    private $resourceClass;
-
     /** @var array */
     private $localDataAttributes = [];
 
@@ -22,12 +19,10 @@ class LocalDataEventDispatcher
     private $eventDispatcher;
 
     /**
-     * @param string                   $resourceClass   The class name of the entity (resource) this event dispatcher is responsible for
      * @param EventDispatcherInterface $eventDispatcher The inner event dispatcher that this event dispatcher decorates
      */
-    public function __construct(string $resourceClass, EventDispatcherInterface $eventDispatcher)
+    public function __construct(string $resourceClass, EventDispatcherInterface $eventDispatcher) // @phpstan-ignore-line
     {
-        $this->resourceClass = $resourceClass;
         $this->eventDispatcher = $eventDispatcher;
     }
 

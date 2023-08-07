@@ -9,7 +9,7 @@ use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 
 class PreparedFilterProvider
 {
-    private const ROOT_CONFIG_NODE = 'prepared_filters';
+    private const PREPARED_FILTERS_CONFIG_NODE = 'prepared_filters';
     private const IDENTIFIER_CONFIG_NODE = 'id';
     private const FILTER_CONFIG_NODE = 'filter';
     private const APPLY_POLICY_CONFIG_NODE = 'apply_policy';
@@ -17,15 +17,15 @@ class PreparedFilterProvider
     private const FILTER_CONFIG_KEY = 'filter';
     private const POLICY_PREFIX = '@apply-filter:';
 
-    /** @var array */
+    /** @var array[] */
     private $config = [];
 
-    /** @var array */
+    /** @var string[] */
     private $policies = [];
 
     public static function getConfigNodeDefinition(): NodeDefinition
     {
-        $treeBuilder = new TreeBuilder(self::ROOT_CONFIG_NODE);
+        $treeBuilder = new TreeBuilder(self::PREPARED_FILTERS_CONFIG_NODE);
 
         return $treeBuilder->getRootNode()
             ->arrayPrototype()
@@ -35,7 +35,7 @@ class PreparedFilterProvider
             ->end()
             ->scalarNode(self::APPLY_POLICY_CONFIG_NODE)
             ->defaultValue('false')
-            ->info('A boolean expression evaluable by the Symfony Expression Language determining whether the current user may apply the prepared filter.')
+            ->info('A boolean expression evaluable by the Symfony Expression Language determining whether the current user may apply the prepared filter. Available parameters: user.')
             ->end()
             ->scalarNode(self::FILTER_CONFIG_NODE)
             ->defaultValue('')
@@ -48,7 +48,7 @@ class PreparedFilterProvider
 
     public function loadConfig(array $config): void
     {
-        foreach ($config[self::ROOT_CONFIG_NODE] ?? [] as $configEntry) {
+        foreach ($config[self::PREPARED_FILTERS_CONFIG_NODE] ?? [] as $configEntry) {
             $filterId = $configEntry[self::IDENTIFIER_CONFIG_NODE];
 
             if (isset($this->config[$filterId])) {

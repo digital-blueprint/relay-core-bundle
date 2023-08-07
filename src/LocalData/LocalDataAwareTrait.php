@@ -26,8 +26,11 @@ trait LocalDataAwareTrait
         return $this->localData;
     }
 
-    public function setLocalData(?array $localData)
+    public function setLocalData(?array $localData): void
     {
+        if ($localData === []) {
+            $localData = null;
+        }
         $this->localData = $localData;
     }
 
@@ -39,7 +42,7 @@ trait LocalDataAwareTrait
      */
     public function setLocalDataValue(string $key, $value): void
     {
-        if (!$this->localData) {
+        if ($this->localData === null) {
             $this->localData = [];
         }
         $this->localData[$key] = $value;
@@ -55,7 +58,7 @@ trait LocalDataAwareTrait
      */
     public function getLocalDataValue(string $key)
     {
-        return $this->localData ? ($this->localData[$key] ?? null) : null;
+        return $this->localData !== null ? ($this->localData[$key] ?? null) : null;
     }
 
     /**
@@ -65,6 +68,6 @@ trait LocalDataAwareTrait
      */
     public function hasLocalDataValue(string $key): bool
     {
-        return $this->localData && array_key_exists($key, $this->localData);
+        return $this->localData !== null && array_key_exists($key, $this->localData);
     }
 }

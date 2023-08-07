@@ -6,6 +6,8 @@ namespace Dbp\Relay\CoreBundle\LocalData;
 
 interface LocalDataAwareInterface
 {
+    public function setLocalData(?array $localData): void;
+
     /**
      * Returns the array of local data attributes.
      */
