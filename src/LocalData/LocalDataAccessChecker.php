@@ -83,14 +83,31 @@ class LocalDataAccessChecker
     /**
      * @throws ApiError
      */
-    public function denyAccessUnlessIsGrantedReadAccess(array $localDataAttributes, AbstractAuthorizationService $authorizationService): void
+    public function assertLocalDataAttributesAreDefined(array $localDataAttributes, AbstractAuthorizationService $authorizationService): void
     {
         foreach ($localDataAttributes as $localDataAttributeName) {
             $attributeConfigEntry = $this->attributeConfig[$localDataAttributeName] ?? null;
             if ($attributeConfigEntry === null) {
                 throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf('local data attribute \'%s\' undefined', $localDataAttributeName));
             }
-            $authorizationService->denyAccessUnlessIsGranted(self::getReadPolicyName($localDataAttributeName));
+        }
+    }
+
+    public function removeForbiddenLocalDataAttributeValues(array $items, array $localDataAttributes, AbstractAuthorizationService $authorizationService)
+    {
+        $forbiddenLocalDataAttributes = [];
+        foreach ($localDataAttributes as $localDataAttributeName) {
+            if (!$authorizationService->isGranted(self::getReadPolicyName($localDataAttributeName))) {
+                $forbiddenLocalDataAttributes[] = $localDataAttributeName;
+            }
+        }
+
+        foreach ($forbiddenLocalDataAttributes as $forbiddenLocalDataAttribute) {
+            foreach ($items as $item) {
+                if ($item instanceof LocalDataAwareInterface) {
+                    $item->setLocalDataValue($forbiddenLocalDataAttribute, null);
+                }
+            }
         }
     }
 

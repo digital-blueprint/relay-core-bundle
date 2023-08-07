@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\LocalData;
 
-use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Tests\Rest\TestDataProvider;
 use Dbp\Relay\CoreBundle\Tests\Rest\TestEntity;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\HttpFoundation\Response;
 
 class LocalDataTest extends TestCase
 {
@@ -90,11 +88,8 @@ class LocalDataTest extends TestCase
         $localDataAttributeName = 'attribute_3';
         $sourceData = ['src_attribute_3' => 'value_3'];
 
-        try {
-            $this->getTestEntity($localDataAttributeName, $sourceData);
-        } catch (ApiError $exception) {
-            $this->assertEquals(Response::HTTP_FORBIDDEN, $exception->getStatusCode());
-        }
+        $entity = $this->getTestEntity($localDataAttributeName, $sourceData);
+        $this->assertNull($entity->getLocalDataValue($localDataAttributeName));
     }
 
     public function testLocalDataAttributeUnauthorizedCollection()
@@ -103,15 +98,15 @@ class LocalDataTest extends TestCase
         $localDataAttributeName = 'attribute_3';
         $sourceData = ['src_attribute_3' => 'value_3'];
 
-        try {
-            $this->getTestEntities($localDataAttributeName, [
-                '0' => $sourceData,
-                '1' => $sourceData,
-                '2' => $sourceData,
-            ]);
-        } catch (ApiError $exception) {
-            $this->assertEquals(Response::HTTP_FORBIDDEN, $exception->getStatusCode());
-        }
+        $entities = $this->getTestEntities($localDataAttributeName, [
+            '0' => $sourceData,
+            '1' => $sourceData,
+            '2' => $sourceData,
+        ]);
+
+        $this->assertNull($entities[0]->getLocalDataValue($localDataAttributeName));
+        $this->assertNull($entities[1]->getLocalDataValue($localDataAttributeName));
+        $this->assertNull($entities[2]->getLocalDataValue($localDataAttributeName));
     }
 
     private static function createAuthzConfig(): array

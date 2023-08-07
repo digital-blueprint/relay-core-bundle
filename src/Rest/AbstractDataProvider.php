@@ -112,6 +112,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $maxNumItemsPerPage = Pagination::getMaxNumItemsPerPage($filters);
 
         $pageItems = $this->getPage($currentPageNumber, $maxNumItemsPerPage, $filters, $options);
+        $this->localDataAccessChecker->removeForbiddenLocalDataAttributeValues($pageItems, Options::getLocalDataAttributes($options), $this);
 
         return new PartialPaginator($pageItems, $currentPageNumber, $maxNumItemsPerPage);
     }
@@ -126,7 +127,10 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $filters = $context[self::FILTERS_CONTEXT_KEY] ?? [];
         $options = $this->createOptions($filters, $context[self::RESOURCE_CLASS_CONTEXT_KEY], $context[self::GROUPS_CONTEXT_KEY]);
 
-        return $this->getItemById($id, $filters, $options);
+        $item = $this->getItemById($id, $filters, $options);
+        $this->localDataAccessChecker->removeForbiddenLocalDataAttributeValues([$item], Options::getLocalDataAttributes($options), $this);
+
+        return $item;
     }
 
     abstract protected function getItemById(string $id, array $filters = [], array $options = []): ?object;
@@ -142,31 +146,19 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
         Options::setLanguage($options, $this->locale->getCurrentPrimaryLanguage());
 
-        $referencedLocalDataAttributes = [];
         if ($includeLocalParameter = Parameters::getIncludeLocal($filters)) {
             $referencedLocalDataAttributes = LocalData::getLocalDataAttributesFromQueryParameter($includeLocalParameter);
+            $this->localDataAccessChecker->assertLocalDataAttributesAreDefined($referencedLocalDataAttributes, $this);
             Options::setLocalDataAttributes($options, $referencedLocalDataAttributes);
         }
 
         if ($filterParameter = Parameters::getFilter($filters)) {
-            $usedAttributePaths = [];
-            Options::addFilter($options, $this->createFilter($filterParameter, $resourceClass, $denormalizationGroups, $usedAttributePaths));
-            $basePathLength = strlen(self::LOCAL_DATA_BASE_PATH);
-            $referencedLocalDataAttributes = array_unique(array_merge($referencedLocalDataAttributes,
-                Tools::arrayFilterAndMap($usedAttributePaths,
-                    function ($attributePath) {
-                        return str_starts_with($attributePath, self::LOCAL_DATA_BASE_PATH);
-                    },
-                    function ($attributePath) use ($basePathLength) {
-                        return substr($attributePath, $basePathLength);
-                    })));
+            Options::addFilter($options, $this->createFilter($filterParameter, $resourceClass, $denormalizationGroups));
         }
 
         if ($preparedFilterParameter = $filters[Parameters::PREPARED_FILTER] ?? null) {
             Options::addFilter($options, $this->createPreparedFilter($preparedFilterParameter, $resourceClass, $denormalizationGroups));
         }
-
-        $this->localDataAccessChecker->denyAccessUnlessIsGrantedReadAccess($referencedLocalDataAttributes, $this);
 
         return $options;
     }
@@ -174,13 +166,13 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     /**
      * @throws ApiError
      */
-    private function createFilter($filterParameter, string $resourceClass, array $denormalizationGroups, array &$usedAttributePaths = null): Filter
+    private function createFilter($filterParameter, string $resourceClass, array $denormalizationGroups): Filter
     {
         if (is_array($filterParameter) === false) {
             throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, Parameters::FILTER.' parameter key lacks square brackets', ErrorIds::FILTER_INVALID_FILTER_KEY_SQUARE_BRACKETS_MISSING);
         }
         try {
-            return FromQueryFilterCreator::createFilterFromQueryParameters($filterParameter, $this->getAvailableAttributePaths($resourceClass, $denormalizationGroups), $usedAttributePaths);
+            return FromQueryFilterCreator::createFilterFromQueryParameters($filterParameter, $this->getAvailableAttributePaths($resourceClass, $denormalizationGroups));
         } catch (FilterException $exception) {
             throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, $exception->getMessage(), ErrorIds::FILTER_INVALID);
         }
@@ -206,13 +198,13 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     /**
      * @return string[]
      */
-    private function getAvailableAttributePaths(string $resourceClass, array $denormalizationGroups): array
+    private function getAvailableAttributePaths(string $resourceClass, array $deserializationGroups): array
     {
         $availableAttributePaths = [];
 
         $propertyNamesFactoryOptions = [];
-        Tools::removeValueFromArray($denormalizationGroups, 'LocalData:output');
-        $propertyNamesFactoryOptions['serializer_groups'] = $denormalizationGroups;
+        Tools::removeValueFromArray($deserializationGroups, 'LocalData:output');
+        $propertyNamesFactoryOptions['serializer_groups'] = $deserializationGroups;
 
         try {
             foreach ($this->propertyNameCollectionFactory->create(
