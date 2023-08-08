@@ -125,7 +125,8 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $this->denyOperationAccessUnlessGranted(self::GET_ITEM_OPERATION);
 
         $filters = $context[self::FILTERS_CONTEXT_KEY] ?? [];
-        $options = $this->createOptions($filters, $context[self::RESOURCE_CLASS_CONTEXT_KEY], $context[self::GROUPS_CONTEXT_KEY]);
+        $options = $this->createOptions($filters,
+            $context[self::RESOURCE_CLASS_CONTEXT_KEY] ?? null, $context[self::GROUPS_CONTEXT_KEY] ?? null);
 
         $item = $this->getItemById($id, $filters, $options);
         $this->localDataAccessChecker->removeForbiddenLocalDataAttributeValues([$item], Options::getLocalDataAttributes($options), $this);
@@ -140,7 +141,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     /**
      * @throws ApiError
      */
-    private function createOptions(array $filters, string $resourceClass, array $denormalizationGroups): array
+    private function createOptions(array $filters, ?string $resourceClass, ?array $deserializationGroups): array
     {
         $options = [];
 
@@ -153,11 +154,11 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         }
 
         if ($filterParameter = Parameters::getFilter($filters)) {
-            Options::addFilter($options, $this->createFilter($filterParameter, $resourceClass, $denormalizationGroups));
+            Options::addFilter($options, $this->createFilter($filterParameter, $resourceClass, $deserializationGroups));
         }
 
         if ($preparedFilterParameter = $filters[Parameters::PREPARED_FILTER] ?? null) {
-            Options::addFilter($options, $this->createPreparedFilter($preparedFilterParameter, $resourceClass, $denormalizationGroups));
+            Options::addFilter($options, $this->createPreparedFilter($preparedFilterParameter, $resourceClass, $deserializationGroups));
         }
 
         return $options;
@@ -165,14 +166,19 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
     /**
      * @throws ApiError
+     * @throws \Exception
      */
-    private function createFilter($filterParameter, string $resourceClass, array $denormalizationGroups): Filter
+    private function createFilter($filterParameter, ?string $resourceClass, ?array $deserializationGroups): Filter
     {
+        if ($resourceClass === null || $deserializationGroups === null) {
+            throw new \Exception('Provider context must contain \''.self::RESOURCE_CLASS_CONTEXT_KEY.'\' and \''.self::GROUPS_CONTEXT_KEY.'\' when using filters to determine available resource properties.');
+        }
+
         if (is_array($filterParameter) === false) {
             throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, Parameters::FILTER.' parameter key lacks square brackets', ErrorIds::FILTER_INVALID_FILTER_KEY_SQUARE_BRACKETS_MISSING);
         }
         try {
-            return FromQueryFilterCreator::createFilterFromQueryParameters($filterParameter, $this->getAvailableAttributePaths($resourceClass, $denormalizationGroups));
+            return FromQueryFilterCreator::createFilterFromQueryParameters($filterParameter, $this->getAvailableAttributePaths($resourceClass, $deserializationGroups));
         } catch (FilterException $exception) {
             throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, $exception->getMessage(), ErrorIds::FILTER_INVALID);
         }
@@ -181,7 +187,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     /**
      * @throws ApiError
      */
-    private function createPreparedFilter(string $preparedFilterId, string $resourceClass, array $denormalizationGroups): Filter
+    private function createPreparedFilter(string $preparedFilterId, string $resourceClass, array $deserializationGroups): Filter
     {
         $filterQueryString = $this->preparedFilterController->getPreparedFilterQueryString($preparedFilterId);
         if ($filterQueryString === null) {
@@ -192,7 +198,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         }
 
         return $this->createFilter(
-            Parameters::getQueryParametersFromQueryString($filterQueryString, Parameters::FILTER), $resourceClass, $denormalizationGroups);
+            Parameters::getQueryParametersFromQueryString($filterQueryString, Parameters::FILTER), $resourceClass, $deserializationGroups);
     }
 
     /**
