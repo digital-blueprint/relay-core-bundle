@@ -9,12 +9,12 @@ class ErrorIds
     /**
      * Client filter.
      */
-    public const FILTER_INVALID_FILTER_KEY_SQUARE_BRACKETS_MISSING = '1400';
-    public const FILTER_INVALID = '1401';
+    public const FILTER_PARAMETER_MUST_BE_AN_ARRAY = 'core:filter-parameter-must-be-an-array';
+    public const FILTER_INVALID = 'core:filter-invalid';
 
     /**
      * Prepared filter.
      */
-    public const PREPARED_FILTER_ACCESS_DENIED = '1420';
-    public const PREPARED_FILTER_UNDEFINED = '1421';
+    public const PREPARED_FILTER_ACCESS_DENIED = 'core:prepared-filter-access-denied';
+    public const PREPARED_FILTER_UNDEFINED = 'core:prepared-filter-undefined';
 }

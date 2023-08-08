@@ -144,7 +144,7 @@ class AbstractDataProviderTest extends TestCase
             $this->testDataProvider->getTestEntities(['filter' => 'value'], [[]]);
         } catch (ApiError $exception) {
             $this->assertEquals(Response::HTTP_BAD_REQUEST, $exception->getStatusCode());
-            $this->assertEquals(ErrorIds::FILTER_INVALID_FILTER_KEY_SQUARE_BRACKETS_MISSING, $exception->getErrorId());
+            $this->assertEquals(ErrorIds::FILTER_PARAMETER_MUST_BE_AN_ARRAY, $exception->getErrorId());
         }
     }
 

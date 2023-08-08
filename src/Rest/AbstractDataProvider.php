@@ -21,6 +21,7 @@ use Dbp\Relay\CoreBundle\Rest\Query\Filter\PreparedFilterProvider;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\Pagination;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
 use Dbp\Relay\CoreBundle\Rest\Query\Parameters;
+use Exception;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\HttpFoundation\Response;
@@ -100,6 +101,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
     /**
      * @throws ApiError
+     * @throws Exception
      */
     protected function getCollectionInternal(array $context): PartialPaginator
     {
@@ -119,6 +121,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
     /**
      * @throws ApiError
+     * @throws Exception
      */
     protected function getItemInternal(string $id, array $context): ?object
     {
@@ -140,6 +143,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
     /**
      * @throws ApiError
+     * @throws Exception
      */
     private function createOptions(array $filters, ?string $resourceClass, ?array $deserializationGroups): array
     {
@@ -166,35 +170,36 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
     /**
      * @throws ApiError
-     * @throws \Exception
+     * @throws Exception
      */
     private function createFilter($filterParameter, ?string $resourceClass, ?array $deserializationGroups): Filter
     {
         if ($resourceClass === null || $deserializationGroups === null) {
-            throw new \Exception('Provider context must contain \''.self::RESOURCE_CLASS_CONTEXT_KEY.'\' and \''.self::GROUPS_CONTEXT_KEY.'\' when using filters to determine available resource properties.');
+            throw new Exception('Provider context must contain \''.self::RESOURCE_CLASS_CONTEXT_KEY.'\' and \''.self::GROUPS_CONTEXT_KEY.'\' when using filters to determine available resource properties.');
         }
 
         if (is_array($filterParameter) === false) {
-            throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, Parameters::FILTER.' parameter key lacks square brackets', ErrorIds::FILTER_INVALID_FILTER_KEY_SQUARE_BRACKETS_MISSING);
+            throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, '\''.Parameters::FILTER.'\' parameter must be an array. Square brackets missing.', ErrorIds::FILTER_PARAMETER_MUST_BE_AN_ARRAY);
         }
         try {
             return FromQueryFilterCreator::createFilterFromQueryParameters($filterParameter, $this->getAvailableAttributePaths($resourceClass, $deserializationGroups));
         } catch (FilterException $exception) {
-            throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, $exception->getMessage(), ErrorIds::FILTER_INVALID);
+            throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, $exception->getMessage(), ErrorIds::FILTER_INVALID, [$exception->getCode(), $exception->getMessage()]);
         }
     }
 
     /**
      * @throws ApiError
+     * @throws Exception
      */
     private function createPreparedFilter(string $preparedFilterId, string $resourceClass, array $deserializationGroups): Filter
     {
         $filterQueryString = $this->preparedFilterController->getPreparedFilterQueryString($preparedFilterId);
         if ($filterQueryString === null) {
-            throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, 'prepared filter undefined', ErrorIds::PREPARED_FILTER_UNDEFINED);
+            throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, 'Prepared filter undefined.', ErrorIds::PREPARED_FILTER_UNDEFINED);
         }
         if ($this->isGranted(PreparedFilterProvider::getPolicyNameByFilterIdentifier($preparedFilterId)) === false) {
-            throw ApiError::withDetails(Response::HTTP_FORBIDDEN, 'prepared filter access denied', ErrorIds::PREPARED_FILTER_ACCESS_DENIED);
+            throw ApiError::withDetails(Response::HTTP_FORBIDDEN, 'Access to prepared filter denied.', ErrorIds::PREPARED_FILTER_ACCESS_DENIED);
         }
 
         return $this->createFilter(
