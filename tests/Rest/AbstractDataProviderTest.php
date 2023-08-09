@@ -40,6 +40,10 @@ class AbstractDataProviderTest extends TestCase
                     'local_data_attribute' => 'attribute0',
                     'read_policy' => 'true',
                 ],
+                [
+                    'local_data_attribute' => 'forbiddenAttribute',
+                    'read_policy' => 'false',
+                ],
             ],
         ];
 
@@ -201,5 +205,64 @@ class AbstractDataProviderTest extends TestCase
             $this->assertEquals(Response::HTTP_FORBIDDEN, $exception->getStatusCode());
             $this->assertEquals(ErrorIds::PREPARED_FILTER_ACCESS_DENIED, $exception->getErrorId());
         }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testFilterWithLocalDataAttribute()
+    {
+        $filterParameters = [];
+        parse_str('filter[localData.attribute0]=value0', $filterParameters);
+
+        $this->testDataProvider->getTestEntities($filterParameters, [[]]);
+        $filter = $this->testDataProvider->getOptions()[Options::FILTER];
+
+        $expectedFilter = FilterTreeBuilder::create()->equals('localData.attribute0', 'value0')->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testFilterWithForbiddenLocalDataAttribute()
+    {
+        $filterParameters = [];
+        parse_str('filter[localData.forbiddenAttribute]=value0', $filterParameters);
+
+        self::assertEquals([], $this->testDataProvider->getTestEntities($filterParameters, [[]]));
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testFilterWithForbiddenLocalDataAttributeInAndGroup()
+    {
+        // condition with forbidden attribute evaluates to constant 'false' -> parent AND group evaluates to 'false'
+        $querySting = 'filter[test_group][group][conjunction]=AND&filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0&&filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=localData.forbiddenAttribute&filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]=value1&&filter[bar][condition][memberOf]=test_group';
+        $filterParameters = [];
+        parse_str($querySting, $filterParameters);
+
+        self::assertEquals([], $this->testDataProvider->getTestEntities($filterParameters, [[]]));
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testFilterWithForbiddenLocalDataAttributeInOrGroup()
+    {
+        // condition with forbidden attribute evaluates to constant 'false', which is to be removed from the parent OR group
+        $querySting = 'filter[test_group][group][conjunction]=OR&filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0&&filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=localData.forbiddenAttribute&filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]=value1&&filter[bar][condition][memberOf]=test_group';
+        $filterParameters = [];
+        parse_str($querySting, $filterParameters);
+
+        $this->testDataProvider->getTestEntities($filterParameters, [[]]);
+        $filter = $this->testDataProvider->getOptions()[Options::FILTER];
+
+        $expectedFilter = FilterTreeBuilder::create()
+            ->iContains('field0', 'value0')->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
     }
 }

@@ -67,6 +67,98 @@ class CreateFilterFromQueryTest extends TestCase
     /**
      * @throws \Exception
      */
+    public function testAndGroup()
+    {
+        $querySting = 'filter[test_group][group][conjunction]=AND&filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0&&filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=field1&filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]=value1&&filter[bar][condition][memberOf]=test_group';
+
+        $usedAttributePaths = [];
+        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0', 'field1'], $usedAttributePaths);
+        $this->assertEquals(['field0', 'field1'], $usedAttributePaths);
+
+        $expectedFilter = FilterTreeBuilder::create()
+            ->and()
+            ->iContains('field0', 'value0')
+            ->equals('field1', 'value1')
+            ->end()
+            ->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testOrGroup()
+    {
+        $querySting = 'filter[test_group][group][conjunction]=OR&filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0&&filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=field1&filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]=value1&&filter[bar][condition][memberOf]=test_group';
+
+        $usedAttributePaths = [];
+        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0', 'field1'], $usedAttributePaths);
+        $this->assertEquals(['field0', 'field1'], $usedAttributePaths);
+
+        $expectedFilter = FilterTreeBuilder::create()
+            ->or()
+            ->iContains('field0', 'value0')
+            ->equals('field1', 'value1')
+            ->end()
+            ->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testNotAndGroup()
+    {
+        $querySting = 'filter[test_group][group][conjunction]=NOT_AND&filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0&&filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=field1&filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]=value1&&filter[bar][condition][memberOf]=test_group';
+
+        $usedAttributePaths = [];
+        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0', 'field1'], $usedAttributePaths);
+        $this->assertEquals(['field0', 'field1'], $usedAttributePaths);
+
+        $expectedFilter = FilterTreeBuilder::create()
+            ->not()
+            ->and()
+            ->iContains('field0', 'value0')
+            ->equals('field1', 'value1')
+            ->end()
+            ->end()
+            ->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testNotOrGroup()
+    {
+        $querySting = 'filter[test_group][group][conjunction]=NOT_OR&filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0&&filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=field1&filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]=value1&&filter[bar][condition][memberOf]=test_group';
+
+        $usedAttributePaths = [];
+        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0', 'field1'], $usedAttributePaths);
+        $this->assertEquals(['field0', 'field1'], $usedAttributePaths);
+
+        $expectedFilter = FilterTreeBuilder::create()
+            ->not()
+            ->or()
+            ->iContains('field0', 'value0')
+            ->equals('field1', 'value1')
+            ->end()
+            ->end()
+            ->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function testConditionDefaultOperatorEquals()
     {
         $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][value]=value0';

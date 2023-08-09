@@ -27,7 +27,7 @@ class FilterTreeBuilder
 
     public function __construct(LogicalNode $rootNode = null)
     {
-        $this->currentNode = $rootNode ?? new AndNode(null);
+        $this->currentNode = $rootNode ?? new AndNode();
     }
 
     /**
@@ -45,9 +45,19 @@ class FilterTreeBuilder
     /**
      * @return $this
      */
+    public function appendChild(Node $childNodeDefinition): FilterTreeBuilder
+    {
+        $this->currentNode->appendChild($childNodeDefinition);
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
     public function and(): FilterTreeBuilder
     {
-        $andNode = new AndNode($this->currentNode);
+        $andNode = new AndNode();
         $this->currentNode->appendChild($andNode);
         $this->currentNode = $andNode;
 
@@ -59,7 +69,7 @@ class FilterTreeBuilder
      */
     public function or(): FilterTreeBuilder
     {
-        $orNode = new OrNode($this->currentNode);
+        $orNode = new OrNode();
         $this->currentNode->appendChild($orNode);
         $this->currentNode = $orNode;
 
@@ -71,7 +81,7 @@ class FilterTreeBuilder
      */
     public function not(): FilterTreeBuilder
     {
-        $notNode = new NotNode($this->currentNode);
+        $notNode = new NotNode();
         $this->currentNode->appendChild($notNode);
         $this->currentNode = $notNode;
 
@@ -138,16 +148,6 @@ class FilterTreeBuilder
     public function isNull(string $field): FilterTreeBuilder
     {
         $this->currentNode->appendChild(new ConditionNode($field, OperatorType::IS_NULL_OPERATOR, null));
-
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    public function appendChild(Node $childNodeDefinition): FilterTreeBuilder
-    {
-        $this->currentNode->appendChild($childNodeDefinition);
 
         return $this;
     }

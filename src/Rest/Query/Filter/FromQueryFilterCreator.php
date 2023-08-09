@@ -4,12 +4,8 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Rest\Query\Filter;
 
-use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\AndNode;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\ConditionNode;
-use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\LogicalNode;
-use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\NotNode;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\OperatorType;
-use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\OrNode;
 
 /**
  * Based on Drupal JSON:API filter module implementation.
@@ -43,7 +39,7 @@ class FromQueryFilterCreator
      *
      * @var string
      */
-    private const MEMBER_KEY = 'memberOf';
+    private const MEMBER_OF_KEY = 'memberOf';
 
     /**
      * The field key in the filter condition: filter[lorem][condition][<field>].
@@ -66,7 +62,7 @@ class FromQueryFilterCreator
      */
     private const OPERATOR_KEY = 'operator';
 
-    private const EQUALS_OPERATOR = 'EQ';
+    private const EQUALS_OPERATOR = 'EQUALS';
     private const LESS_THAN_OR_EQUAL_OPERATOR = 'LTE';
     private const GREATER_THAN_OR_EQUAL_OPERATOR = 'GTE';
     private const I_CONTAINS_OPERATOR = 'I_CONTAINS';
@@ -133,14 +129,14 @@ class FromQueryFilterCreator
             }
 
             // Add a memberOf key to all items.
-            if (isset($item[self::CONDITION_KEY][self::MEMBER_KEY])) {
-                $item[self::MEMBER_KEY] = $item[self::CONDITION_KEY][self::MEMBER_KEY];
-                unset($item[self::CONDITION_KEY][self::MEMBER_KEY]);
-            } elseif (isset($item[self::GROUP_KEY][self::MEMBER_KEY])) {
-                $item[self::MEMBER_KEY] = $item[self::GROUP_KEY][self::MEMBER_KEY];
-                unset($item[self::GROUP_KEY][self::MEMBER_KEY]);
+            if (isset($item[self::CONDITION_KEY][self::MEMBER_OF_KEY])) {
+                $item[self::MEMBER_OF_KEY] = $item[self::CONDITION_KEY][self::MEMBER_OF_KEY];
+                unset($item[self::CONDITION_KEY][self::MEMBER_OF_KEY]);
+            } elseif (isset($item[self::GROUP_KEY][self::MEMBER_OF_KEY])) {
+                $item[self::MEMBER_OF_KEY] = $item[self::GROUP_KEY][self::MEMBER_OF_KEY];
+                unset($item[self::GROUP_KEY][self::MEMBER_OF_KEY]);
             } else {
-                $item[self::MEMBER_KEY] = self::ROOT_ID;
+                $item[self::MEMBER_OF_KEY] = self::ROOT_ID;
             }
 
             // Add the filter id to all items.
@@ -182,58 +178,71 @@ class FromQueryFilterCreator
      */
     private static function buildFilter(array $items, array $availableAttributePaths, array &$usedAttributePaths = null): Filter
     {
-        $rootGroup = [
-            self::ITEM_ID_KEY => self::ROOT_ID,
-            self::GROUP_KEY => [self::CONJUNCTION_KEY => self::AND_CONJUNCTION],
-        ];
+        // filter tree builder appends an AND root node automatically
+        $filterTreeBuilder = FilterTreeBuilder::create();
+        self::appendGroupMembers(self::ROOT_ID, $filterTreeBuilder, $items, $availableAttributePaths, $usedAttributePaths);
 
-        /** @var AndNode */
-        $rootNode = self::buildTreeRecursively($rootGroup, null, $items, $availableAttributePaths, $usedAttributePaths);
-
-        return Filter::create($rootNode);
+        return $filterTreeBuilder->createFilter();
     }
 
     /**
      * @throws FilterException
      */
-    private static function buildTreeRecursively(array $currentItem, ?LogicalNode $currentParentNode, array $items, array $availableAttributePaths, array &$usedAttributePaths = null): LogicalNode
+    private static function appendGroup(array $groupItem, FilterTreeBuilder $filterTreeBuilder, array $items, array $availableAttributePaths, ?array &$usedAttributePaths)
     {
-        $currentItemId = $currentItem[self::ITEM_ID_KEY];
-        $currentItemConjunction = $currentItem[self::GROUP_KEY][self::CONJUNCTION_KEY];
+        $groupId = $groupItem[self::ITEM_ID_KEY];
+        $groupConjunction = $groupItem[self::GROUP_KEY][self::CONJUNCTION_KEY];
 
-        switch ($currentItemConjunction) {
+        switch ($groupConjunction) {
             case self::AND_CONJUNCTION:
-                $logicalNode = new AndNode($currentParentNode);
+                $filterTreeBuilder->and();
                 break;
             case self::OR_CONJUNCTION:
-                $logicalNode = new OrNode($currentParentNode);
+                $filterTreeBuilder->or();
                 break;
             case self::NOT_AND_CONJUNCTION:
-                $notNode = new NotNode($currentParentNode);
-                $logicalNode = new AndNode($notNode);
+                $filterTreeBuilder->not();
+                $filterTreeBuilder->and();
                 break;
             case self::NOT_OR_CONJUNCTION:
-                $notNode = new NotNode($currentParentNode);
-                $logicalNode = new OrNode($notNode);
+                $filterTreeBuilder->not();
+                $filterTreeBuilder->or();
                 break;
             default:
-                throw new FilterException('conjunction undefined: '.$currentItemConjunction, FilterException::CONJUNCTION_UNDEFINED);
+                throw new FilterException('conjunction undefined: '.$groupConjunction, FilterException::CONJUNCTION_UNDEFINED);
         }
 
+        self::appendGroupMembers($groupId, $filterTreeBuilder, $items, $availableAttributePaths, $usedAttributePaths);
+
+        switch ($groupConjunction) {
+            case self::AND_CONJUNCTION:
+            case self::OR_CONJUNCTION:
+                $filterTreeBuilder->end();
+                break;
+            case self::NOT_AND_CONJUNCTION:
+            case self::NOT_OR_CONJUNCTION:
+                $filterTreeBuilder->end();
+                $filterTreeBuilder->end();
+                break;
+        }
+    }
+
+    /**
+     * @throws FilterException
+     */
+    private static function appendGroupMembers(string $groupId, FilterTreeBuilder $filterTreeBuilder, array $items, array $availableAttributePaths, ?array &$usedAttributePaths)
+    {
         foreach ($items as $item) {
-            if ($item[self::MEMBER_KEY] === $currentItemId) {
+            if ($item[self::MEMBER_OF_KEY] === $groupId) {
                 if (isset($item[self::GROUP_KEY])) {
-                    $childNode = self::buildTreeRecursively($item, $logicalNode, $items, $availableAttributePaths, $usedAttributePaths);
+                    self::appendGroup($item, $filterTreeBuilder, $items, $availableAttributePaths, $usedAttributePaths);
                 } elseif (isset($item[self::CONDITION_KEY])) {
-                    $childNode = self::createConditionNodeFromCondition($item[self::CONDITION_KEY], $availableAttributePaths, $usedAttributePaths);
+                    self::appendConditionNode($item[self::CONDITION_KEY], $filterTreeBuilder, $availableAttributePaths, $usedAttributePaths);
                 } else {
                     throw new FilterException('invalid filter item', FilterException::FILTER_ITEM_INVALID);
                 }
-                $logicalNode->appendChild($childNode);
             }
         }
-
-        return $logicalNode;
     }
 
     /**
@@ -241,7 +250,7 @@ class FromQueryFilterCreator
      *
      * @throws FilterException
      */
-    private static function createConditionNodeFromCondition(array $condition, array $availableAttributePaths, array &$usedAttributePaths = null): ConditionNode
+    private static function appendConditionNode(array $condition, FilterTreeBuilder $filterTreeBuilder, array $availableAttributePaths, array &$usedAttributePaths = null)
     {
         self::validateConditionFilterItem($condition);
 
@@ -250,14 +259,14 @@ class FromQueryFilterCreator
         $operator = (isset($condition[self::OPERATOR_KEY])) ? $condition[self::OPERATOR_KEY] : null;
 
         if (!in_array($attributePath, $availableAttributePaths, true)) {
-            throw new FilterException('undefined attribute: '.$attributePath, FilterException::ATTRIBUTE_PATH_UNDEFINED);
+            throw new FilterException('Undefined attribute: '.$attributePath, FilterException::ATTRIBUTE_PATH_UNDEFINED);
         }
 
         if ($usedAttributePaths !== null && !in_array($attributePath, $usedAttributePaths, true)) {
             $usedAttributePaths[] = $attributePath;
         }
 
-        return new ConditionNode($attributePath, self::toConditionNodeOperator($operator), $value);
+        $filterTreeBuilder->appendChild(new ConditionNode($attributePath, self::toConditionNodeOperator($operator), $value));
     }
 
     private static function toConditionNodeOperator(string $operator): string
@@ -280,7 +289,7 @@ class FromQueryFilterCreator
             case self::IS_NULL_OPERATOR:
                 return OperatorType::IS_NULL_OPERATOR;
             default:
-                throw new \UnexpectedValueException('unsupported operator type: '.$operator);
+                throw new \UnexpectedValueException('Unsupported operator type: '.$operator);
         }
     }
 

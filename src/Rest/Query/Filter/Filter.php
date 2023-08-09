@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Rest\Query\Filter;
 
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\AndNode;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\ConstantNode;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\NodeType;
 
 class Filter
@@ -14,7 +15,7 @@ class Filter
 
     public static function create(AndNode $rootNode = null): Filter
     {
-        return new self($rootNode ?? new AndNode(null));
+        return new self($rootNode ?? new AndNode());
     }
 
     protected function __construct(AndNode $rootNode)
@@ -87,6 +88,20 @@ class Filter
         $this->assertIsValid(__METHOD__.': ');
 
         return $this->rootNode->apply($rowData);
+    }
+
+    public function isAlwaysTrue(): bool
+    {
+        $rootChildren = $this->getRootNode()->getChildren();
+
+        return count($rootChildren) === 1 && $rootChildren[0] instanceof ConstantNode && $rootChildren[0]->isTrue();
+    }
+
+    public function isAlwaysFalse(): bool
+    {
+        $rootChildren = $this->getRootNode()->getChildren();
+
+        return count($rootChildren) === 1 && $rootChildren[0] instanceof ConstantNode && $rootChildren[0]->isFalse();
     }
 
     /**

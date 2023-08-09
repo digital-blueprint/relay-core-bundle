@@ -9,7 +9,7 @@ class OperatorType
     /**
      * Equality operator (case-sensitive for strings).
      */
-    public const EQUALS_OPERATOR = 'EQ';
+    public const EQUALS_OPERATOR = 'EQUALS';
 
     /**
      * Numeric less than or equal operator. The value must be of a numeric type.

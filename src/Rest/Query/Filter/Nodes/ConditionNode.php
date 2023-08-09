@@ -28,6 +28,8 @@ class ConditionNode extends Node
      */
     public function __construct(string $field, string $operator, $value)
     {
+        parent::__construct();
+
         if ($field === '') {
             throw new FilterException('field must not be empty', FilterException::CONDITION_FIELD_EMPTY);
         }

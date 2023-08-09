@@ -9,16 +9,20 @@ abstract class Node
     protected const NODE_TYPE = null;
 
     /** @var LogicalNode|null */
-    protected $parentNodeDefinition;
+    protected $parentNode;
+
+    public function __construct()
+    {
+    }
 
     public function getParent(): ?LogicalNode
     {
-        return $this->parentNodeDefinition;
+        return $this->parentNode;
     }
 
-    protected function __construct(?LogicalNode $parent)
+    public function setParent(?LogicalNode $parentNode): void
     {
-        $this->parentNodeDefinition = $parent;
+        $this->parentNode = $parentNode;
     }
 
     public function getNodeType(): string

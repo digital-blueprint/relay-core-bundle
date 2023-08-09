@@ -8,11 +8,6 @@ class NotNode extends LogicalNode
 {
     protected const NODE_TYPE = NodeType::NOT;
 
-    public function __construct(LogicalNode $parent)
-    {
-        parent::__construct($parent);
-    }
-
     public function isValid(string &$reason = null): bool
     {
         if (count($this->childNodes) !== 1) {

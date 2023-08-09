@@ -44,6 +44,16 @@ class Options
         return $targetOptions;
     }
 
+    /**
+     * Removes the filter option in the given target options.
+     */
+    public static function removeFilter(array &$targetOptions): array
+    {
+        unset($targetOptions[Options::FILTER]);
+
+        return $targetOptions;
+    }
+
     public static function getLocalDataAttributes(array $options): array
     {
         return $options[self::LOCAL_DATA_ATTRIBUTES] ?? [];

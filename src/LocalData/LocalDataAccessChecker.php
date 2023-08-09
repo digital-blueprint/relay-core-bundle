@@ -23,10 +23,10 @@ class LocalDataAccessChecker
 
     private const READ_POLICY_PREFIX = '@read-local-data:';
 
-    /** @var array */
+    /** @var array[] */
     private $attributeConfig = [];
 
-    /** @var array */
+    /** @var string[] */
     private $policies = [];
 
     public static function getConfigNodeDefinition(): NodeDefinition
@@ -80,33 +80,20 @@ class LocalDataAccessChecker
         return $this->policies;
     }
 
+    public function isGrantedReadAccess(string $localDataAttributeName, AbstractAuthorizationService $authorizationService): bool
+    {
+        return $authorizationService->isGranted(self::getReadPolicyName($localDataAttributeName));
+    }
+
     /**
      * @throws ApiError
      */
-    public function assertLocalDataAttributesAreDefined(array $localDataAttributes, AbstractAuthorizationService $authorizationService): void
+    public function assertLocalDataAttributesAreDefined(array $localDataAttributes): void
     {
         foreach ($localDataAttributes as $localDataAttributeName) {
             $attributeConfigEntry = $this->attributeConfig[$localDataAttributeName] ?? null;
             if ($attributeConfigEntry === null) {
                 throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf('local data attribute \'%s\' undefined', $localDataAttributeName));
-            }
-        }
-    }
-
-    public function removeForbiddenLocalDataAttributeValues(array $items, array $localDataAttributes, AbstractAuthorizationService $authorizationService)
-    {
-        $forbiddenLocalDataAttributes = [];
-        foreach ($localDataAttributes as $localDataAttributeName) {
-            if (!$authorizationService->isGranted(self::getReadPolicyName($localDataAttributeName))) {
-                $forbiddenLocalDataAttributes[] = $localDataAttributeName;
-            }
-        }
-
-        foreach ($forbiddenLocalDataAttributes as $forbiddenLocalDataAttribute) {
-            foreach ($items as $item) {
-                if ($item instanceof LocalDataAwareInterface) {
-                    $item->setLocalDataValue($forbiddenLocalDataAttribute, null);
-                }
             }
         }
     }

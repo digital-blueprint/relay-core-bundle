@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes;
 
+use Dbp\Relay\CoreBundle\Helpers\Tools;
+
 /**
- * An logical node is a node with child nodes.
+ * A logical node is a node with child nodes.
  */
 abstract class LogicalNode extends Node
 {
@@ -20,9 +22,21 @@ abstract class LogicalNode extends Node
     /**
      * @return $this
      */
-    public function appendChild(Node $childNodeDefinition): LogicalNode
+    public function appendChild(Node $childNode): LogicalNode
     {
-        $this->childNodes[] = $childNodeDefinition;
+        $this->childNodes[] = $childNode;
+        $childNode->setParent($this);
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function removeChild(Node $childNode): LogicalNode
+    {
+        Tools::removeValueFromArray($this->childNodes, $childNode, true, true);
+        $childNode->setParent(null);
 
         return $this;
     }
@@ -48,15 +62,19 @@ abstract class LogicalNode extends Node
 
                 $childNodeType = $childNode->getNodeType();
                 switch ($childNodeType) {
-                    // and under and, or under or -> can be reduced to one
+                    // (A && B) && C => A && B && C, or: (A || B) || C => A || B || C
+                    // (A) && B => A && B, or: (A) || B => A || B
+                    // () && B => B, or: () && B => B
                     case NodeType::AND:
                     case NodeType::OR:
-                        if ($childNodeType === static::NODE_TYPE) {
+                        if ($childNodeType === static::NODE_TYPE ||
+                            count($childNode->getChildren()) <= 1) {
                             $childNodes = array_merge($childNodes, $childNode->getChildren());
                             $appendChild = false;
                         }
                         break;
-                    // not under not -> both can be removed
+
+                    // !(!A) => A
                     case NodeType::NOT:
                         $grandChildNode = $childNode->getChildren()[0];
                         if ($grandChildNode instanceof NotNode) {
@@ -65,7 +83,20 @@ abstract class LogicalNode extends Node
                         }
                         break;
                 }
+            } elseif ($childNode instanceof ConstantNode) {
+                if (($childNode->isTrue() && static::NODE_TYPE === NodeType::OR) ||
+                    ($childNode->isFalse() && static::NODE_TYPE === NodeType::AND)) {
+                    // A || true => true
+                    // A && false => false
+                    $childNodes = [$childNode];
+                    break;
+                } else {
+                    // A || false => A
+                    // A && true => A
+                    $appendChild = false;
+                }
             }
+
             if ($appendChild) {
                 $childNodes[] = $childNode;
             }
