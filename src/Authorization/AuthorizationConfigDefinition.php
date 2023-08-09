@@ -119,6 +119,6 @@ class AuthorizationConfigDefinition
             }
         }
 
-        return $treeBuilder->getRootNode();
+        return $treeBuilder->getRootNode()->addDefaultsIfNotSet();
     }
 }
