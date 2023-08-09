@@ -103,6 +103,6 @@ abstract class Paginator implements Iterator, PartialPaginatorInterface
      */
     public function getItems(): array
     {
-        return $this->items;
+        return iterator_to_array($this, false);
     }
 }
