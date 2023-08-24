@@ -1,3 +1,9 @@
+# v0.1.123
+
+* Fix WholeResultPaginator::getItems(), it would return all items instead of the page
+* AuthorizationConfigDefinition now sets all default policies automatically even if the
+  bundle documentation contains no authorization section.
+
 # v0.1.106
 
 * Deprecate AbstractDataProvider
