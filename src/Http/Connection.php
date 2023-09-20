@@ -6,8 +6,12 @@ namespace Dbp\Relay\CoreBundle\Http;
 
 use Dbp\Relay\CoreBundle\Helpers\Tools;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ServerException;
+use GuzzleHttp\Exception\TooManyRedirectsException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\MessageFormatter;
 use GuzzleHttp\Middleware;
@@ -115,11 +119,23 @@ class Connection implements LoggerAwareInterface
         } catch (GuzzleException $exception) {
             $request = null;
             $response = null;
+            $type = null;
+            if ($exception instanceof ConnectException) {
+                $request = $exception->getRequest();
+                $type = ConnectionException::NETWORK_EXCEPTION;
+            } elseif ($exception instanceof ClientException) {
+                $type = ConnectionException::CLIENT_EXCEPTION;
+            } elseif ($exception instanceof ServerException) {
+                $type = ConnectionException::SERVER_EXCEPTION;
+            } elseif ($exception instanceof TooManyRedirectsException) {
+                $type = ConnectionException::REDIRECTION_EXCEPTION;
+            }
+
             if ($exception instanceof RequestException) {
                 $request = $exception->getRequest();
                 $response = $exception->getResponse();
             }
-            throw new ConnectionException(sprintf('HTTP %s request to %s failed. Message: \'%s\', Code: %s', $method, $this->baseUri.$uri, $exception->getMessage(), $exception->getCode()), ConnectionException::REQUEST_EXCEPTION, $exception, $request, $response);
+            throw new ConnectionException($type, sprintf('HTTP %s request to %s failed. Message: \'%s\', Code: %s', $method, $this->baseUri.$uri, $exception->getMessage(), $exception->getCode()), $exception->getCode(), $exception, $request, $response);
         }
     }
 

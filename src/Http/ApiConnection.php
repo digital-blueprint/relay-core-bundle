@@ -128,7 +128,7 @@ class ApiConnection
             try {
                 $token = Tools::decodeJSON($responseData, true);
             } catch (\JsonException $exception) {
-                throw new ConnectionException(sprintf('Failed to JSON decode access token: '.$exception->getMessage()), ConnectionException::JSON_EXCEPTION);
+                throw new ConnectionException(ConnectionException::JSON_EXCEPTION, sprintf('Failed to JSON decode access token: '.$exception->getMessage()), $exception->getCode(), $exception);
             }
 
             $this->accessToken = $token['access_token'];
