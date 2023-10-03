@@ -1,3 +1,8 @@
+# v0.1.125
+
+* ExtensionTrait::addPathToHide() now optionally allows passing a method, for hiding
+  things other then GET.
+
 # v0.1.123
 
 * Fix WholeResultPaginator::getItems(), it would return all items instead of the page
