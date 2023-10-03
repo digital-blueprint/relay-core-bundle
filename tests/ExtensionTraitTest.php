@@ -22,6 +22,7 @@ class ExtensionTraitTest extends TestCase
         $this->assertTrue($params->has('api_platform.resource_class_directories'));
         $this->addPathToHide($builder, '/');
         $this->assertTrue($params->has('dbp_api.paths_to_hide'));
+        $this->addPathToHide($builder, '/', 'POST');
         $this->addRouteResource($builder, '.', null);
         $this->assertTrue($params->has('dbp_api.route_resources'));
         $this->addExposeHeader($builder, 'foobar');

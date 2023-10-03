@@ -32,8 +32,20 @@ final class OpenApiDecorator implements OpenApiFactoryInterface
         $newPaths = new Paths();
         foreach ($paths->getPaths() as $path => $pathItem) {
             $pathItem = $paths->getPath($path);
-            if ($pathItem->getGet() !== null && in_array($path, $pathsToHide, true)) {
+            if ($pathItem->getGet() !== null && in_array([$path, 'GET'], $pathsToHide, true)) {
                 $pathItem = $pathItem->withGet(null);
+            }
+            if ($pathItem->getPost() !== null && in_array([$path, 'POST'], $pathsToHide, true)) {
+                $pathItem = $pathItem->withPost(null);
+            }
+            if ($pathItem->getDelete() !== null && in_array([$path, 'DELETE'], $pathsToHide, true)) {
+                $pathItem = $pathItem->withDelete(null);
+            }
+            if ($pathItem->getPut() !== null && in_array([$path, 'PUT'], $pathsToHide, true)) {
+                $pathItem = $pathItem->withPut(null);
+            }
+            if ($pathItem->getPatch() !== null && in_array([$path, 'PATCH'], $pathsToHide, true)) {
+                $pathItem = $pathItem->withPatch(null);
             }
             $newPaths->addPath($path, $pathItem);
         }

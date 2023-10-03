@@ -29,11 +29,16 @@ trait ExtensionTrait
     }
 
     /**
-     * Registers a specific API path to be hidden from the API documentation.
+     * Registers a specific operation for an API path to be hidden from the API documentation.
+     * Hides GET by default, $method can be one of GET, POST, DELETE, POST, PUT.
      */
-    public function addPathToHide(ContainerBuilder $container, string $path): void
+    public function addPathToHide(ContainerBuilder $container, string $path, string $method = 'GET'): void
     {
-        $this->extendArrayParameter($container, 'dbp_api.paths_to_hide', [$path]);
+        $allowed = ['GET', 'POST', 'DELETE', 'POST', 'PUT'];
+        if (!in_array($method, $allowed, true)) {
+            throw new \RuntimeException('Method can only be one of: '.implode(', ', $allowed));
+        }
+        $this->extendArrayParameter($container, 'dbp_api.paths_to_hide', [[$path, $method]]);
     }
 
     /**
