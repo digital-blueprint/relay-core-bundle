@@ -12,6 +12,8 @@ use Exception;
 
 trait StateProviderTrait
 {
+    protected static $identifierName = 'identifier';
+
     /**
      * @return PartialPaginator|object|null
      *
@@ -23,7 +25,7 @@ trait StateProviderTrait
         if ($operation instanceof CollectionOperationInterface) {
             return $this->getCollectionInternal($context);
         } else {
-            return $this->getItemInternal($uriVariables['identifier'], $context);
+            return $this->getItemInternal($uriVariables[static::$identifierName], $context);
         }
     }
 }

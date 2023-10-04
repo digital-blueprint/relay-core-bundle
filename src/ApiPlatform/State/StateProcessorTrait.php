@@ -12,16 +12,18 @@ use ApiPlatform\Metadata\Put;
 
 trait StateProcessorTrait
 {
+    protected static $identifierName = 'identifier';
+
     public function process($data, Operation $operation, array $uriVariables = [], array $context = [])
     {
         if ($operation instanceof Post) {
-            return $this->post($data);
+            return $this->post($data, $context);
         } elseif ($operation instanceof Put) {
-            return $this->put($data, $context['previous_data'] ?? null);
+            return $this->put($uriVariables[static::$identifierName], $data, $context);
         } elseif ($operation instanceof Patch) {
-            return $this->patch($data, $context['previous_data'] ?? null);
+            return $this->patch($uriVariables[static::$identifierName], $data, $context);
         } elseif ($operation instanceof Delete) {
-            $this->delete($data);
+            $this->delete($uriVariables[static::$identifierName], $context);
         }
     }
 }

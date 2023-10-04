@@ -13,54 +13,59 @@ abstract class AbstractDataProcessor extends AbstractAuthorizationService implem
     use DataOperationTrait;
     use StateProcessorTrait;
 
+    private const FILTERS_CONTEXT_KEY = 'filters';
+
     protected const ADD_ITEM_OPERATION = 1;
     protected const REPLACE_ITEM_OPERATION = 2;
     protected const UPDATE_ITEM_OPERATION = 3;
     protected const REMOVE_ITEM_OPERATION = 4;
 
-    public function post($data)
+    protected function post($data, array $context)
     {
         $this->denyOperationAccessUnlessGranted(self::ADD_ITEM_OPERATION);
 
-        return $this->addItem($data);
+        return $this->addItem($data, $context[self::FILTERS_CONTEXT_KEY] ?? []);
     }
 
-    public function put($data, $previousData)
+    protected function put($identifier, $data, $context)
     {
         $this->denyOperationAccessUnlessGranted(self::REPLACE_ITEM_OPERATION);
 
-        return $this->replaceItem($data, $previousData);
+        return $this->replaceItem($identifier, $data, $context['previous_data'] ?? null,
+            $context[self::FILTERS_CONTEXT_KEY] ?? []);
     }
 
-    public function patch($data, $previousData)
+    protected function patch($identifier, $data, $context)
     {
         $this->denyOperationAccessUnlessGranted(self::UPDATE_ITEM_OPERATION);
 
-        return $this->updateItem($data, $previousData);
+        return $this->updateItem($identifier, $data, $context['previous_data'] ?? null,
+            $context[self::FILTERS_CONTEXT_KEY] ?? []);
     }
 
-    public function delete($data)
+    protected function delete($data, array $context)
     {
         $this->denyOperationAccessUnlessGranted(self::REMOVE_ITEM_OPERATION);
-        $this->removeItem($data);
+
+        $this->removeItem($data, $context[self::FILTERS_CONTEXT_KEY] ?? []);
     }
 
-    protected function addItem($data)
+    protected function addItem($data, array $filters)
     {
         return $data;
     }
 
-    protected function replaceItem($data, $previousData)
+    protected function replaceItem($identifier, $data, $previousData, array $filters)
     {
         return $data;
     }
 
-    protected function updateItem($data, $previousData)
+    protected function updateItem($identifier, $data, $previousData, array $filters)
     {
         return $data;
     }
 
-    protected function removeItem($data)
+    protected function removeItem($identifier, array $filters)
     {
     }
 }
