@@ -31,12 +31,23 @@ class Connection implements LoggerAwareInterface
     public const REQUEST_METHOD_GET = 'GET';
     public const REQUEST_METHOD_HEAD = 'HEAD';
     public const REQUEST_METHOD_POST = 'POST';
+    public const REQUEST_METHOD_PUT = 'PUT';
+    public const REQUEST_METHOD_PATCH = 'PATCH';
+    public const REQUEST_METHOD_DELETE = 'DELETE';
 
     public const REQUEST_OPTION_HEADERS = RequestOptions::HEADERS;
+    public const REQUEST_OPTION_QUERY = RequestOptions::QUERY;
 
+    /** @var string|null */
     private $baseUri;
+
+    /** @var CacheItemPoolInterface|null */
     private $cachePool;
+
+    /** @var int */
     private $cacheTTL;
+
+    /** @var object|null */
     private $clientHandler;
 
     public function __construct(string $baseUri = null)
@@ -65,6 +76,8 @@ class Connection implements LoggerAwareInterface
     }
 
     /**
+     * HTTP GET request.
+     *
      * @param array $query          Associative array of query parameters
      * @param array $requestOptions Array of request options to apply
      *
@@ -78,7 +91,22 @@ class Connection implements LoggerAwareInterface
     }
 
     /**
-     * Post web form parameters (automatically adds appropriate 'Content-Type' header).
+     * HTTP HEAD request.
+     *
+     * @param array $query          Associative array of query parameters
+     * @param array $requestOptions Array of request options to apply
+     *
+     * @throws ConnectionException
+     */
+    public function head(string $uri, array $query = [], array $requestOptions = []): ResponseInterface
+    {
+        $requestOptions[RequestOptions::QUERY] = $query;
+
+        return $this->request(self::REQUEST_METHOD_HEAD, $uri, $requestOptions);
+    }
+
+    /**
+     * HTTP POST request with web form parameters.
      *
      * @param array $parameters     Associative array of web form parameters to send
      * @param array $requestOptions Array of request options to apply
@@ -93,9 +121,9 @@ class Connection implements LoggerAwareInterface
     }
 
     /**
-     * Post data encoded in JSON format (automatically adds appropriate 'Content-Type' header).
+     * HTTP POST request with a body in JSON format.
      *
-     * @param mixed $data           Data to send (must be JSON encode-able)
+     * @param mixed $data           Data to JSON-encode and send (must be JSON encode-able)
      * @param array $requestOptions Array of request options to apply
      *
      * @throws ConnectionException
@@ -105,6 +133,48 @@ class Connection implements LoggerAwareInterface
         $requestOptions[RequestOptions::JSON] = $data;
 
         return $this->request(self::REQUEST_METHOD_POST, $uri, $requestOptions);
+    }
+
+    /**
+     * HTTP PUT request with a body in JSON format.
+     *
+     * @param mixed $data           Data to JSON-encode and send (must be JSON encode-able)
+     * @param array $requestOptions Array of request options to apply
+     *
+     * @throws ConnectionException
+     */
+    public function putJSON(string $uri, $data, array $requestOptions = []): ResponseInterface
+    {
+        $requestOptions[RequestOptions::JSON] = $data;
+
+        return $this->request(self::REQUEST_METHOD_PUT, $uri, $requestOptions);
+    }
+
+    /**
+     * HTTP PATCH request with a body in JSON format.
+     *
+     * @param mixed $data           Data to JSON-encode and send (must be JSON encode-able)
+     * @param array $requestOptions Array of request options to apply
+     *
+     * @throws ConnectionException
+     */
+    public function patchJSON(string $uri, $data, array $requestOptions = []): ResponseInterface
+    {
+        $requestOptions[RequestOptions::JSON] = $data;
+
+        return $this->request(self::REQUEST_METHOD_PATCH, $uri, $requestOptions);
+    }
+
+    /**
+     * HTTP DELETE request.
+     *
+     * @param array $requestOptions Array of request options to apply
+     *
+     * @throws ConnectionException
+     */
+    public function delete(string $uri, array $requestOptions = []): ResponseInterface
+    {
+        return $this->request(self::REQUEST_METHOD_DELETE, $uri, $requestOptions);
     }
 
     /**
