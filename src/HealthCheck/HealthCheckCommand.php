@@ -39,7 +39,7 @@ class HealthCheckCommand extends Command implements LoggerAwareInterface
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $status = 0;
+        $failed = [];
         foreach ($this->checks as $check) {
             $output->writeln('<fg=green;options=bold>['.$check->getName().']</>');
             $results = $check->check(new CheckOptions());
@@ -52,7 +52,7 @@ class HealthCheckCommand extends Command implements LoggerAwareInterface
                     $color = 'yellow';
                 } elseif ($result->getStatus() === CheckResult::STATUS_FAILURE) {
                     $color = 'red';
-                    ++$status;
+                    $failed[] = [$check, $result];
                 } else {
                     assert(0);
                 }
@@ -64,6 +64,13 @@ class HealthCheckCommand extends Command implements LoggerAwareInterface
             }
         }
 
-        return $status;
+        if ($failed) {
+            $output->writeln('<fg=red;options=bold>The following checks failed:</>');
+            foreach ($failed as [$check, $result]) {
+                $output->writeln('<options=bold>['.$check->getName().']</> '.$result->getDescription());
+            }
+        }
+
+        return count($failed);
     }
 }
