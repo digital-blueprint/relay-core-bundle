@@ -1,3 +1,8 @@
+# v0.1.128
+
+* health-checks: show a summary of all failed checks at the end
+* Support kevinrob/guzzle-cache-middleware v5
+
 # v0.1.125
 
 * ExtensionTrait::addPathToHide() now optionally allows passing a method, for hiding
