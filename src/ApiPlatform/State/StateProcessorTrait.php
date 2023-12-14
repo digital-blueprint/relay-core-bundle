@@ -23,7 +23,7 @@ trait StateProcessorTrait
         } elseif ($operation instanceof Patch) {
             return $this->patch($uriVariables[static::$identifierName], $data, $context);
         } elseif ($operation instanceof Delete) {
-            $this->delete($uriVariables[static::$identifierName], $context);
+            $this->delete($uriVariables[static::$identifierName], $data, $context);
         }
     }
 }

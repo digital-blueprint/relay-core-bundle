@@ -43,11 +43,11 @@ abstract class AbstractDataProcessor extends AbstractAuthorizationService implem
             $context[self::FILTERS_CONTEXT_KEY] ?? []);
     }
 
-    protected function delete($data, array $context)
+    protected function delete($identifier, $data, array $context)
     {
         $this->denyOperationAccessUnlessGranted(self::REMOVE_ITEM_OPERATION);
 
-        $this->removeItem($data, $context[self::FILTERS_CONTEXT_KEY] ?? []);
+        $this->removeItem($identifier, $data, $context[self::FILTERS_CONTEXT_KEY] ?? []);
     }
 
     protected function addItem($data, array $filters)
@@ -65,7 +65,7 @@ abstract class AbstractDataProcessor extends AbstractAuthorizationService implem
         return $data;
     }
 
-    protected function removeItem($identifier, array $filters)
+    protected function removeItem($identifier, $data, array $filters): void
     {
     }
 }
