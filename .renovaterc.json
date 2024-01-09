@@ -18,7 +18,7 @@
     },
     {
       "matchPackageNames": ["api-platform/core"],
-      "allowedVersions": "<2.7"
+      "allowedVersions": "<3"
     }
   ],
   "js": {

@@ -57,8 +57,8 @@ class LocalDataEventDispatcher
     {
         $availableAttributes = $entity->getLocalData() ? array_keys($entity->getLocalData()) : [];
 
-        return count($this->localDataAttributes) === count($availableAttributes) &&
-            empty(array_diff($this->localDataAttributes, $availableAttributes));
+        return count($this->localDataAttributes) === count($availableAttributes)
+            && empty(array_diff($this->localDataAttributes, $availableAttributes));
     }
 
     /**

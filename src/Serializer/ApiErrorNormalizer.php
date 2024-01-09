@@ -74,7 +74,7 @@ class ApiErrorNormalizer implements ContextAwareNormalizerInterface, NormalizerA
         }
 
         return
-            ($format === 'jsonld' || $format === 'jsonproblem') &&
-            ($data instanceof FlattenException);
+            ($format === 'jsonld' || $format === 'jsonproblem')
+            && ($data instanceof FlattenException);
     }
 }

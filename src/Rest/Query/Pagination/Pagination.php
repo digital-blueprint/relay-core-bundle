@@ -20,7 +20,7 @@ class Pagination
     }
 
     public static function getMaxNumItemsPerPage(array $options,
-                                                 int $maxNumItemPerPageDefault = self::MAX_NUM_ITEMS_PER_PAGE_DEFAULT): int
+        int $maxNumItemPerPageDefault = self::MAX_NUM_ITEMS_PER_PAGE_DEFAULT): int
     {
         return max(1, intval(
             $options[self::MAX_NUM_ITEMS_PER_PAGE_PARAMETER_NAME] ?? $maxNumItemPerPageDefault));

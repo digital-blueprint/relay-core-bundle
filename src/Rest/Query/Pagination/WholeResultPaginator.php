@@ -18,9 +18,9 @@ class WholeResultPaginator extends PartialPaginator
     public function valid(): bool
     {
         return
-            ($this->currentPosition < count($this->items)) &&
-            ($this->currentPosition < ($this->currentPageNumber * $this->maxNumItemsPerPage)) &&
-            ($this->currentPosition >= (($this->currentPageNumber - 1) * $this->maxNumItemsPerPage));
+            ($this->currentPosition < count($this->items))
+            && ($this->currentPosition < ($this->currentPageNumber * $this->maxNumItemsPerPage))
+            && ($this->currentPosition >= (($this->currentPageNumber - 1) * $this->maxNumItemsPerPage));
     }
 
     public function rewind(): void

@@ -12,6 +12,7 @@ $config->setRules([
     '@PHP70Migration' => true,
     '@PHP71Migration' => true,
     '@PHP73Migration' => true,
+    '@PHP74Migration' => true,
     '@DoctrineAnnotation' => true,
     'doctrine_annotation_array_assignment' => ['operator' => '='],
     'yoda_style' => false,
@@ -20,6 +21,7 @@ $config->setRules([
     'declare_strict_types' => true,
     'method_argument_space' => ['on_multiline' => 'ignore'],
     'phpdoc_to_comment' => false,
+    'no_superfluous_phpdoc_tags' => ['allow_mixed' => true, 'remove_inheritdoc' => true],
 ])
 ->setRiskyAllowed(true)
 ->setFinder($finder);

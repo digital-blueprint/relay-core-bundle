@@ -11,7 +11,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 trait UserAuthTrait
 {
-    public function withUser(string $id, array $roles = [], ?string $token = null): Client
+    public function withUser(string $id, array $roles = [], string $token = null): Client
     {
         KernelTestCase::ensureKernelShutdown();
 

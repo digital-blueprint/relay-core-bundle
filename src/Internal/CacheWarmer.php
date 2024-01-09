@@ -30,7 +30,7 @@ class CacheWarmer implements CacheWarmerInterface
         // This is a workaround for https://github.com/symfony/symfony/issues/32569
         // Create a dummy cache entry, so that the cache database and table get created,
         // so we don't get spammed with errors on cache misses
-        $key = (Uuid::v4())->toRfc4122();
+        $key = Uuid::v4()->toRfc4122();
         $item = $this->adapter->getItem($key);
         $item->set(true);
         $this->adapter->save($item);

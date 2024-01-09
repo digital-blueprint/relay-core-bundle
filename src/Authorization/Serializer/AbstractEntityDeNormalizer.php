@@ -74,8 +74,6 @@ class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements
     }
 
     /**
-     * {@inheritdoc}
-     *
      * @return array|string|int|float|bool|\ArrayObject|null
      */
     public function normalize($object, $format = null, array $context = [])
@@ -99,9 +97,6 @@ class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements
         return $this->normalizer->normalize($object, $format, $context);
     }
 
-    /**
-     *  {@inheritdoc}
-     */
     public function supportsNormalization($data, $format = null, array $context = []): bool
     {
         if ($this->entityClassNameToReadAttributeNamesMapping === null || is_object($data) === false) {
@@ -119,8 +114,6 @@ class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements
     }
 
     /**
-     * {@inheritdoc}
-     *
      * @return mixed
      */
     public function denormalize($data, string $type, string $format = null, array $context = [])
@@ -143,9 +136,6 @@ class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements
         return $this->denormalizer->denormalize($data, $type, $format, $context);
     }
 
-    /**
-     *  {@inheritdoc}
-     */
     public function supportsDenormalization($data, string $type, string $format = null, array $context = []): bool
     {
         if ($this->entityClassNameToWriteAttributeNamesMapping === null) {

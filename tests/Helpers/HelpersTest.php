@@ -53,7 +53,7 @@ class HelpersTest extends TestCase
 
         $this->assertSame(
             MimeTools::getMimeType(base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVQI12Mo3CQPAALaAUMu4mcOAAAAAElFTkSuQmCC', true)),
-'image/png');
+            'image/png');
 
         $this->assertSame(MimeTools::getFileExtensionForMimeType('image/png'), 'png');
     }

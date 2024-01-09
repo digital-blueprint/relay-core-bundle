@@ -31,8 +31,8 @@ class CacheCheck implements CheckInterface
     {
         $result = new CheckResult('Check if the application cache works');
 
-        $key = (Uuid::v4())->toRfc4122();
-        $value = (Uuid::v4())->toRfc4122();
+        $key = Uuid::v4()->toRfc4122();
+        $value = Uuid::v4()->toRfc4122();
         $result->set(CheckResult::STATUS_SUCCESS);
         try {
             $item = $this->adapter->getItem($key);

@@ -6,9 +6,8 @@ namespace Dbp\Relay\CoreBundle\Rest\Query\Pagination;
 
 use ApiPlatform\State\Pagination\PartialPaginatorInterface;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
-use Iterator;
 
-abstract class Paginator implements Iterator, PartialPaginatorInterface
+abstract class Paginator implements \Iterator, PartialPaginatorInterface
 {
     /** @var int */
     protected $currentPosition;
@@ -65,8 +64,8 @@ abstract class Paginator implements Iterator, PartialPaginatorInterface
     public function valid(): bool
     {
         return
-            $this->currentPosition < count($this->items) &&
-            $this->currentPosition < $this->maxNumItemsPerPage;
+            $this->currentPosition < count($this->items)
+            && $this->currentPosition < $this->maxNumItemsPerPage;
     }
 
     public function rewind(): void
