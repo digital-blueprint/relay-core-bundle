@@ -43,7 +43,7 @@ class PreparedFilterProvider
             ->end()
             ->end()
             ->end()
-            ;
+        ;
     }
 
     public function loadConfig(array $config): void

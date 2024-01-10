@@ -48,7 +48,7 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
                     ->end()
                 ->end()
             ->end()
-            ;
+        ;
     }
 
     public static function getSubscribedEvents(): array

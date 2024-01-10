@@ -8,7 +8,6 @@ use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
-use Exception;
 
 trait StateProviderTrait
 {
@@ -18,7 +17,7 @@ trait StateProviderTrait
      * @return PartialPaginator|object|null
      *
      * @throws ApiError
-     * @throws Exception
+     * @throws \Exception
      */
     public function provide(Operation $operation, array $uriVariables = [], array $context = [])
     {

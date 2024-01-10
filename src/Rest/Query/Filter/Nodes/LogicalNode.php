@@ -67,14 +67,14 @@ abstract class LogicalNode extends Node
                     // () && B => B, or: () && B => B
                     case NodeType::AND:
                     case NodeType::OR:
-                        if ($childNodeType === static::NODE_TYPE ||
-                            count($childNode->getChildren()) <= 1) {
+                        if ($childNodeType === static::NODE_TYPE
+                            || count($childNode->getChildren()) <= 1) {
                             $childNodes = array_merge($childNodes, $childNode->getChildren());
                             $appendChild = false;
                         }
                         break;
 
-                    // !(!A) => A
+                        // !(!A) => A
                     case NodeType::NOT:
                         $grandChildNode = $childNode->getChildren()[0];
                         if ($grandChildNode instanceof NotNode) {
@@ -84,8 +84,8 @@ abstract class LogicalNode extends Node
                         break;
                 }
             } elseif ($childNode instanceof ConstantNode) {
-                if (($childNode->isTrue() && static::NODE_TYPE === NodeType::OR) ||
-                    ($childNode->isFalse() && static::NODE_TYPE === NodeType::AND)) {
+                if (($childNode->isTrue() && static::NODE_TYPE === NodeType::OR)
+                    || ($childNode->isFalse() && static::NODE_TYPE === NodeType::AND)) {
                     // A || true => true
                     // A && false => false
                     $childNodes = [$childNode];

@@ -25,7 +25,6 @@ use Dbp\Relay\CoreBundle\Rest\Query\Filter\PreparedFilterProvider;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\Pagination;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
 use Dbp\Relay\CoreBundle\Rest\Query\Parameters;
-use Exception;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\HttpFoundation\Response;
@@ -108,7 +107,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
     /**
      * @throws ApiError
-     * @throws Exception
+     * @throws \Exception
      */
     protected function getItemInternal(string $id, array $context): ?object
     {
@@ -125,7 +124,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
     /**
      * @throws ApiError
-     * @throws Exception
+     * @throws \Exception
      */
     protected function getCollectionInternal(array $context): PartialPaginator
     {
@@ -175,7 +174,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
     /**
      * @throws ApiError
-     * @throws Exception
+     * @throws \Exception
      */
     private function createOptions(array $filters): array
     {
@@ -194,12 +193,12 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
     /**
      * @throws ApiError
-     * @throws Exception
+     * @throws \Exception
      */
     private function createFilter($filterParameter, ?string $resourceClass, ?array $deserializationGroups, bool $removeForbiddenLocalDataAttributeConditions = true): Filter
     {
         if ($resourceClass === null || $deserializationGroups === null) {
-            throw new Exception('Provider context must contain \''.self::RESOURCE_CLASS_CONTEXT_KEY.'\' and \''.self::GROUPS_CONTEXT_KEY.'\' when using filters to determine available resource properties.');
+            throw new \Exception('Provider context must contain \''.self::RESOURCE_CLASS_CONTEXT_KEY.'\' and \''.self::GROUPS_CONTEXT_KEY.'\' when using filters to determine available resource properties.');
         }
 
         if (is_array($filterParameter) === false) {
@@ -235,9 +234,9 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     {
         foreach ($logicalNode->getChildren() as $child) {
             $localDataAttributeName = '';
-            if ($child instanceof ConditionNode &&
-                self::isLocalDataAttributePath($child->getField(), $localDataAttributeName) &&
-                !$this->isGrantedReadAccessToLocalDataAttribute($localDataAttributeName)) {
+            if ($child instanceof ConditionNode
+                && self::isLocalDataAttributePath($child->getField(), $localDataAttributeName)
+                && !$this->isGrantedReadAccessToLocalDataAttribute($localDataAttributeName)) {
                 $logicalNode->removeChild($child);
                 $logicalNode->appendChild(new ConstantNode(false));
             } elseif ($child instanceof LogicalNode) {
@@ -251,7 +250,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
      * do not leak to the user.
      *
      * @throws ApiError
-     * @throws Exception
+     * @throws \Exception
      */
     private function createPreparedFilter(string $preparedFilterId, string $resourceClass, array $deserializationGroups): Filter
     {

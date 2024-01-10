@@ -9,12 +9,11 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Helpers;
 
 use ApiPlatform\State\Pagination\PaginatorInterface;
-use Iterator;
 
 /**
  * @deprecated Use Dbp\Relay\CoreBundle\Pagination\PartialPaginator
  */
-abstract class ArrayPaginator implements Iterator, PaginatorInterface
+abstract class ArrayPaginator implements \Iterator, PaginatorInterface
 {
     protected $position = 0;
     protected $array = [];
@@ -102,9 +101,9 @@ abstract class ArrayPaginator implements Iterator, PaginatorInterface
 
     public function valid(): bool
     {
-        $value = isset($this->array[$this->position]) &&
-            ($this->position >= (($this->page - 1) * $this->perPage)) &&
-            ($this->position < ($this->page * $this->perPage));
+        $value = isset($this->array[$this->position])
+            && ($this->position >= (($this->page - 1) * $this->perPage))
+            && ($this->position < ($this->page * $this->perPage));
 
         return $value;
     }

@@ -25,7 +25,7 @@ class UserSession implements UserSessionInterface
      */
     private $security;
 
-    public function __construct(?Security $security = null)
+    public function __construct(Security $security = null)
     {
         $this->security = $security;
     }
@@ -46,9 +46,9 @@ class UserSession implements UserSessionInterface
 
     public function isAuthenticated(): bool
     {
-        return $this->provider !== null /* this criterion alone would suffice */ &&
-            $this->security !== null &&
-            $this->security->isGranted('IS_AUTHENTICATED_FULLY');
+        return $this->provider !== null /* this criterion alone would suffice */
+            && $this->security !== null
+            && $this->security->isGranted('IS_AUTHENTICATED_FULLY');
     }
 
     public function getSessionLoggingId(): string
@@ -71,7 +71,7 @@ class UserSession implements UserSessionInterface
             $key = $this->provider->getSessionCacheKey();
         }
         if ($key === null) {
-            $key = (Uuid::v4())->toRfc4122();
+            $key = Uuid::v4()->toRfc4122();
         }
 
         return $key;

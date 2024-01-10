@@ -6,7 +6,6 @@ namespace Dbp\Relay\CoreBundle\Authorization\EventSubscriber;
 
 use Dbp\Relay\CoreBundle\Authorization\AuthorizationDataMuxer;
 use Dbp\Relay\CoreBundle\ProxyApi\AbstractProxyDataEventSubscriber;
-use Exception;
 
 class ProxyDataEventSubscriber extends AbstractProxyDataEventSubscriber
 {
@@ -50,7 +49,7 @@ class ProxyDataEventSubscriber extends AbstractProxyDataEventSubscriber
     }
 
     /**
-     * @throws Exception
+     * @throws \Exception
      */
     protected function callFunction(string $functionName, array $arguments): ?array
     {

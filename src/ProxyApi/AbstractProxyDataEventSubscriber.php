@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\ProxyApi;
 
 use Dbp\Relay\CoreBundle\Exception\ApiError;
-use Exception;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Response;
@@ -39,7 +38,7 @@ abstract class AbstractProxyDataEventSubscriber implements EventSubscriberInterf
 
         try {
             $returnValue = $this->callFunction($functionName, $arguments);
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             $proxyData->setErrorsFromException($exception);
         }
 
