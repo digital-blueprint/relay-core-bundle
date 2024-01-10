@@ -1,3 +1,7 @@
+# v0.1.131
+
+* Drop support for PHP 7.3
+
 # v0.1.128
 
 * health-checks: show a summary of all failed checks at the end
