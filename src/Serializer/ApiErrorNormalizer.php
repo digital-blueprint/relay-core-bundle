@@ -33,7 +33,7 @@ class ApiErrorNormalizer implements ContextAwareNormalizerInterface, NormalizerA
 
         $normalized = $this->normalizer->normalize($object, $format, $context);
 
-        if ($object->getClass() === APIError::class) {
+        if ($object->getClass() === ApiError::class) {
             $message = $object->getMessage();
             $message = json_decode($message, true);
             $errorId = $message['errorId'];

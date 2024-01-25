@@ -1,6 +1,8 @@
 #!/usr/bin/env php
 <?php
 
+declare(strict_types=1);
+
 // ########################################################################################################
 // Disables the DATABASE_URL env variable in `.env` when its default value is used to prevent confusion.
 // ########################################################################################################
