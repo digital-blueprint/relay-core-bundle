@@ -11,7 +11,7 @@ use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
 
 trait StateProviderTrait
 {
-    protected static $identifierName = 'identifier';
+    use StateTrait;
 
     /**
      * @return PartialPaginator|object|null
@@ -21,6 +21,9 @@ trait StateProviderTrait
      */
     public function provide(Operation $operation, array $uriVariables = [], array $context = [])
     {
+        $this->currentOperation = $operation;
+        $this->currentUriVariables = $uriVariables;
+
         if ($operation instanceof CollectionOperationInterface) {
             return $this->getCollectionInternal($context);
         } else {
