@@ -12,8 +12,8 @@ use Dbp\Relay\CoreBundle\Helpers\Tools;
  */
 class AuthorizationExpressionChecker
 {
-    private const USER_VARIBLE_NAME = 'user';
-    private const DEFAULT_OBJECT_VARIBLE_NAME = 'object';
+    private const USER_VARIABLE_NAME = 'user';
+    private const DEFAULT_OBJECT_VARIABLE_NAME = 'object';
 
     /** @var ExpressionLanguage */
     private $expressionLanguage;
@@ -24,21 +24,17 @@ class AuthorizationExpressionChecker
     /** @var array */
     private $attributeExpressions;
 
-    /** @var AuthorizationDataMuxer */
-    private $dataMux;
-
     /** @var array */
     private $roleExpressionStack;
 
     /** @var array */
     private $attributeExpressionStack;
 
-    public function __construct(AuthorizationDataMuxer $dataMux)
+    public function __construct()
     {
         $this->expressionLanguage = new ExpressionLanguage();
         $this->policyExpressions = [];
         $this->attributeExpressions = [];
-        $this->dataMux = $dataMux;
         $this->roleExpressionStack = [];
         $this->attributeExpressionStack = [];
     }
@@ -77,18 +73,6 @@ class AuthorizationExpressionChecker
     }
 
     /**
-     * @param mixed|null $defaultValue
-     *
-     * @return mixed|null
-     *
-     * @throws AuthorizationException
-     */
-    public function getUserAttribute(AuthorizationUser $currentAuthorizationUser, string $attributeName, $defaultValue = null)
-    {
-        return $this->dataMux->getAttribute($currentAuthorizationUser->getIdentifier(), $attributeName, $defaultValue);
-    }
-
-    /**
      * Currently, there are no custom privileges. As opposed to roles and attributes, they can't be cached per privilege, since there values depend on the subject.
      * Might be a future requirement.
      *
@@ -115,8 +99,8 @@ class AuthorizationExpressionChecker
             }
 
             $variables = [
-                self::USER_VARIBLE_NAME => $currentAuthorizationUser,
-                self::DEFAULT_OBJECT_VARIBLE_NAME => $resource,
+                self::USER_VARIABLE_NAME => $currentAuthorizationUser,
+                self::DEFAULT_OBJECT_VARIABLE_NAME => $resource,
             ];
 
             if (!Tools::isNullOrEmpty($resourceAlias)) {

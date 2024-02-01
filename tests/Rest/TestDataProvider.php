@@ -6,15 +6,15 @@ namespace Dbp\Relay\CoreBundle\Tests\Rest;
 
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
-use Dbp\Relay\CoreBundle\Authorization\AuthorizationDataMuxer;
-use Dbp\Relay\CoreBundle\Authorization\AuthorizationDataProviderProvider;
 use Dbp\Relay\CoreBundle\LocalData\LocalDataEventDispatcher;
 use Dbp\Relay\CoreBundle\Rest\AbstractDataProvider;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\Pagination;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
-use Dbp\Relay\CoreBundle\Tests\Authorization\DummyAuthorizationDataProvider;
 use Dbp\Relay\CoreBundle\Tests\Locale\TestLocale;
+use Dbp\Relay\CoreBundle\Tests\User\DummyUserAttributeProvider;
 use Dbp\Relay\CoreBundle\TestUtils\TestUserSession;
+use Dbp\Relay\CoreBundle\User\UserAttributeMuxer;
+use Dbp\Relay\CoreBundle\User\UserAttributeProviderProvider;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class TestDataProvider extends AbstractDataProvider
@@ -32,14 +32,14 @@ class TestDataProvider extends AbstractDataProvider
     {
         $testDataProvider = new TestDataProvider($eventDispatcher ?? new EventDispatcher());
 
-        $authorizationDataProvider = new DummyAuthorizationDataProvider([
+        $authorizationDataProvider = new DummyUserAttributeProvider([
             'ROLE_TEST_USER' => true,
             'ROLE_ADMIN' => false,
         ]);
 
-        $testDataProvider->__injectServices(
+        $testDataProvider->__injectUserSessionAndUserAttributeMuxer(
             new TestUserSession('testuser'),
-            new AuthorizationDataMuxer(new AuthorizationDataProviderProvider([$authorizationDataProvider]), new EventDispatcher()));
+            new UserAttributeMuxer(new UserAttributeProviderProvider([$authorizationDataProvider]), new EventDispatcher()));
         $testDataProvider->__injectLocale(new TestLocale('en'));
         $testDataProvider->__injectPropertyNameCollectionFactory(new TestPropertyNameCollectionFactory());
 

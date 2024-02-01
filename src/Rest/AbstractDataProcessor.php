@@ -20,6 +20,11 @@ abstract class AbstractDataProcessor extends AbstractAuthorizationService implem
     protected const UPDATE_ITEM_OPERATION = 3;
     protected const REMOVE_ITEM_OPERATION = 4;
 
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
     protected function post($data, array $context)
     {
         $this->denyOperationAccessUnlessGranted(self::ADD_ITEM_OPERATION);

@@ -71,8 +71,10 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $rootNode->append(PreparedFilterProvider::getConfigNodeDefinition());
     }
 
-    protected function __construct()
+    public function __construct()
     {
+        parent::__construct();
+
         $this->preparedFilterController = new PreparedFilterProvider();
         $this->localDataAccessChecker = new LocalDataAccessChecker();
     }

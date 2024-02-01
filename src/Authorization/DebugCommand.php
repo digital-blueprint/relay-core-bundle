@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Authorization;
 
+use Dbp\Relay\CoreBundle\User\UserAttributeMuxer;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\Console\Command\Command;
@@ -18,14 +19,14 @@ class DebugCommand extends Command implements LoggerAwareInterface
     protected static $defaultName = 'dbp:relay:core:auth-debug';
 
     /**
-     * @var AuthorizationDataMuxer
+     * @var UserAttributeMuxer
      */
-    private $mux;
+    private $userAttributeMuxer;
 
-    public function __construct(AuthorizationDataMuxer $mux)
+    public function __construct(UserAttributeMuxer $userAttributeMuxer)
     {
         parent::__construct();
-        $this->mux = $mux;
+        $this->userAttributeMuxer = $userAttributeMuxer;
     }
 
     protected function configure()
@@ -38,12 +39,12 @@ class DebugCommand extends Command implements LoggerAwareInterface
     {
         $username = $input->getArgument('username');
 
-        $attrs = $this->mux->getAvailableAttributes();
+        $attrs = $this->userAttributeMuxer->getAvailableAttributes();
         $all = [];
         $default = new \stdClass();
         sort($attrs, SORT_STRING | SORT_FLAG_CASE);
         foreach ($attrs as $attr) {
-            $all[$attr] = $this->mux->getAttribute($username, $attr, $default);
+            $all[$attr] = $this->userAttributeMuxer->getAttribute($username, $attr, $default);
         }
 
         // Now print them out

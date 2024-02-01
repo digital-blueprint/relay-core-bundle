@@ -4,23 +4,19 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Authorization;
 
-use Dbp\Relay\CoreBundle\API\UserSessionInterface;
+use Dbp\Relay\CoreBundle\User\UserAttributeException;
 
 /**
  * Provides the user interface available within privilege expressions.
  */
 class AuthorizationUser
 {
-    /** @var AuthorizationExpressionChecker */
-    private $authorizationChecker;
+    /** @var AbstractAuthorizationService */
+    private $authorizationService;
 
-    /** @var UserSessionInterface */
-    private $userSession;
-
-    public function __construct(UserSessionInterface $userSession, AuthorizationExpressionChecker $authorizationChecker)
+    public function __construct(AbstractAuthorizationService $authorizationService)
     {
-        $this->userSession = $userSession;
-        $this->authorizationChecker = $authorizationChecker;
+        $this->authorizationService = $authorizationService;
     }
 
     /**
@@ -28,7 +24,7 @@ class AuthorizationUser
      */
     public function getIdentifier(): ?string
     {
-        return $this->userSession->getUserIdentifier();
+        return $this->authorizationService->getCurrentUserIdentifier();
     }
 
     /**
@@ -36,7 +32,7 @@ class AuthorizationUser
      */
     public function isAuthenticated(): bool
     {
-        return $this->userSession->isAuthenticated();
+        return $this->authorizationService->isCurrentUserAuthenticated();
     }
 
     /**
@@ -48,7 +44,7 @@ class AuthorizationUser
      */
     public function getAttribute(string $attributeName, $defaultValue = null)
     {
-        return $this->authorizationChecker->evalAttributeExpression($this, $attributeName, $defaultValue);
+        return $this->authorizationService->getAttribute($attributeName, $defaultValue);
     }
 
     /**
@@ -58,7 +54,7 @@ class AuthorizationUser
      */
     public function isGranted(string $policyName, $resource = null): bool
     {
-        return $this->authorizationChecker->isGranted($this, $policyName, $resource);
+        return $this->authorizationService->isGranted($policyName, $resource);
     }
 
     /**
@@ -67,9 +63,10 @@ class AuthorizationUser
      * @return mixed|null
      *
      * @throws AuthorizationException
+     * @throws UserAttributeException
      */
     public function get(string $attributeName, $defaultValue = null)
     {
-        return $this->authorizationChecker->getUserAttribute($this, $attributeName, $defaultValue);
+        return $this->authorizationService->getCurrentUserAttribute($attributeName, $defaultValue);
     }
 }

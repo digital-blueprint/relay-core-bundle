@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Authorization;
 
-use Dbp\Relay\CoreBundle\API\UserSessionInterface;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
+use Dbp\Relay\CoreBundle\User\AbstractUserAttributeService;
 use Symfony\Component\HttpFoundation\Response;
 
-abstract class AbstractAuthorizationService
+abstract class AbstractAuthorizationService extends AbstractUserAttributeService
 {
     /** @var AuthorizationExpressionChecker */
     private $userAuthorizationChecker;
@@ -19,13 +19,12 @@ abstract class AbstractAuthorizationService
     /** @var array|null */
     private $config;
 
-    /**
-     * @required
-     */
-    public function __injectServices(UserSessionInterface $userSession, AuthorizationDataMuxer $mux)
+    public function __construct()
     {
-        $this->userAuthorizationChecker = new AuthorizationExpressionChecker($mux);
-        $this->currentAuthorizationUser = new AuthorizationUser($userSession, $this->userAuthorizationChecker);
+        parent::__construct();
+
+        $this->userAuthorizationChecker = new AuthorizationExpressionChecker();
+        $this->currentAuthorizationUser = new AuthorizationUser($this);
 
         $this->loadConfig();
     }
@@ -116,20 +115,6 @@ abstract class AbstractAuthorizationService
     public function getAttribute(string $attributeName, $defaultValue = null)
     {
         return $this->getAttributeInternal($attributeName, $defaultValue);
-    }
-
-    /**
-     * Gets a user attribute directly.
-     *
-     * @param mixed|null $defaultValue The value to return if the user attribute is declared but not specified for the current user
-     *
-     * @return mixed|null
-     *
-     * @throws AuthorizationException If the user attribute is undeclared
-     */
-    public function getUserAttribute(string $userAttributeName, $defaultValue = null)
-    {
-        return $this->userAuthorizationChecker->getUserAttribute($this->currentAuthorizationUser, $userAttributeName, $defaultValue);
     }
 
     private function loadConfig()

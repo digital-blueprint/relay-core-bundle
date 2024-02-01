@@ -103,15 +103,6 @@ services:
     autowire: true
     autoconfigure: true
 
-  Dbp\Relay\CoreBundle\Authorization\AuthorizationDataProviderProvider:
-    autowire: true
-    autoconfigure: true
-    arguments: [ !tagged auth.authorization_data_provider ]
-
-  Dbp\Relay\CoreBundle\Authorization\AuthorizationDataMuxer:
-    autowire: true
-    autoconfigure: true
-
   Dbp\Relay\CoreBundle\Helpers\Locale:
     autowire: true
     autoconfigure: true
@@ -134,5 +125,14 @@ services:
       - setLocale: ['@locale']
 
   Dbp\Relay\CoreBundle\Internal\CacheWarmer:
+    autowire: true
+    autoconfigure: true
+
+  Dbp\Relay\CoreBundle\User\UserAttributeProviderProvider:
+    autowire: true
+    autoconfigure: true
+    arguments: [ !tagged user.user_attribute_provider ]
+
+  Dbp\Relay\CoreBundle\User\UserAttributeMuxer:
     autowire: true
     autoconfigure: true

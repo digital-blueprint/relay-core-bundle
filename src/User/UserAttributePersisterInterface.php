@@ -6,5 +6,8 @@ namespace Dbp\Relay\CoreBundle\User;
 
 interface UserAttributePersisterInterface
 {
-    public function setUserAttribute(string $userIdentifier, string $attributeName, string $attributeValue);
+    /**
+     * @param mixed $attributeValue
+     */
+    public function setUserAttribute(string $userIdentifier, string $attributeName, $attributeValue): void;
 }
