@@ -13,23 +13,27 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
  */
 class ApiError extends HttpException
 {
-    private const WITHDETAILSSTATUS = -1;
+    private const WITH_DETAILS_STATUS_CODE = -1;
+    private const STATUS_CODE_KEY = 'statusCode';
+    private const ERROR_MESSAGE_KEY = 'message';
+    private const ERROR_ID_KEY = 'errorId';
+    private const ERROR_DETAILS_KEY = 'errorDetails';
 
     public function __construct(int $statusCode, ?string $message = '', \Throwable $previous = null, array $headers = [], ?int $code = 0)
     {
-        if ($statusCode === self::WITHDETAILSSTATUS) {
-            $decoded = json_decode($message, true, 512, JSON_THROW_ON_ERROR);
-            $statusCode = $decoded['statusCode'];
-            unset($decoded['statusCode']);
+        if ($statusCode === self::WITH_DETAILS_STATUS_CODE) {
+            $messageDecoded = self::decodeMessage($message);
+            $statusCode = $messageDecoded[self::STATUS_CODE_KEY];
+            unset($messageDecoded[self::STATUS_CODE_KEY]);
         } else {
-            $decoded = [
-                'message' => $message,
-                'errorId' => '',
-                'errorDetails' => null,
+            $messageDecoded = [
+                self::ERROR_MESSAGE_KEY => $message,
+                self::ERROR_ID_KEY => '',
+                self::ERROR_DETAILS_KEY => null,
             ];
         }
 
-        parent::__construct($statusCode, json_encode($decoded), $previous, $headers, $code);
+        parent::__construct($statusCode, json_encode($messageDecoded), $previous, $headers, $code);
     }
 
     /**
@@ -41,19 +45,36 @@ class ApiError extends HttpException
     public static function withDetails(int $statusCode, ?string $message = '', string $errorId = '', array $errorDetails = []): ApiError
     {
         $message = [
-            'statusCode' => $statusCode,
-            'message' => $message,
-            'errorId' => $errorId,
-            'errorDetails' => $errorDetails,
+            self::STATUS_CODE_KEY => $statusCode,
+            self::ERROR_MESSAGE_KEY => $message,
+            self::ERROR_ID_KEY => $errorId,
+            self::ERROR_DETAILS_KEY => $errorDetails,
         ];
 
-        return new ApiError(self::WITHDETAILSSTATUS, json_encode($message));
+        return new ApiError(self::WITH_DETAILS_STATUS_CODE, json_encode($message));
     }
 
     public function getErrorId(): string
     {
-        $decoded = json_decode($this->getMessage(), true, 512, JSON_THROW_ON_ERROR);
+        return self::decodeMessage($this->getMessage())[self::ERROR_ID_KEY];
+    }
 
-        return $decoded['errorId'];
+    public function getErrorMessage(): string
+    {
+        return self::decodeMessage($this->getMessage())[self::ERROR_MESSAGE_KEY];
+    }
+
+    public function getErrorDetails(): string
+    {
+        return self::decodeMessage($this->getMessage())[self::ERROR_DETAILS_KEY];
+    }
+
+    private static function decodeMessage(string $message): array
+    {
+        try {
+            return json_decode($message, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $jsonException) {
+            throw new \RuntimeException('unexpected error on json_decode');
+        }
     }
 }
