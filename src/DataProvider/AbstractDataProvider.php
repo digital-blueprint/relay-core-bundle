@@ -14,17 +14,17 @@ use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
  */
 abstract class AbstractDataProvider extends \Dbp\Relay\CoreBundle\Rest\AbstractDataProvider implements RestrictedDataProviderInterface, ItemDataProviderInterface, CollectionDataProviderInterface
 {
-    public function supports(string $resourceClass, string $operationName = null, array $context = []): bool
+    public function supports(string $resourceClass, ?string $operationName = null, array $context = []): bool
     {
         return $resourceClass === $this->getResourceClass();
     }
 
-    public function getCollection(string $resourceClass, string $operationName = null, array $context = []): PartialPaginator
+    public function getCollection(string $resourceClass, ?string $operationName = null, array $context = []): PartialPaginator
     {
         return $this->getCollectionInternal($context);
     }
 
-    public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []): ?object
+    public function getItem(string $resourceClass, $id, ?string $operationName = null, array $context = []): ?object
     {
         return $this->getItemInternal($id, $context);
     }

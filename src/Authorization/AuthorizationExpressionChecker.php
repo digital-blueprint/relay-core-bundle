@@ -78,7 +78,7 @@ class AuthorizationExpressionChecker
      *
      * @throws AuthorizationException
      */
-    public function isGranted(AuthorizationUser $currentAuthorizationUser, string $policyName, $resource, string $resourceAlias = null): bool
+    public function isGranted(AuthorizationUser $currentAuthorizationUser, string $policyName, $resource, ?string $resourceAlias = null): bool
     {
         if (in_array($policyName, $this->roleExpressionStack, true)) {
             throw new AuthorizationException(sprintf('infinite loop caused by authorization right expression %s detected', $policyName), AuthorizationException::INFINITE_EXRPESSION_LOOP_DETECTED);

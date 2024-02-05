@@ -8,7 +8,7 @@ class OrNode extends LogicalNode
 {
     protected const NODE_TYPE = NodeType::OR;
 
-    public function isValid(string &$reason = null): bool
+    public function isValid(?string &$reason = null): bool
     {
         if (count($this->childNodes) === 0) {
             $reason = 'logical \'or\' node must have at least one child';

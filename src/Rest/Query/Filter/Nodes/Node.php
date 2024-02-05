@@ -30,7 +30,7 @@ abstract class Node
         return static::NODE_TYPE;
     }
 
-    abstract public function isValid(string &$reason = null): bool;
+    abstract public function isValid(?string &$reason = null): bool;
 
     abstract public function apply(array $rowData): bool;
 

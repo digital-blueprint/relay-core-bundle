@@ -8,7 +8,7 @@ class NotNode extends LogicalNode
 {
     protected const NODE_TYPE = NodeType::NOT;
 
-    public function isValid(string &$reason = null): bool
+    public function isValid(?string &$reason = null): bool
     {
         if (count($this->childNodes) !== 1) {
             $reason = 'logical \'not\' node must have exactly one child';

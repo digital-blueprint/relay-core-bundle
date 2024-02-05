@@ -101,7 +101,7 @@ class FromQueryFilterCreator
      *
      * @throws FilterException
      */
-    public static function createFilterFromQueryParameters(array $filterQueryParameters, array $availableAttributePaths, array &$usedAttributePaths = null): Filter
+    public static function createFilterFromQueryParameters(array $filterQueryParameters, array $availableAttributePaths, ?array &$usedAttributePaths = null): Filter
     {
         return self::buildFilter(self::expand($filterQueryParameters), $availableAttributePaths, $usedAttributePaths);
     }
@@ -176,7 +176,7 @@ class FromQueryFilterCreator
     /**
      * @throws FilterException
      */
-    private static function buildFilter(array $items, array $availableAttributePaths, array &$usedAttributePaths = null): Filter
+    private static function buildFilter(array $items, array $availableAttributePaths, ?array &$usedAttributePaths = null): Filter
     {
         // filter tree builder appends an AND root node automatically
         $filterTreeBuilder = FilterTreeBuilder::create();
@@ -250,7 +250,7 @@ class FromQueryFilterCreator
      *
      * @throws FilterException
      */
-    private static function appendConditionNode(array $condition, FilterTreeBuilder $filterTreeBuilder, array $availableAttributePaths, array &$usedAttributePaths = null)
+    private static function appendConditionNode(array $condition, FilterTreeBuilder $filterTreeBuilder, array $availableAttributePaths, ?array &$usedAttributePaths = null)
     {
         self::validateConditionFilterItem($condition);
 

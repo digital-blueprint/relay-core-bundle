@@ -13,7 +13,7 @@ class Filter
     /** @var AndNode */
     private $rootNode;
 
-    public static function create(AndNode $rootNode = null): Filter
+    public static function create(?AndNode $rootNode = null): Filter
     {
         return new self($rootNode ?? new AndNode());
     }
@@ -28,7 +28,7 @@ class Filter
         return $this->rootNode;
     }
 
-    public function isValid(string &$reason = null): bool
+    public function isValid(?string &$reason = null): bool
     {
         // as opposed to non-root and nodes, no children are ok (=> empty filter)
         if (count($this->rootNode->getChildren()) === 0) {

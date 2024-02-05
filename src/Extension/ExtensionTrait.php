@@ -22,7 +22,7 @@ trait ExtensionTrait
      * Register a resource for routing, for example a config.yaml defining extra routes.
      * $resource is for example a path to a config.yaml and $type is "yaml", see LoaderInterface::load.
      */
-    public function addRouteResource(ContainerBuilder $container, $resource, string $type = null): void
+    public function addRouteResource(ContainerBuilder $container, $resource, ?string $type = null): void
     {
         $this->extendArrayParameter(
             $container, 'dbp_api.route_resources', [[$resource, $type]]);

@@ -23,7 +23,7 @@ class CheckResult
         $this->extra = null;
     }
 
-    public function set(string $status, string $message = null, array $extra = null)
+    public function set(string $status, ?string $message = null, ?array $extra = null)
     {
         $this->status = $status;
         $this->message = $message;

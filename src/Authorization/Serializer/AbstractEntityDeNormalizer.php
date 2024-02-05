@@ -116,7 +116,7 @@ class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements
     /**
      * @return mixed
      */
-    public function denormalize($data, string $type, string $format = null, array $context = [])
+    public function denormalize($data, string $type, ?string $format = null, array $context = [])
     {
         $entityClassName = $type;
         $mapEntry = $this->entityClassNameToWriteAttributeNamesMapping[$entityClassName];
@@ -136,7 +136,7 @@ class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements
         return $this->denormalizer->denormalize($data, $type, $format, $context);
     }
 
-    public function supportsDenormalization($data, string $type, string $format = null, array $context = []): bool
+    public function supportsDenormalization($data, string $type, ?string $format = null, array $context = []): bool
     {
         if ($this->entityClassNameToWriteAttributeNamesMapping === null) {
             return false;

@@ -28,7 +28,7 @@ class TestDataProvider extends AbstractDataProvider
     /** @var array The options to test */
     private $options = [];
 
-    public static function create(EventDispatcher $eventDispatcher = null): TestDataProvider
+    public static function create(?EventDispatcher $eventDispatcher = null): TestDataProvider
     {
         $testDataProvider = new TestDataProvider($eventDispatcher ?? new EventDispatcher());
 

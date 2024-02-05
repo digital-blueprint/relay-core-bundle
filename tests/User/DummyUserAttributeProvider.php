@@ -18,7 +18,7 @@ class DummyUserAttributeProvider implements UserAttributeProviderInterface
      */
     private $available;
 
-    public function __construct(array $attributes, array $available = null)
+    public function __construct(array $attributes, ?array $available = null)
     {
         $this->attributes = $attributes;
         $this->available = $available ?? array_keys($attributes);

@@ -25,7 +25,7 @@ class UserSession implements UserSessionInterface
      */
     private $security;
 
-    public function __construct(Security $security = null)
+    public function __construct(?Security $security = null)
     {
         $this->security = $security;
     }

@@ -11,11 +11,11 @@ use Symfony\Component\Routing\RouteCollection;
 class RoutingLoader extends Loader
 {
     /**
-     * @var ParameterBagInterface
+     * @var ?ParameterBagInterface
      */
     private $params;
 
-    public function __construct(string $env = null, ParameterBagInterface $params)
+    public function __construct(?string $env = null, ?ParameterBagInterface $params = null)
     {
         parent::__construct($env);
 
@@ -25,12 +25,12 @@ class RoutingLoader extends Loader
     /**
      * @return mixed
      */
-    public function load($resource, string $type = null)
+    public function load($resource, ?string $type = null)
     {
         $routes = new RouteCollection();
 
         $routeResources = [];
-        if ($this->params->has('dbp_api.route_resources')) {
+        if ($this->params !== null && $this->params->has('dbp_api.route_resources')) {
             $routeResources = $this->params->get('dbp_api.route_resources');
             assert(is_array($routeResources));
         }
@@ -43,7 +43,7 @@ class RoutingLoader extends Loader
         return $routes;
     }
 
-    public function supports($resource, string $type = null): bool
+    public function supports($resource, ?string $type = null): bool
     {
         return 'dbp_relay' === $type;
     }

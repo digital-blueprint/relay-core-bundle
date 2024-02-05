@@ -50,7 +50,7 @@ class Connection implements LoggerAwareInterface
     /** @var object|null */
     private $clientHandler;
 
-    public function __construct(string $baseUri = null)
+    public function __construct(?string $baseUri = null)
     {
         $this->logger = null;
 

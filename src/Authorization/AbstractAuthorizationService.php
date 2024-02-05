@@ -58,7 +58,7 @@ abstract class AbstractAuthorizationService extends AbstractUserAttributeService
      * @throws ApiError               HTTP Forbidden exception if access is not granted
      * @throws AuthorizationException If the policy is not declared
      */
-    public function denyAccessUnlessIsGranted(string $policyName, $resource = null, string $resourceAlias = null): void
+    public function denyAccessUnlessIsGranted(string $policyName, $resource = null, ?string $resourceAlias = null): void
     {
         if ($this->isGrantedInternal($policyName, $resource, $resourceAlias) === false) {
             throw ApiError::withDetails(Response::HTTP_FORBIDDEN, 'access denied. policy failed: '.$policyName);
@@ -72,7 +72,7 @@ abstract class AbstractAuthorizationService extends AbstractUserAttributeService
      *
      * @throws AuthorizationException If the policy is not declared
      */
-    public function isGranted(string $policyName, $resource = null, string $resourceAlias = null): bool
+    public function isGranted(string $policyName, $resource = null, ?string $resourceAlias = null): bool
     {
         return $this->isGrantedInternal($policyName, $resource, $resourceAlias);
     }
@@ -138,7 +138,7 @@ abstract class AbstractAuthorizationService extends AbstractUserAttributeService
     /**
      * @throws AuthorizationException
      */
-    private function isGrantedInternal(string $policyName, $resource, string $resourceAlias = null): bool
+    private function isGrantedInternal(string $policyName, $resource, ?string $resourceAlias = null): bool
     {
         return $this->userAuthorizationChecker->isGranted($this->currentAuthorizationUser, $policyName, $resource, $resourceAlias);
     }
