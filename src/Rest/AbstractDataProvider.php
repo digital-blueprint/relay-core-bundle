@@ -306,7 +306,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         return $isGrantedReadAccess;
     }
 
-    private static function isLocalDataAttributePath(string $attributePath, string &$localDataAttributeName = null): bool
+    private static function isLocalDataAttributePath(string $attributePath, ?string &$localDataAttributeName = null): bool
     {
         $returnValue = str_starts_with($attributePath, self::LOCAL_DATA_BASE_PATH);
         if ($returnValue && $localDataAttributeName !== null) {

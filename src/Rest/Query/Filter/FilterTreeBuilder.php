@@ -20,12 +20,12 @@ class FilterTreeBuilder
     /** @var LogicalNode */
     private $currentNode;
 
-    public static function create(LogicalNode $rootNode = null): FilterTreeBuilder
+    public static function create(?LogicalNode $rootNode = null): FilterTreeBuilder
     {
         return new FilterTreeBuilder($rootNode);
     }
 
-    public function __construct(LogicalNode $rootNode = null)
+    public function __construct(?LogicalNode $rootNode = null)
     {
         $this->currentNode = $rootNode ?? new AndNode();
     }

@@ -14,7 +14,7 @@ class ExpressionLanguage extends SymfonyExpressionLanguage
     /* @var array */
     private $globalVariables;
 
-    public function __construct(array $globalVariables = [], CacheItemPoolInterface $cache = null, array $providers = [])
+    public function __construct(array $globalVariables = [], ?CacheItemPoolInterface $cache = null, array $providers = [])
     {
         parent::__construct($cache, $providers);
 

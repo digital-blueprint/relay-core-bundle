@@ -41,7 +41,7 @@ abstract class LogicalNode extends Node
         return $this;
     }
 
-    public function isValid(string &$reason = null): bool
+    public function isValid(?string &$reason = null): bool
     {
         foreach ($this->childNodes as $childNodeDefinition) {
             if ($childNodeDefinition->isValid($reason) === false) {

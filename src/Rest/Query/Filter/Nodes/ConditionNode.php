@@ -93,7 +93,7 @@ class ConditionNode extends Node
         $this->value = $value;
     }
 
-    public function isValid(string &$reason = null): bool
+    public function isValid(?string &$reason = null): bool
     {
         if ($this->field === '') {
             $reason = 'field must not be empty';

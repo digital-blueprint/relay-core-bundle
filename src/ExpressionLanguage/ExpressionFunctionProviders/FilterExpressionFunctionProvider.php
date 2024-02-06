@@ -25,7 +25,7 @@ class FilterExpressionFunctionProvider implements ExpressionFunctionProviderInte
                 function (string $array, string $expression): string {
                     return sprintf('filter(%s, %s)', $array, $expression);
                 },
-                function ($arguments, array $array, string $expression = null): array {
+                function ($arguments, array $array, ?string $expression = null): array {
                     $filteredResult = [];
                     foreach ($array as $key => $value) {
                         if ($expression !== null ? $this->expressionLanguage->evaluate($expression, ['key' => $key, 'value' => $value]) : !empty($value)) {

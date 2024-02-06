@@ -171,7 +171,7 @@ class ExpressionExtension
         return $value === null ? $valueIfNull : $value;
     }
 
-    public function regexFormat(string $pattern, string $subject, string $formatString, string $default = null): ?string
+    public function regexFormat(string $pattern, string $subject, string $formatString, ?string $default = null): ?string
     {
         $matches = [];
         if (preg_match($pattern, $subject, $matches)) {

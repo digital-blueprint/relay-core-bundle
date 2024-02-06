@@ -11,7 +11,7 @@ class TestUserSessionProvider implements UserSessionProviderInterface
     /** @var string|null */
     private $userIdentifier;
 
-    public function __construct(string $userIdentifier = null)
+    public function __construct(?string $userIdentifier = null)
     {
         $this->userIdentifier = $userIdentifier;
     }

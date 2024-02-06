@@ -19,7 +19,7 @@ class ApiError extends HttpException
     private const ERROR_ID_KEY = 'errorId';
     private const ERROR_DETAILS_KEY = 'errorDetails';
 
-    public function __construct(int $statusCode, ?string $message = '', \Throwable $previous = null, array $headers = [], ?int $code = 0)
+    public function __construct(int $statusCode, ?string $message = '', ?\Throwable $previous = null, array $headers = [], ?int $code = 0)
     {
         if ($statusCode === self::WITH_DETAILS_STATUS_CODE) {
             $messageDecoded = self::decodeMessage($message);

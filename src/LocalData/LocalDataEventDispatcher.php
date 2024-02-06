@@ -66,7 +66,7 @@ class LocalDataEventDispatcher
      *
      * @throws ApiError
      */
-    public function dispatch(Event $event, string $eventName = null): void
+    public function dispatch(Event $event, ?string $eventName = null): void
     {
         if ($event instanceof LocalDataPostEvent) {
             $event->initRequestedAttributes($this->localDataAttributes);

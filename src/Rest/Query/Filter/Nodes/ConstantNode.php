@@ -28,7 +28,7 @@ class ConstantNode extends Node
         return $this->value === false;
     }
 
-    public function isValid(string &$reason = null): bool
+    public function isValid(?string &$reason = null): bool
     {
         return true;
     }

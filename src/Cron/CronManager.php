@@ -117,7 +117,7 @@ final class CronManager implements LoggerAwareInterface
         return $this->jobs;
     }
 
-    public function runDueJobs(bool $force = false, \DateTimeInterface $currentTime = null)
+    public function runDueJobs(bool $force = false, ?\DateTimeInterface $currentTime = null)
     {
         // Get all jobs that should have been run between the last time we were called and now
         if ($currentTime === null) {

@@ -27,7 +27,7 @@ class ConnectionException extends \RuntimeException
     /** @var string */
     private $type;
 
-    public function __construct(string $type, string $message, int $code, \Throwable $previous = null, RequestInterface $request = null, ResponseInterface $response = null)
+    public function __construct(string $type, string $message, int $code, ?\Throwable $previous = null, ?RequestInterface $request = null, ?ResponseInterface $response = null)
     {
         parent::__construct($message, $code, $previous);
 
