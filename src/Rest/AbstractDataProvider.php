@@ -121,6 +121,8 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $item = $this->getItemById($id, $filters, $options);
         $this->removeForbiddenLocalDataAttributeValues([$item], Options::getLocalDataAttributes($options));
 
+        $this->forbidCurrentUserToAccessItemUnlessAuthorized(self::GET_ITEM_OPERATION, $item, $filters);
+
         return $item;
     }
 
@@ -133,6 +135,8 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $this->denyOperationAccessUnlessGranted(self::GET_COLLECTION_OPERATION);
 
         $filters = $context[self::FILTERS_CONTEXT_KEY] ?? [];
+        $this->forbidCurrentUserToGetCollectionUnlessAuthorized($filters);
+
         $resourceClass = $context[self::RESOURCE_CLASS_CONTEXT_KEY] ?? null;
         $deserializationGroups = $context[self::GROUPS_CONTEXT_KEY] ?? null;
 
@@ -173,6 +177,18 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     abstract protected function getItemById(string $id, array $filters = [], array $options = []): ?object;
 
     abstract protected function getPage(int $currentPageNumber, int $maxNumItemsPerPage, array $filters = [], array $options = []): array;
+
+    protected function forbidCurrentUserToGetCollectionUnlessAuthorized(array $filters): void
+    {
+        if (!$this->isCurrentUserAuthorizedToGetCollection($filters)) {
+            throw ApiError::withDetails(Response::HTTP_FORBIDDEN, 'forbidden');
+        }
+    }
+
+    protected function isCurrentUserAuthorizedToGetCollection(array $filters): bool
+    {
+        return true;
+    }
 
     /**
      * @throws ApiError
