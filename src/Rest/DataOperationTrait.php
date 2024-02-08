@@ -17,7 +17,7 @@ trait DataOperationTrait
     }
 
     /**
-     * @throws apiError 401 Unauthorized, in case the current client has no access to the requested operation
+     * @throws ApiError 401 Unauthorized, in case the current client has no access to the requested operation
      */
     private function denyOperationAccessUnlessGranted(int $operation)
     {
