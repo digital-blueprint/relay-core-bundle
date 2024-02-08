@@ -1,3 +1,8 @@
+# v0.1.135
+
+* Removed legacy API-Platform API: Dbp\Relay\CoreBundle\DataProvider\AbstractDataProvider
+  Use Dbp\Relay\CoreBundle\Rest\AbstractDataProvider instead.
+
 # v0.1.131
 
 * Drop support for PHP 7.3
