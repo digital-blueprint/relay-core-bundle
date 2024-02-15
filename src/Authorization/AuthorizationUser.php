@@ -24,7 +24,7 @@ class AuthorizationUser
      */
     public function getIdentifier(): ?string
     {
-        return $this->authorizationService->getCurrentUserIdentifier();
+        return $this->authorizationService->getUserIdentifier();
     }
 
     /**
@@ -32,7 +32,7 @@ class AuthorizationUser
      */
     public function isAuthenticated(): bool
     {
-        return $this->authorizationService->isCurrentUserAuthenticated();
+        return $this->authorizationService->isAuthenticated();
     }
 
     /**
@@ -67,6 +67,6 @@ class AuthorizationUser
      */
     public function get(string $attributeName, $defaultValue = null)
     {
-        return $this->authorizationService->getCurrentUserAttribute($attributeName, $defaultValue);
+        return $this->authorizationService->getUserAttribute($attributeName, $defaultValue);
     }
 }

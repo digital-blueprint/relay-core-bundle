@@ -10,11 +10,8 @@ use Dbp\Relay\CoreBundle\LocalData\LocalDataEventDispatcher;
 use Dbp\Relay\CoreBundle\Rest\AbstractDataProvider;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\Pagination;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
+use Dbp\Relay\CoreBundle\Tests\Authorization\TestAuthorizationService;
 use Dbp\Relay\CoreBundle\Tests\Locale\TestLocale;
-use Dbp\Relay\CoreBundle\Tests\User\DummyUserAttributeProvider;
-use Dbp\Relay\CoreBundle\TestUtils\TestUserSession;
-use Dbp\Relay\CoreBundle\User\UserAttributeMuxer;
-use Dbp\Relay\CoreBundle\User\UserAttributeProviderProvider;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class TestDataProvider extends AbstractDataProvider
@@ -31,15 +28,11 @@ class TestDataProvider extends AbstractDataProvider
     public static function create(?EventDispatcher $eventDispatcher = null): TestDataProvider
     {
         $testDataProvider = new TestDataProvider($eventDispatcher ?? new EventDispatcher());
-
-        $authorizationDataProvider = new DummyUserAttributeProvider([
+        TestAuthorizationService::setUp($testDataProvider, 'testuser', [
             'ROLE_TEST_USER' => true,
             'ROLE_ADMIN' => false,
         ]);
 
-        $testDataProvider->__injectUserSessionAndUserAttributeMuxer(
-            new TestUserSession('testuser'),
-            new UserAttributeMuxer(new UserAttributeProviderProvider([$authorizationDataProvider]), new EventDispatcher()));
         $testDataProvider->__injectLocale(new TestLocale('en'));
         $testDataProvider->__injectPropertyNameCollectionFactory(new TestPropertyNameCollectionFactory());
 

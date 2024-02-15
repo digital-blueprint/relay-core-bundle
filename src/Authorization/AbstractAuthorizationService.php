@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Authorization;
 
 use Dbp\Relay\CoreBundle\Exception\ApiError;
-use Dbp\Relay\CoreBundle\User\AbstractUserAttributeService;
+use Dbp\Relay\CoreBundle\User\UserAttributeException;
+use Dbp\Relay\CoreBundle\User\UserAttributeService;
 use Symfony\Component\HttpFoundation\Response;
 
-abstract class AbstractAuthorizationService extends AbstractUserAttributeService
+abstract class AbstractAuthorizationService
 {
+    /** @var UserAttributeService */
+    private $userAttributeService;
+
     /** @var AuthorizationExpressionChecker */
     private $userAuthorizationChecker;
 
@@ -21,12 +25,18 @@ abstract class AbstractAuthorizationService extends AbstractUserAttributeService
 
     public function __construct()
     {
-        parent::__construct();
-
         $this->userAuthorizationChecker = new AuthorizationExpressionChecker();
         $this->currentAuthorizationUser = new AuthorizationUser($this);
 
         $this->loadConfig();
+    }
+
+    /**
+     * @required
+     */
+    public function __injectUserAttributeService(UserAttributeService $userAttributeService)
+    {
+        $this->userAttributeService = $userAttributeService;
     }
 
     /**
@@ -78,21 +88,25 @@ abstract class AbstractAuthorizationService extends AbstractUserAttributeService
     }
 
     /**
-     * @throws ApiError Http Unauthorized if the user is not authenticated
+     * Evaluates the attribute expression $attributeExpressionName und returns its result.
+     *
+     * @param mixed|null $defaultValue The value to return if the expression evaluates to 'null'
+     *
+     * @return mixed|null
+     *
+     * @throws AuthorizationException If the attribute is not declared
      */
-    public function denyAccessUnlessIsAuthenticated()
+    public function getAttribute(string $attributeExpressionName, $defaultValue = null)
     {
-        if ($this->currentAuthorizationUser->isAuthenticated() === false) {
-            throw ApiError::withDetails(Response::HTTP_UNAUTHORIZED, 'authentication required');
-        }
+        return $this->getAttributeInternal($attributeExpressionName, $defaultValue);
     }
 
     /**
-     * @deprecated Use isAuthenticated instead
+     * Returns the identifier of the currently logged-in user.
      */
-    public function isUserAuthenticated(): bool
+    public function getUserIdentifier(): ?string
     {
-        return $this->currentAuthorizationUser->isAuthenticated();
+        return $this->userAttributeService->getCurrentUserIdentifier();
     }
 
     /**
@@ -104,17 +118,17 @@ abstract class AbstractAuthorizationService extends AbstractUserAttributeService
     }
 
     /**
-     * Evaluates the attribute expression $attributeName und returns its result.
+     * Gets a user attribute for the currently logged-in user.
      *
-     * @param mixed|null $defaultValue The value to return if the expression evaluates to 'null'
+     * @param mixed|null $defaultValue The value to return if the user attribute is declared but not specified for the current user
      *
      * @return mixed|null
      *
-     * @throws AuthorizationException If the attribute is not declared
+     * @throws UserAttributeException If the user attribute is undeclared
      */
-    public function getAttribute(string $attributeName, $defaultValue = null)
+    public function getUserAttribute(string $userAttributeName, $defaultValue = null)
     {
-        return $this->getAttributeInternal($attributeName, $defaultValue);
+        return $this->userAttributeService->getCurrentUserAttribute($userAttributeName, $defaultValue);
     }
 
     private function loadConfig()

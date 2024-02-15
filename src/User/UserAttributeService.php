@@ -6,7 +6,7 @@ namespace Dbp\Relay\CoreBundle\User;
 
 use Dbp\Relay\CoreBundle\API\UserSessionInterface;
 
-abstract class AbstractUserAttributeService
+class UserAttributeService
 {
     /** @var UserAttributeMuxer */
     private $userAttributeMuxer;
@@ -14,15 +14,7 @@ abstract class AbstractUserAttributeService
     /** @var UserSessionInterface */
     private $currentUserSession;
 
-    public function __construct()
-    {
-    }
-
-    /**
-     * @required
-     */
-    public function __injectUserSessionAndUserAttributeMuxer(
-        UserSessionInterface $currentUserSession, UserAttributeMuxer $userAttributeMuxer)
+    public function __construct(UserSessionInterface $currentUserSession, UserAttributeMuxer $userAttributeMuxer)
     {
         $this->userAttributeMuxer = $userAttributeMuxer;
         $this->currentUserSession = $currentUserSession;

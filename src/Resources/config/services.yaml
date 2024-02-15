@@ -131,3 +131,7 @@ services:
   Dbp\Relay\CoreBundle\User\UserAttributeMuxer:
     autowire: true
     autoconfigure: true
+
+  Dbp\Relay\CoreBundle\User\UserAttributeService:
+    autowire: true
+    autoconfigure: true
