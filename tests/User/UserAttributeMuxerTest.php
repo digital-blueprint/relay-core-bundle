@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\User;
 
-use Dbp\Relay\CoreBundle\TestUtils\DummyUserAttributeProvider;
+use Dbp\Relay\CoreBundle\TestUtils\TestUserAttributeProvider;
 use Dbp\Relay\CoreBundle\User\Event\GetAvailableUserAttributesEvent;
 use Dbp\Relay\CoreBundle\User\Event\GetUserAttributeEvent;
 use Dbp\Relay\CoreBundle\User\UserAttributeException;
@@ -20,11 +20,12 @@ class UserAttributeMuxerTest extends TestCase
      */
     public function testBasics()
     {
-        $dummy = new DummyUserAttributeProvider(['foo' => 42], ['foo', 'bar']);
+        $dummy = new TestUserAttributeProvider(['foo' => null, 'bar' => null]);
+        $dummy->addUser('testuser', ['foo' => 42]);
         $mux = new UserAttributeMuxer(new UserAttributeProviderProvider([$dummy]), new EventDispatcher());
         $this->assertSame(['foo', 'bar'], $mux->getAvailableAttributes());
-        $this->assertSame(42, $mux->getAttribute(null, 'foo'));
-        $this->assertSame(24, $mux->getAttribute(null, 'bar', 24));
+        $this->assertSame(42, $mux->getAttribute('testuser', 'foo'));
+        $this->assertSame(24, $mux->getAttribute('testuser', 'bar', 24));
     }
 
     /**
@@ -32,21 +33,23 @@ class UserAttributeMuxerTest extends TestCase
      */
     public function testMultiple()
     {
-        $dummy = new DummyUserAttributeProvider(['foo' => 42], ['foo', 'qux']);
-        $dummy2 = new DummyUserAttributeProvider(['bar' => 24], ['bar', 'baz']);
+        $dummy = new TestUserAttributeProvider(['foo' => null, 'qux' => null]);
+        $dummy->addUser('testuser', ['foo' => 42]);
+        $dummy2 = new TestUserAttributeProvider(['bar' => null, 'baz' => null]);
+        $dummy2->addUser('testuser', ['bar' => 24]);
 
         $mux = new UserAttributeMuxer(new UserAttributeProviderProvider([$dummy, $dummy2]), new EventDispatcher());
         $this->assertSame(['foo', 'qux', 'bar', 'baz'], $mux->getAvailableAttributes());
-        $this->assertSame(42, $mux->getAttribute(null, 'foo'));
-        $this->assertSame('default', $mux->getAttribute(null, 'qux', 'default'));
-        $this->assertSame(24, $mux->getAttribute(null, 'bar'));
-        $this->assertSame(12, $mux->getAttribute(null, 'baz', 12));
-        $this->assertNull($mux->getAttribute(null, 'baz'));
+        $this->assertSame(42, $mux->getAttribute('testuser', 'foo'));
+        $this->assertSame('default', $mux->getAttribute('testuser', 'qux', 'default'));
+        $this->assertSame(24, $mux->getAttribute('testuser', 'bar'));
+        $this->assertSame(12, $mux->getAttribute('testuser', 'baz', 12));
+        $this->assertNull($mux->getAttribute('testuser', 'baz'));
     }
 
     public function testAvailEvent()
     {
-        $dummy = new DummyUserAttributeProvider(['foo' => 42], ['foo', 'bar']);
+        $dummy = new TestUserAttributeProvider(['foo' => null, 'bar' => null]);
         $dispatched = new EventDispatcher();
         $getAvail = function (GetAvailableUserAttributesEvent $event) {
             $this->assertSame(['foo', 'bar'], $event->getAttributes());
@@ -66,7 +69,7 @@ class UserAttributeMuxerTest extends TestCase
      */
     public function testGetAttrEvent()
     {
-        $dummy = new DummyUserAttributeProvider(['foo' => 42], ['foo', 'bar']);
+        $dummy = new TestUserAttributeProvider(['foo' => null, 'bar' => null]);
         $dispatched = new EventDispatcher();
         $getAttr = function (GetUserAttributeEvent $event) {
             $this->assertSame('myuser', $event->getUserIdentifier());
@@ -84,7 +87,7 @@ class UserAttributeMuxerTest extends TestCase
      */
     public function testGetAttrEventDefault()
     {
-        $dummy = new DummyUserAttributeProvider([], []);
+        $dummy = new TestUserAttributeProvider([]);
         $dispatched = new EventDispatcher();
         $getAvail = function (GetAvailableUserAttributesEvent $event) {
             $event->addAttributes(['bar']);
@@ -103,7 +106,7 @@ class UserAttributeMuxerTest extends TestCase
      */
     public function testGetAttrMultipleEvents()
     {
-        $dummy = new DummyUserAttributeProvider(['foo' => 42], ['foo', 'bar']);
+        $dummy = new TestUserAttributeProvider(['foo' => null, 'bar' => null]);
         $dispatched = new EventDispatcher();
         $getAttr = function (GetUserAttributeEvent $event) {
             $event->setAttributeValue('OK');

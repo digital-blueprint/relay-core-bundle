@@ -24,7 +24,7 @@ class TestAuthorizationService extends AbstractAuthorizationService
     public static function setUp(AbstractAuthorizationService $authorizationService, string $currentUserIdentifier = 'testuser',
         array $currentUserAttributes = [], array $symfonyUserRoles = [], bool $isAuthenticated = true): void
     {
-        $userAttributeProvider = new DummyUserAttributeProvider($currentUserAttributes);
+        $userAttributeProvider = new TestUserAttributeProvider($currentUserAttributes);
         $userAttributeService = new UserAttributeService(
             new TestUserSession($currentUserIdentifier, $symfonyUserRoles, $isAuthenticated),
             new UserAttributeMuxer(new UserAttributeProviderProvider([$userAttributeProvider]), new EventDispatcher()));
