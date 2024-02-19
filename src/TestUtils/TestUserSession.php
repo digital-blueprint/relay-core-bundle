@@ -17,10 +17,11 @@ class TestUserSession implements UserSessionInterface
     /** @var bool */
     private $isAuthenticated = false;
 
-    public function __construct(?string $identifier = null, array $roles = [])
+    public function __construct(?string $identifier = null, array $roles = [], bool $isAuthenticated = true)
     {
         $this->userIdentifier = $identifier;
         $this->roles = $roles;
+        $this->isAuthenticated = $isAuthenticated;
     }
 
     public function setIdentifier(string $identifier)

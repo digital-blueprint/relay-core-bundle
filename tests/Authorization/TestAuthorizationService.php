@@ -14,19 +14,20 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class TestAuthorizationService extends AbstractAuthorizationService
 {
-    public static function create(string $currentUserIdentifier = 'testuser', array $currentUserAttributes = []): TestAuthorizationService
+    public static function create(string $currentUserIdentifier = 'testuser', array $currentUserAttributes = [], array $symfonyUerRoles = [], bool $isAuthenticated = true): TestAuthorizationService
     {
         $testAuthorizationService = new TestAuthorizationService();
-        self::setUp($testAuthorizationService, $currentUserIdentifier, $currentUserAttributes);
+        self::setUp($testAuthorizationService, $currentUserIdentifier, $currentUserAttributes, $symfonyUerRoles, $isAuthenticated);
 
         return $testAuthorizationService;
     }
 
-    public static function setUp(AbstractAuthorizationService $authorizationService, string $currentUserIdentifier = 'testuser', array $currentUserAttributes = []): void
+    public static function setUp(AbstractAuthorizationService $authorizationService, string $currentUserIdentifier = 'testuser',
+                                 array $currentUserAttributes = [], array $symfonyUserRoles = [], bool $isAuthenticated = true): void
     {
         $userAttributeProvider = new DummyUserAttributeProvider($currentUserAttributes);
         $userAttributeService = new UserAttributeService(
-            new TestUserSession($currentUserIdentifier),
+            new TestUserSession($currentUserIdentifier, $symfonyUserRoles, $isAuthenticated),
             new UserAttributeMuxer(new UserAttributeProviderProvider([$userAttributeProvider]), new EventDispatcher()));
 
         $authorizationService->__injectUserAttributeService($userAttributeService);

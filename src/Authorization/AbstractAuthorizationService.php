@@ -114,7 +114,7 @@ abstract class AbstractAuthorizationService
      */
     public function isAuthenticated(): bool
     {
-        return $this->currentAuthorizationUser->isAuthenticated();
+        return $this->userAttributeService->isCurrentUserAuthenticated();
     }
 
     /**
