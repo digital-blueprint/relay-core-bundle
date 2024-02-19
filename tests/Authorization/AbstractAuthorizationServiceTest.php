@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\Authorization;
 
+use Dbp\Relay\CoreBundle\TestUtils\TestAuthorizationService;
 use PHPUnit\Framework\TestCase;
 
 class AbstractAuthorizationServiceTest extends TestCase

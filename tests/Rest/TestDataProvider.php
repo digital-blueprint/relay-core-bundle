@@ -10,8 +10,8 @@ use Dbp\Relay\CoreBundle\LocalData\LocalDataEventDispatcher;
 use Dbp\Relay\CoreBundle\Rest\AbstractDataProvider;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\Pagination;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
-use Dbp\Relay\CoreBundle\Tests\Authorization\TestAuthorizationService;
 use Dbp\Relay\CoreBundle\Tests\Locale\TestLocale;
+use Dbp\Relay\CoreBundle\TestUtils\TestAuthorizationService;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class TestDataProvider extends AbstractDataProvider
