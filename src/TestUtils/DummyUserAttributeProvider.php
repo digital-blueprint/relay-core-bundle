@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\Tests\User;
+namespace Dbp\Relay\CoreBundle\TestUtils;
 
 use Dbp\Relay\CoreBundle\User\UserAttributeProviderInterface;
 

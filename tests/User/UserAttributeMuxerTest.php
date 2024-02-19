@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\User;
 
+use Dbp\Relay\CoreBundle\TestUtils\DummyUserAttributeProvider;
 use Dbp\Relay\CoreBundle\User\Event\GetAvailableUserAttributesEvent;
 use Dbp\Relay\CoreBundle\User\Event\GetUserAttributeEvent;
 use Dbp\Relay\CoreBundle\User\UserAttributeException;
