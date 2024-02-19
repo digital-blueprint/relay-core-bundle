@@ -14,7 +14,8 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class TestAuthorizationService extends AbstractAuthorizationService
 {
-    public static function create(string $currentUserIdentifier = 'testuser', array $currentUserAttributes = [], array $symfonyUerRoles = [], bool $isAuthenticated = true): TestAuthorizationService
+    public static function create(string $currentUserIdentifier = 'testuser', array $currentUserAttributes = [],
+        array $symfonyUerRoles = [], bool $isAuthenticated = true): TestAuthorizationService
     {
         $testAuthorizationService = new TestAuthorizationService();
         self::setUp($testAuthorizationService, $currentUserIdentifier, $currentUserAttributes, $symfonyUerRoles, $isAuthenticated);
@@ -23,7 +24,7 @@ class TestAuthorizationService extends AbstractAuthorizationService
     }
 
     public static function setUp(AbstractAuthorizationService $authorizationService, string $currentUserIdentifier = 'testuser',
-                                 array $currentUserAttributes = [], array $symfonyUserRoles = [], bool $isAuthenticated = true): void
+        array $currentUserAttributes = [], array $symfonyUserRoles = [], bool $isAuthenticated = true): void
     {
         $userAttributeProvider = new DummyUserAttributeProvider($currentUserAttributes);
         $userAttributeService = new UserAttributeService(
