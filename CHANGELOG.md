@@ -1,3 +1,7 @@
+# v0.1.140
+
+* Update to psalm v5
+
 # v0.1.135
 
 * Removed legacy API-Platform API: Dbp\Relay\CoreBundle\DataProvider\AbstractDataProvider
