@@ -29,6 +29,11 @@ use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @template T of object
+ *
+ * @implements StateProviderInterface<T>
+ */
 abstract class AbstractDataProvider extends AbstractAuthorizationService implements StateProviderInterface
 {
     use DataOperationTrait;

@@ -11,6 +11,11 @@ namespace Dbp\Relay\CoreBundle\Helpers;
 use ApiPlatform\State\Pagination\PaginatorInterface;
 
 /**
+ * @template T of object
+ *
+ * @implements PaginatorInterface<T>
+ * @implements \Iterator<T>
+ *
  * @deprecated Use Dbp\Relay\CoreBundle\Pagination\PartialPaginator
  */
 abstract class ArrayPaginator implements \Iterator, PaginatorInterface

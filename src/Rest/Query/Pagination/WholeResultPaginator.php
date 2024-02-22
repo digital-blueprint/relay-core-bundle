@@ -7,6 +7,10 @@ namespace Dbp\Relay\CoreBundle\Rest\Query\Pagination;
 /**
  * Paginator that holds the whole set of result items.
  * Note that it is a full paginator because partial pagination makes no sense with the whole result already at hand.
+ *
+ * @template T of object
+ *
+ * @extends PartialPaginator<T>
  */
 class WholeResultPaginator extends PartialPaginator
 {

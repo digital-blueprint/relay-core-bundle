@@ -17,6 +17,9 @@ class SymfonyCheck implements CheckInterface
     /** @var ContainerInterface */
     private $container;
 
+    /**
+     * @psalm-suppress ContainerDependency I'm not aware of an alternative
+     */
     public function __construct(ParameterBagInterface $parameters, ContainerInterface $container)
     {
         $this->parameters = $parameters;

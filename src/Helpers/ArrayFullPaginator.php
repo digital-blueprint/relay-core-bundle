@@ -9,6 +9,10 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Helpers;
 
 /**
+ * @template T of object
+ *
+ * @extends ArrayPaginator<T>
+ *
  * @deprecated Use Dbp\Relay\CoreBundle\Pagination\PartialPaginator
  */
 class ArrayFullPaginator extends ArrayPaginator

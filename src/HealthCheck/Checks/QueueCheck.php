@@ -7,15 +7,15 @@ namespace Dbp\Relay\CoreBundle\HealthCheck\Checks;
 use Dbp\Relay\CoreBundle\HealthCheck\CheckInterface;
 use Dbp\Relay\CoreBundle\HealthCheck\CheckOptions;
 use Dbp\Relay\CoreBundle\HealthCheck\CheckResult;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class QueueCheck implements CheckInterface
 {
-    private $container;
+    private ParameterBagInterface $parameters;
 
-    public function __construct(ContainerInterface $container)
+    public function __construct(ParameterBagInterface $parameters)
     {
-        $this->container = $container;
+        $this->parameters = $parameters;
     }
 
     public function getName(): string
@@ -27,7 +27,7 @@ class QueueCheck implements CheckInterface
     {
         $result = new CheckResult('Check if the queue is configured');
 
-        $unusedMessages = $this->container->getParameter('dbp_api.messenger_unused_messages');
+        $unusedMessages = $this->parameters->get('dbp_api.messenger_unused_messages');
         if (count($unusedMessages)) {
             $result->set(
                 CheckResult::STATUS_FAILURE,

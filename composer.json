@@ -40,10 +40,11 @@
         "phpstan/phpstan-phpunit": "^1.1.1",
         "phpstan/phpstan-symfony": "^1.2.13",
         "phpunit/phpunit": "^9.5.25",
+        "psalm/plugin-symfony": "^5.1",
         "symfony/browser-kit": "^5.4.11",
         "symfony/http-client": "^5.4.13",
         "symfony/phpunit-bridge": "^5.4.11",
-        "vimeo/psalm": "^4.27"
+        "vimeo/psalm": "^5.22.1"
     },
     "conflict": {
         "symfony/dependency-injection": "5.3.7"

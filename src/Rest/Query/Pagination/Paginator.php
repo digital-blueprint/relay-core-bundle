@@ -7,6 +7,12 @@ namespace Dbp\Relay\CoreBundle\Rest\Query\Pagination;
 use ApiPlatform\State\Pagination\PartialPaginatorInterface;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 
+/**
+ * @template T of object
+ *
+ * @implements PartialPaginatorInterface<T>
+ * @implements \Iterator<T>
+ */
 abstract class Paginator implements \Iterator, PartialPaginatorInterface
 {
     /** @var int */
