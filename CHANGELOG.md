@@ -1,3 +1,7 @@
+# v0.1.142
+
+* composer: allow psr/http-message v1 again, to make rdepend updates easier
+
 # v0.1.141
 
 * Drop support for PHP 7.4/8.0
