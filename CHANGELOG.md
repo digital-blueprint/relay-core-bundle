@@ -1,3 +1,7 @@
+# v0.1.141
+
+* Drop support for PHP 7.4/8.0
+
 # v0.1.140
 
 * Update to psalm v5
