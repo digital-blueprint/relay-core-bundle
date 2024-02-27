@@ -13,6 +13,8 @@ $config->setRules([
     '@PHP71Migration' => true,
     '@PHP73Migration' => true,
     '@PHP74Migration' => true,
+    '@PHP80Migration' => true,
+    '@PHP81Migration' => true,
     '@DoctrineAnnotation' => true,
     'doctrine_annotation_array_assignment' => ['operator' => '='],
     'yoda_style' => false,
