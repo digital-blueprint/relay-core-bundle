@@ -24,7 +24,7 @@ class PreparedFilterTest extends TestCase
             [
                 'id' => 'filter0',
                 'filter' => 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0',
-                'apply_policy' => 'user.get("ROLE_TEST_USER")',
+                'apply_policy' => 'user.get("ROLE_USER")',
             ],
             [
                 'id' => 'filterShortcut',
@@ -42,7 +42,7 @@ class PreparedFilterTest extends TestCase
         $policies = $this->preparedFilterProvider->getPolicies();
 
         $this->assertCount(count($this->config['prepared_filters']), $policies);
-        $this->assertEquals('user.get("ROLE_TEST_USER")', $policies[PreparedFilterProvider::getPolicyNameByFilterIdentifier('filter0')]);
+        $this->assertEquals('user.get("ROLE_USER")', $policies[PreparedFilterProvider::getPolicyNameByFilterIdentifier('filter0')]);
         $this->assertEquals('true', $policies[PreparedFilterProvider::getPolicyNameByFilterIdentifier('filterShortcut')]);
     }
 

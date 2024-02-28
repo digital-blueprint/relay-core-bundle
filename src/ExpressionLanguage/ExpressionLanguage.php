@@ -9,7 +9,11 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage as SymfonyExpression
 
 class ExpressionLanguage extends SymfonyExpressionLanguage
 {
-    private const RELAY_EXTENSION_VARIABLE_NAE = 'relay';
+    /**
+     * @deprecated Use 'Relay' instead
+     */
+    private const DEPRECATE_RELAY_EXTENSION_VARIABLE_NAME = 'relay';
+    private const RELAY_EXTENSION_VARIABLE_NAME = 'Relay';
 
     /* @var array */
     private $globalVariables;
@@ -18,7 +22,9 @@ class ExpressionLanguage extends SymfonyExpressionLanguage
     {
         parent::__construct($cache, $providers);
 
-        $globalVariables[self::RELAY_EXTENSION_VARIABLE_NAE] = new ExpressionExtension($this);
+        $relayExtension = new ExpressionExtension($this);
+        $globalVariables[self::RELAY_EXTENSION_VARIABLE_NAME] = $relayExtension;
+        $globalVariables[self::DEPRECATE_RELAY_EXTENSION_VARIABLE_NAME] = $relayExtension;
         $this->globalVariables = $globalVariables;
     }
 

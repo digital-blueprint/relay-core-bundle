@@ -12,10 +12,19 @@ use Dbp\Relay\CoreBundle\Rest\Query\Pagination\Pagination;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
 use Dbp\Relay\CoreBundle\Tests\Locale\TestLocale;
 use Dbp\Relay\CoreBundle\TestUtils\TestAuthorizationService;
+use Dbp\Relay\CoreBundle\User\UserAttributeException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class TestDataProvider extends AbstractDataProvider
 {
+    public const ROLE_USER = 'ROLE_USER';
+    public const ROLE_ADMIN = 'ROLE_ADMIN';
+
+    public const UNAUTHENTICATED_USER_IDENTIFIER = TestAuthorizationService::UNAUTHENTICATED_USER_IDENTIFIER;
+    public const TEST_USER_IDENTIFIER = TestAuthorizationService::TEST_USER_IDENTIFIER;
+    public const ADMIN_USER_IDENTIFIER = TestAuthorizationService::ADMIN_USER_IDENTIFIER;
+    public const INCLUDE_ADMIN_ONLY_ENTITIES_FILTER = 'includeAdminOnlyEntities';
+
     /** @var LocalDataEventDispatcher */
     private $localDataEventDispatcher;
 
@@ -25,13 +34,16 @@ class TestDataProvider extends AbstractDataProvider
     /** @var array The options to test */
     private $options = [];
 
-    public static function create(?EventDispatcher $eventDispatcher = null): TestDataProvider
+    /** @var bool */
+    private $allowUnauthenticatedAccess = false;
+
+    public static function create(?EventDispatcher $eventDispatcher = null, string $userIdentifier = self::TEST_USER_IDENTIFIER): TestDataProvider
     {
         $testDataProvider = new TestDataProvider($eventDispatcher ?? new EventDispatcher());
-        TestAuthorizationService::setUp($testDataProvider, 'testuser', [
-            'ROLE_TEST_USER' => true,
-            'ROLE_ADMIN' => false,
-        ]);
+        TestAuthorizationService::setUp($testDataProvider,
+            $userIdentifier, [
+            self::ROLE_USER => $userIdentifier === self::TEST_USER_IDENTIFIER,
+            self::ROLE_ADMIN => $userIdentifier === self::ADMIN_USER_IDENTIFIER, ], []);
 
         $testDataProvider->__injectLocale(new TestLocale('en'));
         $testDataProvider->__injectPropertyNameCollectionFactory(new TestPropertyNameCollectionFactory());
@@ -55,6 +67,11 @@ class TestDataProvider extends AbstractDataProvider
         ];
     }
 
+    public function setAllowUnauthenticatedAccess(bool $allowUnauthenticatedAccess): void
+    {
+        $this->allowUnauthenticatedAccess = $allowUnauthenticatedAccess;
+    }
+
     /**
      * @param array[] $sourceData
      */
@@ -67,15 +84,21 @@ class TestDataProvider extends AbstractDataProvider
     {
         $this->setSourceData($sourceData);
 
-        /** @var TestEntity */
+        /** @var TestEntity|null */
         return $this->provide(new Get(), ['identifier' => $id], self::createContext($filters));
     }
 
+    /**
+     * @throws \Exception
+     */
     public function getTestEntities(array $filters = [], array $sourceData = []): array
     {
         return $this->getTestEntityPaginator($filters, $sourceData)->getItems();
     }
 
+    /**
+     * @throws \Exception
+     */
     public function getTestEntityPaginator(array $filters = [], array $sourceData = []): PartialPaginator
     {
         $this->setSourceData($sourceData);
@@ -138,6 +161,25 @@ class TestDataProvider extends AbstractDataProvider
 
     protected function isUserGrantedOperationAccess(int $operation): bool
     {
-        return true;
+        return $this->allowUnauthenticatedAccess || $this->isAuthenticated();
+    }
+
+    /**
+     * @throws UserAttributeException
+     */
+    protected function isCurrentUserAuthorizedToAccessItem(int $operation, $item, array $filters): bool
+    {
+        $testEntity = $item;
+        assert($testEntity instanceof TestEntity);
+
+        return $this->getUserAttribute(self::ROLE_ADMIN) || !str_starts_with($testEntity->getIdentifier(), '_');
+    }
+
+    /**
+     * @throws UserAttributeException
+     */
+    protected function isCurrentUserAuthorizedToGetCollection(array $filters): bool
+    {
+        return $this->getUserAttribute(self::ROLE_ADMIN) || ($filters[self::INCLUDE_ADMIN_ONLY_ENTITIES_FILTER] ?? null) === null;
     }
 }

@@ -13,7 +13,7 @@ use Dbp\Relay\CoreBundle\Helpers\Tools;
 class AuthorizationExpressionChecker
 {
     private const USER_VARIABLE_NAME = 'user';
-    private const DEFAULT_OBJECT_VARIABLE_NAME = 'object';
+    private const DEFAULT_RESOURCE_VARIABLE_NAME = 'resource';
 
     /** @var ExpressionLanguage */
     private $expressionLanguage;
@@ -100,7 +100,7 @@ class AuthorizationExpressionChecker
 
             $variables = [
                 self::USER_VARIABLE_NAME => $currentAuthorizationUser,
-                self::DEFAULT_OBJECT_VARIABLE_NAME => $resource,
+                self::DEFAULT_RESOURCE_VARIABLE_NAME => $resource,
             ];
 
             if (!Tools::isNullOrEmpty($resourceAlias)) {

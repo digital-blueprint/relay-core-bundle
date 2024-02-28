@@ -12,17 +12,21 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class TestAuthorizationService extends AbstractAuthorizationService
 {
-    public static function create(string $currentUserIdentifier = 'testuser', array $currentUserAttributes = [],
-        array $symfonyUerRoles = [], bool $isAuthenticated = true): TestAuthorizationService
+    public const TEST_USER_IDENTIFIER = 'testuser';
+    public const ADMIN_USER_IDENTIFIER = 'admin';
+    public const UNAUTHENTICATED_USER_IDENTIFIER = '';
+
+    public static function create(string $currentUserIdentifier = self::TEST_USER_IDENTIFIER, array $currentUserAttributes = [],
+        array $symfonyUerRoles = []): TestAuthorizationService
     {
         $testAuthorizationService = new TestAuthorizationService();
-        self::setUp($testAuthorizationService, $currentUserIdentifier, $currentUserAttributes, $symfonyUerRoles, $isAuthenticated);
+        self::setUp($testAuthorizationService, $currentUserIdentifier, $currentUserAttributes, $symfonyUerRoles);
 
         return $testAuthorizationService;
     }
 
-    public static function setUp(AbstractAuthorizationService $authorizationService, string $currentUserIdentifier = 'testuser',
-        array $currentUserAttributes = [], array $symfonyUserRoles = [], bool $isAuthenticated = true): void
+    public static function setUp(AbstractAuthorizationService $authorizationService,
+        string $currentUserIdentifier = self::TEST_USER_IDENTIFIER, array $currentUserAttributes = [], array $symfonyUserRoles = []): void
     {
         $availableAttributes = [];
         foreach ($currentUserAttributes as $attributeName => $attributeValue) {
@@ -32,7 +36,9 @@ class TestAuthorizationService extends AbstractAuthorizationService
         $userAttributeProvider = new TestUserAttributeProvider($availableAttributes);
         $userAttributeProvider->addUser($currentUserIdentifier, $currentUserAttributes);
         $userAttributeService = new UserAttributeService(
-            new TestUserSession($currentUserIdentifier, $symfonyUserRoles, $isAuthenticated),
+            $currentUserIdentifier !== self::UNAUTHENTICATED_USER_IDENTIFIER ?
+                new TestUserSession($currentUserIdentifier, $symfonyUserRoles, true) :
+                new TestUserSession(null, [], false),
             new UserAttributeMuxer(new UserAttributeProviderProvider([$userAttributeProvider]), new EventDispatcher()));
 
         $authorizationService->__injectUserAttributeService($userAttributeService);

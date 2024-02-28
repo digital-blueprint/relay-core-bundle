@@ -124,9 +124,11 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $options = $this->createOptions($filters);
 
         $item = $this->getItemById($id, $filters, $options);
-        $this->removeForbiddenLocalDataAttributeValues([$item], Options::getLocalDataAttributes($options));
 
-        $this->forbidCurrentUserToAccessItemUnlessAuthorized(self::GET_ITEM_OPERATION, $item, $filters);
+        if ($item !== null) {
+            $this->removeForbiddenLocalDataAttributeValues([$item], Options::getLocalDataAttributes($options));
+            $this->forbidCurrentUserToAccessItemUnlessAuthorized(self::GET_ITEM_OPERATION, $item, $filters);
+        }
 
         return $item;
     }
