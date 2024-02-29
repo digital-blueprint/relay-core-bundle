@@ -10,7 +10,7 @@ use Dbp\Relay\CoreBundle\LocalData\LocalDataEventDispatcher;
 use Dbp\Relay\CoreBundle\Rest\AbstractDataProvider;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\Pagination;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
-use Dbp\Relay\CoreBundle\Tests\Locale\TestLocale;
+use Dbp\Relay\CoreBundle\TestUtils\DataProviderTester;
 use Dbp\Relay\CoreBundle\TestUtils\TestAuthorizationService;
 use Dbp\Relay\CoreBundle\User\UserAttributeException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -45,7 +45,7 @@ class TestDataProvider extends AbstractDataProvider
             self::ROLE_USER => $userIdentifier === self::TEST_USER_IDENTIFIER,
             self::ROLE_ADMIN => $userIdentifier === self::ADMIN_USER_IDENTIFIER, ], []);
 
-        $testDataProvider->__injectLocale(new TestLocale('en'));
+        DataProviderTester::setUp($testDataProvider);
         $testDataProvider->__injectPropertyNameCollectionFactory(new TestPropertyNameCollectionFactory());
 
         return $testDataProvider;

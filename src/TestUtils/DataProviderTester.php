@@ -6,21 +6,21 @@ namespace Dbp\Relay\CoreBundle\TestUtils;
 
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
-use Dbp\Relay\CoreBundle\ApiPlatform\State\StateProviderInterface;
+use Dbp\Relay\CoreBundle\Rest\AbstractDataProvider;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
 
 class DataProviderTester
 {
-    /** @var StateProviderInterface */
-    private $stateProvider;
+    private AbstractDataProvider $stateProvider;
+    private string $resourceClass;
+    private array $normalizationGroups;
 
-    /** @var string */
-    private $resourceClass;
+    public static function setUp(AbstractDataProvider $dataProvider)
+    {
+        $dataProvider->__injectLocale(new TestLocale('en'));
+    }
 
-    /** @var array */
-    private $normalizationGroups;
-
-    public function __construct(StateProviderInterface $dataProvider, string $resourceClass, array $normalizationGroups = [])
+    public function __construct(AbstractDataProvider $dataProvider, string $resourceClass, array $normalizationGroups = [])
     {
         $this->stateProvider = $dataProvider;
         $this->resourceClass = $resourceClass;

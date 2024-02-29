@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\Tests\Locale;
+namespace Dbp\Relay\CoreBundle\TestUtils;
 
 use Dbp\Relay\CoreBundle\Locale\Locale;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
