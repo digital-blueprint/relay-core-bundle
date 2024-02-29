@@ -37,7 +37,7 @@ class TestUserAttributeProvider implements UserAttributeProviderInterface
      */
     public function getAvailableAttributes(): array
     {
-        return array_keys($this->availableAttributes);
+        return $this->availableAttributes;
     }
 
     public function getUserAttributes(?string $userIdentifier): array
