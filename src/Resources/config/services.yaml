@@ -135,3 +135,6 @@ services:
   Dbp\Relay\CoreBundle\User\UserAttributeService:
     autowire: true
     autoconfigure: true
+
+  Dbp\Relay\CoreBundle\User\UserAttributeProviderProviderInterface:
+    '@Dbp\Relay\CoreBundle\User\UserAttributeProviderProvider'

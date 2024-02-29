@@ -33,7 +33,7 @@ class UserAttributeMuxer
      */
     private $availableCacheAll;
 
-    public function __construct(UserAttributeProviderProvider $userAttributeProviderProvider, EventDispatcherInterface $eventDispatcher)
+    public function __construct(UserAttributeProviderProviderInterface $userAttributeProviderProvider, EventDispatcherInterface $eventDispatcher)
     {
         $this->userAttributeProviders = $userAttributeProviderProvider->getAuthorizationDataProviders();
         $this->eventDispatcher = $eventDispatcher;

@@ -7,7 +7,7 @@ namespace Dbp\Relay\CoreBundle\User;
 /**
  * @internal
  */
-class UserAttributeProviderProvider
+class UserAttributeProviderProvider implements UserAttributeProviderProviderInterface
 {
     /**
      * @var iterable<UserAttributeProviderInterface>

@@ -9,8 +9,16 @@ services:
     autoconfigure: true
     public: true
 
+  Dbp\Relay\CoreBundle\TestUtils\TestUserAttributeProviderProvider:
+    autowire: true
+    autoconfigure: true
+    public: true
+
   Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface:
     '@Dbp\Relay\CoreBundle\TestUtils\TestAuthenticator'
 
   Dbp\Relay\CoreBundle\API\UserSessionInterface:
     '@Dbp\Relay\CoreBundle\TestUtils\TestUserSession'
+
+  Dbp\Relay\CoreBundle\User\UserAttributeProviderProviderInterface:
+    '@Dbp\Relay\CoreBundle\TestUtils\TestUserAttributeProviderProvider'
