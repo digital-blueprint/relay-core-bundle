@@ -17,7 +17,9 @@ class DataProviderTester
 
     public static function setUp(AbstractDataProvider $dataProvider)
     {
-        $dataProvider->__injectLocale(new TestLocale('en'));
+        TestAuthorizationService::setUp($dataProvider);
+
+        $dataProvider->__injectLocale(new TestLocale());
     }
 
     public function __construct(AbstractDataProvider $dataProvider, string $resourceClass, array $normalizationGroups = [])

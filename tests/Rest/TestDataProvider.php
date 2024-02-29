@@ -40,13 +40,13 @@ class TestDataProvider extends AbstractDataProvider
     public static function create(?EventDispatcher $eventDispatcher = null, string $userIdentifier = self::TEST_USER_IDENTIFIER): TestDataProvider
     {
         $testDataProvider = new TestDataProvider($eventDispatcher ?? new EventDispatcher());
-        TestAuthorizationService::setUp($testDataProvider,
-            $userIdentifier, [
-            self::ROLE_USER => $userIdentifier === self::TEST_USER_IDENTIFIER,
-            self::ROLE_ADMIN => $userIdentifier === self::ADMIN_USER_IDENTIFIER, ], []);
-
         DataProviderTester::setUp($testDataProvider);
         $testDataProvider->__injectPropertyNameCollectionFactory(new TestPropertyNameCollectionFactory());
+
+        TestAuthorizationService::setUp($testDataProvider,
+            $userIdentifier, [
+                self::ROLE_USER => $userIdentifier === self::TEST_USER_IDENTIFIER,
+                self::ROLE_ADMIN => $userIdentifier === self::ADMIN_USER_IDENTIFIER, ], []);
 
         return $testDataProvider;
     }
