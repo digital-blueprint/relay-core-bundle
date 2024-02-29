@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\TestUtils;
 
-use Dbp\Relay\CoreBundle\User\UserAttributeProviderInterface;
 use Dbp\Relay\CoreBundle\User\UserAttributeProviderProviderInterface;
 
 class TestUserAttributeProviderProvider implements UserAttributeProviderProviderInterface
 {
     /*
-     * @var UserAttributeProviderInterface|null
+     * @var TestUserAttributeProvider
      */
     private $testUserAttributeProvider;
 
@@ -22,10 +21,14 @@ class TestUserAttributeProviderProvider implements UserAttributeProviderProvider
         $this->testUserAttributeProvider->addUser($userIdentifier, $userAttributes);
     }
 
+    /**
+     * @psalm-suppress InvalidReturnType
+     */
     public function getAuthorizationDataProviders(): iterable
     {
-        if ($this->testUserAttributeProvider !== null) {
-            yield $this->testUserAttributeProvider;
-        }
+        /**
+         * @psalm-suppress InvalidReturnStatement
+         */
+        return $this->testUserAttributeProvider !== null ? [$this->testUserAttributeProvider] : [];
     }
 }
