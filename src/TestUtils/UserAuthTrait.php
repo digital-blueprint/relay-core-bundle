@@ -28,8 +28,12 @@ trait UserAuthTrait
 
     /**
      * Sets up a user with the given list of user attributes.
-     * For the authenticatation in subsequent requests to work you have to add an 'Authorization' header with the value
-     * TestAuthenticator::TEST_AUTHORIZATION_HEADER.
+     * For the authentication in subsequent requests to work you have to add an 'Authorization' header with the value
+     * TestAuthenticator::TEST_AUTHORIZATION_HEADER:
+     *
+     * $client = $this->withUserAttributes('testuser', ['my_user_attribute' => 'my_value',]);
+     * $response = $client->request('GET', $url, [
+     *     'headers' => ['Authorization' => TestAuthenticator::TEST_AUTHORIZATION_HEADER]]);
      *
      * @param array $userAttributes An associative array of user attributes (key: attribute name, value: attribute value)
      */
