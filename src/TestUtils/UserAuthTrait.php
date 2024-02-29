@@ -26,9 +26,16 @@ trait UserAuthTrait
         return $client;
     }
 
+    /**
+     * Sets up a user with the given list of user attributes.
+     * For the authenticatation in subsequent requests to work you have to add an 'Authorization' header with the value
+     * TestAuthenticator::TEST_AUTHORIZATION_HEADER.
+     *
+     * @param array $userAttributes An associative array of user attributes (key: attribute name, value: attribute value)
+     */
     public function withUserAttributes(string $userIdentifier, array $userAttributes): Client
     {
-        $client = $this->withUser($userIdentifier);
+        $client = $this->withUser($userIdentifier, [], TestAuthenticator::TEST_TOKEN);
 
         $container = $client->getContainer();
         $userAttributeProviderProvider = $container->get(TestUserAttributeProviderProvider::class);

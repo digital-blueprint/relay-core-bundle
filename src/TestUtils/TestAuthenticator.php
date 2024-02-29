@@ -18,6 +18,9 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 
 class TestAuthenticator extends AbstractAuthenticator
 {
+    public const TEST_TOKEN = '42';
+    public const TEST_AUTHORIZATION_HEADER = 'Bearer '.self::TEST_TOKEN;
+
     /** @var TestUser */
     private $user;
 
