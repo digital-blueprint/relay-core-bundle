@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Internal;
 
-use Symfony\Component\Cache\Adapter\AdapterInterface;
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
 use Symfony\Component\Uid\Uuid;
 
 class CacheWarmer implements CacheWarmerInterface
 {
     /**
-     * @var AdapterInterface
+     * @var CacheItemPoolInterface
      */
-    private $adapter;
+    private $cachePool;
 
-    public function __construct(AdapterInterface $adapter)
+    public function __construct(CacheItemPoolInterface $cachePool)
     {
-        $this->adapter = $adapter;
+        $this->cachePool = $cachePool;
     }
 
     public function isOptional(): bool
@@ -31,10 +31,10 @@ class CacheWarmer implements CacheWarmerInterface
         // Create a dummy cache entry, so that the cache database and table get created,
         // so we don't get spammed with errors on cache misses
         $key = Uuid::v4()->toRfc4122();
-        $item = $this->adapter->getItem($key);
+        $item = $this->cachePool->getItem($key);
         $item->set(true);
-        $this->adapter->save($item);
-        $this->adapter->deleteItem($key);
+        $this->cachePool->save($item);
+        $this->cachePool->deleteItem($key);
 
         return [];
     }
