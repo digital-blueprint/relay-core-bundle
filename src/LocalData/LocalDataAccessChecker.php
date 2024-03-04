@@ -46,7 +46,7 @@ class LocalDataAccessChecker
             ->booleanNode(self::ALLOW_LOCAL_QUERY_CONFIG_NODE)
             ->defaultValue(false)
             ->info('Indicates whether the local data attribute can be used in local queries.')
-            ->setDeprecated('since version 0.1.119')
+            ->setDeprecated('dbp/relay-core-bundle', '0.1.119')
             ->end()
             ->end()
             ->end()
