@@ -41,7 +41,7 @@ class TestDataProvider extends AbstractDataProvider
     {
         $testDataProvider = new TestDataProvider($eventDispatcher ?? new EventDispatcher());
         DataProviderTester::setUp($testDataProvider);
-        $testDataProvider->__injectPropertyNameCollectionFactory(new TestPropertyNameCollectionFactory());
+        $testDataProvider->__injectPropertyNameCollectionFactory(new TestEntityPropertyNameCollectionFactory());
 
         TestAuthorizationService::setUp($testDataProvider,
             $userIdentifier, [

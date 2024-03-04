@@ -20,6 +20,7 @@ class DataProviderTester
         TestAuthorizationService::setUp($dataProvider);
 
         $dataProvider->__injectLocale(new TestLocale());
+        $dataProvider->__injectPropertyNameCollectionFactory(new TestPropertyNameCollectionFactory());
     }
 
     public function __construct(AbstractDataProvider $dataProvider, string $resourceClass, array $normalizationGroups = [])

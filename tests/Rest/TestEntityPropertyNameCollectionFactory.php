@@ -7,7 +7,7 @@ namespace Dbp\Relay\CoreBundle\Tests\Rest;
 use ApiPlatform\Metadata\Property\Factory\PropertyNameCollectionFactoryInterface;
 use ApiPlatform\Metadata\Property\PropertyNameCollection;
 
-class TestPropertyNameCollectionFactory implements PropertyNameCollectionFactoryInterface
+class TestEntityPropertyNameCollectionFactory implements PropertyNameCollectionFactoryInterface
 {
     public function create(string $resourceClass, array $options = []): PropertyNameCollection
     {
