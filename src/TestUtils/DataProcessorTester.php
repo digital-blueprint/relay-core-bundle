@@ -30,30 +30,30 @@ class DataProcessorTester
         $this->denormalizationGroups = $denormalizationGroups;
     }
 
-    public function addItem($data, array $filters)
+    public function addItem($data, array $filters = [])
     {
         return $this->dataProcessor->process($data, new Post(), [], $this->createContext($filters));
     }
 
-    public function replaceItem($identifier, $data, $previousData, array $filters)
+    public function replaceItem($identifier, $data, $previousData, array $filters = [])
     {
         return $this->dataProcessor->process($data, new Put(), [self::IDENTIFIER_NAME => $identifier],
             $this->createContext($filters, $previousData));
     }
 
-    public function updateItem($identifier, $data, $previousData, array $filters)
+    public function updateItem($identifier, $data, $previousData, array $filters = [])
     {
         return $this->dataProcessor->process($data, new Patch(), [self::IDENTIFIER_NAME => $identifier],
             $this->createContext($filters, $previousData));
     }
 
-    public function removeItem($identifier, $data, array $filters): void
+    public function removeItem($identifier, $data, array $filters = []): void
     {
         $this->dataProcessor->process($data, new Delete(), [self::IDENTIFIER_NAME => $identifier],
             $this->createContext($filters));
     }
 
-    private function createContext(array $filters, $previousData = null): array
+    private function createContext(array $filters = [], $previousData = null): array
     {
         return [
             'filters' => $filters,
