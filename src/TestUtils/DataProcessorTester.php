@@ -8,48 +8,48 @@ use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
-use Dbp\Relay\CoreBundle\ApiPlatform\State\StateProcessorInterface;
+use Dbp\Relay\CoreBundle\Rest\AbstractDataProcessor;
 
 class DataProcessorTester
 {
     private const IDENTIFIER_NAME = 'identifier';
 
-    /** @var StateProcessorInterface */
-    private $stateProcessor;
+    private AbstractDataProcessor $dataProcessor;
+    private string $resourceClass;
+    private array $denormalizationGroups;
 
-    /** @var string */
-    private $resourceClass;
-
-    /** @var array */
-    private $denormalizationGroups;
-
-    public function __construct(StateProcessorInterface $stateProcessor, string $resourceClass, array $denormalizationGroups = [])
+    public static function setUp(AbstractDataProcessor $dataProcessor)
     {
-        $this->stateProcessor = $stateProcessor;
+        TestAuthorizationService::setUp($dataProcessor);
+    }
+
+    public function __construct(AbstractDataProcessor $dataProcessor, string $resourceClass, array $denormalizationGroups = [])
+    {
+        $this->dataProcessor = $dataProcessor;
         $this->resourceClass = $resourceClass;
         $this->denormalizationGroups = $denormalizationGroups;
     }
 
     public function addItem($data, array $filters)
     {
-        return $this->stateProcessor->process($data, new Post(), [], $this->createContext($filters));
+        return $this->dataProcessor->process($data, new Post(), [], $this->createContext($filters));
     }
 
     public function replaceItem($identifier, $data, $previousData, array $filters)
     {
-        return $this->stateProcessor->process($data, new Put(), [self::IDENTIFIER_NAME => $identifier],
+        return $this->dataProcessor->process($data, new Put(), [self::IDENTIFIER_NAME => $identifier],
             $this->createContext($filters, $previousData));
     }
 
     public function updateItem($identifier, $data, $previousData, array $filters)
     {
-        return $this->stateProcessor->process($data, new Patch(), [self::IDENTIFIER_NAME => $identifier],
+        return $this->dataProcessor->process($data, new Patch(), [self::IDENTIFIER_NAME => $identifier],
             $this->createContext($filters, $previousData));
     }
 
     public function removeItem($identifier, $data, array $filters): void
     {
-        $this->stateProcessor->process($data, new Delete(), [self::IDENTIFIER_NAME => $identifier],
+        $this->dataProcessor->process($data, new Delete(), [self::IDENTIFIER_NAME => $identifier],
             $this->createContext($filters));
     }
 

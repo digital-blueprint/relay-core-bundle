@@ -35,7 +35,7 @@ class DataProviderTester
         return $this->stateProvider->provide(new Get(), ['identifier' => $identifier], $this->createContext($filters));
     }
 
-    public function getCollection(string $identifier, array $filters = []): array
+    public function getCollection(array $filters = []): array
     {
         /** @var PartialPaginator */
         $partialPaginator = $this->stateProvider->provide(new GetCollection(), [], $this->createContext($filters));
