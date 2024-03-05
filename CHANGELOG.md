@@ -1,3 +1,18 @@
+# v0.1.146
+
+* Restrict to monolog/monolog v2
+* dev: replace abandoned composer-git-hooks with captainhook.
+  Run `vendor/bin/captainhook install -f` to replace the old hooks with the new ones
+  on an existing checkout.
+
+# v0.1.145
+
+* Various cleanups to remove deprecation warnings with Symfony 6
+
+# v0.1.144
+
+* Fix various Symfony 6 deprecation warnings
+
 # v0.1.142
 
 * composer: allow psr/http-message v1 again, to make rdepend updates easier
