@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\ApiPlatform\State;
 
+use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Operation;
 
 trait StateTrait
@@ -24,5 +25,10 @@ trait StateTrait
     protected function getCurrentUriVariables(): array
     {
         return $this->currentUriVariables;
+    }
+
+    protected function isCurrentOperationACollectionOperation(): bool
+    {
+        return $this->currentOperation instanceof CollectionOperationInterface;
     }
 }
