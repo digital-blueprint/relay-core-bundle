@@ -18,7 +18,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
 class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExtensionInterface
 {
-    public function loadInternal(array $mergedConfig, ContainerBuilder $container)
+    public function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
         $loader = new YamlFileLoader(
             $container,
@@ -64,7 +64,7 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
         return $channels;
     }
 
-    public function prepend(ContainerBuilder $container)
+    public function prepend(ContainerBuilder $container): void
     {
         foreach (['api_platform', 'nelmio_cors', 'twig', 'security', 'framework', 'monolog'] as $extKey) {
             if (!$container->hasExtension($extKey)) {

@@ -35,7 +35,7 @@ class TransportFactoryDecorator implements TransportFactoryInterface, LoggerAwar
         $this->workerName = 'worker';
     }
 
-    public function setActiveWorkerName(string $name)
+    public function setActiveWorkerName(string $name): void
     {
         $this->workerName = $name;
     }

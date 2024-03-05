@@ -18,7 +18,7 @@ class CronCompilerPass implements CompilerPassInterface
         $container->addCompilerPass(new CronCompilerPass());
     }
 
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         if (!$container->has(CronManager::class)) {
             return;
