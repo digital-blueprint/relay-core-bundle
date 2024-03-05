@@ -15,10 +15,9 @@ class RestartCommand extends Command implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    protected static $defaultName = 'dbp:relay:core:queue:restart';
-
-    protected function configure()
+    protected function configure(): void
     {
+        $this->setName('dbp:relay:core:queue:restart');
         $this->setDescription('Stop all workers once they are done with the current task');
     }
 

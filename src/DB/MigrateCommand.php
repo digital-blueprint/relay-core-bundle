@@ -23,7 +23,6 @@ final class MigrateCommand extends Command implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    protected static $defaultName = 'dbp:relay:core:migrate';
     private $entityManagers;
     private $appKernel;
 
@@ -34,8 +33,9 @@ final class MigrateCommand extends Command implements LoggerAwareInterface
         $this->appKernel = $appKernel;
     }
 
-    protected function configure()
+    protected function configure(): void
     {
+        $this->setName('dbp:relay:core:migrate');
         $this->setDescription('Run all database migrations');
     }
 

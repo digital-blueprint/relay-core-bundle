@@ -16,8 +16,6 @@ class DebugCommand extends Command implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    protected static $defaultName = 'dbp:relay:core:auth-debug';
-
     /**
      * @var UserAttributeMuxer
      */
@@ -29,8 +27,9 @@ class DebugCommand extends Command implements LoggerAwareInterface
         $this->userAttributeMuxer = $userAttributeMuxer;
     }
 
-    protected function configure()
+    protected function configure(): void
     {
+        $this->setName('dbp:relay:core:auth-debug');
         $this->setDescription('Shows various information about the authorization providers');
         $this->addArgument('username', InputArgument::OPTIONAL, 'username');
     }

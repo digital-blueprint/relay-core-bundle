@@ -14,8 +14,6 @@ class HealthCheckCommand extends Command implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    protected static $defaultName = 'dbp:relay:core:check-health';
-
     /**
      * @var CheckInterface[]
      */
@@ -32,8 +30,9 @@ class HealthCheckCommand extends Command implements LoggerAwareInterface
         $this->checks[] = $check;
     }
 
-    protected function configure()
+    protected function configure(): void
     {
+        $this->setName('dbp:relay:core:check-health');
         $this->setDescription('Run all available health checks');
     }
 

@@ -17,9 +17,6 @@ final class CronCommand extends Command implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    // dbp:cron only for backwards compat
-    protected static $defaultName = 'dbp:relay:core:cron|dbp:cron';
-
     /**
      * @var CronManager
      */
@@ -32,8 +29,11 @@ final class CronCommand extends Command implements LoggerAwareInterface
         $this->manager = $manager;
     }
 
-    protected function configure()
+    protected function configure(): void
     {
+        $this->setName('dbp:relay:core:cron');
+        // dbp:cron only for backwards compat
+        $this->setAliases(['dbp:cron']);
         $this->setDescription('Runs various tasks which need to be executed periodically');
         $this->addOption('force', null, InputOption::VALUE_NONE, 'Run the cron job even if it\'s not due');
     }

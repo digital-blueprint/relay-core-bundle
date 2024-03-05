@@ -18,8 +18,6 @@ class TestCommand extends Command implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    protected static $defaultName = 'dbp:relay:core:queue:test';
-
     /**
      * @var MessageBusInterface
      */
@@ -32,8 +30,9 @@ class TestCommand extends Command implements LoggerAwareInterface
         $this->bus = $bus;
     }
 
-    protected function configure()
+    protected function configure(): void
     {
+        $this->setName('dbp:relay:core:queue:test');
         $this->setDescription('Start some dummy tasks for testing');
         $this->addOption('count', null, InputArgument::OPTIONAL, 'The number of messages to send', 1);
         $this->addOption('delay', null, InputArgument::OPTIONAL, 'Delay in seconds', 0);

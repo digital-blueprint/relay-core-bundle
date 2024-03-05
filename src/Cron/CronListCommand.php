@@ -15,9 +15,6 @@ final class CronListCommand extends Command implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    // dbp:cron only for backwards compat
-    protected static $defaultName = 'dbp:relay:core:cron:list';
-
     /**
      * @var CronManager
      */
@@ -30,8 +27,9 @@ final class CronListCommand extends Command implements LoggerAwareInterface
         $this->manager = $manager;
     }
 
-    protected function configure()
+    protected function configure(): void
     {
+        $this->setName('dbp:relay:core:cron:list');
         $this->setDescription('Lists all registered cron jobs');
     }
 

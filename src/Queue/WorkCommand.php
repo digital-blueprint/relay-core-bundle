@@ -22,8 +22,6 @@ class WorkCommand extends Command implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    protected static $defaultName = 'dbp:relay:core:queue:work';
-
     /**
      * @var TransportFactoryDecorator
      */
@@ -37,6 +35,7 @@ class WorkCommand extends Command implements LoggerAwareInterface
 
     protected function configure(): void
     {
+        $this->setName('dbp:relay:core:queue:work');
         $this->setDescription('Start a worker which processes queued tasks');
         $this->addArgument('worker-name', InputArgument::REQUIRED, 'A unique and stable worker name');
     }
