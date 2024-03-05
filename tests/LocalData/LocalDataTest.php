@@ -84,12 +84,19 @@ class LocalDataTest extends TestCase
 
     public function testLocalDataAttributeUnauthorized()
     {
-        // authorization expression of attribute evaluates to false -> forbidden exception
+        // authorization expression of attribute evaluates to false -> value must be null
         $localDataAttributeName = 'attribute_3';
         $sourceData = ['src_attribute_3' => 'value_3'];
 
         $entity = $this->getTestEntity($localDataAttributeName, $sourceData);
         $this->assertNull($entity->getLocalDataValue($localDataAttributeName));
+
+        $includeLocal = 'attribute_2,attribute_3';
+        $sourceData = ['src_attribute_3' => 'value_3', 'src_attribute_2' => 'value_2'];
+
+        $entity = $this->getTestEntity($includeLocal, $sourceData);
+        $this->assertNull($entity->getLocalDataValue('attribute_3'));
+        $this->assertEquals('value_2', $entity->getLocalDataValue('attribute_2'));
     }
 
     public function testLocalDataAttributeUnauthorizedCollection()
@@ -107,6 +114,19 @@ class LocalDataTest extends TestCase
         $this->assertNull($entities[0]->getLocalDataValue($localDataAttributeName));
         $this->assertNull($entities[1]->getLocalDataValue($localDataAttributeName));
         $this->assertNull($entities[2]->getLocalDataValue($localDataAttributeName));
+
+        $includeLocal = 'attribute_3,attribute_1';
+        $sourceData = ['src_attribute_1' => 'value_1', 'src_attribute_3' => 'value_3'];
+
+        $entities = $this->getTestEntities($includeLocal, [
+            '0' => $sourceData,
+            '1' => $sourceData,
+        ]);
+
+        $this->assertNull($entities[0]->getLocalDataValue('attribute_3'));
+        $this->assertEquals('value_1', $entities[0]->getLocalDataValue('attribute_1'));
+        $this->assertNull($entities[1]->getLocalDataValue('attribute_3'));
+        $this->assertEquals('value_1', $entities[1]->getLocalDataValue('attribute_1'));
     }
 
     private static function createAuthzConfig(): array
@@ -148,7 +168,7 @@ class LocalDataTest extends TestCase
             ],
             [
                 'local_data_attribute' => 'attribute_2',
-                'source_attribute' => 'src_attribute_2_1',
+                'source_attribute' => 'src_attribute_2',
             ],
             [
                 'local_data_attribute' => 'attribute_3',

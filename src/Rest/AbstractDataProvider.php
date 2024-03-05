@@ -47,17 +47,10 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     private const RESOURCE_CLASS_CONTEXT_KEY = 'resource_class';
     private const LOCAL_DATA_BASE_PATH = 'localData.';
 
-    /** @var Locale */
-    private $locale;
-
-    /** @var PreparedFilterProvider */
-    private $preparedFilterController;
-
-    /** @var LocalDataAccessChecker */
-    private $localDataAccessChecker;
-
-    /** @var PropertyNameCollectionFactoryInterface */
-    private $propertyNameCollectionFactory;
+    private Locale $locale;
+    private PreparedFilterProvider $preparedFilterController;
+    private LocalDataAccessChecker $localDataAccessChecker;
+    private PropertyNameCollectionFactoryInterface $propertyNameCollectionFactory;
 
     /** @var bool[] */
     private $localDataReadAccessGrantedMap = [];
@@ -126,8 +119,8 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $item = $this->getItemById($id, $filters, $options);
 
         if ($item !== null) {
-            $this->removeForbiddenLocalDataAttributeValues([$item], Options::getLocalDataAttributes($options));
             $this->forbidCurrentUserToAccessItemUnlessAuthorized(self::GET_ITEM_OPERATION, $item, $filters);
+            $this->addForbiddenLocalDataAttributesWithNullValue([$item], $options, $filters);
         }
 
         return $item;
@@ -175,7 +168,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
         if (!$returnEmptyPage) {
             $pageItems = $this->getPage($currentPageNumber, $maxNumItemsPerPage, $filters, $options);
-            $this->removeForbiddenLocalDataAttributeValues($pageItems, Options::getLocalDataAttributes($options));
+            $this->addForbiddenLocalDataAttributesWithNullValue($pageItems, $options, $filters);
         }
 
         return new PartialPaginator($pageItems, $currentPageNumber, $maxNumItemsPerPage);
@@ -185,16 +178,20 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
     abstract protected function getPage(int $currentPageNumber, int $maxNumItemsPerPage, array $filters = [], array $options = []): array;
 
-    protected function forbidCurrentUserToGetCollectionUnlessAuthorized(array $filters): void
-    {
-        if (!$this->isCurrentUserAuthorizedToGetCollection($filters)) {
-            throw ApiError::withDetails(Response::HTTP_FORBIDDEN, 'forbidden');
-        }
-    }
-
     protected function isCurrentUserAuthorizedToGetCollection(array $filters): bool
     {
         return true;
+    }
+
+    protected function isGrantedReadAccessToLocalDataAttribute(string $localDataAttributeName): bool
+    {
+        $isGrantedReadAccess = $this->localDataReadAccessGrantedMap[$localDataAttributeName] ?? null;
+        if ($isGrantedReadAccess === null) {
+            $isGrantedReadAccess = $this->localDataAccessChecker->isGrantedReadAccess($localDataAttributeName, $this);
+            $this->localDataReadAccessGrantedMap[$localDataAttributeName] = $isGrantedReadAccess;
+        }
+
+        return $isGrantedReadAccess;
     }
 
     /**
@@ -208,9 +205,10 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         Options::setLanguage($options, $this->locale->getCurrentPrimaryLanguage());
 
         if ($includeLocalParameter = Parameters::getIncludeLocal($filters)) {
-            $referencedLocalDataAttributes = LocalData::getLocalDataAttributesFromQueryParameter($includeLocalParameter);
-            $this->localDataAccessChecker->assertLocalDataAttributesAreDefined($referencedLocalDataAttributes);
-            Options::setLocalDataAttributes($options, $referencedLocalDataAttributes);
+            $requestedLocalDataAttributes = LocalData::getLocalDataAttributesFromQueryParameter($includeLocalParameter);
+            $this->localDataAccessChecker->assertLocalDataAttributesAreDefined($requestedLocalDataAttributes);
+            $localDataAttributesIsGrantedReadAccess = $this->getLocalDataAttributesIsGrantedReadAccess($requestedLocalDataAttributes);
+            Options::setLocalDataAttributes($options, $localDataAttributesIsGrantedReadAccess);
         }
 
         return $options;
@@ -242,17 +240,23 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         }
     }
 
-    private function removeForbiddenLocalDataAttributeValues(array $items, array $requestedLocalDataAttributeNames)
+    private function forbidCurrentUserToGetCollectionUnlessAuthorized(array $filters): void
     {
+        if (!$this->isCurrentUserAuthorizedToGetCollection($filters)) {
+            throw ApiError::withDetails(Response::HTTP_FORBIDDEN, 'forbidden');
+        }
+    }
+
+    private function getLocalDataAttributesIsGrantedReadAccess(array $requestedLocalDataAttributeNames): array
+    {
+        $localDataAttributes = [];
         foreach ($requestedLocalDataAttributeNames as $localDataAttributeName) {
-            if (!$this->isGrantedReadAccessToLocalDataAttribute($localDataAttributeName)) {
-                foreach ($items as $item) {
-                    if ($item instanceof LocalDataAwareInterface) {
-                        $item->setLocalDataValue($localDataAttributeName, null);
-                    }
-                }
+            if ($this->isGrantedReadAccessToLocalDataAttribute($localDataAttributeName)) {
+                $localDataAttributes[] = $localDataAttributeName;
             }
         }
+
+        return $localDataAttributes;
     }
 
     private function removeForbiddenLocalDataAttributeConditionsFromFilterRecursively(LogicalNode $logicalNode)
@@ -266,6 +270,22 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
                 $logicalNode->appendChild(new ConstantNode(false));
             } elseif ($child instanceof LogicalNode) {
                 $this->removeForbiddenLocalDataAttributeConditionsFromFilterRecursively($child);
+            }
+        }
+    }
+
+    private function addForbiddenLocalDataAttributesWithNullValue(array $items, array $options, array $filters)
+    {
+        if ($includeLocalParameter = Parameters::getIncludeLocal($filters)) {
+            $requestedLocalDataAttributes = LocalData::getLocalDataAttributesFromQueryParameter($includeLocalParameter);
+            $localDataAttributesGrantedReadAccess = Options::getLocalDataAttributes($options);
+
+            foreach (array_diff($requestedLocalDataAttributes, $localDataAttributesGrantedReadAccess) as $forbiddenLocalDataAttribute) {
+                foreach ($items as $item) {
+                    if ($item instanceof LocalDataAwareInterface) {
+                        $item->setLocalDataValue($forbiddenLocalDataAttribute, null);
+                    }
+                }
             }
         }
     }
@@ -316,17 +336,6 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         }
 
         return $availableAttributePaths;
-    }
-
-    private function isGrantedReadAccessToLocalDataAttribute(string $localDataAttributeName): bool
-    {
-        $isGrantedReadAccess = $this->localDataReadAccessGrantedMap[$localDataAttributeName] ?? null;
-        if ($isGrantedReadAccess === null) {
-            $isGrantedReadAccess = $this->localDataAccessChecker->isGrantedReadAccess($localDataAttributeName, $this);
-            $this->localDataReadAccessGrantedMap[$localDataAttributeName] = $isGrantedReadAccess;
-        }
-
-        return $isGrantedReadAccess;
     }
 
     private static function isLocalDataAttributePath(string $attributePath, ?string &$localDataAttributeName = null): bool
