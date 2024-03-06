@@ -33,6 +33,30 @@ jobs:
       run: |
         composer install
         composer test
+  unit-tests-lowest:
+    name: Tests for php${{ matrix.php-versions }} with lowest deps
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-versions: ['8.1']
+    steps:
+    - name: Set up php${{ matrix.php-versions }}
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-versions }}
+        extensions: ctype,curl,dom,gd,iconv,intl,json,mbstring,openssl,posix,sqlite,xml,zip,gmp
+        coverage: xdebug
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Cache composer cache directory
+      uses: actions/cache@v4
+      with:
+        path: ${{ env.COMPOSER_CACHE_DIR }}
+        key: composer-cache
+    - name: Unit tests
+      run: |
+        composer update --prefer-lowest
+        composer test
   linting:
     name: Linting
     runs-on: ubuntu-latest

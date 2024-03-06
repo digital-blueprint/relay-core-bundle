@@ -14,6 +14,8 @@ use Symfony\Component\Messenger\Transport\TransportInterface;
 /**
  * Decorated because we want to set reasonable defaults while still allowing the user to set a full transport
  * DSN if needed.
+ *
+ * @psalm-suppress MissingTemplateParam
  */
 class TransportFactoryDecorator implements TransportFactoryInterface, LoggerAwareInterface
 {

@@ -1,3 +1,7 @@
+# Unreleased
+
+* Add support for Symfony 6
+
 # v0.1.146
 
 * Restrict to monolog/monolog v2
