@@ -1,4 +1,4 @@
-# Unreleased
+# v0.1.147
 
 * Add support for Symfony 6
 
