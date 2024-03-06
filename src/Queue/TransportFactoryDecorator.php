@@ -6,7 +6,6 @@ namespace Dbp\Relay\CoreBundle\Queue;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use Symfony\Component\Messenger\Bridge\Redis\Transport\RedisTransportFactory;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Component\Messenger\Transport\TransportFactoryInterface;
 use Symfony\Component\Messenger\Transport\TransportInterface;
@@ -49,8 +48,7 @@ class TransportFactoryDecorator implements TransportFactoryInterface, LoggerAwar
         if ($options['transport_name'] === Utils::QUEUE_TRANSPORT_NAME) {
             $this->logger->debug("Creating queue transport for worker: '$this->workerName'");
 
-            $redis = new RedisTransportFactory();
-            if ($redis->supports($dsn, $options)) {
+            if (str_starts_with($dsn, 'redis:') || str_starts_with($dsn, 'rediss:')) {
                 // We set some nice namespaced default, so the user doesn't have to care about potential conflicts
                 $options['stream'] = 'dbp_relay_queue_stream';
                 $options['group'] = 'dbp_relay_queue_group';

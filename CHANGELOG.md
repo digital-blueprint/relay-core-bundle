@@ -1,3 +1,7 @@
+# v0.1.148
+
+* Remove dependency on symfony/redis-messenger and ext-redis
+
 # v0.1.147
 
 * Add support for Symfony 6
