@@ -10,11 +10,16 @@ env:
 
 jobs:
   unit-tests:
-    name: Tests for php${{ matrix.php-versions }}
+    name: Tests for php${{ matrix.php-versions }} ${{ matrix.name }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
         php-versions: ['8.1', '8.2', '8.3']
+        composer-command: ['install']
+        include:
+          - php-versions: '8.1'
+            composer-command: 'update --prefer-lowest --prefer-dist --prefer-stable --no-interaction'
+            name: prefer-lowest
     steps:
     - name: Set up php${{ matrix.php-versions }}
       uses: shivammathur/setup-php@v2
@@ -31,31 +36,7 @@ jobs:
         key: composer-cache
     - name: Unit tests
       run: |
-        composer install
-        composer test
-  unit-tests-lowest:
-    name: Tests for php${{ matrix.php-versions }} with lowest deps
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        php-versions: ['8.1']
-    steps:
-    - name: Set up php${{ matrix.php-versions }}
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: ${{ matrix.php-versions }}
-        extensions: ctype,curl,dom,gd,iconv,intl,json,mbstring,openssl,posix,sqlite,xml,zip,gmp
-        coverage: xdebug
-    - name: Checkout code
-      uses: actions/checkout@v4
-    - name: Cache composer cache directory
-      uses: actions/cache@v4
-      with:
-        path: ${{ env.COMPOSER_CACHE_DIR }}
-        key: composer-cache
-    - name: Unit tests
-      run: |
-        composer update --prefer-lowest
+        composer ${{ matrix.composer-command }}
         composer test
   linting:
     name: Linting
