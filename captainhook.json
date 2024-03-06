@@ -3,7 +3,13 @@
         "enabled": true,
         "actions": [
             {
-                "action": "composer lint"
+                "action": "composer phpstan"
+            },
+            {
+                "action": "composer psalm"
+            },
+            {
+                "action": "composer cs"
             }
         ]
     }
