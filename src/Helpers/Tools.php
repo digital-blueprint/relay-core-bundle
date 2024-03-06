@@ -30,10 +30,11 @@ class Tools
         return preg_replace('/([&?]token=)[\w\d-]+/i', '${1}hidden', $message);
     }
 
+    /**
+     * @deprecated
+     */
     public static function dumpTrace(...$moreVars)
     {
-        $e = new \Exception();
-        dump($e->getTraceAsString(), $moreVars);
     }
 
     public static function isNullOrEmpty(?string $str): bool
