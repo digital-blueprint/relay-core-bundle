@@ -84,6 +84,7 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
             ],
             'description' => $config['docs_description'],
             'defaults' => [
+                'stateless' => true,
                 // This enables it for the doctrine integration, which we don't actually use.
                 // But it also adds it to the open-api docs which need because we implement it manually
                 // in the controllers and providers, so enable it anyway.
@@ -111,8 +112,39 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
                 ],
             ],
             'path_segment_name_generator' => 'api_platform.path_segment_name_generator.dash',
-            'metadata_backward_compatibility_layer' => false,
         ]);
+
+        // Disable for <3.x. In 3.x this doesn't exist and fails
+        if (class_exists('ApiPlatform\Core\Bridge\Symfony\Bundle\ApiPlatformBundle')) {
+            $container->prependExtensionConfig('api_platform', [
+                'metadata_backward_compatibility_layer' => false,
+            ]);
+        } else {
+            $container->prependExtensionConfig('api_platform', [
+                'formats' => [
+                    'jsonld' => ['application/ld+json'],
+                ],
+                'error_formats' => [
+                    'jsonld' => ['application/ld+json'],
+                ],
+                'docs_formats' => [
+                    'jsonld' => ['application/ld+json'],
+                    'jsonopenapi' => ['application/vnd.openapi+json'],
+                    'html' => ['text/html'],
+                ],
+                'event_listeners_backward_compatibility_layer' => false,
+                'keep_legacy_inflector' => false,
+                'defaults' => [
+                    'extra_properties' => [
+                        'standard_put' => true,
+                        'rfc_7807_compliant_errors' => true,
+                    ],
+                    'normalization_context' => [
+                        'skip_null_values' => false,
+                    ],
+                ],
+            ]);
+        }
 
         $container->loadFromExtension('framework', [
             'router' => [

@@ -8,7 +8,7 @@
         "ext-fileinfo": "*",
         "ext-intl": "*",
         "ext-json": "*",
-        "api-platform/core": "^2.7.11",
+        "api-platform/core": "^2.7 || ^3.2",
         "doctrine/annotations": "^1.13 || ^2.0",
         "dragonmantank/cron-expression": "^3.3.3",
         "guzzlehttp/guzzle": "^7.5",
