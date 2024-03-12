@@ -19,7 +19,7 @@ trait StateProviderTrait
      * @throws ApiError
      * @throws \Exception
      */
-    public function provide(Operation $operation, array $uriVariables = [], array $context = [])
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
     {
         $this->currentOperation = $operation;
         $this->currentUriVariables = $uriVariables;
