@@ -84,6 +84,7 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
             ],
             'description' => $config['docs_description'],
             'defaults' => [
+                'stateless' => true,
                 // This enables it for the doctrine integration, which we don't actually use.
                 // But it also adds it to the open-api docs which need because we implement it manually
                 // in the controllers and providers, so enable it anyway.
@@ -92,6 +93,7 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
                     'etag' => true,
                     'vary' => [
                         'Accept',
+                        'Content-Type',
                         // Accept is default, Origin/ACRH/ACRM are for CORS requests
                         'Origin',
                         'Access-Control-Request-Headers',
@@ -117,6 +119,22 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
         if (class_exists('ApiPlatform\Core\Bridge\Symfony\Bundle\ApiPlatformBundle')) {
             $container->prependExtensionConfig('api_platform', [
                 'metadata_backward_compatibility_layer' => false,
+            ]);
+        } else {
+            $container->prependExtensionConfig('api_platform', [
+                'formats' => [
+                    'jsonld' => ['application/ld+json'],
+                ],
+                'error_formats' => [
+                    'jsonld' => ['application/ld+json'],
+                ],
+                'docs_formats' => [
+                    'jsonld' => ['application/ld+json'],
+                    'jsonopenapi' => ['application/vnd.openapi+json'],
+                    'html' => ['text/html'],
+                ],
+                'event_listeners_backward_compatibility_layer' => false,
+                'keep_legacy_inflector' => false,
             ]);
         }
 
