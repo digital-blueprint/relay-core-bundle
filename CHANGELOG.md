@@ -1,3 +1,7 @@
+# v0.1.149
+
+* Add conflict for broken api-platform release
+
 # v0.1.148
 
 * Remove dependency on symfony/redis-messenger and ext-redis
