@@ -65,7 +65,8 @@
         "symfony/twig-bridge": ">=6.0 <6.4",
         "symfony/amqp-messenger": ">=6.0 <6.4",
         "symfony/property-info": ">=6.0 <6.4",
-        "willdurand/negotiation": "<3"
+        "willdurand/negotiation": "<3",
+        "api-platform/core": "2.7.17"
     },
     "autoload": {
         "psr-4": {
