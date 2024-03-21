@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Rest;
 
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
+use Dbp\Relay\CoreBundle\Rest\Query\Sorting\Sorting;
 
 class Options
 {
     public const LANGUAGE = 'lang';
     public const FILTER = 'filter';
+    public const SORTING = 'sorting';
     public const LOCAL_DATA_ATTRIBUTES = 'local_data_attributes';
 
     public static function getLanguage(array $options): ?string
@@ -30,6 +32,16 @@ class Options
     }
 
     /**
+     * Sets the filter option in the given target options.
+     */
+    public static function setFilter(array &$targetOptions, Filter $filter): array
+    {
+        $targetOptions[Options::FILTER] = $filter;
+
+        return $targetOptions;
+    }
+
+    /**
      * Sets the filter option in the given target options. If the filter option is already set, the existing filter and
      * the given filter combined with a logical AND operator.
      */
@@ -45,11 +57,36 @@ class Options
     }
 
     /**
-     * Removes the filter option in the given target options.
+     * Removes the filter option from the given target options.
      */
     public static function removeFilter(array &$targetOptions): array
     {
-        unset($targetOptions[Options::FILTER]);
+        unset($targetOptions[self::FILTER]);
+
+        return $targetOptions;
+    }
+
+    public static function getSorting(array $options): ?Sorting
+    {
+        return $options[self::SORTING] ?? null;
+    }
+
+    /**
+     * Sets the sorting option in the given target options.
+     */
+    public static function setSorting(array &$targetOptions, Sorting $sorting): array
+    {
+        $targetOptions[self::SORTING] = $sorting;
+
+        return $targetOptions;
+    }
+
+    /**
+     * Removes the sorting option from the given target options.
+     */
+    public static function removeSorting(array &$targetOptions): array
+    {
+        unset($targetOptions[self::SORTING]);
 
         return $targetOptions;
     }
