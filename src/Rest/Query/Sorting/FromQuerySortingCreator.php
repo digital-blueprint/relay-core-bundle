@@ -13,11 +13,6 @@ namespace Dbp\Relay\CoreBundle\Rest\Query\Sorting;
 class FromQuerySortingCreator
 {
     /**
-     * The JSON:API sort key name.
-     */
-    private const KEY_NAME = 'sort';
-
-    /**
      * The field key in the sort parameter: sort[lorem][<field>].
      */
     private const PATH_KEY = 'path';

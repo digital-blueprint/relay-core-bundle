@@ -6,12 +6,36 @@ namespace Dbp\Relay\CoreBundle\Rest\Query\Sorting;
 
 class Sorting
 {
+    public const PATH_KEY = 'path';
+    public const DIRECTION_KEY = 'direction';
+
+    public const DIRECTION_ASCENDING = 'ASC';
+    public const DIRECTION_DESCENDING = 'DESC';
+
     /**
      * The fields on which to sort.
      *
      * @var array[]
      */
-    protected array $fields;
+    protected array $sortFields;
+
+    public static function createSortField(string $path, string $direction = self::DIRECTION_ASCENDING): array
+    {
+        return [
+            self::PATH_KEY => $path,
+            self::DIRECTION_KEY => $direction,
+        ];
+    }
+
+    public static function getPath(array $sortField): string
+    {
+        return $sortField[self::PATH_KEY];
+    }
+
+    public static function getDirection(array $sortField): string
+    {
+        return $sortField[self::DIRECTION_KEY];
+    }
 
     /**
      * Constructs a new Sort object.
@@ -19,19 +43,24 @@ class Sorting
      * Takes an array of sort fields. Example:
      *   [
      *     [
-     *       'path' => 'changed',
-     *       'direction' => 'DESC',
+     *       Sorting::PATH_KEY => 'changed',
+     *       Sorting::DIRECTION_KEY => Sorting::DIRECTION_DESCENDING,
      *     ],
      *     [
-     *       'path' => 'title',
-     *       'direction' => 'ASC',
+     *       Sorting::PATH_KEY => 'title',
+     *       Sorting::DIRECTION_KEY => Sorting::DIRECTION_ASCENDING,
      *     ],
      *   ]
      *
-     * @param array[] $fields the entity query sort fields
+     * @param array[] $sortFields the entity query sort fields
      */
-    public function __construct(array $fields)
+    public function __construct(array $sortFields)
     {
-        $this->fields = $fields;
+        $this->sortFields = $sortFields;
+    }
+
+    public function getSortFields(): array
+    {
+        return $this->sortFields;
     }
 }
