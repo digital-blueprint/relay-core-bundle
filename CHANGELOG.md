@@ -1,3 +1,7 @@
+# v0.1.150
+
+* Set a timeout of 20min for database migrations, because some migrations take a long time
+
 # v0.1.149
 
 * Add conflict for broken api-platform release

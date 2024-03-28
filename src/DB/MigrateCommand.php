@@ -81,6 +81,8 @@ final class MigrateCommand extends Command implements LoggerAwareInterface
         // Run the command
         $output->writeln('Running command: '.implode(' ', $args));
         $process = new Process($args);
+        // Set a timeout of 20 minutes, database migrations can take a while!
+        $process->setTimeout(1200);
         $process->setTty($isTty);
         $process->mustRun(function ($type, $buffer) use ($output) {
             $errOutput = $output instanceof ConsoleOutputInterface ? $output->getErrorOutput() : $output;
