@@ -1,3 +1,7 @@
+# v0.1.152
+
+* Conflict with carbonphp/carbon-doctrine-types v3 to work around composer issues
+
 # v0.1.151
 
 * Conflict with doctrine/dbal v4 to work around composer issues
