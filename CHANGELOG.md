@@ -1,3 +1,7 @@
+# v0.1.151
+
+* Conflict with doctrine/dbal v4 to work around composer issues
+
 # v0.1.150
 
 * Set a timeout of 20min for database migrations, because some migrations take a long time
