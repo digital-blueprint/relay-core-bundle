@@ -67,7 +67,8 @@
         "symfony/property-info": ">=6.0 <6.4",
         "willdurand/negotiation": "<3",
         "api-platform/core": "2.7.17",
-        "doctrine/dbal": ">=4"
+        "doctrine/dbal": ">=4",
+        "carbonphp/carbon-doctrine-types": ">=3"
     },
     "autoload": {
         "psr-4": {
