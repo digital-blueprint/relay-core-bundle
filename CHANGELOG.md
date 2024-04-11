@@ -1,3 +1,7 @@
+# v0.1.153
+
+* Add preliminary support for api-platform 3.2
+
 # v0.1.152
 
 * Conflict with carbonphp/carbon-doctrine-types v3 to work around composer issues
