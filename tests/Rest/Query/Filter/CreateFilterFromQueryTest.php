@@ -19,10 +19,10 @@ class CreateFilterFromQueryTest extends TestCase
     public function testCreateFromQueryParameters()
     {
         $queryParameters = ['foo' => ['condition' => [
-                'path' => 'field0',
-                'operator' => 'I_CONTAINS',
-                'value' => 'value0',
-            ]]];
+            'path' => 'field0',
+            'operator' => 'I_CONTAINS',
+            'value' => 'value0',
+        ]]];
 
         $filter = FromQueryFilterCreator::createFilterFromQueryParameters($queryParameters, ['field0']);
 

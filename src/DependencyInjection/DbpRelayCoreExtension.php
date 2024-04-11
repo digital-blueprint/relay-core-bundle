@@ -78,9 +78,9 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
         $container->prependExtensionConfig('api_platform', [
             'title' => $config['docs_title'],
             'collection' => [
-              'pagination' => [
-                  'items_per_page_parameter_name' => 'perPage',
-              ],
+                'pagination' => [
+                    'items_per_page_parameter_name' => 'perPage',
+                ],
             ],
             'description' => $config['docs_description'],
             'defaults' => [

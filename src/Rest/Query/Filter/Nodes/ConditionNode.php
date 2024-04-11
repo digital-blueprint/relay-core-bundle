@@ -127,6 +127,6 @@ class ConditionNode extends Node
             self::FIELD_KEY => $this->field,
             self::OPERATOR_KEY => $this->operator,
             self::VALUE_KEY => $this->value,
-            ];
+        ];
     }
 }

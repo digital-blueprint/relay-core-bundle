@@ -15,6 +15,6 @@ class TestEntityLocalDataEventSubscriber extends AbstractLocalDataEventSubscribe
         return [
             TestEntityPostEvent::class,
             TestEntityPreEvent::class,
-            ];
+        ];
     }
 }

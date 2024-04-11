@@ -157,7 +157,7 @@ class FromQueryFilterCreator
             $item = [self::CONDITION_KEY => [
                 self::VALUE_KEY => $item,
                 self::PATH_KEY => $key,
-                ]];
+            ]];
         } elseif (isset($item[self::VALUE_KEY])) { // the case for filter[foo][value]=bar'
             $item = [self::CONDITION_KEY => [
                 self::VALUE_KEY => $item[self::VALUE_KEY],
