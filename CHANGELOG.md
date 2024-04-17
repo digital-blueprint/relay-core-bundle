@@ -1,3 +1,7 @@
+# v0.1.155
+
+* Restore support for api-platform 3.2
+
 # v0.1.154
 
 * Remove support for api-platform 3.2 for now as some regressions have surfaced.
