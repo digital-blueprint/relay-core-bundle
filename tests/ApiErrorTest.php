@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests;
 
+use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Serializer\ApiErrorNormalizer;
-use PHPUnit\Framework\TestCase;
+use Dbp\Relay\CoreBundle\TestUtils\UserAuthTrait;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Symfony\Component\Serializer\Normalizer\ProblemNormalizer;
 
-class ApiErrorTest extends TestCase
+class ApiErrorTest extends ApiTestCase
 {
+    use UserAuthTrait;
+
     public function testBasics()
     {
         $error = new ApiError(400, 'foobar');
@@ -53,5 +56,66 @@ class ApiErrorTest extends TestCase
         $this->assertSame($res['detail'], 'message');
         $this->assertSame($res['errorId'], 'id');
         $this->assertSame($res['errorDetails'], ['foo' => 'bar']);
+    }
+
+    public function testApiErrorJsonLd()
+    {
+        $client = self::createClient();
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=ApiError', ['headers' => ['Accept' => 'application/ld+json']]);
+        $this->assertSame(418, $response->getStatusCode());
+        $this->assertStringStartsWith('application/ld+json', $response->getHeaders(false)['content-type'][0]);
+        $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
+
+        $this->assertSame($content['hydra:title'], 'An error occurred');
+        $this->assertSame($content['hydra:description'], 'some message');
+        $this->assertSame($content['relay:errorId'], 'some-error-id');
+        $this->assertSame($content['relay:errorDetails'], [
+            'detail1' => '1',
+            'detail2' => '2',
+        ]);
+    }
+
+    public function testApiErrorJson()
+    {
+        $client = self::createClient();
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=ApiError', ['headers' => ['Accept' => 'application/json']]);
+        $this->assertSame(418, $response->getStatusCode());
+        $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
+        $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
+        $this->assertSame($content['title'], 'An error occurred');
+        $this->assertSame($content['detail'], 'some message');
+        $this->assertSame($content['errorId'], 'some-error-id');
+        $this->assertSame($content['errorDetails'], [
+            'detail1' => '1',
+            'detail2' => '2',
+        ]);
+    }
+
+    public function testUnhandledError()
+    {
+        $client = self::createClient();
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=UnhandledError');
+        $this->assertSame(500, $response->getStatusCode());
+        $this->assertStringStartsWith('application/ld+json', $response->getHeaders(false)['content-type'][0]);
+        $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
+
+        $this->assertSame($content['hydra:title'], 'An error occurred');
+        $this->assertSame($content['hydra:description'], 'oh no');
+        $this->assertArrayNotHasKey('relay:errorId', $content);
+        $this->assertArrayNotHasKey('relay:errorDetails', $content);
+    }
+
+    public function testUnhandledErrorJson()
+    {
+        $client = self::createClient();
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=UnhandledError', ['headers' => ['Accept' => 'application/json']]);
+        $this->assertSame(500, $response->getStatusCode());
+        $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
+        $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
+
+        $this->assertSame($content['title'], 'An error occurred');
+        $this->assertSame($content['detail'], 'oh no');
+        $this->assertArrayNotHasKey('errorId', $content);
+        $this->assertArrayNotHasKey('errorDetails', $content);
     }
 }

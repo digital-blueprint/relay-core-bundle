@@ -23,6 +23,12 @@ trait UserAuthTrait
         $auth->setToken($token);
         $auth->setUser(new TestUser($userIdentifier, $symfonyRoles));
 
+        $session = $container->get(TestUserSession::class);
+        assert($session instanceof TestUserSession);
+        $session->setRoles($symfonyRoles);
+        $session->setIdentifier($userIdentifier);
+        $session->setIsAuthenticated(true);
+
         return $client;
     }
 

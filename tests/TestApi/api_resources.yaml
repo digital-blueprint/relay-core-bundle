@@ -1,0 +1,21 @@
+resources:
+  Dbp\Relay\CoreBundle\Tests\TestApi\TestResource:
+    normalizationContext:
+      groups: ["TestResource:output"]
+
+    operations:
+      ApiPlatform\Metadata\Get:
+        provider: Dbp\Relay\CoreBundle\Tests\TestApi\TestResourceProvider
+        method:
+        uriTemplate: "/test/test-resources/{identifier}"
+
+      custom_controller_get:
+        class: ApiPlatform\Metadata\Get
+        method: GET
+        read: false
+        uriTemplate: "/test/test-resources/{identifier}/custom_controller"
+        controller: Dbp\Relay\CoreBundle\Tests\TestApi\TestResourceController
+
+    properties:
+      identifier:
+        identifier: true

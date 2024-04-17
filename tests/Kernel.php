@@ -6,6 +6,9 @@ namespace Dbp\Relay\CoreBundle\Tests;
 
 use ApiPlatform\Symfony\Bundle\ApiPlatformBundle;
 use Dbp\Relay\CoreBundle\DbpRelayCoreBundle;
+use Dbp\Relay\CoreBundle\Tests\TestApi\TestResource;
+use Dbp\Relay\CoreBundle\Tests\TestApi\TestResourceController;
+use Dbp\Relay\CoreBundle\Tests\TestApi\TestResourceProvider;
 use Nelmio\CorsBundle\NelmioCorsBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
@@ -38,10 +41,20 @@ class Kernel extends BaseKernel
 
     protected function configureContainer(ContainerConfigurator $container)
     {
+        $container->services()->set(TestResourceController::class)->public()->autoconfigure()->autowire();
+        $container->services()->set(TestResource::class)->public()->autoconfigure()->autowire();
+        $container->services()->set(TestResourceProvider::class)->public()->autoconfigure()->autowire();
+
         $container->import('@DbpRelayCoreBundle/Resources/config/services_test.yaml');
         $container->extension('framework', [
             'test' => true,
             'secret' => '',
+        ]);
+
+        $container->extension('api_platform', [
+            'mapping' => [
+                'paths' => [__DIR__.'/TestApi'],
+            ],
         ]);
     }
 }

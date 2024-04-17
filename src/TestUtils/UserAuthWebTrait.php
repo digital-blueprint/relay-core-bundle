@@ -22,6 +22,7 @@ trait UserAuthWebTrait
         assert($session instanceof TestUserSession);
         $session->setRoles($roles);
         $session->setIdentifier($id);
+        $session->setIsAuthenticated(true);
 
         $client->loginUser($user, 'api');
 

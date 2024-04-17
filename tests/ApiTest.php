@@ -26,4 +26,37 @@ class ApiTest extends ApiTestCase
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
         $this->assertJson($response->getContent(false));
     }
+
+    public function testSimpleProvider()
+    {
+        $client = $this->withUser('foobar');
+        $response = $client->request('GET', '/test/test-resources/foobar');
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertStringStartsWith('application/ld+json', $response->getHeaders(false)['content-type'][0]);
+        $content = json_decode($response->getContent(), true, flags: JSON_THROW_ON_ERROR);
+        $this->assertSame($content['identifier'], 'foobar');
+        $this->assertSame($content['content'], null);
+    }
+
+    public function testGetCurrentUserNoAuth()
+    {
+        $client = self::createClient();
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=GetCurrentUser');
+        $this->assertSame(200, $response->getStatusCode());
+        $content = json_decode($response->getContent(), true, flags: JSON_THROW_ON_ERROR);
+        $content = json_decode($content['content'], true, flags: JSON_THROW_ON_ERROR);
+        $this->assertSame($content['isAuthenticated'], false);
+        $this->assertSame($content['userIdentifier'], null);
+    }
+
+    public function testGetCurrentUserIdAuth()
+    {
+        $client = $this->withUser('someuser');
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=GetCurrentUser');
+        $this->assertSame(200, $response->getStatusCode());
+        $content = json_decode($response->getContent(), true, flags: JSON_THROW_ON_ERROR);
+        $content = json_decode($content['content'], true, flags: JSON_THROW_ON_ERROR);
+        $this->assertSame($content['userIdentifier'], 'someuser');
+        $this->assertSame($content['isAuthenticated'], true);
+    }
 }
