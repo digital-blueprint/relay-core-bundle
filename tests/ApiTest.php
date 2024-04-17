@@ -40,23 +40,25 @@ class ApiTest extends ApiTestCase
 
     public function testGetCurrentUserNoAuth()
     {
-        $client = self::createClient();
+        $client = $this->withUser('someuser', ['myrole']);
         $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=GetCurrentUser');
         $this->assertSame(200, $response->getStatusCode());
         $content = json_decode($response->getContent(), true, flags: JSON_THROW_ON_ERROR);
         $content = json_decode($content['content'], true, flags: JSON_THROW_ON_ERROR);
         $this->assertSame($content['isAuthenticated'], false);
         $this->assertSame($content['userIdentifier'], null);
+        $this->assertSame($content['userRoles'], []);
     }
 
     public function testGetCurrentUserIdAuth()
     {
-        $client = $this->withUser('someuser');
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=GetCurrentUser');
+        $client = $this->withUser('someuser', ['myrole'], 'xxx');
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=GetCurrentUser', ['headers' => ['Authorization' => 'Bearer xxx']]);
         $this->assertSame(200, $response->getStatusCode());
         $content = json_decode($response->getContent(), true, flags: JSON_THROW_ON_ERROR);
         $content = json_decode($content['content'], true, flags: JSON_THROW_ON_ERROR);
         $this->assertSame($content['userIdentifier'], 'someuser');
         $this->assertSame($content['isAuthenticated'], true);
+        $this->assertSame($content['userRoles'], ['myrole']);
     }
 }
