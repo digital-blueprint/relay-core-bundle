@@ -137,7 +137,7 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
                 'defaults' => [
                     'extra_properties' => [
                         'standard_put' => true,
-                        'rfc_7807_compliant_errors' => true,
+                        'rfc_7807_compliant_errors' => false,
                     ],
                     'normalization_context' => [
                         'skip_null_values' => false,

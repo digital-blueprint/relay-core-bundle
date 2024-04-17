@@ -78,7 +78,7 @@ class ApiErrorTest extends ApiTestCase
     public function testApiErrorJson()
     {
         $client = self::createClient();
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=ApiError', ['headers' => ['Accept' => 'application/json']]);
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller_json?test=ApiError', ['headers' => ['Accept' => 'application/json']]);
         $this->assertSame(418, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
@@ -108,7 +108,7 @@ class ApiErrorTest extends ApiTestCase
     public function testUnhandledErrorJson()
     {
         $client = self::createClient();
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=UnhandledError', ['headers' => ['Accept' => 'application/json']]);
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller_json?test=UnhandledError', ['headers' => ['Accept' => 'application/json']]);
         $this->assertSame(500, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);

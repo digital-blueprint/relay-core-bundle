@@ -9,7 +9,17 @@ resources:
         method:
         uriTemplate: "/test/test-resources/{identifier}"
 
-      custom_controller_get:
+      custom_controller_get_json:
+        class: ApiPlatform\Metadata\Get
+        method: GET
+        formats:
+          # This one only allows json, since some of our APIs still provide json for backwards compat
+          json: ['application/json']
+        read: false
+        uriTemplate: "/test/test-resources/{identifier}/custom_controller_json"
+        controller: Dbp\Relay\CoreBundle\Tests\TestApi\TestResourceController
+
+      custom_controller_get_default:
         class: ApiPlatform\Metadata\Get
         method: GET
         read: false
