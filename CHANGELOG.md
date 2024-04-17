@@ -1,3 +1,8 @@
+# v0.1.154
+
+* Remove support for api-platform 3.2 for now as some regressions have surfaced.
+* Add regression tests to avoid similar issues in the future.
+
 # v0.1.153
 
 * Add preliminary support for api-platform 3.2
