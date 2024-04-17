@@ -1,3 +1,8 @@
+# v0.1.156
+
+* Fix a regression from v0.1.154 where UserAuthTrait (this is used in unit tests
+  only) would log the user in before the authentication.
+
 # v0.1.155
 
 * Restore support for api-platform 3.2
