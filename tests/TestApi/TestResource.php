@@ -8,14 +8,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 class TestResource
 {
-    /**
-     * @Groups({"TestResource:output"})
-     */
+    #[Groups(['TestResource:output'])]
     private string $identifier;
 
-    /**
-     * @Groups({"TestResource:output"})
-     */
+    #[Groups(['TestResource:output'])]
     private ?string $content;
 
     public function getIdentifier(): string
