@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Http;
 
-use Dbp\Relay\CoreBundle\Helpers\Tools;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
@@ -126,7 +125,7 @@ class ApiConnection
             $responseData = $response->getBody()->getContents();
 
             try {
-                $token = Tools::decodeJSON($responseData, true);
+                $token = json_decode($responseData, true, flags: JSON_THROW_ON_ERROR);
             } catch (\JsonException $exception) {
                 throw new ConnectionException(ConnectionException::JSON_EXCEPTION, sprintf('Failed to JSON decode access token: '.$exception->getMessage()), $exception->getCode(), $exception);
             }

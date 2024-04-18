@@ -9,6 +9,8 @@ class Tools
     /**
      * Like json_decode but throws on invalid json data.
      *
+     * @deprecated use json_decode() with JSON_THROW_ON_ERROR instead
+     *
      * @return mixed
      *
      * @throws \JsonException
