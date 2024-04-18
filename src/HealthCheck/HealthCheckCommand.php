@@ -36,6 +36,14 @@ class HealthCheckCommand extends Command implements LoggerAwareInterface
         $this->setDescription('Run all available health checks');
     }
 
+    /**
+     * For testing.
+     */
+    public function setChecks(array $checks): void
+    {
+        $this->checks = $checks;
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $failed = [];
