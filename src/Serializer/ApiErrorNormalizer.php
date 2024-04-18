@@ -77,4 +77,15 @@ class ApiErrorNormalizer implements ContextAwareNormalizerInterface, NormalizerA
             ($format === 'jsonld' || $format === 'jsonproblem')
             && ($data instanceof FlattenException);
     }
+
+    public function getSupportedTypes(?string $format): array
+    {
+        if ($format === 'jsonld' || $format === 'jsonproblem') {
+            return [
+                FlattenException::class => false,
+            ];
+        }
+
+        return [];
+    }
 }
