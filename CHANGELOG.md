@@ -1,3 +1,7 @@
+# v0.1.157
+
+* Add support for monolog v3
+
 # v0.1.156
 
 * Fix a regression from v0.1.154 where UserAuthTrait (this is used in unit tests
