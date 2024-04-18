@@ -111,13 +111,13 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
                     ],
                 ],
             ],
-            'path_segment_name_generator' => 'api_platform.path_segment_name_generator.dash',
         ]);
 
         // Disable for <3.x. In 3.x this doesn't exist and fails
         if (class_exists('ApiPlatform\Core\Bridge\Symfony\Bundle\ApiPlatformBundle')) {
             $container->prependExtensionConfig('api_platform', [
                 'metadata_backward_compatibility_layer' => false,
+                'path_segment_name_generator' => 'api_platform.path_segment_name_generator.dash',
             ]);
         } else {
             $container->prependExtensionConfig('api_platform', [
@@ -143,6 +143,7 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
                         'skip_null_values' => false,
                     ],
                 ],
+                'path_segment_name_generator' => 'api_platform.metadata.path_segment_name_generator.dash',
             ]);
         }
 
