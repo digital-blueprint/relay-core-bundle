@@ -25,7 +25,7 @@ class CacheWarmer implements CacheWarmerInterface
         return true;
     }
 
-    public function warmUp(string $cacheDir): array
+    public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
         // This is a workaround for https://github.com/symfony/symfony/issues/32569
         // Create a dummy cache entry, so that the cache database and table get created,
