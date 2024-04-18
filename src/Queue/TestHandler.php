@@ -6,9 +6,10 @@ namespace Dbp\Relay\CoreBundle\Queue;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-class TestHandler implements MessageHandlerInterface, LoggerAwareInterface
+#[AsMessageHandler]
+class TestHandler implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
