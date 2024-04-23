@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.1.159
+
+* The core bundle now configures Symfony to log PHP errors in all cases, not just
+  when the environment is "dev". In addition the logging levels of each PHP error
+  is synced with the improved Symfony 7 defaults.
+* The worker queue now configures a failure transport by default in all cases. This
+  means after a message failed multiple times it will not be thrown out but moved
+  to the failure transport. The failure transport uses the same connection as the
+  main transport so no configuration change is needed.
+
 ## v0.1.158
 
 * Fix various Symfony/api-platform deprecation warnings
