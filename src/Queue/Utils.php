@@ -8,6 +8,8 @@ class Utils
 {
     public const QUEUE_TRANSPORT_NAME = 'async';
 
+    public const QUEUE_TRANSPORT_FAILED_NAME = 'async_failed';
+
     // These just should be good defaults, feel free to adjust
     public const DEFAULT_TIME_LIMIT = 3600;
     public const DEFAULT_TASK_LIMIT = 10;

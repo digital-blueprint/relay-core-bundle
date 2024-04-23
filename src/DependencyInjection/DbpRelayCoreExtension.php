@@ -271,7 +271,11 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
 
         $messengerConfig = [
             'transports' => [
-                QueueUtils::QUEUE_TRANSPORT_NAME => $messengerTransportDsn,
+                QueueUtils::QUEUE_TRANSPORT_NAME => [
+                    'dsn' => $messengerTransportDsn,
+                    'failure_transport' => QueueUtils::QUEUE_TRANSPORT_FAILED_NAME,
+                ],
+                QueueUtils::QUEUE_TRANSPORT_FAILED_NAME => $messengerTransportDsn,
             ],
             'routing' => $routing,
         ];

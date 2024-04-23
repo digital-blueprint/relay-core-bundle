@@ -9,6 +9,7 @@ use Dbp\Relay\CoreBundle\DbpRelayCoreBundle;
 use Dbp\Relay\CoreBundle\Tests\TestApi\TestResource;
 use Dbp\Relay\CoreBundle\Tests\TestApi\TestResourceController;
 use Dbp\Relay\CoreBundle\Tests\TestApi\TestResourceProvider;
+use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Nelmio\CorsBundle\NelmioCorsBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
@@ -31,6 +32,7 @@ class Kernel extends BaseKernel
         yield new NelmioCorsBundle();
         yield new MonologBundle();
         yield new ApiPlatformBundle();
+        yield new DoctrineBundle();
         yield new DbpRelayCoreBundle();
     }
 
@@ -56,6 +58,21 @@ class Kernel extends BaseKernel
             'mapping' => [
                 'paths' => [__DIR__.'/TestApi'],
             ],
+        ]);
+
+        $container->extension('doctrine', [
+            'dbal' => [
+                'connections' => [
+                    'in_memory_test' => [
+                        'url' => 'sqlite:///:memory:',
+                        'driver' => 'pdo_sqlite',
+                    ],
+                ],
+            ],
+        ]);
+
+        $container->extension('dbp_relay_core', [
+            'queue_dsn' => 'doctrine://in_memory_test',
         ]);
     }
 }
