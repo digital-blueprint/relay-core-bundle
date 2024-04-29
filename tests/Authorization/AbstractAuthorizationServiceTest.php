@@ -199,6 +199,46 @@ class AbstractAuthorizationServiceTest extends TestCase
         }
     }
 
+    public function testIsPolicyDefined(): void
+    {
+        $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
+
+        $this->assertTrue($authorizationService->isPolicyDefined('MAY_USE'));
+        $this->assertFalse($authorizationService->isPolicyDefined('404'));
+    }
+
+    public function testIsAttributeDefined(): void
+    {
+        $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
+
+        $this->assertTrue($authorizationService->isAttributeDefined('NULL_ATTRIBUTE'));
+        $this->assertFalse($authorizationService->isAttributeDefined('404'));
+    }
+
+    public function testGetPolicyNames(): void
+    {
+        $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
+        $policyNames = $authorizationService->getPolicyNames();
+        $this->assertCount(6, $policyNames);
+        $this->assertEquals('MAY_USE', $policyNames[0]);
+        $this->assertEquals('MAY_MANAGE', $policyNames[1]);
+        $this->assertEquals('MAY_ACCESS', $policyNames[2]);
+        $this->assertEquals('MAY_ACCESS_RESOURCE_ALIAS', $policyNames[3]);
+        $this->assertEquals('INFINITE_POLICY', $policyNames[4]);
+        $this->assertEquals('USER_ATTRIBUTE_UNDEFINED_POLICY', $policyNames[5]);
+    }
+
+    public function testGetAttributeNames(): void
+    {
+        $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
+        $attributeNames = $authorizationService->getAttributeNames();
+        $this->assertCount(4, $attributeNames);
+        $this->assertEquals('MY_ORG_IDS', $attributeNames[0]);
+        $this->assertEquals('NULL_ATTRIBUTE', $attributeNames[1]);
+        $this->assertEquals('INFINITE_ATTRIBUTE', $attributeNames[2]);
+        $this->assertEquals('USER_ATTRIBUTE_UNDEFINED_ATTRIBUTE', $attributeNames[3]);
+    }
+
     private function getTestAuthorizationService(string $userIdentifier): TestAuthorizationService
     {
         $authorizationService = TestAuthorizationService::create($userIdentifier, [

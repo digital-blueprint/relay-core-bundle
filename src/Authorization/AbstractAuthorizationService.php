@@ -11,21 +11,14 @@ use Symfony\Component\HttpFoundation\Response;
 
 abstract class AbstractAuthorizationService
 {
-    /** @var UserAttributeService */
-    private $userAttributeService;
-
-    /** @var AuthorizationExpressionChecker */
-    private $userAuthorizationChecker;
-
-    /** @var AuthorizationUser */
-    private $currentAuthorizationUser;
-
-    /** @var array|null */
-    private $config;
+    private UserAttributeService $userAttributeService;
+    private AuthorizationExpressionChecker $authorizationExpressionChecker;
+    private AuthorizationUser $currentAuthorizationUser;
+    private ?array $config = null;
 
     public function __construct()
     {
-        $this->userAuthorizationChecker = new AuthorizationExpressionChecker();
+        $this->authorizationExpressionChecker = new AuthorizationExpressionChecker();
         $this->currentAuthorizationUser = new AuthorizationUser($this);
 
         $this->loadConfig();
@@ -34,7 +27,7 @@ abstract class AbstractAuthorizationService
     /**
      * @required
      */
-    public function __injectUserAttributeService(UserAttributeService $userAttributeService)
+    public function __injectUserAttributeService(UserAttributeService $userAttributeService): void
     {
         $this->userAttributeService = $userAttributeService;
     }
@@ -59,16 +52,40 @@ abstract class AbstractAuthorizationService
         $this->loadConfig();
     }
 
+    public function isAttributeDefined(string $attributeName): bool
+    {
+        return $this->authorizationExpressionChecker->isAttributeExpressionDefined($attributeName);
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getAttributeNames(): array
+    {
+        return $this->authorizationExpressionChecker->getAttributeExpressionNames();
+    }
+
+    public function isPolicyDefined(string $policyName): bool
+    {
+        return $this->authorizationExpressionChecker->isPolicyExpressionDefined($policyName);
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getPolicyNames(): array
+    {
+        return $this->authorizationExpressionChecker->getPolicyExpressionNames();
+    }
+
     /**
      * Checks the given policy for the current user and the resource $resource. Throws a 'forbidden' exception if
      * access is not granted.
      *
-     * @param mixed $resource
-     *
      * @throws ApiError               HTTP Forbidden exception if access is not granted
      * @throws AuthorizationException If the policy is not declared
      */
-    public function denyAccessUnlessIsGranted(string $policyName, $resource = null, ?string $resourceAlias = null): void
+    public function denyAccessUnlessIsGranted(string $policyName, mixed $resource = null, ?string $resourceAlias = null): void
     {
         if ($this->isGrantedInternal($policyName, $resource, $resourceAlias) === false) {
             throw ApiError::withDetails(Response::HTTP_FORBIDDEN, 'access denied. policy failed: '.$policyName);
@@ -78,11 +95,9 @@ abstract class AbstractAuthorizationService
     /**
      * Checks the given policy for the current user and the resource $resource. Returns true if access is granted, false otherwise.
      *
-     * @param mixed $resource
-     *
      * @throws AuthorizationException If the policy is not declared
      */
-    public function isGranted(string $policyName, $resource = null, ?string $resourceAlias = null): bool
+    public function isGranted(string $policyName, mixed $resource = null, ?string $resourceAlias = null): bool
     {
         return $this->isGrantedInternal($policyName, $resource, $resourceAlias);
     }
@@ -92,11 +107,9 @@ abstract class AbstractAuthorizationService
      *
      * @param mixed|null $defaultValue The value to return if the expression evaluates to 'null'
      *
-     * @return mixed|null
-     *
      * @throws AuthorizationException If the attribute is not declared
      */
-    public function getAttribute(string $attributeExpressionName, $defaultValue = null)
+    public function getAttribute(string $attributeExpressionName, mixed $defaultValue = null): mixed
     {
         return $this->getAttributeInternal($attributeExpressionName, $defaultValue);
     }
@@ -133,11 +146,11 @@ abstract class AbstractAuthorizationService
 
     private function loadConfig()
     {
-        if ($this->userAuthorizationChecker !== null && $this->config !== null) {
+        if ($this->authorizationExpressionChecker !== null && $this->config !== null) {
             $roleExpressions = $this->config[AuthorizationConfigDefinition::POLICIES_CONFIG_NODE] ?? [];
             $attributeExpressions = $this->config[AuthorizationConfigDefinition::ATTRIBUTES_CONFIG_NODE] ?? [];
 
-            $this->userAuthorizationChecker->setExpressions($roleExpressions, $attributeExpressions);
+            $this->authorizationExpressionChecker->setExpressions($roleExpressions, $attributeExpressions);
         }
     }
 
@@ -146,7 +159,7 @@ abstract class AbstractAuthorizationService
      */
     private function getAttributeInternal(string $attributeName, $defaultValue = null)
     {
-        return $this->userAuthorizationChecker->evalAttributeExpression($this->currentAuthorizationUser, $attributeName, $defaultValue);
+        return $this->authorizationExpressionChecker->evalAttributeExpression($this->currentAuthorizationUser, $attributeName, $defaultValue);
     }
 
     /**
@@ -154,6 +167,6 @@ abstract class AbstractAuthorizationService
      */
     private function isGrantedInternal(string $policyName, $resource, ?string $resourceAlias = null): bool
     {
-        return $this->userAuthorizationChecker->isGranted($this->currentAuthorizationUser, $policyName, $resource, $resourceAlias);
+        return $this->authorizationExpressionChecker->isGranted($this->currentAuthorizationUser, $policyName, $resource, $resourceAlias);
     }
 }

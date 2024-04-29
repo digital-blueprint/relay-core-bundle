@@ -15,31 +15,30 @@ class AuthorizationExpressionChecker
     private const USER_VARIABLE_NAME = 'user';
     private const DEFAULT_RESOURCE_VARIABLE_NAME = 'resource';
 
-    /** @var ExpressionLanguage */
-    private $expressionLanguage;
+    private ExpressionLanguage $expressionLanguage;
 
-    /** @var array */
-    private $policyExpressions;
+    /** @var string[] */
+    private array $policyExpressions;
 
-    /** @var array */
-    private $attributeExpressions;
+    /** @var string[] */
+    private array $attributeExpressions;
 
-    /** @var array */
-    private $roleExpressionStack;
+    /** @var string[] */
+    private array $policyExpressionStack;
 
-    /** @var array */
-    private $attributeExpressionStack;
+    /** @var string[] */
+    private array $attributeExpressionStack;
 
     public function __construct()
     {
         $this->expressionLanguage = new ExpressionLanguage();
         $this->policyExpressions = [];
         $this->attributeExpressions = [];
-        $this->roleExpressionStack = [];
+        $this->policyExpressionStack = [];
         $this->attributeExpressionStack = [];
     }
 
-    public function setExpressions(array $policyExpressions, array $attributeExpressions)
+    public function setExpressions(array $policyExpressions, array $attributeExpressions): void
     {
         $this->policyExpressions = $policyExpressions;
         $this->attributeExpressions = $attributeExpressions;
@@ -80,10 +79,10 @@ class AuthorizationExpressionChecker
      */
     public function isGranted(AuthorizationUser $currentAuthorizationUser, string $policyName, $resource, ?string $resourceAlias = null): bool
     {
-        if (in_array($policyName, $this->roleExpressionStack, true)) {
+        if (in_array($policyName, $this->policyExpressionStack, true)) {
             throw new AuthorizationException(sprintf('infinite loop caused by authorization right expression %s detected', $policyName), AuthorizationException::INFINITE_EXRPESSION_LOOP_DETECTED);
         }
-        array_push($this->roleExpressionStack, $policyName);
+        array_push($this->policyExpressionStack, $policyName);
 
         try {
             $policyExpression = $this->policyExpressions[$policyName] ?? null;
@@ -109,7 +108,33 @@ class AuthorizationExpressionChecker
 
             return $this->expressionLanguage->evaluate($policyExpression, $variables);
         } finally {
-            array_pop($this->roleExpressionStack);
+            array_pop($this->policyExpressionStack);
         }
+    }
+
+    public function isAttributeExpressionDefined(string $attributeExpressionName): bool
+    {
+        return isset($this->attributeExpressions[$attributeExpressionName]);
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getAttributeExpressionNames(): array
+    {
+        return array_keys($this->attributeExpressions);
+    }
+
+    public function isPolicyExpressionDefined(string $policyExpressionName): bool
+    {
+        return isset($this->policyExpressions[$policyExpressionName]);
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getPolicyExpressionNames(): array
+    {
+        return array_keys($this->policyExpressions);
     }
 }
