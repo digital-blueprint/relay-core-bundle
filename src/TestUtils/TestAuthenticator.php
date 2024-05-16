@@ -57,7 +57,9 @@ class TestAuthenticator extends AbstractAuthenticator
 
     public function authenticate(Request $request): Passport
     {
-        assert($this->user !== null);
+        if ($this->user === null) {
+            throw new \AssertionError('No user set. Make sure to create a new test client for each request, or call disableReboot() on the test client.');
+        }
 
         if ($this->token === null) {
             throw new BadCredentialsException('Invalid token');
