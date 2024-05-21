@@ -85,4 +85,38 @@ class ApiTest extends ApiTestCase
         $this->assertSame($content['isAuthenticated'], false);
         $this->assertSame($content['userRoles'], []);
     }
+
+    public function testNeedsAuthenticatedFully()
+    {
+        $client = $this->withUser(null);
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=IS_AUTHENTICATED_FULLY');
+        $this->assertSame(401, $response->getStatusCode());
+
+        $client = $this->withUser(null);
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=IS_AUTHENTICATED_FULLY', ['headers' => ['Authorization' => 'Bearer xxx']]);
+        $this->assertSame(403, $response->getStatusCode());
+
+        $client = $this->withUser(null, [], 'xxx');
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=IS_AUTHENTICATED_FULLY');
+        $this->assertSame(401, $response->getStatusCode());
+
+        $client = $this->withUser(null, [], 'xxx');
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=IS_AUTHENTICATED_FULLY', ['headers' => ['Authorization' => 'Bearer wrong']]);
+        $this->assertSame(403, $response->getStatusCode());
+
+        $client = $this->withUser(null, [], 'xxx');
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=IS_AUTHENTICATED_FULLY', ['headers' => ['Authorization' => 'Bearer xxx']]);
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function testNeedsSymfonyRole()
+    {
+        $client = $this->withUser(null, ['ROLE_FOO'], 'xxx');
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=ROLE_BAR', ['headers' => ['Authorization' => 'Bearer xxx']]);
+        $this->assertSame(403, $response->getStatusCode());
+
+        $client = $this->withUser(null, ['ROLE_FOO'], 'xxx');
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=ROLE_FOO', ['headers' => ['Authorization' => 'Bearer xxx']]);
+        $this->assertSame(200, $response->getStatusCode());
+    }
 }

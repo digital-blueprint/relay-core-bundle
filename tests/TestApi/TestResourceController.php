@@ -22,6 +22,7 @@ class TestResourceController extends AbstractController
     public function __invoke(string $identifier, Request $request): ?TestResource
     {
         $test = $request->get('test');
+        $parameter = $request->get('param');
         $resource = new TestResource();
         $resource->setIdentifier($identifier);
 
@@ -35,6 +36,11 @@ class TestResourceController extends AbstractController
             throw ApiError::withDetails(Response::HTTP_I_AM_A_TEAPOT, 'some message', 'some-error-id', ['detail1' => '1', 'detail2' => '2']);
         } elseif ($test === 'UnhandledError') {
             throw new \RuntimeException('oh no');
+        } elseif ($test === 'denyAccessUnlessGranted') {
+            if ($parameter === null) {
+                throw new \RuntimeException('missing param');
+            }
+            $this->denyAccessUnlessGranted($parameter);
         } else {
             throw new \RuntimeException('unknown tests');
         }
