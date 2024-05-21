@@ -6,6 +6,8 @@ namespace Dbp\Relay\CoreBundle\TestUtils;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use ApiPlatform\Symfony\Bundle\Test\Client;
+use Dbp\Relay\CoreBundle\TestUtils\Internal\TestAuthenticator;
+use Dbp\Relay\CoreBundle\TestUtils\Internal\TestUser;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Security\Core\User\UserInterface;
 

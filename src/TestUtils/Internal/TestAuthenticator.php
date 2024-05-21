@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\TestUtils;
+namespace Dbp\Relay\CoreBundle\TestUtils\Internal;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,6 +16,9 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 
+/**
+ * @internal
+ */
 class TestAuthenticator extends AbstractAuthenticator
 {
     public const TEST_TOKEN = '42';

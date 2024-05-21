@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\TestUtils;
 
 use Dbp\Relay\CoreBundle\Authorization\AbstractAuthorizationService;
+use Dbp\Relay\CoreBundle\TestUtils\Internal\TestUserSession;
 use Dbp\Relay\CoreBundle\User\UserAttributeMuxer;
 use Dbp\Relay\CoreBundle\User\UserAttributeProviderProvider;
 use Dbp\Relay\CoreBundle\User\UserAttributeService;

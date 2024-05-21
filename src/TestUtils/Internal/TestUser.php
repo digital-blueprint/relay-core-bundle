@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\TestUtils;
+namespace Dbp\Relay\CoreBundle\TestUtils\Internal;
 
 use Symfony\Component\Security\Core\User\UserInterface;
 
+/**
+ * @internal
+ */
 class TestUser implements UserInterface
 {
     private ?string $id;

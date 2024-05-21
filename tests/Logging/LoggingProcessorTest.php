@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Tests\Logging;
 
 use Dbp\Relay\CoreBundle\Logging\LoggingProcessor;
-use Dbp\Relay\CoreBundle\TestUtils\TestUserSession;
+use Dbp\Relay\CoreBundle\TestUtils\Internal\TestUserSession;
 use Monolog\Logger;
 use Monolog\LogRecord;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
