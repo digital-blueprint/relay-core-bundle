@@ -73,4 +73,16 @@ class ApiTest extends ApiTestCase
         $this->assertSame($content['isAuthenticated'], true);
         $this->assertSame($content['userRoles'], ['myrole42']);
     }
+
+    public function testNoUserSetup()
+    {
+        $client = self::createClient();
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=GetCurrentUser');
+        $this->assertSame(200, $response->getStatusCode());
+        $content = json_decode($response->getContent(), true, flags: JSON_THROW_ON_ERROR);
+        $content = json_decode($content['content'], true, flags: JSON_THROW_ON_ERROR);
+        $this->assertSame($content['userIdentifier'], null);
+        $this->assertSame($content['isAuthenticated'], false);
+        $this->assertSame($content['userRoles'], []);
+    }
 }
