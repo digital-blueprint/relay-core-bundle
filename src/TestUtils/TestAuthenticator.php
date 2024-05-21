@@ -79,14 +79,14 @@ class TestAuthenticator extends AbstractAuthenticator
             return $this->user;
         }));
 
-        $passport->setAttribute('relay_user_session_provider', new TestUserSessionProvider($this->user->getUserIdentifier()));
+        $passport->setAttribute('relay_user_session_provider', new TestUserSessionProvider($this->user->isServiceAccount() ? null : $this->user->getUserIdentifier()));
 
         return $passport;
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        $this->userSession->setIdentifier($this->user->getUserIdentifier());
+        $this->userSession->setIdentifier($this->user->isServiceAccount() ? null : $this->user->getUserIdentifier());
         $this->userSession->setRoles($this->user->getRoles());
         $this->userSession->setIsAuthenticated(true);
 

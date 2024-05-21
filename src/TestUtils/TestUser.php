@@ -8,13 +8,18 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class TestUser implements UserInterface
 {
-    private $id;
-    private $roles;
+    private ?string $id;
+    private array $roles;
 
-    public function __construct(string $id, array $roles = [])
+    public function __construct(?string $id, array $roles = [])
     {
         $this->id = $id;
         $this->roles = $roles;
+    }
+
+    public function isServiceAccount(): bool
+    {
+        return $this->id === null;
     }
 
     public function getRoles(): array
@@ -38,11 +43,11 @@ class TestUser implements UserInterface
 
     public function getUsername(): string
     {
-        return $this->id;
+        return $this->id ?? '';
     }
 
     public function getUserIdentifier(): string
     {
-        return $this->id;
+        return $this->id ?? '';
     }
 }

@@ -8,14 +8,11 @@ use Dbp\Relay\CoreBundle\API\UserSessionInterface;
 
 class TestUserSession implements UserSessionInterface
 {
-    /** @var string */
-    private $userIdentifier;
+    private ?string $userIdentifier;
 
-    /** @var array */
-    private $roles;
+    private array $roles;
 
-    /** @var bool */
-    private $isAuthenticated = false;
+    private bool $isAuthenticated = false;
 
     public function __construct(?string $identifier = null, array $roles = [], bool $isAuthenticated = false)
     {
@@ -24,7 +21,7 @@ class TestUserSession implements UserSessionInterface
         $this->isAuthenticated = $isAuthenticated;
     }
 
-    public function setIdentifier(string $identifier)
+    public function setIdentifier(?string $identifier)
     {
         $this->userIdentifier = $identifier;
     }

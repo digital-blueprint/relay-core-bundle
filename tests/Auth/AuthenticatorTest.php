@@ -48,6 +48,26 @@ class AuthenticatorTest extends TestCase
         $this->assertSame($userIdentifier, $userSession->getUserIdentifier());
     }
 
+    public function testServiceAccount()
+    {
+        $user = new TestUser(null);
+
+        $userSession = new UserSession();
+        $proxyAuthenticator = new ProxyAuthenticator($userSession);
+        $testAuthenticator = new TestAuthenticator(new TestUserSession());
+        $testAuthenticator->setUser($user);
+        $testAuthenticator->setToken('bla');
+        $proxyAuthenticator->addAuthenticator($testAuthenticator);
+
+        $request = new Request();
+        $request->headers->add(['Authorization' => 'Bearer bla']);
+        $this->assertTrue($proxyAuthenticator->supports($request));
+        $passport = $proxyAuthenticator->authenticate($request);
+        $this->assertSame($passport->getUser(), $user);
+        $proxyAuthenticator->onAuthenticationSuccess($request, new NullToken(), 'firewall');
+        $this->assertSame(null, $userSession->getUserIdentifier());
+    }
+
     public function testCompilerPass()
     {
         $builder = new ContainerBuilder(new ParameterBag());
