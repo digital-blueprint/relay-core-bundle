@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+## v0.1.161
+
+* add support for GET item operation without (or constant) identifier to AbstractDataProvider 
+
+## v0.1.160
+
+* add isPolicy/AttributeDefined and getPolicy/AttributeNames access functions to AbstractAuthorizationService
+
 ## v0.1.159
 
 * The core bundle now configures Symfony to log PHP errors in all cases, not just

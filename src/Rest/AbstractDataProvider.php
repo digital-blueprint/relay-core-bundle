@@ -41,6 +41,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
     protected const GET_COLLECTION_OPERATION = 1;
     protected const GET_ITEM_OPERATION = 2;
+    protected const NO_ID = '';
 
     private const FILTERS_CONTEXT_KEY = 'filters';
     private const GROUPS_CONTEXT_KEY = 'groups';
