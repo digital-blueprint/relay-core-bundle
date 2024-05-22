@@ -18,12 +18,29 @@ class DataProcessorTester
     private string $resourceClass;
     private array $denormalizationGroups;
 
-    public static function setUp(AbstractDataProcessor $dataProcessor)
+    /**
+     * Use this to set up the given data processor (i.e. inject all required services and set up a test user)
+     * and create a new data provider tester instance for it.
+     *
+     * @param string   $resourceClass         the fully qualified class name of the entity that this data provider provides
+     * @param string[] $denormalizationGroups the denormalization groups of the entity that this data provider provides
+     */
+    public static function create(AbstractDataProcessor $dataProcessor, string $resourceClass, array $denormalizationGroups = []): DataProcessorTester
+    {
+        self::setUp($dataProcessor);
+
+        return new DataProcessorTester($dataProcessor, $resourceClass, $denormalizationGroups);
+    }
+
+    /**
+     * Use this to set up the given data processor (i.e. inject all required services and set up a test user).
+     */
+    public static function setUp(AbstractDataProcessor $dataProcessor): void
     {
         TestAuthorizationService::setUp($dataProcessor);
     }
 
-    public function __construct(AbstractDataProcessor $dataProcessor, string $resourceClass, array $denormalizationGroups = [])
+    private function __construct(AbstractDataProcessor $dataProcessor, string $resourceClass, array $denormalizationGroups = [])
     {
         $this->dataProcessor = $dataProcessor;
         $this->resourceClass = $resourceClass;

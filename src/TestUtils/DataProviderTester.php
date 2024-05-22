@@ -15,7 +15,24 @@ class DataProviderTester
     private string $resourceClass;
     private array $normalizationGroups;
 
-    public static function setUp(AbstractDataProvider $dataProvider)
+    /**
+     * Use this to set up the given data provider (i.e. inject all required services and set up a test user)
+     * and create a new data provider tester instance for it.
+     *
+     * @param string   $resourceClass       the fully qualified class name of the entity that this data provider provides
+     * @param string[] $normalizationGroups the normalization groups of the entity that this data provider provides
+     */
+    public static function create(AbstractDataProvider $dataProvider, string $resourceClass, array $normalizationGroups = []): DataProviderTester
+    {
+        self::setUp($dataProvider);
+
+        return new DataProviderTester($dataProvider, $resourceClass, $normalizationGroups);
+    }
+
+    /**
+     * Use this to set up the given data provider (i.e. inject all required services and set up a test user).
+     */
+    public static function setUp(AbstractDataProvider $dataProvider): void
     {
         TestAuthorizationService::setUp($dataProvider);
 
@@ -23,17 +40,24 @@ class DataProviderTester
         $dataProvider->__injectPropertyNameCollectionFactory(new TestPropertyNameCollectionFactory());
     }
 
-    public function __construct(AbstractDataProvider $dataProvider, string $resourceClass, array $normalizationGroups = [])
+    /**
+     * @param string[] $normalizationGroups
+     */
+    private function __construct(AbstractDataProvider $dataProvider, string $resourceClass, array $normalizationGroups = [])
     {
         $this->stateProvider = $dataProvider;
         $this->resourceClass = $resourceClass;
         $this->normalizationGroups = $normalizationGroups;
+
+        self::setUp($dataProvider);
     }
 
-    public function getItem(string $identifier, array $filters = []): ?object
+    public function getItem(?string $identifier, array $filters = []): ?object
     {
+        $uriVariables = $identifier !== null ? ['identifier' => $identifier] : [];
+
         /** @var object|null */
-        return $this->stateProvider->provide(new Get(), ['identifier' => $identifier], $this->createContext($filters));
+        return $this->stateProvider->provide(new Get(), $uriVariables, $this->createContext($filters));
     }
 
     public function getCollection(array $filters = []): array

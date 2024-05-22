@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.1.162
+
+* facilitate usage of DataProvider/DataProcessorTester
+
 ## v0.1.161
 
 * add support for GET item operation without (or constant) identifier to AbstractDataProvider 
