@@ -9,7 +9,7 @@ use Dbp\Relay\CoreBundle\Auth\ProxyAuthenticator;
 use Dbp\Relay\CoreBundle\Auth\UserSession;
 use Dbp\Relay\CoreBundle\TestUtils\Internal\TestAuthenticator;
 use Dbp\Relay\CoreBundle\TestUtils\Internal\TestUser;
-use Dbp\Relay\CoreBundle\TestUtils\Internal\TestUserSession;
+use Dbp\Relay\CoreBundle\TestUtils\TestUserSession;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;

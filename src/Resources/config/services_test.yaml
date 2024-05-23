@@ -1,5 +1,5 @@
 services:
-  Dbp\Relay\CoreBundle\TestUtils\Internal\TestUserSession:
+  Dbp\Relay\CoreBundle\TestUtils\TestUserSession:
     autowire: true
     autoconfigure: true
     public: true
@@ -18,7 +18,7 @@ services:
     '@Dbp\Relay\CoreBundle\TestUtils\Internal\TestAuthenticator'
 
   Dbp\Relay\CoreBundle\API\UserSessionInterface:
-    '@Dbp\Relay\CoreBundle\TestUtils\Internal\TestUserSession'
+    '@Dbp\Relay\CoreBundle\TestUtils\TestUserSession'
 
   Dbp\Relay\CoreBundle\User\UserAttributeProviderProviderInterface:
     '@Dbp\Relay\CoreBundle\TestUtils\TestUserAttributeProviderProvider'

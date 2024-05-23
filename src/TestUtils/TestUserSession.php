@@ -2,13 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\TestUtils\Internal;
+namespace Dbp\Relay\CoreBundle\TestUtils;
 
 use Dbp\Relay\CoreBundle\API\UserSessionInterface;
 
-/**
- * @internal
- */
 class TestUserSession implements UserSessionInterface
 {
     private ?string $userIdentifier;

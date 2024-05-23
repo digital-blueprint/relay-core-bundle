@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\TestUtils\Internal;
 
+use Dbp\Relay\CoreBundle\TestUtils\TestUserSession;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

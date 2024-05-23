@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\TestUtils;
 
 use Dbp\Relay\CoreBundle\TestUtils\Internal\TestUser;
-use Dbp\Relay\CoreBundle\TestUtils\Internal\TestUserSession;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
