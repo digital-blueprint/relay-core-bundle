@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## v0.1.163
+
+* Make TestUserSession public again (it had users after all)
 
 ## v0.1.162
 
