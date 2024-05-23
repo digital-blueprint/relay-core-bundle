@@ -27,6 +27,7 @@ jobs:
         php-version: ${{ matrix.php-versions }}
         extensions: ctype,curl,dom,gd,iconv,intl,json,mbstring,openssl,posix,sqlite,xml,zip,gmp
         coverage: xdebug
+        ini-file: development
     - name: Checkout code
       uses: actions/checkout@v4
     - name: Cache composer cache directory
@@ -49,6 +50,7 @@ jobs:
         extensions: ctype,curl,dom,gd,iconv,intl,json,mbstring,openssl,posix,sqlite,xml,zip,gmp
         coverage: xdebug
         tools: composer-require-checker:4
+        ini-file: development
     - name: Checkout code
       uses: actions/checkout@v4
     - name: Cache composer cache directory
