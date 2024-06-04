@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.164
+
+* Remove remaining internal uses of Doctrine annotations and related dependencies
+
 ## v0.1.163
 
 * Make TestUserSession public again (it had users after all)
