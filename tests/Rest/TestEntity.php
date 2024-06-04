@@ -12,19 +12,11 @@ class TestEntity implements LocalDataAwareInterface
 {
     use LocalDataAwareTrait;
 
-    /**
-     * @Groups({"TestEntity:output"})
-     *
-     * @var string
-     */
-    private $identifier;
+    #[Groups(['TestEntity:output'])]
+    private string $identifier;
 
-    /**
-     * @Groups({"TestEntity:output"})
-     *
-     * @var string
-     */
-    private $field0;
+    #[Groups(['TestEntity:output'])]
+    private string $field0;
 
     public function __construct(string $id)
     {

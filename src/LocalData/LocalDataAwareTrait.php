@@ -9,12 +9,8 @@ use Symfony\Component\Serializer\Annotation\Ignore;
 
 trait LocalDataAwareTrait
 {
-    /**
-     * @Groups({"LocalData:output"})
-     *
-     * @var array|null
-     */
-    private $localData;
+    #[Groups(['LocalData:output'])]
+    private ?array $localData = null;
 
     /**
      * Returns the array of local data attributes.
