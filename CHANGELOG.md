@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.165
+
+* Update the vendored JS bundle containing the API docs login component. Most importantly
+  this updates the Keycloak JS adapter to the latest version.
+
 ## v0.1.164
 
 * Remove remaining internal uses of Doctrine annotations and related dependencies
