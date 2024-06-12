@@ -21,23 +21,12 @@ export default (async () => {
             format: 'esm',
             sourcemap: true
         },
-        onwarn: function (warning, warn) {
-            // ignore chai warnings
-            if (warning.code === 'CIRCULAR_DEPENDENCY' && warning.message.includes('/chai/')) {
-                return;
-            }
-            // keycloak bundled code uses eval
-            if (warning.code === 'EVAL' && warning.id.includes('sha256.js')) {
-                return;
-            }
-            warn(warning);
-        },
         plugins: [
             del({
                 targets: '../public/auth/*',
                 force: true
             }),
-            resolve(),
+            resolve({browser: true}),
             commonjs(),
             json(),
             useTerser ? terser() : false,
