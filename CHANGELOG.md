@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.166
+
+* Fix the API docs auto-login with api-platform v3.3.6+
+
 ## v0.1.165
 
 * Update the vendored JS bundle containing the API docs login component. Most importantly
