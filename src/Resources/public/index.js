@@ -79,7 +79,8 @@ function delayInsert() {
 document.addEventListener('DOMContentLoaded', delayInsert);
 
 function onAuthUpdate(e) {
-    window.swaggerUI.preauthorizeApiKey('apiKey', e.detail.token);
+    let token = e.detail.token;
+    window.swaggerUI.preauthorizeApiKey('apiKey', token ? 'Bearer ' + token : ' ');
 }
 
 window.addEventListener("api-platform-auth-update", onAuthUpdate);
