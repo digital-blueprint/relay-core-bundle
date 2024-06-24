@@ -29,7 +29,7 @@
     {% if (keycloak_server_url or oidc_server_url) and (keycloak_realm or oidc_server_url) and (keycloak_frontend_client_id or oidc_frontend_client_id) %}
         <style>
             /* Hide the builtin auth key button in case we have a keycloak setup */
-            .swagger-ui .auth-wrapper .authorize {
+            .swagger-ui .auth-wrapper {
                 display: none;
             }
         </style>
