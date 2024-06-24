@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.167
+
+* Improvements to the fix in v0.1.166 for the API docs auto-login
+
 ## v0.1.166
 
 * Fix the API docs auto-login with api-platform v3.3.6+
