@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.168
+
+* Add UserAttributeProviderExInterface to allow for more flexible attribute providers
+
 ## v0.1.167
 
 * Improvements to the fix in v0.1.166 for the API docs auto-login
