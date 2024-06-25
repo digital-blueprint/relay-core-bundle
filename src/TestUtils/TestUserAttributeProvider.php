@@ -20,11 +20,11 @@ class TestUserAttributeProvider implements UserAttributeProviderInterface
      *
      * Mapping available attribute names to default values
      */
-    private $availableAttributes;
+    private $defaultAttributes;
 
-    public function __construct(array $availableAttributes = [])
+    public function __construct(array $defaultAttributes = [])
     {
-        $this->availableAttributes = $availableAttributes;
+        $this->defaultAttributes = $defaultAttributes;
     }
 
     public function addUser(string $userIdentifier, array $userAttributes = []): void
@@ -37,16 +37,16 @@ class TestUserAttributeProvider implements UserAttributeProviderInterface
      */
     public function getAvailableAttributes(): array
     {
-        return $this->availableAttributes;
+        return array_keys($this->defaultAttributes);
     }
 
     public function getUserAttributes(?string $userIdentifier): array
     {
         if ($userIdentifier === null || ($userAttributes = $this->userAttributes[$userIdentifier] ?? null) === null) {
-            return $this->availableAttributes;
+            return $this->defaultAttributes;
         }
 
-        foreach ($this->availableAttributes as $attributeName => $defaultValue) {
+        foreach ($this->defaultAttributes as $attributeName => $defaultValue) {
             if (!isset($userAttributes[$attributeName])) {
                 $userAttributes[$attributeName] = $defaultValue;
             }

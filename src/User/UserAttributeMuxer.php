@@ -120,7 +120,7 @@ class UserAttributeMuxer
             }
             $userAttributes = $this->getProviderUserAttributes($authorizationDataProvider, $userIdentifier);
             if (!array_key_exists($attributeName, $userAttributes)) {
-                continue;
+                throw new UserAttributeException(sprintf('attribute \'%s\' was not provided', $attributeName), UserAttributeException::USER_ATTRIBUTE_UNDEFINED);
             }
             $value = $userAttributes[$attributeName];
             break;

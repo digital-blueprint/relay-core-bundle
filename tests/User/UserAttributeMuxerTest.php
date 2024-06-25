@@ -20,7 +20,7 @@ class UserAttributeMuxerTest extends TestCase
      */
     public function testBasics()
     {
-        $dummy = new TestUserAttributeProvider(['foo', 'bar']);
+        $dummy = new TestUserAttributeProvider(['foo' => null, 'bar' => null]);
         $dummy->addUser('testuser', ['foo' => 42]);
         $mux = new UserAttributeMuxer(new UserAttributeProviderProvider([$dummy]), new EventDispatcher());
         $this->assertSame(['foo', 'bar'], $mux->getAvailableAttributes());
@@ -33,9 +33,9 @@ class UserAttributeMuxerTest extends TestCase
      */
     public function testMultiple()
     {
-        $dummy = new TestUserAttributeProvider(['foo', 'qux']);
+        $dummy = new TestUserAttributeProvider(['foo' => null, 'qux' => null]);
         $dummy->addUser('testuser', ['foo' => 42]);
-        $dummy2 = new TestUserAttributeProvider(['bar', 'baz']);
+        $dummy2 = new TestUserAttributeProvider(['bar' => null, 'baz' => null]);
         $dummy2->addUser('testuser', ['bar' => 24]);
 
         $mux = new UserAttributeMuxer(new UserAttributeProviderProvider([$dummy, $dummy2]), new EventDispatcher());
@@ -49,7 +49,7 @@ class UserAttributeMuxerTest extends TestCase
 
     public function testAvailEvent()
     {
-        $dummy = new TestUserAttributeProvider(['foo', 'bar']);
+        $dummy = new TestUserAttributeProvider(['foo' => null, 'bar' => null]);
         $dispatched = new EventDispatcher();
         $getAvail = function (GetAvailableUserAttributesEvent $event) {
             $this->assertSame(['foo', 'bar'], $event->getAttributes());
@@ -69,7 +69,7 @@ class UserAttributeMuxerTest extends TestCase
      */
     public function testGetAttrEvent()
     {
-        $dummy = new TestUserAttributeProvider(['foo', 'bar']);
+        $dummy = new TestUserAttributeProvider(['foo' => null, 'bar' => null]);
         $dispatched = new EventDispatcher();
         $getAttr = function (GetUserAttributeEvent $event) {
             $this->assertSame('myuser', $event->getUserIdentifier());
@@ -106,7 +106,7 @@ class UserAttributeMuxerTest extends TestCase
      */
     public function testGetAttrMultipleEvents()
     {
-        $dummy = new TestUserAttributeProvider(['foo', 'bar']);
+        $dummy = new TestUserAttributeProvider(['foo' => null, 'bar' => null]);
         $dispatched = new EventDispatcher();
         $getAttr = function (GetUserAttributeEvent $event) {
             $event->setAttributeValue('OK');
