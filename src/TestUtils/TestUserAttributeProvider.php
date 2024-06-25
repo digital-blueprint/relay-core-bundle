@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\TestUtils;
 
-use Dbp\Relay\CoreBundle\User\UserAttributeProviderInterface;
+use Dbp\Relay\CoreBundle\User\UserAttributeException;
+use Dbp\Relay\CoreBundle\User\UserAttributeProviderExInterface;
 
-class TestUserAttributeProvider implements UserAttributeProviderInterface
+class TestUserAttributeProvider implements UserAttributeProviderExInterface
 {
     /**
      * @var array
@@ -53,5 +54,20 @@ class TestUserAttributeProvider implements UserAttributeProviderInterface
         }
 
         return $userAttributes;
+    }
+
+    public function getUserAttribute(?string $userIdentifier, string $name): mixed
+    {
+        $attributes = $this->getUserAttributes($userIdentifier);
+        if (!array_key_exists($name, $attributes)) {
+            throw new UserAttributeException('unknown '.$name, UserAttributeException::USER_ATTRIBUTE_UNDEFINED);
+        }
+
+        return $attributes[$name];
+    }
+
+    public function hasUserAttribute(string $name): bool
+    {
+        return in_array($name, $this->getAvailableAttributes(), true);
     }
 }

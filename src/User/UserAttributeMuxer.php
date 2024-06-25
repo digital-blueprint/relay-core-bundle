@@ -99,6 +99,20 @@ class UserAttributeMuxer
         return $res[1];
     }
 
+    private function getProviderUserAttribute(UserAttributeProviderInterface $userAttributeProvider, ?string $userIdentifier, string $attributeName): mixed
+    {
+        if ($userAttributeProvider instanceof UserAttributeProviderExInterface) {
+            return $userAttributeProvider->getUserAttribute($userIdentifier, $attributeName);
+        } else {
+            $userAttributes = $this->getProviderUserAttributes($userAttributeProvider, $userIdentifier);
+            if (!array_key_exists($attributeName, $userAttributes)) {
+                throw new UserAttributeException(sprintf('attribute \'%s\' was not provided', $attributeName), UserAttributeException::USER_ATTRIBUTE_UNDEFINED);
+            }
+
+            return $userAttributes[$attributeName];
+        }
+    }
+
     /**
      * @param mixed $defaultValue
      *
@@ -118,11 +132,7 @@ class UserAttributeMuxer
             if (!in_array($attributeName, $availableAttributes, true)) {
                 continue;
             }
-            $userAttributes = $this->getProviderUserAttributes($authorizationDataProvider, $userIdentifier);
-            if (!array_key_exists($attributeName, $userAttributes)) {
-                throw new UserAttributeException(sprintf('attribute \'%s\' was not provided', $attributeName), UserAttributeException::USER_ATTRIBUTE_UNDEFINED);
-            }
-            $value = $userAttributes[$attributeName];
+            $value = $this->getProviderUserAttribute($authorizationDataProvider, $userIdentifier, $attributeName);
             break;
         }
 
