@@ -146,7 +146,7 @@ abstract class AbstractAuthorizationService
 
     private function loadConfig()
     {
-        if ($this->authorizationExpressionChecker !== null && $this->config !== null) {
+        if ($this->config !== null) {
             $roleExpressions = $this->config[AuthorizationConfigDefinition::POLICIES_CONFIG_NODE] ?? [];
             $attributeExpressions = $this->config[AuthorizationConfigDefinition::ATTRIBUTES_CONFIG_NODE] ?? [];
 

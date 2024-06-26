@@ -30,4 +30,32 @@ class Pagination
     {
         return max(0, ($currentPageNumber - 1) * $maxNumItemsPerPage);
     }
+
+    public static function getPage(int $firstResultIndex, int $maxNumResults, callable $getItemsCallback,
+        callable $passesFilterCallback, int $maxNumItemsToGet = 1024): array
+    {
+        $resultPageItems = [];
+        if ($maxNumResults > 0) {
+            $firstItemIndexToGet = 0;
+            $done = false;
+            $currentFilteredItemIndex = 0;
+            while (!$done && ($items = $getItemsCallback($firstItemIndexToGet, $maxNumItemsToGet)) !== []) {
+                foreach ($items as $item) {
+                    if ($passesFilterCallback($item)) {
+                        if ($currentFilteredItemIndex >= $firstResultIndex) {
+                            $resultPageItems[] = $item;
+                        }
+                        if (count($resultPageItems) === $maxNumResults) {
+                            $done = true;
+                            break;
+                        }
+                        ++$currentFilteredItemIndex;
+                    }
+                }
+                $firstItemIndexToGet += $maxNumItemsToGet;
+            }
+        }
+
+        return $resultPageItems;
+    }
 }
