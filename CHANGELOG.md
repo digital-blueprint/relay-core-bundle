@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+## v0.1.169
+
+* replace deprecate ContextAwareNormalizeInterface by NormalizedInterface
+
 ## v0.1.168
 
 * Add UserAttributeProviderExInterface to allow for more flexible attribute providers

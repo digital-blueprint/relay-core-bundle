@@ -7,14 +7,15 @@ namespace Dbp\Relay\CoreBundle\Authorization\Serializer;
 use Dbp\Relay\CoreBundle\Authorization\AbstractAuthorizationService;
 use Dbp\Relay\CoreBundle\Authorization\AuthorizationConfigDefinition;
 use Dbp\Relay\CoreBundle\Helpers\Tools;
-use Symfony\Component\Serializer\Normalizer\ContextAwareDenormalizerInterface;
-use Symfony\Component\Serializer\Normalizer\ContextAwareNormalizerInterface;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareTrait;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements ContextAwareNormalizerInterface, NormalizerAwareInterface, ContextAwareDenormalizerInterface, DenormalizerAwareInterface
+class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements NormalizerInterface, NormalizerAwareInterface, DenormalizerInterface, DenormalizerAwareInterface
 {
     use NormalizerAwareTrait;
     use DenormalizerAwareTrait;
@@ -26,34 +27,32 @@ class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements
     private const CONTEXT_GROUPS_KEY = 'groups';
     private const ENTITY_OBJECT_ALIAS = 'entity';
 
-    /** @var array */
-    private $entityClassNameToReadAttributeNamesMapping = [];
+    private array $entityClassNameToReadAttributeNamesMapping = [];
 
-    /** @var array */
-    private $entityClassNameToWriteAttributeNamesMapping = [];
+    private array $entityClassNameToWriteAttributeNamesMapping = [];
 
-    public static function showAttributes(array &$context, string $entityShortName, array $attributeNames)
+    public static function showAttributes(array &$context, string $entityShortName, array $attributeNames): void
     {
         foreach ($attributeNames as $attributeName) {
             $context[self::CONTEXT_GROUPS_KEY][] = self::toReadAttributeId($entityShortName, $attributeName);
         }
     }
 
-    public static function hideAttributes(array &$context, string $entityShortName, array $attributeNames)
+    public static function hideAttributes(array &$context, string $entityShortName, array $attributeNames): void
     {
         foreach ($attributeNames as $attributeName) {
             Tools::removeValueFromArray($context[self::CONTEXT_GROUPS_KEY], self::toReadAttributeId($entityShortName, $attributeName));
         }
     }
 
-    public static function acceptAttributes(array &$context, string $entityShortName, array $attributeNames)
+    public static function acceptAttributes(array &$context, string $entityShortName, array $attributeNames): void
     {
         foreach ($attributeNames as $attributeName) {
             $context[self::CONTEXT_GROUPS_KEY][] = self::toWriteAttributeId($entityShortName, $attributeName);
         }
     }
 
-    public static function rejectAttributes(array &$context, string $entityShortName, array $attributeNames)
+    public static function rejectAttributes(array &$context, string $entityShortName, array $attributeNames): void
     {
         foreach ($attributeNames as $attributeName) {
             Tools::removeValueFromArray($context[self::CONTEXT_GROUPS_KEY], self::toWriteAttributeId($entityShortName, $attributeName));
@@ -75,6 +74,8 @@ class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements
 
     /**
      * @return array|string|int|float|bool|\ArrayObject|null
+     *
+     * @throws ExceptionInterface
      */
     public function normalize($object, $format = null, array $context = [])
     {
@@ -99,7 +100,7 @@ class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements
 
     public function supportsNormalization($data, $format = null, array $context = []): bool
     {
-        if ($this->entityClassNameToReadAttributeNamesMapping === null || is_object($data) === false) {
+        if ($this->entityClassNameToReadAttributeNamesMapping === [] || is_object($data) === false) {
             return false;
         }
 
@@ -115,6 +116,8 @@ class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements
 
     /**
      * @return mixed
+     *
+     * @throws ExceptionInterface
      */
     public function denormalize($data, string $type, ?string $format = null, array $context = [])
     {
@@ -129,7 +132,7 @@ class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements
             }
         }
 
-        $this->onDeormalize($data, $entityClassName, $entityShortName, $context);
+        $this->onDenormalize($data, $entityClassName, $entityShortName, $context);
 
         $context[self::getUniqueDenormalizerAlreadyCalledKeyForEntity($entityClassName)] = true;
 
@@ -138,7 +141,7 @@ class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements
 
     public function supportsDenormalization($data, string $type, ?string $format = null, array $context = []): bool
     {
-        if ($this->entityClassNameToWriteAttributeNamesMapping === null) {
+        if ($this->entityClassNameToWriteAttributeNamesMapping === []) {
             return false;
         }
 
@@ -156,7 +159,7 @@ class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements
     {
     }
 
-    protected function onDeormalize(array $entityData, string $entityClassName, string $entityShortName, array &$context)
+    protected function onDenormalize(array $entityData, string $entityClassName, string $entityShortName, array &$context)
     {
     }
 
