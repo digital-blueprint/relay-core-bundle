@@ -66,7 +66,7 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
         throw new \RuntimeException(sprintf('child classes must override the static \'%s\' method', __METHOD__));
     }
 
-    public function setConfig(array $config)
+    public function setConfig(array $config): void
     {
         $configNode = $config[self::ROOT_CONFIG_NODE] ?? [];
 

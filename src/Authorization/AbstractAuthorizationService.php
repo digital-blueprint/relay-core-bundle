@@ -14,14 +14,11 @@ abstract class AbstractAuthorizationService
     private UserAttributeService $userAttributeService;
     private AuthorizationExpressionChecker $authorizationExpressionChecker;
     private AuthorizationUser $currentAuthorizationUser;
-    private ?array $config = null;
 
     public function __construct()
     {
         $this->authorizationExpressionChecker = new AuthorizationExpressionChecker();
         $this->currentAuthorizationUser = new AuthorizationUser($this);
-
-        $this->loadConfig();
     }
 
     /**
@@ -35,21 +32,17 @@ abstract class AbstractAuthorizationService
     /**
      * Method for bundle config injection. Don't call in your code  (use @see AbstractAuthorizationService::configure() instead).
      */
-    public function setConfig(array $config)
+    public function setConfig(array $config): void
     {
-        $this->config = $config[AuthorizationConfigDefinition::AUTHORIZATION_CONFIG_NODE] ?? [];
-
-        $this->loadConfig();
+        $this->loadConfig($config[AuthorizationConfigDefinition::AUTHORIZATION_CONFIG_NODE] ?? null);
     }
 
     public function configure(array $policies = [], array $attributes = []): void
     {
-        $this->config = [
+        $this->loadConfig([
             AuthorizationConfigDefinition::POLICIES_CONFIG_NODE => $policies,
             AuthorizationConfigDefinition::ATTRIBUTES_CONFIG_NODE => $attributes,
-        ];
-
-        $this->loadConfig();
+        ]);
     }
 
     public function isAttributeDefined(string $attributeName): bool
@@ -135,20 +128,18 @@ abstract class AbstractAuthorizationService
      *
      * @param mixed|null $defaultValue The value to return if the user attribute is declared but not specified for the current user
      *
-     * @return mixed|null
-     *
      * @throws UserAttributeException If the user attribute is undeclared
      */
-    public function getUserAttribute(string $userAttributeName, $defaultValue = null)
+    public function getUserAttribute(string $userAttributeName, mixed $defaultValue = null): mixed
     {
         return $this->userAttributeService->getCurrentUserAttribute($userAttributeName, $defaultValue);
     }
 
-    private function loadConfig()
+    private function loadConfig(?array $config): void
     {
-        if ($this->config !== null) {
-            $roleExpressions = $this->config[AuthorizationConfigDefinition::POLICIES_CONFIG_NODE] ?? [];
-            $attributeExpressions = $this->config[AuthorizationConfigDefinition::ATTRIBUTES_CONFIG_NODE] ?? [];
+        if ($config !== null) {
+            $roleExpressions = $config[AuthorizationConfigDefinition::POLICIES_CONFIG_NODE] ?? [];
+            $attributeExpressions = $config[AuthorizationConfigDefinition::ATTRIBUTES_CONFIG_NODE] ?? [];
 
             $this->authorizationExpressionChecker->setExpressions($roleExpressions, $attributeExpressions);
         }

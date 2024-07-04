@@ -64,7 +64,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         return LocalDataAccessChecker::getConfigNodeDefinition();
     }
 
-    public static function appendConfigNodeDefinitions(ArrayNodeDefinition $rootNode)
+    public static function appendConfigNodeDefinitions(ArrayNodeDefinition $rootNode): void
     {
         $rootNode->append(LocalDataAccessChecker::getConfigNodeDefinition());
         $rootNode->append(PreparedFilterProvider::getConfigNodeDefinition());
@@ -94,7 +94,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $this->propertyNameCollectionFactory = $propertyNameCollectionFactory;
     }
 
-    public function setConfig(array $config)
+    public function setConfig(array $config): void
     {
         parent::setConfig($config);
 
@@ -275,7 +275,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         }
     }
 
-    private function addForbiddenLocalDataAttributesWithNullValue(array $items, array $options, array $filters)
+    private function addForbiddenLocalDataAttributesWithNullValue(array $items, array $options, array $filters): void
     {
         if ($includeLocalParameter = Parameters::getIncludeLocal($filters)) {
             $requestedLocalDataAttributes = LocalData::getLocalDataAttributesFromQueryParameter($includeLocalParameter);

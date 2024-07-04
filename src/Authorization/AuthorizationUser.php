@@ -7,7 +7,9 @@ namespace Dbp\Relay\CoreBundle\Authorization;
 use Dbp\Relay\CoreBundle\User\UserAttributeException;
 
 /**
- * Provides the user interface available within privilege expressions.
+ * @internal
+ *
+ * Provides the user interface available within privilege expressions
  */
 class AuthorizationUser
 {
