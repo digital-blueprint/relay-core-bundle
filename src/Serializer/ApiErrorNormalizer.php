@@ -6,9 +6,10 @@ namespace Dbp\Relay\CoreBundle\Serializer;
 
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
-use Symfony\Component\Serializer\Normalizer\ContextAwareNormalizerInterface;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 /**
  * A workaround to API-Platform by default stripping error messages from 500-600 HttpException
@@ -18,7 +19,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
  * To avoid leaking internals for 500+ errors we only do this for a special APIError class
  * which is a subclass of HttpException.
  */
-class ApiErrorNormalizer implements ContextAwareNormalizerInterface, NormalizerAwareInterface
+class ApiErrorNormalizer implements NormalizerInterface, NormalizerAwareInterface
 {
     use NormalizerAwareTrait;
 
@@ -26,6 +27,8 @@ class ApiErrorNormalizer implements ContextAwareNormalizerInterface, NormalizerA
 
     /**
      * @return array|\ArrayObject|bool|float|int|string|null
+     *
+     * @throws ExceptionInterface
      */
     public function normalize($object, $format = null, array $context = [])
     {
