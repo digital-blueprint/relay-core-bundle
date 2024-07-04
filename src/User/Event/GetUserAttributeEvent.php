@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\User\Event;
 
+use Dbp\Relay\CoreBundle\User\UserAttributeException;
 use Dbp\Relay\CoreBundle\User\UserAttributeMuxer;
 use Symfony\Contracts\EventDispatcher\Event;
 
@@ -16,30 +17,12 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 class GetUserAttributeEvent extends Event
 {
-    /**
-     * @var UserAttributeMuxer
-     */
-    private $userAttributeMuxer;
+    private UserAttributeMuxer $userAttributeMuxer;
+    private ?string $userIdentifier;
+    private string $attributeName;
+    private mixed $attributeValue;
 
-    /**
-     * @var ?string
-     */
-    private $userIdentifier;
-
-    /**
-     * @var string
-     */
-    private $attributeName;
-
-    /**
-     * @var mixed
-     */
-    private $attributeValue;
-
-    /**
-     * @param mixed $attributeValue
-     */
-    public function __construct(UserAttributeMuxer $userAttributeMuxer, string $attributeName, $attributeValue, ?string $userIdentifier)
+    public function __construct(UserAttributeMuxer $userAttributeMuxer, string $attributeName, mixed $attributeValue, ?string $userIdentifier)
     {
         $this->userAttributeMuxer = $userAttributeMuxer;
         $this->userIdentifier = $userIdentifier;
@@ -48,11 +31,9 @@ class GetUserAttributeEvent extends Event
     }
 
     /**
-     * @param mixed|null $defaultValue
-     *
-     * @return mixed|null
+     * @throws UserAttributeException
      */
-    public function getAttribute(string $attributeName, $defaultValue = null)
+    public function getAttribute(string $attributeName, mixed $defaultValue = null): mixed
     {
         return $this->userAttributeMuxer->getAttribute($this->userIdentifier, $attributeName, $defaultValue);
     }
@@ -62,18 +43,12 @@ class GetUserAttributeEvent extends Event
         return $this->attributeName;
     }
 
-    /**
-     * @param mixed $attributeValue
-     */
-    public function setAttributeValue($attributeValue): void
+    public function setAttributeValue(mixed $attributeValue): void
     {
         $this->attributeValue = $attributeValue;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getAttributeValue()
+    public function getAttributeValue(): mixed
     {
         return $this->attributeValue;
     }

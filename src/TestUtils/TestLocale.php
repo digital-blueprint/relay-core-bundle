@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class TestLocale extends Locale
 {
-    private $primaryLanguage;
+    private string $primaryLanguage;
 
     public function __construct(string $primaryLanguage = 'en')
     {

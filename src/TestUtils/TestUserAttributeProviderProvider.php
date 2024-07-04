@@ -8,10 +8,7 @@ use Dbp\Relay\CoreBundle\User\UserAttributeProviderProviderInterface;
 
 class TestUserAttributeProviderProvider implements UserAttributeProviderProviderInterface
 {
-    /*
-     * @var TestUserAttributeProvider
-     */
-    private $testUserAttributeProvider;
+    private ?TestUserAttributeProvider $testUserAttributeProvider = null;
 
     public function addUser(string $userIdentifier, array $userAttributes): void
     {

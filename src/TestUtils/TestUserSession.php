@@ -9,10 +9,8 @@ use Dbp\Relay\CoreBundle\API\UserSessionInterface;
 class TestUserSession implements UserSessionInterface
 {
     private ?string $userIdentifier;
-
     private array $roles;
-
-    private bool $isAuthenticated = false;
+    private bool $isAuthenticated;
 
     public function __construct(?string $identifier = null, array $roles = [], bool $isAuthenticated = false)
     {

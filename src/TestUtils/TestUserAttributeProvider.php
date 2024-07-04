@@ -10,18 +10,14 @@ use Dbp\Relay\CoreBundle\User\UserAttributeProviderExInterface;
 class TestUserAttributeProvider implements UserAttributeProviderExInterface
 {
     /**
-     * @var array
-     *
-     * Mpping user identifiers to user attribute maps (attribute name => attribute value)
+     * Mapping user identifiers to user attribute maps (attribute name => attribute value).
      */
-    private $userAttributes = [];
+    private array $userAttributes = [];
 
     /**
-     * @var array
-     *
-     * Mapping available attribute names to default values
+     * Mapping available attribute names to default values.
      */
-    private $defaultAttributes;
+    private array $defaultAttributes;
 
     public function __construct(array $defaultAttributes = [])
     {

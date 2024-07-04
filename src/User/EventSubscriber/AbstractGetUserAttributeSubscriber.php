@@ -10,8 +10,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 abstract class AbstractGetUserAttributeSubscriber implements EventSubscriberInterface
 {
-    /** @var array */
-    private $eventStack = [];
+    private array $eventStack = [];
 
     public static function getSubscribedEvents(): array
     {
@@ -21,12 +20,12 @@ abstract class AbstractGetUserAttributeSubscriber implements EventSubscriberInte
         ];
     }
 
-    public function onGetAvailableUserAttributes(GetAvailableUserAttributesEvent $event)
+    public function onGetAvailableUserAttributes(GetAvailableUserAttributesEvent $event): void
     {
         $event->addAttributes($this->getNewAttributes());
     }
 
-    public function onGetUserAttributeEvent(GetUserAttributeEvent $event)
+    public function onGetUserAttributeEvent(GetUserAttributeEvent $event): void
     {
         try {
             array_push($this->eventStack, $event);
@@ -41,22 +40,12 @@ abstract class AbstractGetUserAttributeSubscriber implements EventSubscriberInte
         }
     }
 
-    /**
-     * @param mixed|null $defaultValue
-     *
-     * @return mixed|null
-     */
-    public function getAttribute(string $attributeName, $defaultValue = null)
+    public function getAttribute(string $attributeName, mixed $defaultValue = null): mixed
     {
         return $this->eventStack[array_key_last($this->eventStack)]->getAttribute($attributeName, $defaultValue);
     }
 
-    /**
-     * @param mixed|null $attributeValue The current attribute value
-     *
-     * @return mixed|null The updated attribute value
-     */
-    protected function updateExistingAttributeValue(?string $userIdentifier, string $attributeName, $attributeValue)
+    protected function updateExistingAttributeValue(?string $userIdentifier, string $attributeName, mixed $attributeValue): mixed
     {
         return $attributeValue;
     }
@@ -66,10 +55,5 @@ abstract class AbstractGetUserAttributeSubscriber implements EventSubscriberInte
      */
     abstract protected function getNewAttributes(): array;
 
-    /**
-     * @param mixed|null $defaultValue the default value if provided explicitly in the authorization expression, else null
-     *
-     * @return mixed|null the value for the new attribute with the given name for the given user
-     */
-    abstract protected function getNewAttributeValue(?string $userIdentifier, string $attributeName, $defaultValue);
+    abstract protected function getNewAttributeValue(?string $userIdentifier, string $attributeName, mixed $defaultValue): mixed;
 }

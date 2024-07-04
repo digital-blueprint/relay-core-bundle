@@ -16,7 +16,7 @@ class GetAvailableUserAttributesEvent extends Event
     /**
      * @var string[]
      */
-    private $attributes;
+    private array $attributes;
 
     /**
      * @param string[] $attributes
