@@ -94,7 +94,7 @@ class ApiTest extends ApiTestCase
 
         $client = $this->withUser(null);
         $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=IS_AUTHENTICATED_FULLY', ['headers' => ['Authorization' => 'Bearer xxx']]);
-        $this->assertSame(403, $response->getStatusCode());
+        $this->assertSame(401, $response->getStatusCode());
 
         $client = $this->withUser(null, [], 'xxx');
         $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=IS_AUTHENTICATED_FULLY');
@@ -102,7 +102,7 @@ class ApiTest extends ApiTestCase
 
         $client = $this->withUser(null, [], 'xxx');
         $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=IS_AUTHENTICATED_FULLY', ['headers' => ['Authorization' => 'Bearer wrong']]);
-        $this->assertSame(403, $response->getStatusCode());
+        $this->assertSame(401, $response->getStatusCode());
 
         $client = $this->withUser(null, [], 'xxx');
         $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=IS_AUTHENTICATED_FULLY', ['headers' => ['Authorization' => 'Bearer xxx']]);

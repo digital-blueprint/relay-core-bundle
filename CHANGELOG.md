@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## v0.1.171
+
+* Update code style
+* TestAuthenticator: Return 401 instead of 403 on authentication failure
+
 ## v0.1.169
 
 * replace deprecate ContextAwareNormalizeInterface by NormalizedInterface

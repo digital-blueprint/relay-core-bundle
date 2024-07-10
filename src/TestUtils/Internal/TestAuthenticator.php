@@ -99,6 +99,6 @@ class TestAuthenticator extends AbstractAuthenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
-        return new JsonResponse(['error' => $exception->getMessage()], Response::HTTP_FORBIDDEN);
+        return new JsonResponse(['error' => $exception->getMessage()], Response::HTTP_UNAUTHORIZED);
     }
 }
