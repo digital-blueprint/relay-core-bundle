@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Remove conflict with doctrine/dbal v4, now that all dependencies are compatible with it
+
 ## v0.1.187
 
 * Restore default ErrorProvider behavior which leaves exceptions that already are api-platform resources untouched 
