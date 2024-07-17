@@ -7,13 +7,18 @@ namespace Dbp\Relay\CoreBundle\TestUtils;
 use ApiPlatform\Symfony\Bundle\Test\Client;
 use Dbp\Relay\CoreBundle\TestUtils\Internal\TestAuthenticator;
 use Dbp\Relay\CoreBundle\TestUtils\Internal\TestUser;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class TestClient
 {
-    private Client $client;
+    protected Client $client;
 
+    /**
+     * @param Client $client Create in your override of ApiPlatform\Symfony\Bundle\Test\ApiTestCase::setUp method like this:
+     *                       ApiTestCase::createClient()
+     */
     public function __construct(Client $client)
     {
         $this->client = $client;
@@ -24,7 +29,20 @@ class TestClient
         return $this->client;
     }
 
-    public function setUpUser(?string $userIdentifier = 'test user', array $userAttributes = [],
+    public function getContainer(): ContainerInterface
+    {
+        return $this->client->getContainer();
+    }
+
+    /**
+     * Setups up a user that can authenticate in subsequent requests using the given token.
+     *
+     * @param string|null $userIdentifier The user identifier
+     * @param array       $userAttributes Associative array of user attributes used for authorization
+     * @param array       $symfonyRoles   The symfony roles for the user
+     * @param string|null $token          The bearer token the user can be authenticated with on subsequent requests
+     */
+    public function setUpUser(?string $userIdentifier = 'testuser', array $userAttributes = [],
         array $symfonyRoles = [], ?string $token = TestAuthenticator::TEST_TOKEN): void
     {
         $container = $this->client->getContainer();

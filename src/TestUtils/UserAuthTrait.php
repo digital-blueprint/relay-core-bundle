@@ -10,23 +10,19 @@ use Dbp\Relay\CoreBundle\TestUtils\Internal\TestAuthenticator;
 use Dbp\Relay\CoreBundle\TestUtils\Internal\TestUser;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
-use Symfony\Contracts\HttpClient\ResponseInterface;
 
 trait UserAuthTrait
 {
-    public function withUser(?string $userIdentifier, array $symfonyRoles = [], ?string $token = null, ?Client $client = null): Client
+    public function withUser(?string $userIdentifier, array $symfonyRoles = [], ?string $token = null): Client
     {
-        if ($client === null) {
-            KernelTestCase::ensureKernelShutdown();
-            $client = ApiTestCase::createClient();
-        }
-        $container = $client->getContainer();
+        KernelTestCase::ensureKernelShutdown();
+        $client = ApiTestCase::createClient();
 
-        $auth = $container->get(TestAuthenticator::class);
-        assert($auth instanceof TestAuthenticator);
-        $auth->setToken($token);
-        $auth->setUser(new TestUser($userIdentifier, $symfonyRoles));
+        $testAuthenticator = $client->getContainer()->get(TestAuthenticator::class);
+        assert($testAuthenticator instanceof TestAuthenticator);
+
+        $testAuthenticator->setToken($token);
+        $testAuthenticator->setUser(new TestUser($userIdentifier, $symfonyRoles));
 
         return $client;
     }
@@ -42,9 +38,9 @@ trait UserAuthTrait
      *
      * @param array $userAttributes An associative array of user attributes (key: attribute name, value: attribute value)
      */
-    public function withUserAttributes(string $userIdentifier, array $userAttributes, ?Client $client = null): Client
+    public function withUserAttributes(string $userIdentifier, array $userAttributes): Client
     {
-        $client = $this->withUser($userIdentifier, [], TestAuthenticator::TEST_TOKEN, $client);
+        $client = $this->withUser($userIdentifier, [], TestAuthenticator::TEST_TOKEN);
 
         $container = $client->getContainer();
         $userAttributeProviderProvider = $container->get(TestUserAttributeProviderProvider::class);
@@ -60,31 +56,5 @@ trait UserAuthTrait
         assert($auth instanceof TestAuthenticator);
 
         return $auth->getUser();
-    }
-
-    public function getTestResponse(string $method, string $url, array $options = [], ?string $userIdentifier = 'testuser', array $userAttributes = [], ?Client $client = null): ResponseInterface
-    {
-        try {
-            $client = $this->withUserAttributes($userIdentifier, $userAttributes, null);
-            $options = array_merge($options, [
-                'headers' => [
-                    'Authorization' => 'Bearer '.TestAuthenticator::TEST_TOKEN,
-                ]]);
-
-            return $client->request($method, $url, $options);
-        } catch (TransportExceptionInterface $e) {
-            throw new \RuntimeException($e->getMessage());
-        }
-    }
-
-    public function getTestResponseUnauthenticated(string $method, string $url, array $options = [], ?Client $client = null): ResponseInterface
-    {
-        try {
-            $client = $this->withUser(null, [], null, $client);
-
-            return $client->request($method, $url);
-        } catch (TransportExceptionInterface $e) {
-            throw new \RuntimeException($e->getMessage());
-        }
     }
 }
