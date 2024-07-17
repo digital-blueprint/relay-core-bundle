@@ -15,11 +15,12 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 
 trait UserAuthTrait
 {
-    public function withUser(?string $userIdentifier, array $symfonyRoles = [], ?string $token = null): Client
+    public function withUser(?string $userIdentifier, array $symfonyRoles = [], ?string $token = null, ?Client $client = null): Client
     {
-        KernelTestCase::ensureKernelShutdown();
-
-        $client = ApiTestCase::createClient();
+        if ($client === null) {
+            KernelTestCase::ensureKernelShutdown();
+            $client = ApiTestCase::createClient();
+        }
         $container = $client->getContainer();
 
         $auth = $container->get(TestAuthenticator::class);
@@ -37,13 +38,13 @@ trait UserAuthTrait
      *
      * $client = $this->withUserAttributes('testuser', ['my_user_attribute' => 'my_value',]);
      * $response = $client->request('GET', $url, [
-     *     'headers' => ['Authorization' => TestAuthenticator::TEST_AUTHORIZATION_HEADER]]);
+     *     'headers' => ['Authorization' => TestAuthenticator::TEST_TOKEN]]);
      *
      * @param array $userAttributes An associative array of user attributes (key: attribute name, value: attribute value)
      */
-    public function withUserAttributes(string $userIdentifier, array $userAttributes): Client
+    public function withUserAttributes(string $userIdentifier, array $userAttributes, ?Client $client = null): Client
     {
-        $client = $this->withUser($userIdentifier, [], TestAuthenticator::TEST_TOKEN);
+        $client = $this->withUser($userIdentifier, [], TestAuthenticator::TEST_TOKEN, $client);
 
         $container = $client->getContainer();
         $userAttributeProviderProvider = $container->get(TestUserAttributeProviderProvider::class);
@@ -61,10 +62,10 @@ trait UserAuthTrait
         return $auth->getUser();
     }
 
-    public function getTestResponse(string $method, string $url, array $options = [], ?string $userIdentifier = 'testuser', array $userAttributes = []): ResponseInterface
+    public function getTestResponse(string $method, string $url, array $options = [], ?string $userIdentifier = 'testuser', array $userAttributes = [], ?Client $client = null): ResponseInterface
     {
         try {
-            $client = $this->withUserAttributes($userIdentifier, $userAttributes);
+            $client = $this->withUserAttributes($userIdentifier, $userAttributes, null);
             $options = array_merge($options, [
                 'headers' => [
                     'Authorization' => 'Bearer '.TestAuthenticator::TEST_TOKEN,
@@ -76,10 +77,10 @@ trait UserAuthTrait
         }
     }
 
-    public function getTestResponseUnauthenticated(string $method, string $url, array $options = []): ResponseInterface
+    public function getTestResponseUnauthenticated(string $method, string $url, array $options = [], ?Client $client = null): ResponseInterface
     {
         try {
-            $client = $this->withUser(null);
+            $client = $this->withUser(null, [], null, $client);
 
             return $client->request($method, $url);
         } catch (TransportExceptionInterface $e) {
