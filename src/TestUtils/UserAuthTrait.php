@@ -61,16 +61,27 @@ trait UserAuthTrait
         return $auth->getUser();
     }
 
-    public function getTestResponse(string $method, string $url, array $options = [], ?string $userIdentifier = 'testuser', array $userAttributes = [], bool $authenticated = true): ResponseInterface
+    public function getTestResponse(string $method, string $url, array $options = [], ?string $userIdentifier = 'testuser', array $userAttributes = []): ResponseInterface
     {
         try {
             $client = $this->withUserAttributes($userIdentifier, $userAttributes);
-            $options = $authenticated ? array_merge($options, [
+            $options = array_merge($options, [
                 'headers' => [
                     'Authorization' => 'Bearer '.TestAuthenticator::TEST_TOKEN,
-                ]]) : $options;
+                ]]);
 
             return $client->request($method, $url, $options);
+        } catch (TransportExceptionInterface $e) {
+            throw new \RuntimeException($e->getMessage());
+        }
+    }
+
+    public function getTestResponseUnauthenticated(string $method, string $url, array $options = []): ResponseInterface
+    {
+        try {
+            $client = $this->withUser(null);
+
+            return $client->request($method, $url);
         } catch (TransportExceptionInterface $e) {
             throw new \RuntimeException($e->getMessage());
         }
