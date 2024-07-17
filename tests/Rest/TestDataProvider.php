@@ -6,6 +6,7 @@ namespace Dbp\Relay\CoreBundle\Tests\Rest;
 
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\LocalData\LocalDataEventDispatcher;
 use Dbp\Relay\CoreBundle\Rest\AbstractDataProvider;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\Pagination;
@@ -25,17 +26,16 @@ class TestDataProvider extends AbstractDataProvider
     public const ADMIN_USER_IDENTIFIER = TestAuthorizationService::ADMIN_USER_IDENTIFIER;
     public const INCLUDE_ADMIN_ONLY_ENTITIES_FILTER = 'includeAdminOnlyEntities';
 
-    /** @var LocalDataEventDispatcher */
-    private $localDataEventDispatcher;
+    private LocalDataEventDispatcher $localDataEventDispatcher;
 
-    /** @var array[] */
-    private $sourceData = [];
+    private array $sourceData = [];
 
-    /** @var array The options to test */
-    private $options = [];
+    /** The options to test */
+    private array $options = [];
 
-    /** @var bool */
-    private $allowUnauthenticatedAccess = false;
+    private bool $allowUnauthenticatedAccess = false;
+    private bool $isGetItemOperationAllowed = true;
+    private bool $isGetCollectionOperationAllowed = true;
 
     public static function create(?EventDispatcher $eventDispatcher = null, string $userIdentifier = self::TEST_USER_IDENTIFIER): TestDataProvider
     {
@@ -75,11 +75,14 @@ class TestDataProvider extends AbstractDataProvider
     /**
      * @param array[] $sourceData
      */
-    public function setSourceData(array $sourceData)
+    public function setSourceData(array $sourceData): void
     {
         $this->sourceData = $sourceData;
     }
 
+    /**
+     * @throws ApiError
+     */
     public function getTestEntity(string $id, array $filters = [], array $sourceData = []): ?TestEntity
     {
         $this->setSourceData($sourceData);
@@ -89,7 +92,7 @@ class TestDataProvider extends AbstractDataProvider
     }
 
     /**
-     * @throws \Exception
+     * @throws ApiError
      */
     public function getTestEntities(array $filters = [], array $sourceData = []): array
     {
@@ -97,7 +100,7 @@ class TestDataProvider extends AbstractDataProvider
     }
 
     /**
-     * @throws \Exception
+     * @throws ApiError
      */
     public function getTestEntityPaginator(array $filters = [], array $sourceData = []): PartialPaginator
     {
@@ -113,6 +116,16 @@ class TestDataProvider extends AbstractDataProvider
     public function getOptions(): array
     {
         return $this->options;
+    }
+
+    public function setIsGetItemOperationAllowed(bool $isGetItemOperationAllowed): void
+    {
+        $this->isGetItemOperationAllowed = $isGetItemOperationAllowed;
+    }
+
+    public function setIsGetCollectionOperationAllowed(bool $isGetCollectionOperationAllowed): void
+    {
+        $this->isGetCollectionOperationAllowed = $isGetCollectionOperationAllowed;
     }
 
     protected function getItemById(string $id, array $filters = [], array $options = []): ?object
@@ -159,9 +172,18 @@ class TestDataProvider extends AbstractDataProvider
         return $pageEntities;
     }
 
-    protected function isUserGrantedOperationAccess(int $operation): bool
+    protected function requiresAuthentication(int $operation): bool
     {
-        return $this->allowUnauthenticatedAccess || $this->isAuthenticated();
+        return $this->allowUnauthenticatedAccess === false;
+    }
+
+    protected function isCurrentUserGrantedOperationAccess(int $operation): bool
+    {
+        return match ($operation) {
+            self::GET_ITEM_OPERATION => $this->isGetItemOperationAllowed,
+            self::GET_COLLECTION_OPERATION => $this->isGetCollectionOperationAllowed,
+            default => false,
+        };
     }
 
     /**

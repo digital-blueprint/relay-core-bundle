@@ -17,7 +17,6 @@ trait StateProviderTrait
      * @return PartialPaginator|object|null
      *
      * @throws ApiError
-     * @throws \Exception
      */
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
     {

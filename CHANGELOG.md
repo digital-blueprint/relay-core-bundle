@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## v0.1.172
+
+* AbstractDataProvider: Do not require AbstractDataProvider::isUserGrantedOperationAccess to be overridden anymore.
+Instead, assume that all operations require the user to be authenticated, throwing 401 otherwise. 
+This behavior can be overridden using AbstractDataProvider::requiresAuthentication. Introduce a new method 
+AbstractDataProvider::isCurrentUserGrantedOperationAccess that can be overridden to forbid access to certain operations
+(throwing 403)
+
 ## v0.1.171
 
 * Update code style

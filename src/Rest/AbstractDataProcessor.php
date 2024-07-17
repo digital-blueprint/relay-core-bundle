@@ -96,6 +96,11 @@ abstract class AbstractDataProcessor extends AbstractAuthorizationService implem
         }
     }
 
+    /**
+     * Override if you want to restrict access to the add item operation.
+     * Returning false for the given item will cause a 403 forbidden error to be thrown.
+     * Defaults to true.
+     */
     protected function isCurrentUserAuthorizedToAddItem($item, array $filters): bool
     {
         return true;

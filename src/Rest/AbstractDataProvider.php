@@ -54,7 +54,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     private PropertyNameCollectionFactoryInterface $propertyNameCollectionFactory;
 
     /** @var bool[] */
-    private $localDataReadAccessGrantedMap = [];
+    private array $localDataReadAccessGrantedMap = [];
 
     /**
      * @deprecated Use self::appendConfigNodeDefinitions instead
@@ -108,7 +108,6 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
     /**
      * @throws ApiError
-     * @throws \Exception
      */
     protected function getItemInternal(string $id, array $context): ?object
     {
@@ -129,7 +128,6 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
     /**
      * @throws ApiError
-     * @throws \Exception
      */
     protected function getCollectionInternal(array $context): PartialPaginator
     {
@@ -150,12 +148,20 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
         if ($preparedFilterParameter = Parameters::getPreparedFilter($filters)) {
             $preparedFilter = $this->createPreparedFilter($preparedFilterParameter, $resourceClass, $deserializationGroups);
-            $filter = $filter !== null ? $filter->combineWith($preparedFilter) : $preparedFilter;
+            try {
+                $filter = $filter !== null ? $filter->combineWith($preparedFilter) : $preparedFilter;
+            } catch (FilterException $filterException) {
+                throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR, $filterException->getMessage());
+            }
         }
 
         $returnEmptyPage = false;
         if ($filter !== null) {
-            $filter->simplify();
+            try {
+                $filter->simplify();
+            } catch (FilterException $filterException) {
+                throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR, $filterException->getMessage());
+            }
             if ($filter->isAlwaysFalse()) {
                 $returnEmptyPage = true;
             } elseif (!$filter->isAlwaysTrue()) {
@@ -179,6 +185,12 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
     abstract protected function getPage(int $currentPageNumber, int $maxNumItemsPerPage, array $filters = [], array $options = []): array;
 
+    /**
+     * Override if you want to restrict access to the get collection operation based on the given set of filters.
+     * if you want to completely forbid access to the get collection, use @see isCurrentUserGrantedOperationAccess instead
+     * Returning false causes a 403 forbidden error to be thrown.
+     * Defaults to true.
+     */
     protected function isCurrentUserAuthorizedToGetCollection(array $filters): bool
     {
         return true;
@@ -197,7 +209,6 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
     /**
      * @throws ApiError
-     * @throws \Exception
      */
     private function createOptions(array $filters): array
     {
@@ -217,12 +228,12 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
     /**
      * @throws ApiError
-     * @throws \Exception
      */
     private function createFilter($filterParameter, ?string $resourceClass, ?array $deserializationGroups, bool $removeForbiddenLocalDataAttributeConditions = true): Filter
     {
         if ($resourceClass === null || $deserializationGroups === null) {
-            throw new \Exception('Provider context must contain \''.self::RESOURCE_CLASS_CONTEXT_KEY.'\' and \''.self::GROUPS_CONTEXT_KEY.'\' when using filters to determine available resource properties.');
+            throw ApiError::withDetails(Response::HTTP_INTERNAL_SERVER_ERROR,
+                'Provider context must contain \''.self::RESOURCE_CLASS_CONTEXT_KEY.'\' and \''.self::GROUPS_CONTEXT_KEY.'\' when using filters to determine available resource properties.');
         }
 
         if (is_array($filterParameter) === false) {
@@ -260,7 +271,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         return $localDataAttributes;
     }
 
-    private function removeForbiddenLocalDataAttributeConditionsFromFilterRecursively(LogicalNode $logicalNode)
+    private function removeForbiddenLocalDataAttributeConditionsFromFilterRecursively(LogicalNode $logicalNode): void
     {
         foreach ($logicalNode->getChildren() as $child) {
             $localDataAttributeName = '';
@@ -296,7 +307,6 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
      * do not leak to the user.
      *
      * @throws ApiError
-     * @throws \Exception
      */
     private function createPreparedFilter(string $preparedFilterId, string $resourceClass, array $deserializationGroups): Filter
     {

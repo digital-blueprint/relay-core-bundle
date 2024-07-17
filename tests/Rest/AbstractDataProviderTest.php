@@ -73,6 +73,37 @@ class AbstractDataProviderTest extends TestCase
         $this->assertEquals('id', $testEntity->getIdentifier());
     }
 
+    public function testGetEntityUnauthenticated()
+    {
+        $this->logout();
+        try {
+            $this->testDataProvider->getTestEntity('id', [], ['id' => []]);
+            $this->fail('401 unauthorized exception not thrown as expected');
+        } catch (ApiError $exception) {
+            $this->assertEquals(401, $exception->getStatusCode());
+        }
+    }
+
+    public function testGetEntityUnauthenticatedAllowed()
+    {
+        $this->logout();
+        $this->testDataProvider->setAllowUnauthenticatedAccess(true);
+        $testEntity = $this->testDataProvider->getTestEntity('id', [], ['id' => []]);
+
+        $this->assertEquals('id', $testEntity->getIdentifier());
+    }
+
+    public function testGetEntityOperationAccessForbidden()
+    {
+        try {
+            $this->testDataProvider->setIsGetItemOperationAllowed(false);
+            $this->testDataProvider->getTestEntity('_forbidden', [], ['_forbidden' => []]);
+            $this->fail('403 forbidden exception not thrown as expected');
+        } catch (ApiError $exception) {
+            $this->assertEquals(403, $exception->getStatusCode());
+        }
+    }
+
     public function testGetEntityAdminOnly()
     {
         try {
@@ -86,17 +117,6 @@ class AbstractDataProviderTest extends TestCase
 
         $testEntity = $this->testDataProvider->getTestEntity('_forbidden', [], ['_forbidden' => []]);
         $this->assertEquals('_forbidden', $testEntity->getIdentifier());
-    }
-
-    public function testGetEntityUnauthenticated()
-    {
-        $this->logout();
-        try {
-            $this->testDataProvider->getTestEntity('id', [], ['id' => []]);
-            $this->fail('401 unauthorized exception not thrown as expected');
-        } catch (ApiError $exception) {
-            $this->assertEquals(401, $exception->getStatusCode());
-        }
     }
 
     public function testGetEntityNotFound()
@@ -134,6 +154,16 @@ class AbstractDataProviderTest extends TestCase
         }
     }
 
+    public function testGetCollectionUnauthenticatedAllowed()
+    {
+        $this->logout();
+        $this->testDataProvider->setAllowUnauthenticatedAccess(true);
+        $testEntities = $this->testDataProvider->getTestEntities([], ['1' => [], '2' => []]);
+        $this->assertCount(2, $testEntities);
+        $this->assertEquals('1', $testEntities[0]->getIdentifier());
+        $this->assertEquals('2', $testEntities[1]->getIdentifier());
+    }
+
     public function testGetCollectionAdminOnly()
     {
         try {
@@ -148,6 +178,17 @@ class AbstractDataProviderTest extends TestCase
 
         $testEntities = $this->testDataProvider->getTestEntities([], ['1' => [], '2' => []]);
         $this->assertCount(2, $testEntities);
+    }
+
+    public function testGetCollectionOperationAccessForbidden()
+    {
+        try {
+            $this->testDataProvider->setIsGetCollectionOperationAllowed(false);
+            $this->testDataProvider->getTestEntities([], ['1' => [], '2' => []]);
+            $this->fail('403 forbidden exception not thrown as expected');
+        } catch (ApiError $exception) {
+            $this->assertEquals(403, $exception->getStatusCode());
+        }
     }
 
     public function testPaginationParameters()
