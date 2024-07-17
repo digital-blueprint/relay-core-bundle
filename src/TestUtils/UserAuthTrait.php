@@ -10,6 +10,8 @@ use Dbp\Relay\CoreBundle\TestUtils\Internal\TestAuthenticator;
 use Dbp\Relay\CoreBundle\TestUtils\Internal\TestUser;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 trait UserAuthTrait
 {
@@ -57,5 +59,20 @@ trait UserAuthTrait
         assert($auth instanceof TestAuthenticator);
 
         return $auth->getUser();
+    }
+
+    public function getTestResponse(string $method, string $url, array $options = [], ?string $userIdentifier = 'testuser', array $userAttributes = [], bool $authenticated = true): ResponseInterface
+    {
+        try {
+            $client = $this->withUserAttributes($userIdentifier, $userAttributes);
+            $options = $authenticated ? array_merge($options, [
+                'headers' => [
+                    'Authorization' => 'Bearer '.TestAuthenticator::TEST_TOKEN,
+                ]]) : $options;
+
+            return $client->request($method, $url, $options);
+        } catch (TransportExceptionInterface $e) {
+            throw new \RuntimeException($e->getMessage());
+        }
     }
 }
