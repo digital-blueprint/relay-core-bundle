@@ -9,6 +9,7 @@ Instead, assume that all operations require the user to be authenticated, throwi
 This behavior can be overridden using AbstractDataProvider::requiresAuthentication. Introduce a new method 
 AbstractDataProvider::isCurrentUserGrantedOperationAccess that can be overridden to forbid access to certain operations
 (throwing 403)
+* add TestClient to TestUtils, which can be used for internal API testing
 
 ## v0.1.171
 
