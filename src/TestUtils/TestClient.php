@@ -13,6 +13,8 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class TestClient
 {
+    public const TEST_USER_IDENTIFIER = 'testuser';
+
     protected Client $client;
 
     /**
@@ -42,7 +44,7 @@ class TestClient
      * @param array       $symfonyRoles   The symfony roles for the user
      * @param string|null $token          The bearer token the user can be authenticated with on subsequent requests
      */
-    public function setUpUser(?string $userIdentifier = 'testuser', array $userAttributes = [],
+    public function setUpUser(?string $userIdentifier = self::TEST_USER_IDENTIFIER, array $userAttributes = [],
         array $symfonyRoles = [], ?string $token = TestAuthenticator::TEST_TOKEN): void
     {
         $container = $this->client->getContainer();
