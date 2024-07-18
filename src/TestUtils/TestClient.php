@@ -80,6 +80,7 @@ class TestClient
         ?string $token = TestAuthenticator::TEST_TOKEN): ResponseInterface
     {
         $options['json'] = $data;
+        $options['headers']['Content-Type'] = 'application/ld+json';
 
         return $this->request('POST', $uri, $options, $token);
     }
@@ -94,6 +95,7 @@ class TestClient
         ?string $token = TestAuthenticator::TEST_TOKEN): ResponseInterface
     {
         $options['json'] = $data;
+        $options['headers']['Content-Type'] = 'application/merge-patch+json';
 
         return $this->request('PATCH', $url, $options, $token);
     }
@@ -113,10 +115,7 @@ class TestClient
         ?string $token = TestAuthenticator::TEST_TOKEN): ResponseInterface
     {
         try {
-            $options = array_merge($options, [
-                'headers' => [
-                    'Authorization' => 'Bearer '.$token,
-                ]]);
+            $options['headers']['Authorization'] = 'Bearer '.$token;
 
             return $this->client->request($method, $url, $options);
         } catch (TransportExceptionInterface $e) {
