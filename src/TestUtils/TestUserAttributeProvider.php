@@ -17,9 +17,14 @@ class TestUserAttributeProvider implements UserAttributeProviderExInterface
     /**
      * Mapping available attribute names to default values.
      */
-    private array $defaultAttributes;
+    private array $defaultAttributes = [];
 
     public function __construct(array $defaultAttributes = [])
+    {
+        $this->defaultAttributes = $defaultAttributes;
+    }
+
+    public function setDefaultAttributes(array $defaultAttributes): void
     {
         $this->defaultAttributes = $defaultAttributes;
     }

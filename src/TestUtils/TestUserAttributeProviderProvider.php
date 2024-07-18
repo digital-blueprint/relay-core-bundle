@@ -8,13 +8,20 @@ use Dbp\Relay\CoreBundle\User\UserAttributeProviderProviderInterface;
 
 class TestUserAttributeProviderProvider implements UserAttributeProviderProviderInterface
 {
-    private ?TestUserAttributeProvider $testUserAttributeProvider = null;
+    private TestUserAttributeProvider $testUserAttributeProvider;
+
+    public function __construct()
+    {
+        $this->testUserAttributeProvider = new TestUserAttributeProvider();
+    }
+
+    public function setDefaultAttributes(array $defaultAttributes): void
+    {
+        $this->testUserAttributeProvider->setDefaultAttributes($defaultAttributes);
+    }
 
     public function addUser(string $userIdentifier, array $userAttributes): void
     {
-        if ($this->testUserAttributeProvider === null) {
-            $this->testUserAttributeProvider = new TestUserAttributeProvider(array_keys($userAttributes));
-        }
         $this->testUserAttributeProvider->addUser($userIdentifier, $userAttributes);
     }
 
@@ -26,6 +33,6 @@ class TestUserAttributeProviderProvider implements UserAttributeProviderProvider
         /**
          * @psalm-suppress InvalidReturnStatement
          */
-        return $this->testUserAttributeProvider !== null ? [$this->testUserAttributeProvider] : [];
+        return [$this->testUserAttributeProvider];
     }
 }

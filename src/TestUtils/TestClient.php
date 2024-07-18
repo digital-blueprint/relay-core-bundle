@@ -53,6 +53,8 @@ class TestClient
         $testAuthenticator->setUser(new TestUser($userIdentifier, $symfonyRoles));
 
         $userAttributeProviderProvider = $container->get(TestUserAttributeProviderProvider::class);
+        assert($userAttributeProviderProvider instanceof TestUserAttributeProviderProvider);
+        $userAttributeProviderProvider->setDefaultAttributes($userAttributes);
         $userAttributeProviderProvider->addUser($userIdentifier, $userAttributes);
     }
 
