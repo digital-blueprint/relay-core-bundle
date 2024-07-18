@@ -34,7 +34,7 @@ trait DataOperationTrait
      * Returning false for the given operation and item will cause a 403 forbidden error to be thrown.
      * Defaults to true.
      */
-    protected function isCurrentUserAuthorizedToAccessItem(int $operation, $item, array $filters): bool
+    protected function isCurrentUserAuthorizedToAccessItem(int $operation, mixed $item, array $filters): bool
     {
         return true;
     }

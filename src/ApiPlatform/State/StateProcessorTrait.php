@@ -14,10 +14,7 @@ trait StateProcessorTrait
 {
     use StateTrait;
 
-    /**
-     * @return mixed
-     */
-    public function process($data, Operation $operation, array $uriVariables = [], array $context = [])
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
     {
         $this->currentOperation = $operation;
         $this->currentUriVariables = $uriVariables;

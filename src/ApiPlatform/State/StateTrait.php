@@ -9,17 +9,13 @@ use ApiPlatform\Metadata\Operation;
 
 trait StateTrait
 {
-    protected static $identifierName = 'identifier';
+    protected static string $identifierName = 'identifier';
+    private ?Operation $currentOperation = null;
+    private array $currentUriVariables = [];
 
-    /* @var Operation */
-    private $currentOperation;
-
-    /* @var array */
-    private $currentUriVariables;
-
-    protected function getCurrentOperationName(): string
+    protected function getCurrentOperationName(): ?string
     {
-        return $this->currentOperation->getName();
+        return $this->currentOperation?->getName();
     }
 
     protected function getCurrentUriVariables(): array

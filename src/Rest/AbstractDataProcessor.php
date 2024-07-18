@@ -27,7 +27,7 @@ abstract class AbstractDataProcessor extends AbstractAuthorizationService implem
         parent::__construct();
     }
 
-    protected function post($data, array $context)
+    protected function post(mixed $data, array $context): mixed
     {
         $this->denyOperationAccessUnlessGranted(self::ADD_ITEM_OPERATION);
 
@@ -37,7 +37,7 @@ abstract class AbstractDataProcessor extends AbstractAuthorizationService implem
         return $this->addItem($data, $filters);
     }
 
-    protected function put($identifier, $data, $context)
+    protected function put(mixed $identifier, mixed $data, array $context): mixed
     {
         $this->denyOperationAccessUnlessGranted(self::REPLACE_ITEM_OPERATION);
 
@@ -48,7 +48,7 @@ abstract class AbstractDataProcessor extends AbstractAuthorizationService implem
         return $this->replaceItem($identifier, $data, $currentItem, $filters);
     }
 
-    protected function patch($identifier, $data, $context)
+    protected function patch(mixed $identifier, mixed $data, array $context): mixed
     {
         $this->denyOperationAccessUnlessGranted(self::UPDATE_ITEM_OPERATION);
 
@@ -60,7 +60,7 @@ abstract class AbstractDataProcessor extends AbstractAuthorizationService implem
             $context[self::FILTERS_CONTEXT_KEY] ?? []);
     }
 
-    protected function delete($identifier, $data, array $context)
+    protected function delete(mixed $identifier, mixed $data, array $context): void
     {
         $this->denyOperationAccessUnlessGranted(self::REMOVE_ITEM_OPERATION);
 
@@ -70,22 +70,22 @@ abstract class AbstractDataProcessor extends AbstractAuthorizationService implem
         $this->removeItem($identifier, $data, $filters);
     }
 
-    protected function addItem($data, array $filters)
+    protected function addItem(mixed $data, array $filters): mixed
     {
         return $data;
     }
 
-    protected function replaceItem($identifier, $data, $previousData, array $filters)
+    protected function replaceItem(mixed $identifier, mixed $data, mixed $previousData, array $filters): mixed
     {
         return $data;
     }
 
-    protected function updateItem($identifier, $data, $previousData, array $filters)
+    protected function updateItem(mixed $identifier, mixed $data, mixed $previousData, array $filters): mixed
     {
         return $data;
     }
 
-    protected function removeItem($identifier, $data, array $filters): void
+    protected function removeItem(mixed $identifier, mixed $data, array $filters): void
     {
     }
 
@@ -101,7 +101,7 @@ abstract class AbstractDataProcessor extends AbstractAuthorizationService implem
      * Returning false for the given item will cause a 403 forbidden error to be thrown.
      * Defaults to true.
      */
-    protected function isCurrentUserAuthorizedToAddItem($item, array $filters): bool
+    protected function isCurrentUserAuthorizedToAddItem(mixed $item, array $filters): bool
     {
         return true;
     }
