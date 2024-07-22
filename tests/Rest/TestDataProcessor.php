@@ -15,7 +15,7 @@ class TestDataProcessor extends AbstractDataProcessor
     {
         assert($data instanceof TestEntity);
 
-        $identifier = (string) Uuid::v7();
+        $identifier = (string) Uuid::v4();
         $data->setIdentifier($identifier);
         $this->items[$identifier] = $data;
 
