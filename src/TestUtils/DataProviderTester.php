@@ -11,7 +11,7 @@ use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
 
 class DataProviderTester
 {
-    private AbstractDataProvider $stateProvider;
+    private AbstractDataProvider $dataProvider;
     private string $resourceClass;
     private array $normalizationGroups;
 
@@ -32,12 +32,13 @@ class DataProviderTester
     /**
      * Use this to set up the given data provider (i.e. inject all required services and set up a test user).
      */
-    public static function setUp(AbstractDataProvider $dataProvider): void
+    public static function setUp(AbstractDataProvider $dataProvider,
+        string $currentUserIdentifier = TestAuthorizationService::TEST_USER_IDENTIFIER, array $currentUserAttributes = []): void
     {
-        TestAuthorizationService::setUp($dataProvider);
-
         $dataProvider->__injectLocale(new TestLocale());
         $dataProvider->__injectPropertyNameCollectionFactory(new TestPropertyNameCollectionFactory());
+
+        TestAuthorizationService::setUp($dataProvider, $currentUserIdentifier, $currentUserAttributes);
     }
 
     /**
@@ -45,11 +46,9 @@ class DataProviderTester
      */
     private function __construct(AbstractDataProvider $dataProvider, string $resourceClass, array $normalizationGroups = [])
     {
-        $this->stateProvider = $dataProvider;
+        $this->dataProvider = $dataProvider;
         $this->resourceClass = $resourceClass;
         $this->normalizationGroups = $normalizationGroups;
-
-        self::setUp($dataProvider);
     }
 
     public function getItem(?string $identifier, array $filters = []): ?object
@@ -57,15 +56,28 @@ class DataProviderTester
         $uriVariables = $identifier !== null ? ['identifier' => $identifier] : [];
 
         /** @var object|null */
-        return $this->stateProvider->provide(new Get(), $uriVariables, $this->createContext($filters));
+        return $this->dataProvider->provide(new Get(), $uriVariables, $this->createContext($filters));
     }
 
     public function getCollection(array $filters = []): array
     {
         /** @var PartialPaginator */
-        $partialPaginator = $this->stateProvider->provide(new GetCollection(), [], $this->createContext($filters));
+        $partialPaginator = $this->dataProvider->provide(new GetCollection(), [], $this->createContext($filters));
 
         return $partialPaginator->getItems();
+    }
+
+    /**
+     * @param int $pageNumber One-based page number
+     */
+    public function getPage(int $pageNumber, int $maxNumItemsPerPage, array $filters = []): array
+    {
+        $filters = array_merge($filters, [
+            'page' => $pageNumber,
+            'perPage' => $maxNumItemsPerPage,
+        ]);
+
+        return $this->getCollection($filters);
     }
 
     private function createContext(array $filters): array

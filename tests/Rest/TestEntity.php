@@ -13,23 +13,33 @@ class TestEntity implements LocalDataAwareInterface
     use LocalDataAwareTrait;
 
     #[Groups(['TestEntity:output'])]
-    private string $identifier;
+    private ?string $identifier;
 
-    #[Groups(['TestEntity:output'])]
-    private string $field0;
+    #[Groups(['TestEntity:output', 'TestEntity:input'])]
+    private ?string $field0 = null;
 
-    public function __construct(string $id)
+    public function __construct(?string $identifier = null)
     {
-        $this->identifier = $id;
+        $this->identifier = $identifier;
     }
 
-    public function getIdentifier(): string
+    public function getIdentifier(): ?string
     {
         return $this->identifier;
     }
 
-    public function getField0(): string
+    public function setIdentifier(?string $identifier)
+    {
+        $this->identifier = $identifier;
+    }
+
+    public function getField0(): ?string
     {
         return $this->field0;
+    }
+
+    public function setField0(?string $field0): void
+    {
+        $this->field0 = $field0;
     }
 }

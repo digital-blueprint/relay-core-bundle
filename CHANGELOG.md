@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+* Enhance test utilities
+* Add unit tests for DataProviderTester and DataProcessorTester
+* Allow setup with custom user identifier and attributes for DataProviderTester and DataProcessorTester
+
 ## v0.1.172
 
 * AbstractDataProvider: Do not require AbstractDataProvider::isUserGrantedOperationAccess to be overridden anymore.

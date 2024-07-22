@@ -35,9 +35,10 @@ class DataProcessorTester
     /**
      * Use this to set up the given data processor (i.e. inject all required services and set up a test user).
      */
-    public static function setUp(AbstractDataProcessor $dataProcessor): void
+    public static function setUp(AbstractDataProcessor $dataProcessor,
+        string $currentUserIdentifier = TestAuthorizationService::TEST_USER_IDENTIFIER, array $currentUserAttributes = []): void
     {
-        TestAuthorizationService::setUp($dataProcessor);
+        TestAuthorizationService::setUp($dataProcessor, $currentUserIdentifier, $currentUserAttributes);
     }
 
     private function __construct(AbstractDataProcessor $dataProcessor, string $resourceClass, array $denormalizationGroups = [])

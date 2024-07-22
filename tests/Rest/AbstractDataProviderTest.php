@@ -13,8 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AbstractDataProviderTest extends TestCase
 {
-    /** @var TestDataProvider */
-    private $testDataProvider;
+    private TestDataProvider $testDataProvider;
 
     protected function setUp(): void
     {

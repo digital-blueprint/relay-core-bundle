@@ -37,21 +37,27 @@ class TestDataProvider extends AbstractDataProvider
     private bool $isGetItemOperationAllowed = true;
     private bool $isGetCollectionOperationAllowed = true;
 
-    public static function create(?EventDispatcher $eventDispatcher = null, string $userIdentifier = self::TEST_USER_IDENTIFIER): TestDataProvider
+    public static function create(?EventDispatcher $eventDispatcher = null,
+        string $currentUserIdentifier = self::TEST_USER_IDENTIFIER, ?array $currentUserAttributes = null): TestDataProvider
     {
         $testDataProvider = new TestDataProvider($eventDispatcher ?? new EventDispatcher());
-        DataProviderTester::setUp($testDataProvider);
-        $testDataProvider->__injectPropertyNameCollectionFactory(new TestEntityPropertyNameCollectionFactory());
-
-        TestAuthorizationService::setUp($testDataProvider,
-            $userIdentifier, [
-                self::ROLE_USER => $userIdentifier === self::TEST_USER_IDENTIFIER,
-                self::ROLE_ADMIN => $userIdentifier === self::ADMIN_USER_IDENTIFIER, ], []);
+        self::setUp($testDataProvider, $currentUserIdentifier, $currentUserAttributes);
 
         return $testDataProvider;
     }
 
-    public function __construct(EventDispatcher $eventDispatcher)
+    public static function setUp(TestDataProvider $testDataProvider,
+        string $currentUserIdentifier = TestAuthorizationService::TEST_USER_IDENTIFIER, ?array $currentUserAttributes = null): void
+    {
+        DataProviderTester::setUp($testDataProvider, $currentUserIdentifier,
+            $currentUserAttributes ?? [
+                self::ROLE_USER => $currentUserIdentifier === self::TEST_USER_IDENTIFIER,
+                self::ROLE_ADMIN => $currentUserIdentifier === self::ADMIN_USER_IDENTIFIER,
+            ]);
+        $testDataProvider->__injectPropertyNameCollectionFactory(new TestEntityPropertyNameCollectionFactory());
+    }
+
+    protected function __construct(EventDispatcher $eventDispatcher)
     {
         parent::__construct();
 
@@ -152,7 +158,6 @@ class TestDataProvider extends AbstractDataProvider
         $this->localDataEventDispatcher->onNewOperation($options);
 
         $pageStartIndex = Pagination::getFirstItemIndex($currentPageNumber, $maxNumItemsPerPage);
-
         $currentIndex = 0;
         foreach ($this->sourceData as $entityId => $entitySourceData) {
             if ($currentIndex++ >= $pageStartIndex) {
