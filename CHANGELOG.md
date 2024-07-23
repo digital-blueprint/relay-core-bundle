@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## v0.1.174
+
+* modernize code
+* add Filter:mapConditionNodes method to be able to replace certain condition nodes (e.g. for local data mapping)
+
+## v0.1.173
+
 * Enhance test utilities
 * Add unit tests for DataProviderTester and DataProcessorTester
 * Allow setup with custom user identifier and attributes for DataProviderTester and DataProcessorTester

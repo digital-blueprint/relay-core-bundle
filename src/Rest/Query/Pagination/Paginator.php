@@ -15,14 +15,10 @@ use Dbp\Relay\CoreBundle\Exception\ApiError;
  */
 abstract class Paginator implements \Iterator, PartialPaginatorInterface
 {
-    /** @var int */
-    protected $currentPosition;
-    /** @var array */
-    protected $items;
-    /** @var int */
-    protected $maxNumItemsPerPage;
-    /** @var int */
-    protected $currentPageNumber;
+    protected int $currentPosition = 0;
+    protected array $items;
+    protected int $maxNumItemsPerPage;
+    protected int $currentPageNumber;
 
     protected function __construct(array $items, int $currentPageNumber, int $maxNumItemsPerPage)
     {

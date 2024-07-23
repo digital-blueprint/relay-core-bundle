@@ -17,8 +17,7 @@ use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\OrNode;
  */
 class FilterTreeBuilder
 {
-    /** @var LogicalNode */
-    private $currentNode;
+    private ?LogicalNode $currentNode;
 
     public static function create(?LogicalNode $rootNode = null): FilterTreeBuilder
     {
@@ -28,6 +27,11 @@ class FilterTreeBuilder
     public function __construct(?LogicalNode $rootNode = null)
     {
         $this->currentNode = $rootNode ?? new AndNode();
+    }
+
+    public function getCurrentNode(): ?Node
+    {
+        return $this->currentNode;
     }
 
     /**

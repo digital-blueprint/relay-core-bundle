@@ -18,10 +18,10 @@ class PreparedFilterProvider
     private const POLICY_PREFIX = '@apply-filter:';
 
     /** @var array[] */
-    private $config = [];
+    private array $config = [];
 
     /** @var string[] */
-    private $policies = [];
+    private array $policies = [];
 
     public static function getConfigNodeDefinition(): NodeDefinition
     {

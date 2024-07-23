@@ -46,7 +46,6 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     private const FILTERS_CONTEXT_KEY = 'filters';
     private const GROUPS_CONTEXT_KEY = 'groups';
     private const RESOURCE_CLASS_CONTEXT_KEY = 'resource_class';
-    private const LOCAL_DATA_BASE_PATH = 'localData.';
 
     private Locale $locale;
     private PreparedFilterProvider $preparedFilterController;
@@ -273,10 +272,10 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
     private function removeForbiddenLocalDataAttributeConditionsFromFilterRecursively(LogicalNode $logicalNode): void
     {
+        // TODO: replace by Filter::mapConditionNode
         foreach ($logicalNode->getChildren() as $child) {
-            $localDataAttributeName = '';
             if ($child instanceof ConditionNode
-                && self::isLocalDataAttributePath($child->getField(), $localDataAttributeName)
+                && ($localDataAttributeName = LocalData::tryGetLocalDataAttributeName($child->getField()))
                 && !$this->isGrantedReadAccessToLocalDataAttribute($localDataAttributeName)) {
                 $logicalNode->removeChild($child);
                 $logicalNode->appendChild(new ConstantNode(false));
@@ -343,19 +342,9 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         }
 
         foreach ($this->localDataAccessChecker->getConfiguredLocalDataAttributeNames() as $localDataAttributeName) {
-            $availableAttributePaths[] = self::LOCAL_DATA_BASE_PATH.$localDataAttributeName;
+            $availableAttributePaths[] = LocalData::getAttributePath($localDataAttributeName);
         }
 
         return $availableAttributePaths;
-    }
-
-    private static function isLocalDataAttributePath(string $attributePath, ?string &$localDataAttributeName = null): bool
-    {
-        $returnValue = str_starts_with($attributePath, self::LOCAL_DATA_BASE_PATH);
-        if ($returnValue && $localDataAttributeName !== null) {
-            $localDataAttributeName = substr($attributePath, strlen(self::LOCAL_DATA_BASE_PATH));
-        }
-
-        return $returnValue;
     }
 }

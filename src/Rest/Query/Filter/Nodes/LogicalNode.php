@@ -12,7 +12,7 @@ use Dbp\Relay\CoreBundle\Helpers\Tools;
 abstract class LogicalNode extends Node
 {
     /** @var Node[] */
-    protected $childNodes = [];
+    protected array $childNodes = [];
 
     public function getChildren(): array
     {
@@ -52,7 +52,7 @@ abstract class LogicalNode extends Node
         return true;
     }
 
-    public function simplifyRecursively()
+    public function simplifyRecursively(): void
     {
         $childNodes = [];
         foreach ($this->childNodes as $childNode) {
@@ -117,5 +117,22 @@ abstract class LogicalNode extends Node
         }
 
         return $childArray;
+    }
+
+    /**
+     * @param callable(ConditionNode): Node $mapConditionNode
+     */
+    public function mapConditionNodesRecursively(callable $mapConditionNode): void
+    {
+        $childNodes = [];
+        foreach ($this->childNodes as $childNode) {
+            if ($childNode instanceof ConditionNode) {
+                $childNodes[] = $mapConditionNode($childNode);
+            } elseif ($childNode instanceof LogicalNode) {
+                $childNode->mapConditionNodesRecursively($mapConditionNode);
+                $childNodes[] = $childNode;
+            }
+        }
+        $this->childNodes = $childNodes;
     }
 }

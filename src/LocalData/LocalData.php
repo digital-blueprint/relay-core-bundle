@@ -10,6 +10,8 @@ use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 
 class LocalData
 {
+    public const BASE_PATH = 'localData.';
+
     private const SEPARATOR = ',';
 
     public static function getConfigNodeDefinition(): NodeDefinition
@@ -28,6 +30,21 @@ class LocalData
     public static function getQueryParameterFromLocalDataAttributes(array $attributes): string
     {
         return implode(self::SEPARATOR, $attributes);
+    }
+
+    public static function getAttributePath(string $localDataAttributeName): string
+    {
+        return self::BASE_PATH.$localDataAttributeName;
+    }
+
+    public static function tryGetLocalDataAttributeName(string $attributePath): ?string
+    {
+        $localDataAttributeName = null;
+        if (str_starts_with($attributePath, LocalData::BASE_PATH)) {
+            $localDataAttributeName = substr($attributePath, strlen(LocalData::BASE_PATH));
+        }
+
+        return $localDataAttributeName;
     }
 
     /**

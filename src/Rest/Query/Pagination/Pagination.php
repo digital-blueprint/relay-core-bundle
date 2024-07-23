@@ -26,7 +26,7 @@ class Pagination
             $options[self::MAX_NUM_ITEMS_PER_PAGE_PARAMETER_NAME] ?? $maxNumItemPerPageDefault));
     }
 
-    public static function getFirstItemIndex(int $currentPageNumber, int $maxNumItemsPerPage)
+    public static function getFirstItemIndex(int $currentPageNumber, int $maxNumItemsPerPage): int
     {
         return max(0, ($currentPageNumber - 1) * $maxNumItemsPerPage);
     }

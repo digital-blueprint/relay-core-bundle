@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Rest\Query\Filter;
 
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\AndNode;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\ConditionNode;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\ConstantNode;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\Node;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\NodeType;
 
 class Filter
 {
-    /** @var AndNode */
-    private $rootNode;
+    private AndNode $rootNode;
 
     public static function create(?AndNode $rootNode = null): Filter
     {
@@ -51,6 +52,14 @@ class Filter
         $this->assertIsValid(__METHOD__.': ');
 
         $this->rootNode->simplifyRecursively();
+    }
+
+    /**
+     * @param callable(ConditionNode): Node $mapConditionNode
+     */
+    public function mapConditionNodes(callable $mapConditionNode): void
+    {
+        $this->rootNode->mapConditionNodesRecursively($mapConditionNode);
     }
 
     public function toArray(): array

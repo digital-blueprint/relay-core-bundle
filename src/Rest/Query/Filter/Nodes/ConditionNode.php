@@ -14,19 +14,14 @@ class ConditionNode extends Node
 
     protected const NODE_TYPE = NodeType::CONDITION;
 
-    /** @var string */
-    private $field;
-
-    /** @var string */
-    private $operator;
-
-    /** @var mixed */
-    private $value;
+    private string $field;
+    private string $operator;
+    private mixed $value;
 
     /**
      * @throws FilterException
      */
-    public function __construct(string $field, string $operator, $value)
+    public function __construct(string $field, string $operator, mixed $value)
     {
         parent::__construct();
 

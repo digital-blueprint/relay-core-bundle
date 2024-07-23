@@ -76,7 +76,7 @@ class FromQueryFilterCreator
      *
      * @var string[]
      */
-    private static $allowedOperators = [
+    private static array $allowedOperators = [
         self::EQUALS_OPERATOR,
         self::LESS_THAN_OR_EQUAL_OPERATOR,
         self::GREATER_THAN_OR_EQUAL_OPERATOR,

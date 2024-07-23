@@ -26,8 +26,7 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
     private const SOURCE_ATTRIBUTE_KEY = 'source';
     private const IS_ARRAY_KEY = 'is_array';
 
-    /** @var array */
-    private $attributeMapping = [];
+    private array $attributeMapping = [];
 
     public static function getLocalDataMappingConfigNodeDefinition(): NodeDefinition
     {
@@ -87,7 +86,7 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
     /**
      * @throws \Exception
      */
-    public function onEvent(Event $event)
+    public function onEvent(Event $event): void
     {
         if ($event instanceof LocalDataPostEvent) {
             $localDataAttributes = [];
@@ -121,7 +120,7 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
      * @param array $localDataAttributes A reference to the associative array of local data attributes
      *                                   (keys: local data attribute names, values: local data attribute values)
      */
-    protected function onPostEvent(LocalDataPostEvent $postEvent, array &$localDataAttributes)
+    protected function onPostEvent(LocalDataPostEvent $postEvent, array &$localDataAttributes): void
     {
     }
 }
