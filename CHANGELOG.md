@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## v0.1.175
+
+* The "dbp/relay-auth-bundle" has been replaced by the "dbp/relay-core-connector-oidc-bundle".
+  Check out the https://github.com/digital-blueprint/relay-core-connector-oidc-bundle/blob/main/CHANGELOG.md
+  for a migration guide.
+* composer: Add a conflict with the old "dbp/relay-auth-bundle".
+
 ## v0.1.174
 
 * modernize code

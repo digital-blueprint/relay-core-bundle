@@ -68,7 +68,8 @@
         "willdurand/negotiation": "<3",
         "api-platform/core": "2.7.17",
         "doctrine/dbal": ">=4",
-        "carbonphp/carbon-doctrine-types": ">=3"
+        "carbonphp/carbon-doctrine-types": ">=3",
+        "dbp/relay-auth-bundle": "*"
     },
     "autoload": {
         "psr-4": {
