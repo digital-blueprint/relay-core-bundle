@@ -116,7 +116,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $this->preparedFiltersController->loadConfig($filterConfig);
 
         $this->isSortEnabled =
-            $config[Rest::ROOT_CONFIG_NODE][Query::ROOT_CONFIG_NODE][Sort::ROOT_CONFIG_NODE][Sort::ENABLE_SORTING_CONFIG_NODE] ?? false;
+            $config[Rest::ROOT_CONFIG_NODE][Query::ROOT_CONFIG_NODE][Sort::ROOT_CONFIG_NODE][Sort::ENABLE_SORT_CONFIG_NODE] ?? false;
 
         parent::configure(array_merge(
             $this->localDataAccessChecker->getPolicies(),
@@ -158,7 +158,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
         $options = $this->createOptions($filters);
 
-        [$filter, $sorting] = $this->getFilterAndSorting($filters, $resourceClass, $deserializationGroups);
+        [$filter, $sort] = $this->getFilterAndSort($filters, $resourceClass, $deserializationGroups);
 
         $returnEmptyPage = false;
         if ($filter !== null) {
@@ -174,8 +174,8 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
             }
         }
 
-        if ($sorting !== null) {
-            Options::setSorting($options, $sorting);
+        if ($sort !== null) {
+            Options::setSort($options, $sort);
         }
 
         $pageItems = [];
@@ -257,16 +257,16 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     }
 
     /**
-     * @param string|array $sortingParameters
+     * @param string|array $sortQueryParameters
      *
      * @throws ApiError
      */
-    private function createSorting(mixed $sortingParameters, array $availableAttributePaths): ?Sort
+    private function createSort(mixed $sortQueryParameters, array $availableAttributePaths): ?Sort
     {
         try {
             $sortFields = [];
-            foreach (FromQuerySortCreator::createSortingFromQueryParameter(
-                $sortingParameters, $availableAttributePaths)->getSortFields() as $sortField) {
+            foreach (FromQuerySortCreator::createSortFromQueryParameters(
+                $sortQueryParameters, $availableAttributePaths)->getSortFields() as $sortField) {
                 if (($localDataAttributeName = LocalData::tryGetLocalDataAttributeName(Sort::getPath($sortField))) === null
                     || $this->isGrantedReadAccessToLocalDataAttribute($localDataAttributeName)) {
                     $sortFields[] = $sortField;
@@ -275,7 +275,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
             return !empty($sortFields) ? new Sort($sortFields) : null;
         } catch (SortException $exception) {
-            throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, $exception->getMessage(), ErrorIds::SORTING_INVALID, [$exception->getCode(), $exception->getMessage()]);
+            throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, $exception->getMessage(), ErrorIds::SORT_INVALID, [$exception->getCode(), $exception->getMessage()]);
         }
     }
 
@@ -329,10 +329,10 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         }
     }
 
-    private function getFilterAndSorting(array $filters, string $resourceClass, array $deserializationGroups): array
+    private function getFilterAndSort(array $filters, string $resourceClass, array $deserializationGroups): array
     {
         $filter = null;
-        $sorting = null;
+        $sort = null;
 
         $availableAttributePaths = null;
         if ($this->areQueryFiltersEnabled && $filterParameter = Parameters::getFilter($filters)) {
@@ -348,12 +348,12 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
             }
         }
 
-        if ($this->isSortEnabled && $sortParameter = Parameters::getSorting($filters)) {
-            $sorting = $this->createSorting($sortParameter,
+        if ($this->isSortEnabled && $sortParameter = Parameters::getSort($filters)) {
+            $sort = $this->createSort($sortParameter,
                 $availableAttributePaths ?? $this->getAvailableAttributePaths($resourceClass, $deserializationGroups));
         }
 
-        return [$filter, $sorting];
+        return [$filter, $sort];
     }
 
     /**

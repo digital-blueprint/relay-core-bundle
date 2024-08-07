@@ -427,7 +427,7 @@ class AbstractDataProviderTest extends TestCase
 
         $this->assertCount(1, $sortFields);
         $this->assertEquals('field0', Sort::getPath($sortFields[0]));
-        $this->assertEquals(Sort::DIRECTION_ASCENDING, Sort::getDirection($sortFields[0]));
+        $this->assertEquals(Sort::ASCENDING_DIRECTION, Sort::getDirection($sortFields[0]));
     }
 
     public function testSortQueryParameterNotEnabled(): void

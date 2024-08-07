@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## v0.1.176
+## v0.1.177
 
 * add support for sort query parameter for GET collection requests (for extenders of AbstractDataProvider)
 * allow enabling/disabling filter/prepared filter/sort via AbstractDataProvider config

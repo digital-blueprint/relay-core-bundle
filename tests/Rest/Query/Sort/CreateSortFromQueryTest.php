@@ -21,12 +21,12 @@ class CreateSortFromQueryTest extends TestCase
             'direction' => 'DESC',
         ]];
 
-        $sorting = FromQuerySortCreator::createSortingFromQueryParameter($queryParameters, ['field0']);
+        $sort = FromQuerySortCreator::createSortFromQueryParameters($queryParameters, ['field0']);
 
-        $sortFields = $sorting->getSortFields();
+        $sortFields = $sort->getSortFields();
         $this->assertCount(1, $sortFields);
         $this->assertEquals('field0', Sort::getPath($sortFields[0]));
-        $this->assertEquals(Sort::DIRECTION_DESCENDING, Sort::getDirection($sortFields[0]));
+        $this->assertEquals(Sort::DESCENDING_DIRECTION, Sort::getDirection($sortFields[0]));
     }
 
     public function testGetQueryParametersFromQueryString()
@@ -51,14 +51,14 @@ class CreateSortFromQueryTest extends TestCase
     {
         $querySting = 'sort[sort-field0][path]=field0';
 
-        $sorting = FromQuerySortCreator::createSortingFromQueryParameter(
+        $sort = FromQuerySortCreator::createSortFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'sort'), ['field0']);
 
-        $sortFields = $sorting->getSortFields();
+        $sortFields = $sort->getSortFields();
 
         $this->assertCount(1, $sortFields);
         $this->assertEquals('field0', Sort::getPath($sortFields[0]));
-        $this->assertEquals(Sort::DIRECTION_ASCENDING, Sort::getDirection($sortFields[0]));
+        $this->assertEquals(Sort::ASCENDING_DIRECTION, Sort::getDirection($sortFields[0]));
     }
 
     /**
@@ -68,14 +68,14 @@ class CreateSortFromQueryTest extends TestCase
     {
         $querySting = 'sort[sort-field0][path]=field0&sort[sort-field0][direction]=ASC';
 
-        $sorting = FromQuerySortCreator::createSortingFromQueryParameter(
+        $sort = FromQuerySortCreator::createSortFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'sort'), ['field0']);
 
-        $sortFields = $sorting->getSortFields();
+        $sortFields = $sort->getSortFields();
 
         $this->assertCount(1, $sortFields);
         $this->assertEquals('field0', Sort::getPath($sortFields[0]));
-        $this->assertEquals(Sort::DIRECTION_ASCENDING, Sort::getDirection($sortFields[0]));
+        $this->assertEquals(Sort::ASCENDING_DIRECTION, Sort::getDirection($sortFields[0]));
     }
 
     /**
@@ -85,14 +85,14 @@ class CreateSortFromQueryTest extends TestCase
     {
         $querySting = 'sort[sort-field0][path]=field0&sort[sort-field0][direction]=DESC';
 
-        $sorting = FromQuerySortCreator::createSortingFromQueryParameter(
+        $sort = FromQuerySortCreator::createSortFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'sort'), ['field0']);
 
-        $sortFields = $sorting->getSortFields();
+        $sortFields = $sort->getSortFields();
 
         $this->assertCount(1, $sortFields);
         $this->assertEquals('field0', Sort::getPath($sortFields[0]));
-        $this->assertEquals(Sort::DIRECTION_DESCENDING, Sort::getDirection($sortFields[0]));
+        $this->assertEquals(Sort::DESCENDING_DIRECTION, Sort::getDirection($sortFields[0]));
     }
 
     /**
@@ -102,14 +102,14 @@ class CreateSortFromQueryTest extends TestCase
     {
         $querySting = 'sort=field0';
 
-        $sorting = FromQuerySortCreator::createSortingFromQueryParameter(
+        $sort = FromQuerySortCreator::createSortFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'sort'), ['field0']);
 
-        $sortFields = $sorting->getSortFields();
+        $sortFields = $sort->getSortFields();
 
         $this->assertCount(1, $sortFields);
         $this->assertEquals('field0', Sort::getPath($sortFields[0]));
-        $this->assertEquals(Sort::DIRECTION_ASCENDING, Sort::getDirection($sortFields[0]));
+        $this->assertEquals(Sort::ASCENDING_DIRECTION, Sort::getDirection($sortFields[0]));
     }
 
     /**
@@ -119,14 +119,14 @@ class CreateSortFromQueryTest extends TestCase
     {
         $querySting = 'sort=-field0';
 
-        $sorting = FromQuerySortCreator::createSortingFromQueryParameter(
+        $sort = FromQuerySortCreator::createSortFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'sort'), ['field0']);
 
-        $sortFields = $sorting->getSortFields();
+        $sortFields = $sort->getSortFields();
 
         $this->assertCount(1, $sortFields);
         $this->assertEquals('field0', Sort::getPath($sortFields[0]));
-        $this->assertEquals(Sort::DIRECTION_DESCENDING, Sort::getDirection($sortFields[0]));
+        $this->assertEquals(Sort::DESCENDING_DIRECTION, Sort::getDirection($sortFields[0]));
     }
 
     /**
@@ -136,16 +136,16 @@ class CreateSortFromQueryTest extends TestCase
     {
         $querySting = 'sort[sort-field0][path]=field0&sort[sort-field0][direction]=DESC&sort[sort-field1][path]=field1&sort[sort-field1][direction]=ASC';
 
-        $sorting = FromQuerySortCreator::createSortingFromQueryParameter(
+        $sort = FromQuerySortCreator::createSortFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'sort'), ['field0', 'field1']);
 
-        $sortFields = $sorting->getSortFields();
+        $sortFields = $sort->getSortFields();
 
         $this->assertCount(2, $sortFields);
         $this->assertEquals('field0', Sort::getPath($sortFields[0]));
-        $this->assertEquals(Sort::DIRECTION_DESCENDING, Sort::getDirection($sortFields[0]));
+        $this->assertEquals(Sort::DESCENDING_DIRECTION, Sort::getDirection($sortFields[0]));
         $this->assertEquals('field1', Sort::getPath($sortFields[1]));
-        $this->assertEquals(Sort::DIRECTION_ASCENDING, Sort::getDirection($sortFields[1]));
+        $this->assertEquals(Sort::ASCENDING_DIRECTION, Sort::getDirection($sortFields[1]));
     }
 
     /**
@@ -155,16 +155,16 @@ class CreateSortFromQueryTest extends TestCase
     {
         $querySting = 'sort[sort-field0][path]=field0&sort[sort-field1][path]=field1&sort[sort-field1][direction]=DESC';
 
-        $sorting = FromQuerySortCreator::createSortingFromQueryParameter(
+        $sort = FromQuerySortCreator::createSortFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'sort'), ['field0', 'field1']);
 
-        $sortFields = $sorting->getSortFields();
+        $sortFields = $sort->getSortFields();
 
         $this->assertCount(2, $sortFields);
         $this->assertEquals('field0', Sort::getPath($sortFields[0]));
-        $this->assertEquals(Sort::DIRECTION_ASCENDING, Sort::getDirection($sortFields[0]));
+        $this->assertEquals(Sort::ASCENDING_DIRECTION, Sort::getDirection($sortFields[0]));
         $this->assertEquals('field1', Sort::getPath($sortFields[1]));
-        $this->assertEquals(Sort::DIRECTION_DESCENDING, Sort::getDirection($sortFields[1]));
+        $this->assertEquals(Sort::DESCENDING_DIRECTION, Sort::getDirection($sortFields[1]));
     }
 
     /**
@@ -174,15 +174,15 @@ class CreateSortFromQueryTest extends TestCase
     {
         $querySting = 'sort[sort-field0][path]=field0&sort[sort-field1][path]=field1';
 
-        $sorting = FromQuerySortCreator::createSortingFromQueryParameter(
+        $sort = FromQuerySortCreator::createSortFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'sort'), ['field0', 'field1']);
 
-        $sortFields = $sorting->getSortFields();
+        $sortFields = $sort->getSortFields();
 
         $this->assertCount(2, $sortFields);
         $this->assertEquals('field0', Sort::getPath($sortFields[0]));
-        $this->assertEquals(Sort::DIRECTION_ASCENDING, Sort::getDirection($sortFields[0]));
+        $this->assertEquals(Sort::ASCENDING_DIRECTION, Sort::getDirection($sortFields[0]));
         $this->assertEquals('field1', Sort::getPath($sortFields[1]));
-        $this->assertEquals(Sort::DIRECTION_ASCENDING, Sort::getDirection($sortFields[1]));
+        $this->assertEquals(Sort::ASCENDING_DIRECTION, Sort::getDirection($sortFields[1]));
     }
 }

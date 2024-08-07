@@ -9,7 +9,7 @@ class Parameters
     public const FILTER = 'filter';
     public const PREPARED_FILTER = 'preparedFilter';
     public const INCLUDE_LOCAL = 'includeLocal';
-    public const SORTING = 'sort';
+    public const SORT = 'sort';
 
     public static function getFilter(array $parameters): mixed
     {
@@ -21,9 +21,9 @@ class Parameters
         return $parameters[self::PREPARED_FILTER] ?? null;
     }
 
-    public static function getSorting(array $parameters)
+    public static function getSort(array $parameters)
     {
-        return $parameters[self::SORTING] ?? null;
+        return $parameters[self::SORT] ?? null;
     }
 
     public static function getIncludeLocal(array $parameters): ?string

@@ -29,7 +29,7 @@ class FromQuerySortCreator
      *
      * @throws SortException
      */
-    public static function createSortingFromQueryParameter(mixed $sortQueryParameters, array $availableAttributePaths): Sort
+    public static function createSortFromQueryParameters(mixed $sortQueryParameters, array $availableAttributePaths): Sort
     {
         // Expand a JSON:API compliant sort into a more expressive sort parameter.
         if (is_string($sortQueryParameters)) {

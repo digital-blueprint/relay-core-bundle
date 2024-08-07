@@ -12,14 +12,14 @@ class Sort
     public const PATH_KEY = 'path';
     public const DIRECTION_KEY = 'direction';
 
-    public const DIRECTION_ASCENDING = 'ASC';
-    public const DIRECTION_DESCENDING = 'DESC';
+    public const ASCENDING_DIRECTION = 'ASC';
+    public const DESCENDING_DIRECTION = 'DESC';
 
     public const ROOT_CONFIG_NODE = 'sort';
-    public const ENABLE_SORTING_CONFIG_NODE = 'enable_sort';
+    public const ENABLE_SORT_CONFIG_NODE = 'enable_sort';
 
     /**
-     * The fields on which to sort ordered by sort prioriry (index 0 has highest priority).
+     * The fields on which to sort ordered by sort priority (index 0 has highest priority).
      *
      * @var array[]
      */
@@ -31,7 +31,7 @@ class Sort
         $rootNode = $treeBuilder->getRootNode();
 
         $rootNode->children()
-            ->scalarNode(self::ENABLE_SORTING_CONFIG_NODE)
+            ->scalarNode(self::ENABLE_SORT_CONFIG_NODE)
             ->info('Indicates whether sorting using sort query parameters is enabled.')
             ->defaultFalse()
             ->end();
@@ -39,7 +39,7 @@ class Sort
         return $rootNode;
     }
 
-    public static function createSortField(string $path, string $direction = self::DIRECTION_ASCENDING): array
+    public static function createSortField(string $path, string $direction = self::ASCENDING_DIRECTION): array
     {
         return [
             self::PATH_KEY => $path,
@@ -63,12 +63,12 @@ class Sort
      * Takes an array of sort fields. Example:
      *   [
      *     [
-     *       Sorting::PATH_KEY => 'changed',
-     *       Sorting::DIRECTION_KEY => Sorting::DIRECTION_DESCENDING,
+     *       Sort::PATH_KEY => 'changed',
+     *       Sort::DIRECTION_KEY => Sort::DIRECTION_DESCENDING,
      *     ],
      *     [
-     *       Sorting::PATH_KEY => 'title',
-     *       Sorting::DIRECTION_KEY => Sorting::DIRECTION_ASCENDING,
+     *       Sort::PATH_KEY => 'title',
+     *       Sort::DIRECTION_KEY => Sort::DIRECTION_ASCENDING,
      *     ],
      *   ]
      * The results will be sorted first by 'changed' (ascending) and then by 'title' (descending)

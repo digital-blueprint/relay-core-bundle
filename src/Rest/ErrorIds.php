@@ -7,7 +7,7 @@ namespace Dbp\Relay\CoreBundle\Rest;
 class ErrorIds
 {
     /**
-     * Client filter.
+     * Query filter.
      */
     public const FILTER_PARAMETER_MUST_BE_AN_ARRAY = 'core:filter-parameter-must-be-an-array';
     public const FILTER_INVALID = 'core:filter-invalid';
@@ -19,7 +19,7 @@ class ErrorIds
     public const PREPARED_FILTER_UNDEFINED = 'core:prepared-filter-undefined';
 
     /**
-     * Sorting.
+     * Query sort.
      */
-    public const SORTING_INVALID = 'core:sorting-invalid';
+    public const SORT_INVALID = 'core:sort-invalid';
 }

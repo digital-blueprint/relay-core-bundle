@@ -11,7 +11,7 @@ class Options
 {
     public const LANGUAGE = 'lang';
     public const FILTER = 'filter';
-    public const SORT = 'sorting';
+    public const SORT = 'sort';
     public const LOCAL_DATA_ATTRIBUTES = 'local_data_attributes';
 
     public static function getLanguage(array $options): ?string
@@ -72,19 +72,19 @@ class Options
     }
 
     /**
-     * Sets the sorting option in the given target options.
+     * Sets the sort option in the given target options.
      */
-    public static function setSorting(array &$targetOptions, Sort $sorting): array
+    public static function setSort(array &$targetOptions, Sort $sort): array
     {
-        $targetOptions[self::SORT] = $sorting;
+        $targetOptions[self::SORT] = $sort;
 
         return $targetOptions;
     }
 
     /**
-     * Removes the sorting option from the given target options.
+     * Removes the sort option from the given target options.
      */
-    public static function removeSorting(array &$targetOptions): array
+    public static function removeSort(array &$targetOptions): array
     {
         unset($targetOptions[self::SORT]);
 
