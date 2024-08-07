@@ -19,7 +19,7 @@ class DataProviderTesterTest extends TestCase
         $this->testDataProvider = TestDataProvider::create();
         $this->dataProviderTester = DataProviderTester::create(
             $this->testDataProvider, TestEntity::class, ['TestEntity:output']);
-        TestDataProvider::setUp($this->testDataProvider);
+        TestDataProvider::login($this->testDataProvider);
     }
 
     public function testGetItem(): void

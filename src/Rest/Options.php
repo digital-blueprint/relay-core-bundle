@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Rest;
 
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
-use Dbp\Relay\CoreBundle\Rest\Query\Sorting\Sorting;
+use Dbp\Relay\CoreBundle\Rest\Query\Sort\Sort;
 
 class Options
 {
     public const LANGUAGE = 'lang';
     public const FILTER = 'filter';
-    public const SORTING = 'sorting';
+    public const SORT = 'sorting';
     public const LOCAL_DATA_ATTRIBUTES = 'local_data_attributes';
 
     public static function getLanguage(array $options): ?string
@@ -66,17 +66,17 @@ class Options
         return $targetOptions;
     }
 
-    public static function getSorting(array $options): ?Sorting
+    public static function getSort(array $options): ?Sort
     {
-        return $options[self::SORTING] ?? null;
+        return $options[self::SORT] ?? null;
     }
 
     /**
      * Sets the sorting option in the given target options.
      */
-    public static function setSorting(array &$targetOptions, Sorting $sorting): array
+    public static function setSorting(array &$targetOptions, Sort $sorting): array
     {
-        $targetOptions[self::SORTING] = $sorting;
+        $targetOptions[self::SORT] = $sorting;
 
         return $targetOptions;
     }
@@ -86,7 +86,7 @@ class Options
      */
     public static function removeSorting(array &$targetOptions): array
     {
-        unset($targetOptions[self::SORTING]);
+        unset($targetOptions[self::SORT]);
 
         return $targetOptions;
     }

@@ -7,9 +7,12 @@ namespace Dbp\Relay\CoreBundle\Rest\Query\Filter;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 
-class PreparedFilterProvider
+/**
+ * @internal
+ */
+class PreparedFilters
 {
-    private const PREPARED_FILTERS_CONFIG_NODE = 'prepared_filters';
+    private const ROOT_CONFIG_NODE = 'prepared_filters';
     private const IDENTIFIER_CONFIG_NODE = 'id';
     private const FILTER_CONFIG_NODE = 'filter';
     private const APPLY_POLICY_CONFIG_NODE = 'apply_policy';
@@ -25,7 +28,7 @@ class PreparedFilterProvider
 
     public static function getConfigNodeDefinition(): NodeDefinition
     {
-        $treeBuilder = new TreeBuilder(self::PREPARED_FILTERS_CONFIG_NODE);
+        $treeBuilder = new TreeBuilder(self::ROOT_CONFIG_NODE);
 
         return $treeBuilder->getRootNode()
             ->arrayPrototype()
@@ -48,7 +51,7 @@ class PreparedFilterProvider
 
     public function loadConfig(array $config): void
     {
-        foreach ($config[self::PREPARED_FILTERS_CONFIG_NODE] ?? [] as $configEntry) {
+        foreach ($config[self::ROOT_CONFIG_NODE] ?? [] as $configEntry) {
             $filterId = $configEntry[self::IDENTIFIER_CONFIG_NODE];
 
             if (isset($this->config[$filterId])) {

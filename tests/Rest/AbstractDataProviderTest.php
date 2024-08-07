@@ -8,6 +8,7 @@ use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Rest\ErrorIds;
 use Dbp\Relay\CoreBundle\Rest\Options;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTreeBuilder;
+use Dbp\Relay\CoreBundle\Rest\Query\Sort\Sort;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -17,51 +18,55 @@ class AbstractDataProviderTest extends TestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
-
-        $this->login(false);
+        $this->setUpAndConfigure(self::getTestConfig());
     }
 
-    private function login(bool $admin): void
+    private function setUpAndConfigure(array $testConfig): void
     {
-        $this->testDataProvider = TestDataProvider::create(null, $admin ? TestDataProvider::ADMIN_USER_IDENTIFIER : TestDataProvider::TEST_USER_IDENTIFIER);
-        $this->configureTestDataProvider();
+        $this->testDataProvider = TestDataProvider::create(null, TestDataProvider::TEST_USER_IDENTIFIER);
+        $this->testDataProvider->setConfig($testConfig);
+    }
+
+    private function loginAdmin(): void
+    {
+        TestDataProvider::login($this->testDataProvider, TestDataProvider::ADMIN_USER_IDENTIFIER);
     }
 
     private function logout(): void
     {
-        $this->testDataProvider = TestDataProvider::create(null, TestDataProvider::UNAUTHENTICATED_USER_IDENTIFIER);
-        $this->configureTestDataProvider();
+        TestDataProvider::logout($this->testDataProvider);
     }
 
-    private function configureTestDataProvider(): void
+    private static function getTestConfig(): array
     {
-        $config = [
-            'prepared_filters' => [
-                [
-                    'id' => 'filter0',
-                    'filter' => 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0',
-                    'apply_policy' => 'user.get("ROLE_USER")',
-                ],
-                [
-                    'id' => 'filterForbidden',
-                    'filter' => 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0',
-                    'apply_policy' => 'user.get("ROLE_ADMIN")',
-                ],
+        $config['rest']['query']['filter']['enable_query_filters'] = true;
+        $config['rest']['query']['filter']['enable_prepared_filters'] = true;
+        $config['rest']['query']['filter']['prepared_filters'] = [
+            [
+                'id' => 'filter0',
+                'filter' => 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0',
+                'apply_policy' => 'user.get("ROLE_USER")',
             ],
-            'local_data' => [
-                [
-                    'local_data_attribute' => 'attribute0',
-                    'read_policy' => 'true',
-                ],
-                [
-                    'local_data_attribute' => 'forbiddenAttribute',
-                    'read_policy' => 'false',
-                ],
+            [
+                'id' => 'filterForbidden',
+                'filter' => 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0',
+                'apply_policy' => 'user.get("ROLE_ADMIN")',
+            ],
+        ];
+        $config['rest']['query']['sort']['enable_sort'] = true;
+
+        $config['local_data'] = [
+            [
+                'local_data_attribute' => 'attribute0',
+                'read_policy' => 'true',
+            ],
+            [
+                'local_data_attribute' => 'forbiddenAttribute',
+                'read_policy' => 'false',
             ],
         ];
 
-        $this->testDataProvider->setConfig($config);
+        return $config;
     }
 
     public function testGetEntity()
@@ -112,7 +117,7 @@ class AbstractDataProviderTest extends TestCase
             $this->assertEquals(403, $exception->getStatusCode());
         }
 
-        $this->login(true);
+        $this->loginAdmin();
 
         $testEntity = $this->testDataProvider->getTestEntity('_forbidden', [], ['_forbidden' => []]);
         $this->assertEquals('_forbidden', $testEntity->getIdentifier());
@@ -173,7 +178,7 @@ class AbstractDataProviderTest extends TestCase
             $this->assertEquals(403, $exception->getStatusCode());
         }
 
-        $this->login(true);
+        $this->loginAdmin();
 
         $testEntities = $this->testDataProvider->getTestEntities([], ['1' => [], '2' => []]);
         $this->assertCount(2, $testEntities);
@@ -238,15 +243,31 @@ class AbstractDataProviderTest extends TestCase
      */
     public function testFilterQueryParameter()
     {
-        $filterParameters = [];
-        parse_str('filter[field0]=value0', $filterParameters);
+        $queryParameters = [];
+        parse_str('filter[field0]=value0', $queryParameters);
 
-        $this->testDataProvider->getTestEntities($filterParameters, [[]]);
+        $this->testDataProvider->getTestEntities($queryParameters, [[]]);
         $filter = $this->testDataProvider->getOptions()[Options::FILTER];
 
         $expectedFilter = FilterTreeBuilder::create()->equals('field0', 'value0')->createFilter();
 
         $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testFilterQueryParameterNotEnabled()
+    {
+        $config = self::getTestConfig();
+        $config['rest']['query']['filter']['enable_query_filters'] = false;
+        $this->setUpAndConfigure($config);
+
+        $queryParameters = [];
+        parse_str('filter[field0]=value0', $queryParameters);
+
+        $this->testDataProvider->getTestEntities($queryParameters, [[]]);
+        $this->assertNull(Options::getFilter($this->testDataProvider->getOptions()));
     }
 
     /**
@@ -269,10 +290,10 @@ class AbstractDataProviderTest extends TestCase
     public function testFilterInvalid()
     {
         try {
-            $filterParameters = [];
-            parse_str('filter[field0][foo][bar]=value', $filterParameters);
+            $queryParameters = [];
+            parse_str('filter[field0][foo][bar]=value', $queryParameters);
 
-            $this->testDataProvider->getTestEntities($filterParameters, [[]]);
+            $this->testDataProvider->getTestEntities($queryParameters, [[]]);
             $this->fail('exception not thrown as expected');
         } catch (ApiError $exception) {
             $this->assertEquals(Response::HTTP_BAD_REQUEST, $exception->getStatusCode());
@@ -286,11 +307,24 @@ class AbstractDataProviderTest extends TestCase
     public function testPreparedFilter()
     {
         $this->testDataProvider->getTestEntities(['preparedFilter' => 'filter0'], [[]]);
-        $preparedFilter = $this->testDataProvider->getOptions()[Options::FILTER];
+        $preparedFilter = Options::getFilter($this->testDataProvider->getOptions());
 
         $expectedFilter = FilterTreeBuilder::create()->iContains('field0', 'value0')->createFilter();
 
         $this->assertEquals($expectedFilter->toArray(), $preparedFilter->toArray());
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testPreparedFilterNotEnabled()
+    {
+        $config = self::getTestConfig();
+        $config['rest']['query']['filter']['enable_prepared_filters'] = false;
+        $this->setUpAndConfigure($config);
+
+        $this->testDataProvider->getTestEntities(['preparedFilter' => 'filter0'], [[]]);
+        $this->assertNull(Options::getFilter($this->testDataProvider->getOptions()));
     }
 
     /**
@@ -326,11 +360,11 @@ class AbstractDataProviderTest extends TestCase
      */
     public function testFilterWithLocalDataAttribute()
     {
-        $filterParameters = [];
-        parse_str('filter[localData.attribute0]=value0', $filterParameters);
+        $queryParameters = [];
+        parse_str('filter[localData.attribute0]=value0', $queryParameters);
 
-        $this->testDataProvider->getTestEntities($filterParameters, [[]]);
-        $filter = $this->testDataProvider->getOptions()[Options::FILTER];
+        $this->testDataProvider->getTestEntities($queryParameters, [[]]);
+        $filter = Options::getFilter($this->testDataProvider->getOptions());
 
         $expectedFilter = FilterTreeBuilder::create()->equals('localData.attribute0', 'value0')->createFilter();
 
@@ -342,10 +376,10 @@ class AbstractDataProviderTest extends TestCase
      */
     public function testFilterWithForbiddenLocalDataAttribute()
     {
-        $filterParameters = [];
-        parse_str('filter[localData.forbiddenAttribute]=value0', $filterParameters);
+        $queryParameters = [];
+        parse_str('filter[localData.forbiddenAttribute]=value0', $queryParameters);
 
-        self::assertEquals([], $this->testDataProvider->getTestEntities($filterParameters, [[]]));
+        self::assertEquals([], $this->testDataProvider->getTestEntities($queryParameters, [[]]));
     }
 
     /**
@@ -355,10 +389,10 @@ class AbstractDataProviderTest extends TestCase
     {
         // condition with forbidden attribute evaluates to constant 'false' -> parent AND group evaluates to 'false'
         $querySting = 'filter[test_group][group][conjunction]=AND&filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0&&filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=localData.forbiddenAttribute&filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]=value1&&filter[bar][condition][memberOf]=test_group';
-        $filterParameters = [];
-        parse_str($querySting, $filterParameters);
+        $queryParameters = [];
+        parse_str($querySting, $queryParameters);
 
-        self::assertEquals([], $this->testDataProvider->getTestEntities($filterParameters, [[]]));
+        self::assertEquals([], $this->testDataProvider->getTestEntities($queryParameters, [[]]));
     }
 
     /**
@@ -368,15 +402,45 @@ class AbstractDataProviderTest extends TestCase
     {
         // condition with forbidden attribute evaluates to constant 'false', which is to be removed from the parent OR group
         $querySting = 'filter[test_group][group][conjunction]=OR&filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0&&filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=localData.forbiddenAttribute&filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]=value1&&filter[bar][condition][memberOf]=test_group';
-        $filterParameters = [];
-        parse_str($querySting, $filterParameters);
+        $queryParameters = [];
+        parse_str($querySting, $queryParameters);
 
-        $this->testDataProvider->getTestEntities($filterParameters, [[]]);
-        $filter = $this->testDataProvider->getOptions()[Options::FILTER];
+        $this->testDataProvider->getTestEntities($queryParameters, [[]]);
+        $filter = Options::getFilter($this->testDataProvider->getOptions());
 
         $expectedFilter = FilterTreeBuilder::create()
             ->iContains('field0', 'value0')->createFilter();
 
         $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    public function testSortQueryParameter(): void
+    {
+        $querySting = 'sort[sort-field0][path]=field0';
+        $queryParameters = [];
+        parse_str($querySting, $queryParameters);
+
+        $this->testDataProvider->getTestEntities($queryParameters, [[]]);
+        $sort = Options::getSort($this->testDataProvider->getOptions());
+
+        $sortFields = $sort->getSortFields();
+
+        $this->assertCount(1, $sortFields);
+        $this->assertEquals('field0', Sort::getPath($sortFields[0]));
+        $this->assertEquals(Sort::DIRECTION_ASCENDING, Sort::getDirection($sortFields[0]));
+    }
+
+    public function testSortQueryParameterNotEnabled(): void
+    {
+        $testConfig = self::getTestConfig();
+        $testConfig['rest']['query']['sort']['enable_sort'] = false;
+        $this->setUpAndConfigure($testConfig);
+
+        $querySting = 'sort[sort-field0][path]=field0';
+        $queryParameters = [];
+        parse_str($querySting, $queryParameters);
+
+        $this->testDataProvider->getTestEntities($queryParameters, [[]]);
+        $this->assertNull(Options::getSort($this->testDataProvider->getOptions()));
     }
 }

@@ -9,10 +9,35 @@ use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\ConditionNode;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\ConstantNode;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\Node;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\NodeType;
+use Symfony\Component\Config\Definition\Builder\NodeDefinition;
+use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 
 class Filter
 {
+    public const ROOT_CONFIG_NODE = 'filter';
+    public const ENABLE_QUERY_FILTERS_CONFIG_NODE = 'enable_query_filters';
+    public const ENABLE_PREPARED_FILTERS_CONFIG_NODE = 'enable_prepared_filters';
+
     private AndNode $rootNode;
+
+    public static function getConfigNodeDefinition(): NodeDefinition
+    {
+        $treeBuilder = new TreeBuilder(self::ROOT_CONFIG_NODE);
+        $rootNode = $treeBuilder->getRootNode();
+
+        $rootNode->append(PreparedFilters::getConfigNodeDefinition());
+        $rootNode->children()
+            ->scalarNode(self::ENABLE_QUERY_FILTERS_CONFIG_NODE)
+                ->info('Indicates whether filtering using filter query parameters is enabled.')
+                ->defaultFalse()
+            ->end()
+            ->scalarNode(self::ENABLE_PREPARED_FILTERS_CONFIG_NODE)
+                ->info('Indicates whether filtering using prepared filters is enabled.')
+                ->defaultFalse()
+            ->end();
+
+        return $rootNode;
+    }
 
     public static function create(?AndNode $rootNode = null): Filter
     {

@@ -31,10 +31,10 @@ trait LocalDataAwareTrait
     /**
      * Sets the value of a local data attribute.
      *
-     * @param string     $key   the attribute name
-     * @param mixed|null $value the attribute value
+     * @param string $key   the attribute name
+     * @param mixed  $value the attribute value
      */
-    public function setLocalDataValue(string $key, $value): void
+    public function setLocalDataValue(string $key, mixed $value): void
     {
         if ($this->localData === null) {
             $this->localData = [];
@@ -48,9 +48,9 @@ trait LocalDataAwareTrait
      *
      * @param string $key the attribute name
      *
-     * @return ?mixed the value or null if the attribute is not found
+     * @return mixed the value or null if the attribute is not found
      */
-    public function getLocalDataValue(string $key)
+    public function getLocalDataValue(string $key): mixed
     {
         return $this->localData !== null ? ($this->localData[$key] ?? null) : null;
     }

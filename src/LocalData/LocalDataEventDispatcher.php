@@ -12,11 +12,9 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class LocalDataEventDispatcher
 {
-    /** @var array */
-    private $localDataAttributes = [];
+    private array $localDataAttributes = [];
 
-    /** @var EventDispatcherInterface */
-    private $eventDispatcher;
+    private EventDispatcherInterface $eventDispatcher;
 
     /**
      * @param EventDispatcherInterface $eventDispatcher The inner event dispatcher that this event dispatcher decorates

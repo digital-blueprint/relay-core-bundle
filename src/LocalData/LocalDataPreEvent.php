@@ -8,8 +8,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class LocalDataPreEvent extends Event
 {
-    /** @var array */
-    private $options;
+    private array $options;
 
     public function __construct(array $options)
     {

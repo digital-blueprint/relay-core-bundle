@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\Rest\Query\Sorting;
+namespace Dbp\Relay\CoreBundle\Rest\Query\Sort;
 
 /**
  * Based on Drupal JSON:API sorting module implementation.
@@ -10,7 +10,7 @@ namespace Dbp\Relay\CoreBundle\Rest\Query\Sorting;
  * https://github.com/drupal/drupal/blob/11.x/core/modules/jsonapi/src/Query/Sort.php
  * https://www.drupal.org/docs/core-modules-and-themes/core-modules/jsonapi-module/sorting.
  */
-class FromQuerySortingCreator
+class FromQuerySortCreator
 {
     /**
      * The field key in the sort parameter: sort[lorem][<field>].
@@ -27,22 +27,25 @@ class FromQuerySortingCreator
      *
      * @param mixed $sortQueryParameters The `sort` query parameter from the Symfony request object
      *
-     * @throws SortingException
+     * @throws SortException
      */
-    public static function createSortingFromQueryParameter(mixed $sortQueryParameters): Sorting
+    public static function createSortingFromQueryParameter(mixed $sortQueryParameters, array $availableAttributePaths): Sort
     {
         // Expand a JSON:API compliant sort into a more expressive sort parameter.
         if (is_string($sortQueryParameters)) {
             $sortQueryParameters = static::expandFieldString($sortQueryParameters);
+        } elseif (!is_array($sortQueryParameters)) {
+            throw new SortException('Invalid sort parameter type: Must be string or array. ',
+                SortException::INVALID_QUERY_PARAMETER);
         }
 
         // Expand any defaults into the sort array.
         $expanded = [];
-        foreach ($sortQueryParameters as $sort_index => $sort_item) {
-            $expanded[$sort_index] = static::expandItem($sort_item);
+        foreach ($sortQueryParameters as $sortIndex => $sortItem) {
+            $expanded[] = static::expandItem($sortItem, $availableAttributePaths);
         }
 
-        return new Sorting($expanded);
+        return new Sort($expanded);
     }
 
     /**
@@ -72,20 +75,24 @@ class FromQuerySortingCreator
     /**
      * Expands a sort item in case a shortcut was used.
      *
-     * @param array $sort_item The raw sort item
+     * @param array $sortItem The raw sort item
      *
      * @return array The expanded sort item
      *
-     * @throws SortingException
+     * @throws SortException
      */
-    protected static function expandItem(array $sort_item): array
+    protected static function expandItem(array $sortItem, array $availableAttributePaths): array
     {
         $defaults = [
             self::DIRECTION_KEY => 'ASC',
         ];
 
-        if (!isset($sort_item[self::PATH_KEY])) {
-            throw new SortingException('You need to provide a field name for the sort parameter.');
+        $attributePath = $sortItem[self::PATH_KEY] ?? null;
+        if ($attributePath === null) {
+            throw new SortException('Sort parameter is missing a \''.self::PATH_KEY.'\' key.', SortException::ATTRIBUTE_PATH_MISSING);
+        }
+        if (!in_array($attributePath, $availableAttributePaths, true)) {
+            throw new SortException('Undefined attribute path: '.$attributePath, SortException::ATTRIBUTE_PATH_UNDEFINED);
         }
 
         $expected_keys = [
@@ -93,11 +100,11 @@ class FromQuerySortingCreator
             self::DIRECTION_KEY,
         ];
 
-        $expanded = array_merge($defaults, $sort_item);
+        $expanded = array_merge($defaults, $sortItem);
 
         // Verify correct sort keys.
-        if (count(array_diff($expected_keys, array_keys($expanded))) > 0) {
-            throw new SortingException('You have provided an invalid set of sort keys.');
+        if (!empty(array_diff($expected_keys, array_keys($expanded)))) {
+            throw new SortException('You have provided an invalid set of sort keys.', SortException::SORT_KEYS_UNDEFINED);
         }
 
         return $expanded;

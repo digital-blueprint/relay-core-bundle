@@ -6,7 +6,7 @@ namespace Dbp\Relay\CoreBundle\Tests\Rest\Query\Filter;
 
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTreeBuilder;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FromQueryFilterCreator;
-use Dbp\Relay\CoreBundle\Rest\Query\Filter\PreparedFilterProvider;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\PreparedFilters;
 use Dbp\Relay\CoreBundle\Rest\Query\Parameters;
 use PHPUnit\Framework\TestCase;
 
@@ -33,7 +33,7 @@ class PreparedFilterTest extends TestCase
             ],
         ]];
 
-        $this->preparedFilterProvider = new PreparedFilterProvider();
+        $this->preparedFilterProvider = new PreparedFilters();
         $this->preparedFilterProvider->loadConfig($this->config);
     }
 
@@ -42,8 +42,8 @@ class PreparedFilterTest extends TestCase
         $policies = $this->preparedFilterProvider->getPolicies();
 
         $this->assertCount(count($this->config['prepared_filters']), $policies);
-        $this->assertEquals('user.get("ROLE_USER")', $policies[PreparedFilterProvider::getPolicyNameByFilterIdentifier('filter0')]);
-        $this->assertEquals('true', $policies[PreparedFilterProvider::getPolicyNameByFilterIdentifier('filterShortcut')]);
+        $this->assertEquals('user.get("ROLE_USER")', $policies[PreparedFilters::getPolicyNameByFilterIdentifier('filter0')]);
+        $this->assertEquals('true', $policies[PreparedFilters::getPolicyNameByFilterIdentifier('filterShortcut')]);
     }
 
     /**

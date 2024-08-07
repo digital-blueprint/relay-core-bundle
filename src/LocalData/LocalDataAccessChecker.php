@@ -10,6 +10,9 @@ use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @internal
+ */
 class LocalDataAccessChecker
 {
     private const LOCAL_DATA_CONFIG_NODE = 'local_data';
@@ -24,10 +27,10 @@ class LocalDataAccessChecker
     private const READ_POLICY_PREFIX = '@read-local-data:';
 
     /** @var array[] */
-    private $attributeConfig = [];
+    private array $attributeConfig = [];
 
     /** @var string[] */
-    private $policies = [];
+    private array $policies = [];
 
     public static function getConfigNodeDefinition(): NodeDefinition
     {

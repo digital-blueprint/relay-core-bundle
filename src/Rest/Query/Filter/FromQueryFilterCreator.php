@@ -188,7 +188,7 @@ class FromQueryFilterCreator
     /**
      * @throws FilterException
      */
-    private static function appendGroup(array $groupItem, FilterTreeBuilder $filterTreeBuilder, array $items, array $availableAttributePaths, ?array &$usedAttributePaths)
+    private static function appendGroup(array $groupItem, FilterTreeBuilder $filterTreeBuilder, array $items, array $availableAttributePaths, ?array &$usedAttributePaths): void
     {
         $groupId = $groupItem[self::ITEM_ID_KEY];
         $groupConjunction = $groupItem[self::GROUP_KEY][self::CONJUNCTION_KEY];
@@ -230,7 +230,7 @@ class FromQueryFilterCreator
     /**
      * @throws FilterException
      */
-    private static function appendGroupMembers(string $groupId, FilterTreeBuilder $filterTreeBuilder, array $items, array $availableAttributePaths, ?array &$usedAttributePaths)
+    private static function appendGroupMembers(string $groupId, FilterTreeBuilder $filterTreeBuilder, array $items, array $availableAttributePaths, ?array &$usedAttributePaths): void
     {
         foreach ($items as $item) {
             if ($item[self::MEMBER_OF_KEY] === $groupId) {
@@ -250,7 +250,7 @@ class FromQueryFilterCreator
      *
      * @throws FilterException
      */
-    private static function appendConditionNode(array $condition, FilterTreeBuilder $filterTreeBuilder, array $availableAttributePaths, ?array &$usedAttributePaths = null)
+    private static function appendConditionNode(array $condition, FilterTreeBuilder $filterTreeBuilder, array $availableAttributePaths, ?array &$usedAttributePaths = null): void
     {
         self::validateConditionFilterItem($condition);
 

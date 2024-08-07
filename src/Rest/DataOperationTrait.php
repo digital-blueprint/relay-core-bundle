@@ -7,6 +7,9 @@ namespace Dbp\Relay\CoreBundle\Rest;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @internal
+ */
 trait DataOperationTrait
 {
     /**

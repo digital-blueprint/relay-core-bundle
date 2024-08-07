@@ -38,7 +38,21 @@ class DataProviderTester
         $dataProvider->__injectLocale(new TestLocale());
         $dataProvider->__injectPropertyNameCollectionFactory(new TestPropertyNameCollectionFactory());
 
+        self::login($dataProvider, $currentUserIdentifier, $currentUserAttributes);
+    }
+
+    /**
+     * Use this to set up a test user with the given user attributes.
+     */
+    public static function login(AbstractDataProvider $dataProvider,
+        string $currentUserIdentifier = TestAuthorizationService::TEST_USER_IDENTIFIER, array $currentUserAttributes = []): void
+    {
         TestAuthorizationService::setUp($dataProvider, $currentUserIdentifier, $currentUserAttributes);
+    }
+
+    public static function logout(AbstractDataProvider $dataProvider): void
+    {
+        TestAuthorizationService::setUp($dataProvider, TestAuthorizationService::UNAUTHENTICATED_USER_IDENTIFIER);
     }
 
     /**

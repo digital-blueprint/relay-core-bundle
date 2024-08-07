@@ -16,12 +16,13 @@ use Dbp\Relay\CoreBundle\TestUtils\TestAuthorizationService;
 use Dbp\Relay\CoreBundle\User\UserAttributeException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
+/**
+ * @extends AbstractDataProvider<TestEntity>
+ */
 class TestDataProvider extends AbstractDataProvider
 {
     public const ROLE_USER = 'ROLE_USER';
     public const ROLE_ADMIN = 'ROLE_ADMIN';
-
-    public const UNAUTHENTICATED_USER_IDENTIFIER = TestAuthorizationService::UNAUTHENTICATED_USER_IDENTIFIER;
     public const TEST_USER_IDENTIFIER = TestAuthorizationService::TEST_USER_IDENTIFIER;
     public const ADMIN_USER_IDENTIFIER = TestAuthorizationService::ADMIN_USER_IDENTIFIER;
     public const INCLUDE_ADMIN_ONLY_ENTITIES_FILTER = 'includeAdminOnlyEntities';
@@ -41,20 +42,28 @@ class TestDataProvider extends AbstractDataProvider
         string $currentUserIdentifier = self::TEST_USER_IDENTIFIER, ?array $currentUserAttributes = null): TestDataProvider
     {
         $testDataProvider = new TestDataProvider($eventDispatcher ?? new EventDispatcher());
-        self::setUp($testDataProvider, $currentUserIdentifier, $currentUserAttributes);
-
-        return $testDataProvider;
-    }
-
-    public static function setUp(TestDataProvider $testDataProvider,
-        string $currentUserIdentifier = TestAuthorizationService::TEST_USER_IDENTIFIER, ?array $currentUserAttributes = null): void
-    {
         DataProviderTester::setUp($testDataProvider, $currentUserIdentifier,
             $currentUserAttributes ?? [
                 self::ROLE_USER => $currentUserIdentifier === self::TEST_USER_IDENTIFIER,
                 self::ROLE_ADMIN => $currentUserIdentifier === self::ADMIN_USER_IDENTIFIER,
             ]);
         $testDataProvider->__injectPropertyNameCollectionFactory(new TestEntityPropertyNameCollectionFactory());
+
+        return $testDataProvider;
+    }
+
+    public static function login(TestDataProvider $testDataProvider,
+        string $currentUserIdentifier = self::TEST_USER_IDENTIFIER, ?array $currentUserAttributes = null): void
+    {
+        DataProviderTester::login($testDataProvider, $currentUserIdentifier, $currentUserAttributes ?? [
+            self::ROLE_USER => $currentUserIdentifier === self::TEST_USER_IDENTIFIER,
+            self::ROLE_ADMIN => $currentUserIdentifier === self::ADMIN_USER_IDENTIFIER,
+        ]);
+    }
+
+    public static function logout(TestDataProvider $testDataProvider): void
+    {
+        DataProviderTester::logout($testDataProvider);
     }
 
     protected function __construct(EventDispatcher $eventDispatcher)
@@ -199,7 +208,8 @@ class TestDataProvider extends AbstractDataProvider
         $testEntity = $item;
         assert($testEntity instanceof TestEntity);
 
-        return $this->getUserAttribute(self::ROLE_ADMIN) || !str_starts_with($testEntity->getIdentifier(), '_');
+        return ($this->isAuthenticated() && $this->getUserAttribute(self::ROLE_ADMIN))
+            || !str_starts_with($testEntity->getIdentifier(), '_');
     }
 
     /**
@@ -207,6 +217,7 @@ class TestDataProvider extends AbstractDataProvider
      */
     protected function isCurrentUserAuthorizedToGetCollection(array $filters): bool
     {
-        return $this->getUserAttribute(self::ROLE_ADMIN) || ($filters[self::INCLUDE_ADMIN_ONLY_ENTITIES_FILTER] ?? null) === null;
+        return ($this->isAuthenticated() && $this->getUserAttribute(self::ROLE_ADMIN))
+            || ($filters[self::INCLUDE_ADMIN_ONLY_ENTITIES_FILTER] ?? null) === null;
     }
 }

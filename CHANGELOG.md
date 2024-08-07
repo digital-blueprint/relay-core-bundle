@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## v0.1.176
+
+* add support for sort query parameter for GET collection requests (for extenders of AbstractDataProvider)
+* allow enabling/disabling filter/prepared filter/sort via AbstractDataProvider config
+
 ## v0.1.175
 
 * The "dbp/relay-auth-bundle" has been replaced by the "dbp/relay-core-connector-oidc-bundle".

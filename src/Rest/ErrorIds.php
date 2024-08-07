@@ -17,4 +17,9 @@ class ErrorIds
      */
     public const PREPARED_FILTER_ACCESS_DENIED = 'core:prepared-filter-access-denied';
     public const PREPARED_FILTER_UNDEFINED = 'core:prepared-filter-undefined';
+
+    /**
+     * Sorting.
+     */
+    public const SORTING_INVALID = 'core:sorting-invalid';
 }

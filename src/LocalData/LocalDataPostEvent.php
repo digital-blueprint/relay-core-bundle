@@ -13,14 +13,9 @@ class LocalDataPostEvent extends Event implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    /** @var LocalDataAwareInterface */
-    private $entity;
-
-    /** @var array */
-    private $sourceData;
-
-    /** @var array */
-    private $requestedAttributes;
+    private LocalDataAwareInterface $entity;
+    private array $sourceData;
+    private array $requestedAttributes = [];
 
     public function __construct(LocalDataAwareInterface $entity, array $sourceData)
     {

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\Helpers;
 
-use Dbp\Relay\CoreBundle\Helpers\ArrayFullPaginator;
-use Dbp\Relay\CoreBundle\Helpers\ArrayPartPaginator;
 use Dbp\Relay\CoreBundle\Helpers\GuzzleTools;
 use Dbp\Relay\CoreBundle\Helpers\MimeTools;
 use PHPUnit\Framework\TestCase;
@@ -13,34 +11,6 @@ use Psr\Log\NullLogger;
 
 class HelpersTest extends TestCase
 {
-    public function testArrayFullPaginator()
-    {
-        $paginator = new ArrayFullPaginator([4, 5, 6], 1, 2);
-        $this->assertSame($paginator->getCurrentPage(), 1.0);
-        $this->assertSame($paginator->getItemsPerPage(), 2.0);
-        $this->assertSame($paginator->getTotalItems(), 3.0);
-        $this->assertSame($paginator->current(), 4);
-        $this->assertSame($paginator->key(), 0);
-        $this->assertTrue($paginator->valid());
-        $paginator->next();
-        $this->assertSame($paginator->current(), 5);
-        $this->assertSame($paginator->getLastPage(), 2.0);
-    }
-
-    public function testArrayPartPaginator()
-    {
-        $paginator = new ArrayPartPaginator([4, 5, 6], 3, 1, 2);
-        $this->assertSame($paginator->getCurrentPage(), 1.0);
-        $this->assertSame($paginator->getItemsPerPage(), 2.0);
-        $this->assertSame($paginator->getTotalItems(), 3.0);
-        $this->assertSame($paginator->current(), 4);
-        $this->assertSame($paginator->key(), 0);
-        $this->assertTrue($paginator->valid());
-        $paginator->next();
-        $this->assertSame($paginator->current(), 5);
-        $this->assertSame($paginator->getLastPage(), 2.0);
-    }
-
     public function testGuzzleTools()
     {
         $middleware = GuzzleTools::createLoggerMiddleware(new NullLogger());
