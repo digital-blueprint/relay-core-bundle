@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## v0.1.178
+
+* Remove dependency on symfony/contracts
+* Port to PHPUnit 10
+
 ## v0.1.177
 
 * add support for sort query parameter for GET collection requests (for extenders of AbstractDataProvider)
