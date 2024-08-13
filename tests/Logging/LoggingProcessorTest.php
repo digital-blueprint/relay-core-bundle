@@ -35,7 +35,7 @@ class LoggingProcessorTest extends WebTestCase
 
     public function testAllFieldsArePreserved()
     {
-        $processor = new LoggingProcessor(new TestUserSession('some-random-user-id'), new RequestStack());
+        $processor = new LoggingProcessor(new TestUserSession('some-random-user-id', isAuthenticated: true), new RequestStack());
         $now = new \DateTimeImmutable();
         $record = [
             'message' => 'message', 'channel' => 'channel', 'datetime' => $now,
@@ -51,7 +51,7 @@ class LoggingProcessorTest extends WebTestCase
 
     public function testFilter()
     {
-        $processor = new LoggingProcessor(new TestUserSession('some-random-user-id'), new RequestStack());
+        $processor = new LoggingProcessor(new TestUserSession('some-random-user-id', isAuthenticated: true), new RequestStack());
 
         $record = ['message' => 'http://foo.bar?token=secret', 'channel' => 'app'];
         $record = $this->processRecord($processor, $record);
@@ -75,7 +75,7 @@ class LoggingProcessorTest extends WebTestCase
 
     public function testSessionId()
     {
-        $processor = new LoggingProcessor(new TestUserSession('log'), new RequestStack());
+        $processor = new LoggingProcessor(new TestUserSession('log', isAuthenticated: true), new RequestStack());
         $record = ['message' => 'foobar', 'channel' => 'app'];
         $record = $this->processRecord($processor, $record);
         $this->assertSame('foobar', $record['message']);
@@ -97,7 +97,7 @@ class LoggingProcessorTest extends WebTestCase
 
     public function testMaskUserId()
     {
-        $processor = new LoggingProcessor(new TestUserSession('some-random-user-id'), new RequestStack());
+        $processor = new LoggingProcessor(new TestUserSession('some-random-user-id', isAuthenticated: true), new RequestStack());
 
         $record = [
             'message' => 'hello some-random-user-id!',
@@ -112,7 +112,7 @@ class LoggingProcessorTest extends WebTestCase
         $this->assertSame('app', $record['channel']);
 
         // Don't mask when contained in a word
-        $processor = new LoggingProcessor(new TestUserSession('log'), new RequestStack());
+        $processor = new LoggingProcessor(new TestUserSession('log', isAuthenticated: true), new RequestStack());
         $record = ['message' => 'logging log', 'channel' => 'app'];
         $record = $this->processRecord($processor, $record);
         $this->assertSame('logging *****', $record['message']);
@@ -122,7 +122,7 @@ class LoggingProcessorTest extends WebTestCase
 
     public function testNoMasking()
     {
-        $processor = new LoggingProcessor(new TestUserSession('some-random-user-id'), new RequestStack());
+        $processor = new LoggingProcessor(new TestUserSession('some-random-user-id', isAuthenticated: true), new RequestStack());
         $record = [
             'message' => 'hello some-random-user-id!',
             'channel' => 'mychannel',

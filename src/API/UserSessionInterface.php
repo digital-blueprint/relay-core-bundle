@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\API;
 
+/**
+ * All methods except isAuthenticated() can only be used if the user is authenticated and isAuthenticated() returns true.
+ */
 interface UserSessionInterface
 {
     /**
      * The unique identifier of the authenticated user. Or null in case it is called
-     * before the user is known or if the user is a system.
+     * before the user is authenticated or if the user identifier is not known.
      */
     public function getUserIdentifier(): ?string;
 
@@ -25,11 +28,6 @@ interface UserSessionInterface
     public function getSessionLoggingId(): string;
 
     /**
-     * @deprecated
-     */
-    public function getUserRoles(): array;
-
-    /**
      * Returns a unique caching key that can be used to cache metadata related to the current user session like
      * any user metadata, authorization related information etc.
      * It should not be possible to figure out which user is behind the ID based on the ID itself and the ID should
@@ -38,10 +36,24 @@ interface UserSessionInterface
     public function getSessionCacheKey(): string;
 
     /**
-     * Returns the duration the session is valid (as a whole, not from now) in seconds.
-     * After the specified amount of time has passed the logging ID and the caching key should have changed.
-     *
-     * This is mostly useful for limiting the cache.
+     * An amount of time in seconds after which the result of getSessionCacheKey() has changed, i.e. the old
+     * cached data can be removed without performance impat. This is mostly useful for pruning caches created with
+     * getSessionCacheKey().
+     */
+    public function getSessionCacheTTL(): int;
+
+    /**
+     * Returns whether the user is a service account, or a real user.
+     */
+    public function isServiceAccount(): bool;
+
+    /**
+     * @deprecated
+     */
+    public function getUserRoles(): array;
+
+    /**
+     * @deprecated use getSessionCacheTTL() instead
      */
     public function getSessionTTL(): int;
 }

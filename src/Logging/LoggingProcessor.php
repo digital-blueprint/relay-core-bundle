@@ -41,12 +41,7 @@ final class LoggingProcessor implements ProcessorInterface
 
     private function maskUserId(array &$record)
     {
-        try {
-            $userId = $this->userDataProvider->getUserIdentifier();
-        } catch (\Throwable $error) {
-            // pre-auth
-            $userId = null;
-        }
+        $userId = $this->userDataProvider->getUserIdentifier();
 
         if ($userId !== null) {
             Tools::maskValues($record, [$userId], '*****');
@@ -55,16 +50,23 @@ final class LoggingProcessor implements ProcessorInterface
 
     private function invokeLogArray(array $record): array
     {
+        $isAuth = $this->userDataProvider->isAuthenticated();
+
         if ($this->maskConfig[$record['channel']] ?? true) {
             // Try to avoid information leaks (users should still not log sensitive information though...)
             $record['message'] = CoreTools::filterErrorMessage($record['message']);
 
-            // Mask the user identifier
-            $this->maskUserId($record);
+            if ($isAuth) {
+                // Mask the user identifier
+                $this->maskUserId($record);
+            }
         }
 
-        // Add a session ID (the same during multiple requests for the same user session)
-        $record['context']['relay-session-id'] = $this->userDataProvider->getSessionLoggingId();
+        if ($isAuth) {
+            // Add a session ID (the same during multiple requests for the same user session)
+            $record['context']['relay-session-id'] = $this->userDataProvider->getSessionLoggingId();
+        }
+
         // Add a request ID (the same during the same client request)
         $request = $this->requestStack->getMainRequest();
         if ($request !== null) {

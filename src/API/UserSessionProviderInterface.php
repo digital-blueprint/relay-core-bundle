@@ -47,5 +47,10 @@ interface UserSessionProviderInterface
      *
      * Return <0 in case that information isn't available.
      */
-    public function getSessionTTL(): int;
+    public function getSessionCacheTTL(): int;
+
+    /**
+     * Should return whether the user is a service account, or a real user.
+     */
+    public function isServiceAccount(): bool;
 }

@@ -39,8 +39,18 @@ class TestUserSessionProvider implements UserSessionProviderInterface
         return 'cache';
     }
 
-    public function getSessionTTL(): int
+    public function getSessionCacheTTL(): int
     {
         return 42;
+    }
+
+    public function getSessionTTL(): int
+    {
+        return $this->getSessionCacheTTL();
+    }
+
+    public function isServiceAccount(): bool
+    {
+        return false;
     }
 }

@@ -7,7 +7,6 @@ namespace Dbp\Relay\CoreBundle\Auth;
 use Dbp\Relay\CoreBundle\API\UserSessionInterface;
 use Dbp\Relay\CoreBundle\API\UserSessionProviderInterface;
 use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Uid\Uuid;
 
 /**
  * This service provides user session information, either sourcing information from the active auth provider
@@ -30,6 +29,15 @@ class UserSession implements UserSessionInterface
         $this->security = $security;
     }
 
+    private function ensureProvider(): UserSessionProviderInterface
+    {
+        if ($this->provider === null) {
+            throw new \RuntimeException('Can only be called if authenticated');
+        }
+
+        return $this->provider;
+    }
+
     public function setProvider(?UserSessionProviderInterface $provider)
     {
         $this->provider = $provider;
@@ -37,11 +45,9 @@ class UserSession implements UserSessionInterface
 
     public function getUserIdentifier(): ?string
     {
-        if ($this->provider === null) {
-            return null;
-        }
+        $provider = $this->ensureProvider();
 
-        return $this->provider->getUserIdentifier();
+        return $provider->getUserIdentifier();
     }
 
     public function isAuthenticated(): bool
@@ -53,10 +59,8 @@ class UserSession implements UserSessionInterface
 
     public function getSessionLoggingId(): string
     {
-        $id = null;
-        if ($this->provider !== null) {
-            $id = $this->provider->getSessionLoggingId();
-        }
+        $provider = $this->ensureProvider();
+        $id = $provider->getSessionLoggingId();
         if ($id === null) {
             $id = 'unknown';
         }
@@ -66,23 +70,15 @@ class UserSession implements UserSessionInterface
 
     public function getSessionCacheKey(): string
     {
-        $key = null;
-        if ($this->provider !== null) {
-            $key = $this->provider->getSessionCacheKey();
-        }
-        if ($key === null) {
-            $key = Uuid::v4()->toRfc4122();
-        }
+        $provider = $this->ensureProvider();
 
-        return $key;
+        return $provider->getSessionCacheKey();
     }
 
-    public function getSessionTTL(): int
+    public function getSessionCacheTTL(): int
     {
-        $ttl = -1;
-        if ($this->provider !== null) {
-            $ttl = $this->provider->getSessionTTL();
-        }
+        $provider = $this->ensureProvider();
+        $ttl = $provider->getSessionCacheTTL();
         if ($ttl === -1) {
             $ttl = 60;
         }
@@ -90,16 +86,26 @@ class UserSession implements UserSessionInterface
         return $ttl;
     }
 
+    public function getSessionTTL(): int
+    {
+        return $this->getSessionCacheTTL();
+    }
+
     public function getUserRoles(): array
     {
-        if ($this->provider === null) {
-            return [];
-        }
+        $this->ensureProvider();
         $user = $this->security->getUser();
         if ($user === null) {
             return [];
         }
 
         return $user->getRoles();
+    }
+
+    public function isServiceAccount(): bool
+    {
+        $provider = $this->ensureProvider();
+
+        return $provider->isServiceAccount();
     }
 }
