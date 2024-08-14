@@ -22,10 +22,13 @@ final class LoggingProcessor implements ProcessorInterface
      */
     private $maskConfig;
 
+    private bool $processing;
+
     public function __construct(UserSessionInterface $userDataProvider, RequestStack $requestStack)
     {
         $this->userDataProvider = $userDataProvider;
         $this->requestStack = $requestStack;
+        $this->processing = false;
     }
 
     /**
@@ -96,7 +99,16 @@ final class LoggingProcessor implements ProcessorInterface
             $arrayRecord = $record;
         }
 
-        $arrayRecord = $this->invokeLogArray($arrayRecord);
+        if (!$this->processing) {
+            // Ignore for any logs that are produced while we are in here,
+            // otherwise we could end up with an infinite recursion
+            $this->processing = true;
+            try {
+                $arrayRecord = $this->invokeLogArray($arrayRecord);
+            } finally {
+                $this->processing = false;
+            }
+        }
 
         if (Logger::API === 2) {
             return $arrayRecord;
