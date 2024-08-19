@@ -38,7 +38,7 @@ class ApiErrorNormalizer implements NormalizerInterface, NormalizerAwareInterfac
 
         if ($object->getClass() === ApiError::class) {
             $message = $object->getMessage();
-            $message = json_decode($message, true);
+            $message = json_decode($message, true, flags: JSON_THROW_ON_ERROR);
             $errorId = $message['errorId'];
             $errorDetails = $message['errorDetails'];
             $message = $message['message'];
@@ -51,7 +51,7 @@ class ApiErrorNormalizer implements NormalizerInterface, NormalizerAwareInterfac
                     $normalized['relay:errorId'] = $errorId;
                 }
                 if ($errorDetails !== null) {
-                    $normalized['relay:errorDetails'] = $errorDetails;
+                    $normalized['relay:errorDetails'] = (object) $errorDetails;
                 }
             } elseif ($format === 'jsonproblem') {
                 if ($message !== '') {
@@ -61,7 +61,7 @@ class ApiErrorNormalizer implements NormalizerInterface, NormalizerAwareInterfac
                     $normalized['errorId'] = $errorId;
                 }
                 if ($errorDetails !== null) {
-                    $normalized['errorDetails'] = $errorDetails;
+                    $normalized['errorDetails'] = (object) $errorDetails;
                 }
             }
         }

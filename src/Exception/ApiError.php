@@ -40,7 +40,7 @@ class ApiError extends HttpException
      * @param int         $statusCode   The HTTP status code
      * @param string|null $message      The error message
      * @param string      $errorId      The custom error id e.g. 'bundle:my-custom-error'
-     * @param array       $errorDetails An array containing additional information, content depends on the errorId
+     * @param array       $errorDetails An associative array containing additional information, content depends on the errorId
      */
     public static function withDetails(int $statusCode, ?string $message = '', string $errorId = '', array $errorDetails = []): ApiError
     {

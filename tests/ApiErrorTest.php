@@ -49,13 +49,21 @@ class ApiErrorTest extends ApiTestCase
         $this->assertSame($res['status'], 424);
         $this->assertSame($res['hydra:description'], 'message');
         $this->assertSame($res['relay:errorId'], 'id');
-        $this->assertSame($res['relay:errorDetails'], ['foo' => 'bar']);
+        $this->assertSame((array) $res['relay:errorDetails'], ['foo' => 'bar']);
 
         $res = self::normalize($error, 'jsonproblem');
         $this->assertSame($res['status'], 424);
         $this->assertSame($res['detail'], 'message');
         $this->assertSame($res['errorId'], 'id');
-        $this->assertSame($res['errorDetails'], ['foo' => 'bar']);
+        $this->assertSame((array) $res['errorDetails'], ['foo' => 'bar']);
+
+        $error = ApiError::withDetails(424, 'message', 'id');
+        $res = self::normalize($error, 'jsonld');
+        $this->assertSame($res['status'], 424);
+        $this->assertSame($res['hydra:description'], 'message');
+        $this->assertSame($res['relay:errorId'], 'id');
+        $this->assertIsObject($res['relay:errorDetails']);
+        $this->assertSame((array) $res['relay:errorDetails'], []);
     }
 
     public function testApiErrorJsonLd()
