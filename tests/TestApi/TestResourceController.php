@@ -32,8 +32,12 @@ class TestResourceController extends AbstractController
                 'isAuthenticated' => $this->userSession->isAuthenticated(),
                 'userRoles' => $this->userSession->getUserRoles(),
             ]));
-        } elseif ($test === 'ApiError') {
+        } elseif ($test === 'ApiErrorDetails') {
             throw ApiError::withDetails(Response::HTTP_I_AM_A_TEAPOT, 'some message', 'some-error-id', ['detail1' => '1', 'detail2' => '2']);
+        } elseif ($test === 'ApiErrorDetailsDefault') {
+            throw ApiError::withDetails(Response::HTTP_I_AM_A_TEAPOT);
+        } elseif ($test === 'ApiError') {
+            throw new ApiError(Response::HTTP_I_AM_A_TEAPOT);
         } elseif ($test === 'UnhandledError') {
             throw new \RuntimeException('oh no');
         } elseif ($test === 'denyAccessUnlessGranted') {

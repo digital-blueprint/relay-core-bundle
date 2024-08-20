@@ -43,7 +43,7 @@ class ApiErrorNormalizer implements NormalizerInterface, NormalizerAwareInterfac
             $message = $message['message'];
 
             if ($format === 'jsonld') {
-                if ($message !== '') {
+                if ($message !== null) {
                     $normalized['hydra:description'] = $message;
                 }
                 if ($errorId !== '') {
@@ -53,7 +53,7 @@ class ApiErrorNormalizer implements NormalizerInterface, NormalizerAwareInterfac
                     $normalized['relay:errorDetails'] = (object) $errorDetails;
                 }
             } elseif ($format === 'jsonproblem') {
-                if ($message !== '') {
+                if ($message !== null) {
                     $normalized['detail'] = $message;
                 }
                 if ($errorId !== '') {

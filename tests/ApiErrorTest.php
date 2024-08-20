@@ -21,6 +21,9 @@ class ApiErrorTest extends ApiTestCase
         $message = json_decode($error->getMessage(), true);
         $this->assertSame('foobar', $message['message']);
         $this->assertSame(400, $error->getStatusCode());
+        $this->assertSame('foobar', $error->getErrorMessage());
+        $this->assertSame(null, $error->getErrorDetails());
+        $this->assertSame('', $error->getErrorId());
     }
 
     public function testWithDetails()
@@ -31,6 +34,9 @@ class ApiErrorTest extends ApiTestCase
         $this->assertSame('id', $message['errorId']);
         $this->assertSame(['foo' => 'bar'], $message['errorDetails']);
         $this->assertSame(424, $error->getStatusCode());
+        $this->assertSame('message', $error->getErrorMessage());
+        $this->assertSame(['foo' => 'bar'], $error->getErrorDetails());
+        $this->assertSame('id', $error->getErrorId());
     }
 
     private function normalize(ApiError $error, string $format): array
@@ -66,10 +72,10 @@ class ApiErrorTest extends ApiTestCase
         $this->assertSame((array) $res['relay:errorDetails'], []);
     }
 
-    public function testApiErrorJsonLd()
+    public function testApiErrorDetailsJsonLd()
     {
         $client = self::createClient();
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=ApiError', ['headers' => ['Accept' => 'application/ld+json']]);
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=ApiErrorDetails', ['headers' => ['Accept' => 'application/ld+json']]);
         $this->assertSame(418, $response->getStatusCode());
         $this->assertStringStartsWith('application/ld+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
@@ -83,10 +89,10 @@ class ApiErrorTest extends ApiTestCase
         ]);
     }
 
-    public function testApiErrorJson()
+    public function testApiErrorDetailsJson()
     {
         $client = self::createClient();
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller_json?test=ApiError', ['headers' => ['Accept' => 'application/json']]);
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller_json?test=ApiErrorDetails', ['headers' => ['Accept' => 'application/json']]);
         $this->assertSame(418, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
@@ -97,6 +103,32 @@ class ApiErrorTest extends ApiTestCase
             'detail1' => '1',
             'detail2' => '2',
         ]);
+    }
+
+    public function testApiErrorDetailsDefaultJsonLd()
+    {
+        $client = self::createClient();
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=ApiErrorDetailsDefault', ['headers' => ['Accept' => 'application/ld+json']]);
+        $this->assertSame(418, $response->getStatusCode());
+        $this->assertStringStartsWith('application/ld+json', $response->getHeaders(false)['content-type'][0]);
+        $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
+        $this->assertSame($content['hydra:title'], 'An error occurred');
+        $this->assertSame($content['hydra:description'], '');
+        $this->assertArrayNotHasKey('relay:errorId', $content);
+        $this->assertSame($content['relay:errorDetails'], []);
+    }
+
+    public function testApiError()
+    {
+        $client = self::createClient();
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=ApiError', ['headers' => ['Accept' => 'application/ld+json']]);
+        $this->assertSame(418, $response->getStatusCode());
+        $this->assertStringStartsWith('application/ld+json', $response->getHeaders(false)['content-type'][0]);
+        $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
+        $this->assertSame($content['hydra:title'], 'An error occurred');
+        $this->assertSame($content['hydra:description'], '');
+        $this->assertArrayNotHasKey('relay:errorId', $content);
+        $this->assertArrayNotHasKey('relay:errorDetails', $content);
     }
 
     public function testUnhandledError()

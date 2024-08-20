@@ -64,7 +64,7 @@ class ApiError extends HttpException
         return self::decodeMessage($this->getMessage())[self::ERROR_MESSAGE_KEY];
     }
 
-    public function getErrorDetails(): array
+    public function getErrorDetails(): ?array
     {
         return self::decodeMessage($this->getMessage())[self::ERROR_DETAILS_KEY];
     }
