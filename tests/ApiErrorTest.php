@@ -23,7 +23,7 @@ class ApiErrorTest extends ApiTestCase
         $this->assertSame(400, $error->getStatusCode());
         $this->assertSame('foobar', $error->getErrorMessage());
         $this->assertSame(null, $error->getErrorDetails());
-        $this->assertSame('', $error->getErrorId());
+        $this->assertSame(null, $error->getErrorId());
     }
 
     public function testWithDetails()
@@ -114,7 +114,7 @@ class ApiErrorTest extends ApiTestCase
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
         $this->assertSame($content['hydra:title'], 'An error occurred');
         $this->assertSame($content['hydra:description'], '');
-        $this->assertArrayNotHasKey('relay:errorId', $content);
+        $this->assertSame($content['relay:errorId'], '');
         $this->assertSame($content['relay:errorDetails'], []);
     }
 

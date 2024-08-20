@@ -46,7 +46,7 @@ class ApiErrorNormalizer implements NormalizerInterface, NormalizerAwareInterfac
                 if ($message !== null) {
                     $normalized['hydra:description'] = $message;
                 }
-                if ($errorId !== '') {
+                if ($errorId !== null) {
                     $normalized['relay:errorId'] = $errorId;
                 }
                 if ($errorDetails !== null) {
@@ -56,7 +56,7 @@ class ApiErrorNormalizer implements NormalizerInterface, NormalizerAwareInterfac
                 if ($message !== null) {
                     $normalized['detail'] = $message;
                 }
-                if ($errorId !== '') {
+                if ($errorId !== null) {
                     $normalized['errorId'] = $errorId;
                 }
                 if ($errorDetails !== null) {

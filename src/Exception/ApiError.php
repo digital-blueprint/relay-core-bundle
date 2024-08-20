@@ -28,7 +28,7 @@ class ApiError extends HttpException
         } else {
             $messageDecoded = [
                 self::ERROR_MESSAGE_KEY => $message,
-                self::ERROR_ID_KEY => '',
+                self::ERROR_ID_KEY => null,
                 self::ERROR_DETAILS_KEY => null,
             ];
         }
@@ -54,14 +54,14 @@ class ApiError extends HttpException
         return new ApiError(self::WITH_DETAILS_STATUS_CODE, json_encode($message));
     }
 
-    public function getErrorId(): string
-    {
-        return self::decodeMessage($this->getMessage())[self::ERROR_ID_KEY];
-    }
-
     public function getErrorMessage(): string
     {
         return self::decodeMessage($this->getMessage())[self::ERROR_MESSAGE_KEY];
+    }
+
+    public function getErrorId(): ?string
+    {
+        return self::decodeMessage($this->getMessage())[self::ERROR_ID_KEY];
     }
 
     public function getErrorDetails(): ?array
