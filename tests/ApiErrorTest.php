@@ -70,6 +70,14 @@ class ApiErrorTest extends ApiTestCase
         $this->assertSame($res['relay:errorId'], 'id');
         $this->assertIsObject($res['relay:errorDetails']);
         $this->assertSame((array) $res['relay:errorDetails'], []);
+
+        $error = ApiError::withDetails(424, 'message', 'id', ['foo', 'bar']);
+        $res = self::normalize($error, 'jsonld');
+        $this->assertSame($res['status'], 424);
+        $this->assertSame($res['hydra:description'], 'message');
+        $this->assertSame($res['relay:errorId'], 'id');
+        $this->assertIsObject($res['relay:errorDetails']);
+        $this->assertSame((array) $res['relay:errorDetails'], ['foo', 'bar']);
     }
 
     public function testApiErrorDetailsJsonLd()
@@ -85,8 +93,11 @@ class ApiErrorTest extends ApiTestCase
         $this->assertSame($content['relay:errorId'], 'some-error-id');
         $this->assertSame($content['relay:errorDetails'], [
             'detail1' => '1',
-            'detail2' => '2',
+            'detail2' => ['2', '3'],
         ]);
+        $content = json_decode($response->getContent(false), false, flags: JSON_THROW_ON_ERROR);
+        $this->assertIsObject($content->{'relay:errorDetails'});
+        $this->assertIsArray($content->{'relay:errorDetails'}->detail2);
     }
 
     public function testApiErrorDetailsJson()
@@ -101,8 +112,11 @@ class ApiErrorTest extends ApiTestCase
         $this->assertSame($content['errorId'], 'some-error-id');
         $this->assertSame($content['errorDetails'], [
             'detail1' => '1',
-            'detail2' => '2',
+            'detail2' => ['2', '3'],
         ]);
+        $content = json_decode($response->getContent(false), false, flags: JSON_THROW_ON_ERROR);
+        $this->assertIsObject($content->errorDetails);
+        $this->assertIsArray($content->errorDetails->detail2);
     }
 
     public function testApiErrorDetailsDefaultJsonLd()
@@ -116,6 +130,8 @@ class ApiErrorTest extends ApiTestCase
         $this->assertSame($content['hydra:description'], '');
         $this->assertSame($content['relay:errorId'], '');
         $this->assertSame($content['relay:errorDetails'], []);
+        $content = json_decode($response->getContent(false), false, flags: JSON_THROW_ON_ERROR);
+        $this->assertIsObject($content->{'relay:errorDetails'});
     }
 
     public function testApiError()
@@ -138,7 +154,6 @@ class ApiErrorTest extends ApiTestCase
         $this->assertSame(500, $response->getStatusCode());
         $this->assertStringStartsWith('application/ld+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
-
         $this->assertSame($content['hydra:title'], 'An error occurred');
         $this->assertSame($content['hydra:description'], 'oh no');
         $this->assertArrayNotHasKey('relay:errorId', $content);

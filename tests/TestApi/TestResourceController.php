@@ -33,7 +33,7 @@ class TestResourceController extends AbstractController
                 'userRoles' => $this->userSession->getUserRoles(),
             ]));
         } elseif ($test === 'ApiErrorDetails') {
-            throw ApiError::withDetails(Response::HTTP_I_AM_A_TEAPOT, 'some message', 'some-error-id', ['detail1' => '1', 'detail2' => '2']);
+            throw ApiError::withDetails(Response::HTTP_I_AM_A_TEAPOT, 'some message', 'some-error-id', ['detail1' => '1', 'detail2' => ['2', '3']]);
         } elseif ($test === 'ApiErrorDetailsDefault') {
             throw ApiError::withDetails(Response::HTTP_I_AM_A_TEAPOT);
         } elseif ($test === 'ApiError') {
