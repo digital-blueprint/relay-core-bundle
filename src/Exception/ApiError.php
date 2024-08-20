@@ -24,16 +24,15 @@ class ApiError extends HttpException
         if ($statusCode === self::WITH_DETAILS_STATUS_CODE) {
             $messageDecoded = self::decodeMessage($message);
             $statusCode = $messageDecoded[self::STATUS_CODE_KEY];
-            unset($messageDecoded[self::STATUS_CODE_KEY]);
         } else {
-            $messageDecoded = [
+            $message = json_encode([
                 self::ERROR_MESSAGE_KEY => $message,
                 self::ERROR_ID_KEY => null,
                 self::ERROR_DETAILS_KEY => null,
-            ];
+            ]);
         }
 
-        parent::__construct($statusCode, json_encode($messageDecoded), $previous, $headers, $code);
+        parent::__construct($statusCode, $message, $previous, $headers, $code);
     }
 
     /**
