@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## v0.1.179
+
+* Ensure that for ApiError the errorDetails property is always serialized as an object
+* For ApiError make sure that either both errorId and errorDetails are set or none of them
+  when serialized as JSON.
+
 ## v0.1.178
 
 * Remove dependency on symfony/contracts
