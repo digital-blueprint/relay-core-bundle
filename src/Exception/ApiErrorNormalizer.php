@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\Serializer;
+namespace Dbp\Relay\CoreBundle\Exception;
 
-use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;

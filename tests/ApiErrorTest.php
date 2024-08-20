@@ -6,7 +6,7 @@ namespace Dbp\Relay\CoreBundle\Tests;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
-use Dbp\Relay\CoreBundle\Serializer\ApiErrorNormalizer;
+use Dbp\Relay\CoreBundle\Exception\ApiErrorNormalizer;
 use Dbp\Relay\CoreBundle\TestUtils\UserAuthTrait;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Symfony\Component\Serializer\Normalizer\ProblemNormalizer;

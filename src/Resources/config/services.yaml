@@ -1,5 +1,5 @@
 services:
-  Dbp\Relay\CoreBundle\Serializer\ApiErrorNormalizer:
+  Dbp\Relay\CoreBundle\Exception\ApiErrorNormalizer:
     autowire: true
     autoconfigure: false
     tags: [{'name' : 'serializer.normalizer', priority: '-700'}]
