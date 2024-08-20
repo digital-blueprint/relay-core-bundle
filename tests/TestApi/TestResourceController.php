@@ -38,6 +38,8 @@ class TestResourceController extends AbstractController
             throw ApiError::withDetails(Response::HTTP_I_AM_A_TEAPOT);
         } elseif ($test === 'ApiError') {
             throw new ApiError(Response::HTTP_I_AM_A_TEAPOT);
+        } elseif ($test === 'ApiError500') {
+            throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR, "it wasn't me");
         } elseif ($test === 'UnhandledError') {
             throw new \RuntimeException('oh no');
         } elseif ($test === 'denyAccessUnlessGranted') {

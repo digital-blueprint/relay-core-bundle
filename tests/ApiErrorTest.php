@@ -147,6 +147,17 @@ class ApiErrorTest extends ApiTestCase
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
     }
 
+    public function testApiError500()
+    {
+        $client = self::createClient();
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=ApiError500', ['headers' => ['Accept' => 'application/ld+json']]);
+        $this->assertSame(500, $response->getStatusCode());
+        $this->assertStringStartsWith('application/ld+json', $response->getHeaders(false)['content-type'][0]);
+        $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
+        $this->assertSame($content['hydra:title'], 'An error occurred');
+        $this->assertSame($content['hydra:description'], "it wasn't me");
+    }
+
     public function testUnhandledError()
     {
         $client = self::createClient();
