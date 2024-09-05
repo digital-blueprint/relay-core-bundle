@@ -10,8 +10,7 @@ namespace Dbp\Relay\CoreBundle\API;
 interface UserSessionInterface
 {
     /**
-     * The unique identifier of the authenticated user. Or null in case it is called
-     * before the user is authenticated or if the user identifier is not known.
+     * The unique identifier of the authenticated user. Or null if the user identifier is not known.
      */
     public function getUserIdentifier(): ?string;
 

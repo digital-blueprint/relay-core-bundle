@@ -19,6 +19,10 @@ class UserAttributeService
 
     public function getCurrentUserIdentifier(): ?string
     {
+        if (!$this->currentUserSession->isAuthenticated()) {
+            return null;
+        }
+
         return $this->currentUserSession->getUserIdentifier();
     }
 
