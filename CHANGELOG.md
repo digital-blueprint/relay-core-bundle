@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.1.181
+
+* Fix fetching of user attributes in an unauthorized context.
+
 ## v0.1.180
 
 * UserSessionInterface gained a new isServiceAccount() method to allow for
