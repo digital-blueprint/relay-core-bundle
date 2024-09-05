@@ -70,7 +70,8 @@
         "api-platform/core": "2.7.17",
         "doctrine/dbal": ">=4",
         "carbonphp/carbon-doctrine-types": ">=3",
-        "dbp/relay-auth-bundle": "*"
+        "dbp/relay-auth-bundle": "*",
+        "dbp/relay-core-connector-oidc-bundle": "<=0.1.33"
     },
     "autoload": {
         "psr-4": {
