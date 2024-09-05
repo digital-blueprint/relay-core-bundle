@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## v0.1.180
+
+* UserSessionInterface gained a new isServiceAccount() method to allow for
+  distinguishing between user and service accounts.
+* UserSessionInterface gained a new getSessionCacheTTL() which is the same as
+  the old getSessionTTL() method, but with a more descriptive name.
+
+Note that the OIDC connector needs to be updated to be compatible with this new
+version.
+
 ## v0.1.179
 
 * Ensure that for ApiError the errorDetails property is always serialized as an object
