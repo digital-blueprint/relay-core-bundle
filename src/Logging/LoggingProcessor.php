@@ -14,21 +14,20 @@ use Symfony\Component\Uid\Uuid;
 
 final class LoggingProcessor implements ProcessorInterface
 {
-    private $userDataProvider;
-    private $requestStack;
+    private UserSessionInterface $userSession;
+    private RequestStack $requestStack;
 
     /**
      * @var array<string,bool>
      */
-    private $maskConfig;
+    private array $maskConfig = [];
 
-    private bool $processing;
+    private bool $processing = false;
 
     public function __construct(UserSessionInterface $userDataProvider, RequestStack $requestStack)
     {
-        $this->userDataProvider = $userDataProvider;
+        $this->userSession = $userDataProvider;
         $this->requestStack = $requestStack;
-        $this->processing = false;
     }
 
     /**
@@ -39,9 +38,10 @@ final class LoggingProcessor implements ProcessorInterface
         $this->maskConfig = $maskConfig;
     }
 
-    private function maskUserId(array &$record)
+    private function maskUserId(array &$record): void
     {
-        $userId = $this->userDataProvider->getUserIdentifier();
+        $userId = $this->userSession->isAuthenticated() ?
+            $this->userSession->getUserIdentifier() : null;
 
         if ($userId !== null) {
             Tools::maskValues($record, [$userId], '*****');
@@ -50,7 +50,7 @@ final class LoggingProcessor implements ProcessorInterface
 
     private function invokeLogArray(array $record): array
     {
-        $isAuth = $this->userDataProvider->isAuthenticated();
+        $isAuth = $this->userSession->isAuthenticated();
 
         if ($this->maskConfig[$record['channel']] ?? true) {
             // Try to avoid information leaks (users should still not log sensitive information though...)
@@ -64,7 +64,7 @@ final class LoggingProcessor implements ProcessorInterface
 
         if ($isAuth) {
             // Add a session ID (the same during multiple requests for the same user session)
-            $record['context']['relay-session-id'] = $this->userDataProvider->getSessionLoggingId();
+            $record['context']['relay-session-id'] = $this->userSession->getSessionLoggingId();
         }
 
         // Add a request ID (the same during the same client request)
