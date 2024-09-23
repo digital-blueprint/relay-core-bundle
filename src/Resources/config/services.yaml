@@ -1,9 +1,4 @@
 services:
-  Dbp\Relay\CoreBundle\Exception\ApiErrorNormalizer:
-    autowire: true
-    autoconfigure: false
-    tags: [{'name' : 'serializer.normalizer', priority: '-700'}]
-
   Dbp\Relay\CoreBundle\Logging\LoggingProcessor:
     autowire: true
     autoconfigure: true
