@@ -12,10 +12,13 @@ use Symfony\Component\Serializer\Attribute\SerializedName;
 use Symfony\Component\Serializer\Serializer;
 
 #[ErrorResource(
+    uriTemplate: '/api-errors/{status}',
+    uriVariables: ['status'],
     normalizationContext: [
         'ignored_attributes' => ['trace', 'file', 'line', 'code', 'message', 'traceAsString', 'previous', 'description'],
         'skip_null_values' => true,
     ],
+    openapi: false
 )]
 class ApiError extends Error
 {
