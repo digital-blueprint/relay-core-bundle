@@ -13,7 +13,7 @@ use Symfony\Component\Serializer\Serializer;
 
 #[ErrorResource(
     normalizationContext: [
-        'ignored_attributes' => ['trace', 'file', 'line', 'code', 'message', 'traceAsString', 'previous', 'instance', 'description'],
+        'ignored_attributes' => ['trace', 'file', 'line', 'code', 'message', 'traceAsString', 'previous', 'description'],
         'skip_null_values' => true,
     ],
 )]
