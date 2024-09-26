@@ -10,6 +10,7 @@ use Symfony\Component\Uid\Uuid;
 class TestDataProcessor extends AbstractDataProcessor
 {
     private array $items = [];
+    private ?array $filters = null;
 
     protected function addItem(mixed $data, array $filters): TestEntity
     {
@@ -18,6 +19,7 @@ class TestDataProcessor extends AbstractDataProcessor
         $identifier = (string) Uuid::v4();
         $data->setIdentifier($identifier);
         $this->items[$identifier] = $data;
+        $this->filters = $filters;
 
         return $data;
     }
@@ -26,6 +28,7 @@ class TestDataProcessor extends AbstractDataProcessor
     {
         assert($data instanceof TestEntity);
         $this->items[$identifier] = $data;
+        $this->filters = $filters;
 
         return $data;
     }
@@ -34,6 +37,7 @@ class TestDataProcessor extends AbstractDataProcessor
     {
         assert($data instanceof TestEntity);
         $this->items[$identifier] = $data;
+        $this->filters = $filters;
 
         return $data;
     }
@@ -43,6 +47,7 @@ class TestDataProcessor extends AbstractDataProcessor
         assert($data instanceof TestEntity);
 
         unset($this->items[$identifier]);
+        $this->filters = $filters;
     }
 
     public function getItemByIdentifier(string $identifier): ?TestEntity
@@ -53,5 +58,10 @@ class TestDataProcessor extends AbstractDataProcessor
     public function getItems(): array
     {
         return array_values($this->items);
+    }
+
+    public function getFilters(): ?array
+    {
+        return $this->filters;
     }
 }

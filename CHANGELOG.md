@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## v0.1.182
+
+* Fix filters (query parameters) not being passed to implementors of AbstractDataProcessor
+* Add CustomControllerTrait to facilitate custom controller to require authentication
+
 ## v0.1.181
 
 * Fix fetching of user attributes in an unauthorized context.

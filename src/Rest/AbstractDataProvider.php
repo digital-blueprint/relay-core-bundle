@@ -32,6 +32,7 @@ use Dbp\Relay\CoreBundle\Rest\Query\Sort\SortException;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Service\Attribute\Required;
 
 /**
  * @template T of object
@@ -88,17 +89,13 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $this->localDataAccessChecker = new LocalDataAccessChecker();
     }
 
-    /**
-     * @required
-     */
+    #[Required]
     public function __injectLocale(Locale $locale): void
     {
         $this->locale = $locale;
     }
 
-    /**
-     * @required
-     */
+    #[Required]
     public function __injectPropertyNameCollectionFactory(PropertyNameCollectionFactoryInterface $propertyNameCollectionFactory): void
     {
         $this->propertyNameCollectionFactory = $propertyNameCollectionFactory;

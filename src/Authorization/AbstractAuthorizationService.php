@@ -8,6 +8,7 @@ use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\User\UserAttributeException;
 use Dbp\Relay\CoreBundle\User\UserAttributeService;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Service\Attribute\Required;
 
 abstract class AbstractAuthorizationService
 {
@@ -21,9 +22,7 @@ abstract class AbstractAuthorizationService
         $this->currentAuthorizationUser = new AuthorizationUser($this);
     }
 
-    /**
-     * @required
-     */
+    #[Required]
     public function __injectUserAttributeService(UserAttributeService $userAttributeService): void
     {
         $this->userAttributeService = $userAttributeService;

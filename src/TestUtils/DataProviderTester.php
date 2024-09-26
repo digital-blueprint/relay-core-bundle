@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use Dbp\Relay\CoreBundle\Rest\AbstractDataProvider;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
+use Symfony\Component\HttpFoundation\Request;
 
 class DataProviderTester
 {
@@ -100,6 +101,7 @@ class DataProviderTester
             'filters' => $filters,
             'resource_class' => $this->resourceClass,
             'groups' => $this->normalizationGroups,
+            'request' => new Request(),
         ];
     }
 }

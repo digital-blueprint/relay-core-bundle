@@ -25,10 +25,12 @@ class DataProcessorTesterTest extends TestCase
     {
         $testEntity = new TestEntity();
         $testEntity->setField0('test');
+        $filters = ['foo' => 'bar'];
 
-        $this->dataProcessorTester->addItem($testEntity);
+        $this->dataProcessorTester->addItem($testEntity, $filters);
 
         $this->assertSame($testEntity, $this->dataProcessor->getItemByIdentifier($testEntity->getIdentifier()));
+        $this->assertSame($filters, $this->dataProcessor->getFilters());
     }
 
     public function testReplaceItem(): void
@@ -37,11 +39,13 @@ class DataProcessorTesterTest extends TestCase
         $testEntity->setField0('test');
         $this->dataProcessorTester->addItem($testEntity);
 
+        $filters = ['foo' => 'bar'];
         $updatedTestEntity = new TestEntity();
         $updatedTestEntity->setField0('updated test');
-        $this->dataProcessorTester->replaceItem($testEntity->getIdentifier(), $updatedTestEntity, $testEntity);
+        $this->dataProcessorTester->replaceItem($testEntity->getIdentifier(), $updatedTestEntity, $testEntity, $filters);
 
         $this->assertSame($updatedTestEntity, $this->dataProcessor->getItemByIdentifier($testEntity->getIdentifier()));
+        $this->assertSame($filters, $this->dataProcessor->getFilters());
     }
 
     public function testUpdateItem(): void
@@ -50,11 +54,13 @@ class DataProcessorTesterTest extends TestCase
         $testEntity->setField0('test');
         $this->dataProcessorTester->addItem($testEntity);
 
+        $filters = ['foo' => 'bar'];
         $updatedTestEntity = new TestEntity();
         $updatedTestEntity->setField0('updated test');
-        $this->dataProcessorTester->updateItem($testEntity->getIdentifier(), $updatedTestEntity, $testEntity);
+        $this->dataProcessorTester->updateItem($testEntity->getIdentifier(), $updatedTestEntity, $testEntity, $filters);
 
         $this->assertSame($updatedTestEntity, $this->dataProcessor->getItemByIdentifier($testEntity->getIdentifier()));
+        $this->assertSame($filters, $this->dataProcessor->getFilters());
     }
 
     public function testRemoveItem(): void
@@ -64,8 +70,10 @@ class DataProcessorTesterTest extends TestCase
         $this->dataProcessorTester->addItem($testEntity);
         $this->assertSame($testEntity, $this->dataProcessor->getItemByIdentifier($testEntity->getIdentifier()));
 
-        $this->dataProcessorTester->removeItem($testEntity->getIdentifier(), $testEntity);
+        $filters = ['foo' => 'bar'];
+        $this->dataProcessorTester->removeItem($testEntity->getIdentifier(), $testEntity, $filters);
 
         $this->assertNull($this->dataProcessor->getItemByIdentifier($testEntity->getIdentifier()));
+        $this->assertSame($filters, $this->dataProcessor->getFilters());
     }
 }

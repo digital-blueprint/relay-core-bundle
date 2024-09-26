@@ -9,6 +9,7 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Dbp\Relay\CoreBundle\Rest\AbstractDataProcessor;
+use Symfony\Component\HttpFoundation\Request;
 
 class DataProcessorTester
 {
@@ -74,10 +75,10 @@ class DataProcessorTester
     private function createContext(array $filters = [], $previousData = null): array
     {
         return [
-            'filters' => $filters,
             'resource_class' => $this->resourceClass,
             'groups' => $this->denormalizationGroups,
             'previous_data' => $previousData,
+            'request' => new Request($filters),
         ];
     }
 }
