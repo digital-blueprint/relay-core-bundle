@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.1.183
+
+* make ApiError an api-platform ErrorResource, remove the custom ApiError normalizer, and set rfc_7807_compliant_errors to true
+  (backwards compatibility flag which will be removed in api-platform 4)
 * Dropped support for api-platform v2. v3.2 is now the oldest supported version.
 
 ## v0.1.182
