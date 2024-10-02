@@ -17,6 +17,7 @@ use Symfony\Component\Serializer\Serializer;
     normalizationContext: [
         'ignored_attributes' => ['trace', 'file', 'line', 'code', 'message', 'traceAsString', 'previous', 'description'],
         'skip_null_values' => true,
+        'groups' => null,
     ],
     openapi: false
 )]

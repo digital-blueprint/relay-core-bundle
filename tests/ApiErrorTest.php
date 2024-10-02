@@ -131,7 +131,6 @@ class ApiErrorTest extends ApiTestCase
         $this->assertSame(500, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
-
         $this->assertSame($content['title'], 'An error occurred');
         $this->assertSame($content['detail'], 'oh no');
         $this->assertArrayNotHasKey('relay:errorId', $content);
