@@ -17,6 +17,8 @@ class ApiErrorTest extends ApiTestCase
         $error = new ApiError(400, 'foobar');
         $this->assertSame('foobar', $error->getDetail());
         $this->assertSame(400, $error->getStatusCode());
+        $this->assertSame('Bad Request', $error->getTitle());
+        $this->assertSame('foobar', $error->getDetail());
         $this->assertSame(null, $error->getErrorDetails());
         $this->assertSame(null, $error->getErrorId());
     }
@@ -26,6 +28,7 @@ class ApiErrorTest extends ApiTestCase
         $error = ApiError::withDetails(424, 'message', 'id', ['foo' => 'bar']);
         $this->assertSame('message', $error->getDetail());
         $this->assertSame(424, $error->getStatusCode());
+        $this->assertSame('Failed Dependency', $error->getTitle());
         $this->assertEquals(['foo' => 'bar'], (array) $error->getErrorDetails());
         $this->assertSame('id', $error->getErrorId());
     }
@@ -50,24 +53,24 @@ class ApiErrorTest extends ApiTestCase
     }
 
     // do we really want other attribute names (errorId, errorDetails instead of relay:errorId, relay:errorDetails) for jsonproblem?
-    //    public function testApiErrorDetailsJson()
-    //    {
-    //        $client = self::createClient();
-    //        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller_json?test=ApiErrorDetails', ['headers' => ['Accept' => 'application/json']]);
-    //        $this->assertSame(418, $response->getStatusCode());
-    //        $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
-    //        $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
-    //        $this->assertSame($content['title'], 'I\'m a teapot');
-    //        $this->assertSame($content['detail'], 'some message');
-    //        $this->assertSame($content['errorId'], 'some-error-id');
-    //        $this->assertSame($content['errorDetails'], [
-    //            'detail1' => '1',
-    //            'detail2' => ['2', '3'],
-    //        ]);
-    //        $content = json_decode($response->getContent(false), false, flags: JSON_THROW_ON_ERROR);
-    //        $this->assertIsObject($content->errorDetails);
-    //        $this->assertIsArray($content->errorDetails->detail2);
-    //    }
+    public function testApiErrorDetailsJson()
+    {
+        $client = self::createClient();
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller_json?test=ApiErrorDetails', ['headers' => ['Accept' => 'application/json']]);
+        $this->assertSame(418, $response->getStatusCode());
+        $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
+        $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
+        $this->assertSame($content['title'], 'I\'m a teapot');
+        $this->assertSame($content['detail'], 'some message');
+        $this->assertSame($content['relay:errorId'], 'some-error-id');
+        $this->assertSame($content['relay:errorDetails'], [
+            'detail1' => '1',
+            'detail2' => ['2', '3'],
+        ]);
+        $content = json_decode($response->getContent(false), false, flags: JSON_THROW_ON_ERROR);
+        $this->assertIsObject($content->{'relay:errorDetails'});
+        $this->assertIsArray($content->{'relay:errorDetails'}->detail2);
+    }
 
     public function testApiErrorDetailsDefaultJsonLd()
     {
@@ -131,7 +134,7 @@ class ApiErrorTest extends ApiTestCase
 
         $this->assertSame($content['title'], 'An error occurred');
         $this->assertSame($content['detail'], 'oh no');
-        $this->assertArrayNotHasKey('errorId', $content);
-        $this->assertArrayNotHasKey('errorDetails', $content);
+        $this->assertArrayNotHasKey('relay:errorId', $content);
+        $this->assertArrayNotHasKey('relay:errorDetails', $content);
     }
 }
