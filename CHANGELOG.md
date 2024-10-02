@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Dropped support for api-platform v2. v3.2 is now the oldest supported version.
+
 ## v0.1.182
 
 * Fix filters (query parameters) not being passed to implementors of AbstractDataProcessor
