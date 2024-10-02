@@ -35,8 +35,13 @@ class ApiErrorTest extends ApiTestCase
 
     public function testApiErrorDetailsJsonLd()
     {
-        $client = self::createClient();
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=ApiErrorDetails', ['headers' => ['Accept' => 'application/ld+json']]);
+        $client = $this->withUser('user', [], '42');
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=ApiErrorDetails',
+            ['headers' => [
+                'Authorization' => 'Bearer 42',
+                'Accept' => 'application/ld+json',
+            ],
+            ]);
         $this->assertSame(418, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
@@ -55,8 +60,13 @@ class ApiErrorTest extends ApiTestCase
     // do we really want other attribute names (errorId, errorDetails instead of relay:errorId, relay:errorDetails) for jsonproblem?
     public function testApiErrorDetailsJson()
     {
-        $client = self::createClient();
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller_json?test=ApiErrorDetails', ['headers' => ['Accept' => 'application/json']]);
+        $client = $this->withUser('user', [], '42');
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller_json?test=ApiErrorDetails',
+            ['headers' => [
+                'Authorization' => 'Bearer 42',
+                'Accept' => 'application/json',
+            ],
+            ]);
         $this->assertSame(418, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
@@ -74,8 +84,13 @@ class ApiErrorTest extends ApiTestCase
 
     public function testApiErrorDetailsDefaultJsonLd()
     {
-        $client = self::createClient();
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=ApiErrorDetailsDefault', ['headers' => ['Accept' => 'application/ld+json']]);
+        $client = $this->withUser('user', [], '42');
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=ApiErrorDetailsDefault',
+            ['headers' => [
+                'Authorization' => 'Bearer 42',
+                'Accept' => 'application/ld+json',
+            ],
+            ]);
         $this->assertSame(418, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
@@ -89,8 +104,13 @@ class ApiErrorTest extends ApiTestCase
 
     public function testApiError()
     {
-        $client = self::createClient();
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=ApiError', ['headers' => ['Accept' => 'application/ld+json']]);
+        $client = $this->withUser('user', [], '42');
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=ApiError',
+            ['headers' => [
+                'Authorization' => 'Bearer 42',
+                'Accept' => 'application/ld+json',
+            ],
+            ]);
         $this->assertSame(418, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
@@ -102,8 +122,13 @@ class ApiErrorTest extends ApiTestCase
 
     public function testApiError500()
     {
-        $client = self::createClient();
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=ApiError500', ['headers' => ['Accept' => 'application/ld+json']]);
+        $client = $this->withUser('user', [], '42');
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=ApiError500',
+            ['headers' => [
+                'Authorization' => 'Bearer 42',
+                'Accept' => 'application/ld+json',
+            ],
+            ]);
         $this->assertSame(500, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
@@ -113,8 +138,12 @@ class ApiErrorTest extends ApiTestCase
 
     public function testUnhandledError()
     {
-        $client = self::createClient();
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=UnhandledError');
+        $client = $this->withUser('user', [], '42');
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=UnhandledError',
+            ['headers' => [
+                'Authorization' => 'Bearer 42',
+            ],
+            ]);
         $this->assertSame(500, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
@@ -126,8 +155,13 @@ class ApiErrorTest extends ApiTestCase
 
     public function testUnhandledErrorJson()
     {
-        $client = self::createClient();
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller_json?test=UnhandledError', ['headers' => ['Accept' => 'application/json']]);
+        $client = $this->withUser('user', [], '42');
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller_json?test=UnhandledError',
+            ['headers' => [
+                'Authorization' => 'Bearer 42',
+                'Accept' => 'application/json',
+            ],
+            ]);
         $this->assertSame(500, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
