@@ -4,76 +4,62 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Exception;
 
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use ApiPlatform\Metadata\ErrorResource;
+use ApiPlatform\State\ApiResource\Error;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Serializer\Attribute\Context;
+use Symfony\Component\Serializer\Attribute\SerializedName;
+use Symfony\Component\Serializer\Serializer;
 
-/**
- * This is equal to a HttpException but the contained message will be serialized to
- * the client as jsonld/json, even for 500 errors. This is used to relay more detailed
- * error messages to the client for errors from third party systems for example.
- */
-class ApiError extends HttpException
+#[ErrorResource(
+    uriTemplate: '/api-errors/{status}',
+    uriVariables: ['status'],
+    normalizationContext: [
+        'ignored_attributes' => ['trace', 'file', 'line', 'code', 'message', 'traceAsString', 'previous', 'description'],
+        'skip_null_values' => true,
+    ],
+    openapi: false
+)]
+class ApiError extends Error
 {
-    private const WITH_DETAILS_STATUS_CODE = -1;
-    private const STATUS_CODE_KEY = 'statusCode';
-    private const ERROR_MESSAGE_KEY = 'message';
-    private const ERROR_ID_KEY = 'errorId';
-    private const ERROR_DETAILS_KEY = 'errorDetails';
+    #[SerializedName('relay:errorId')]
+    private ?string $errorId = null;
 
-    public function __construct(int $statusCode, ?string $message = '', ?\Throwable $previous = null, array $headers = [], ?int $code = 0)
+    #[SerializedName('relay:errorDetails')]
+    #[Context([Serializer::EMPTY_ARRAY_AS_OBJECT => true])]
+    private ?\ArrayObject $errorDetails = null;
+
+    public function __construct(int $statusCode, ?string $message = '')
     {
-        if ($statusCode === self::WITH_DETAILS_STATUS_CODE) {
-            $messageDecoded = self::decodeMessage($message);
-            $statusCode = $messageDecoded[self::STATUS_CODE_KEY];
-        } else {
-            $message = json_encode([
-                self::ERROR_MESSAGE_KEY => $message,
-                self::ERROR_ID_KEY => null,
-                self::ERROR_DETAILS_KEY => null,
-            ]);
-        }
-
-        parent::__construct($statusCode, $message, $previous, $headers, $code);
+        parent::__construct(Response::$statusTexts[$statusCode] ?? 'undefined status code', $message, $statusCode);
     }
 
-    /**
-     * @param int         $statusCode   The HTTP status code
-     * @param string|null $message      The error message
-     * @param string      $errorId      The custom error id e.g. 'bundle:my-custom-error'
-     * @param array       $errorDetails An associative array containing additional information, content depends on the errorId
-     */
     public static function withDetails(int $statusCode, ?string $message = '', string $errorId = '', array $errorDetails = []): ApiError
     {
-        $message = [
-            self::STATUS_CODE_KEY => $statusCode,
-            self::ERROR_MESSAGE_KEY => $message,
-            self::ERROR_ID_KEY => $errorId,
-            self::ERROR_DETAILS_KEY => $errorDetails,
-        ];
+        $apiError = new ApiError($statusCode, $message);
+        $apiError->setErrorId($errorId);
+        $apiError->setErrorDetails(new \ArrayObject($errorDetails));
 
-        return new ApiError(self::WITH_DETAILS_STATUS_CODE, json_encode($message));
-    }
-
-    public function getErrorMessage(): string
-    {
-        return self::decodeMessage($this->getMessage())[self::ERROR_MESSAGE_KEY];
+        return $apiError;
     }
 
     public function getErrorId(): ?string
     {
-        return self::decodeMessage($this->getMessage())[self::ERROR_ID_KEY];
+        return $this->errorId;
     }
 
-    public function getErrorDetails(): ?array
+    public function setErrorId(?string $errorId): void
     {
-        return self::decodeMessage($this->getMessage())[self::ERROR_DETAILS_KEY];
+        $this->errorId = $errorId;
     }
 
-    private static function decodeMessage(string $message): array
+    public function getErrorDetails(): ?\ArrayObject
     {
-        try {
-            return json_decode($message, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $jsonException) {
-            throw new \RuntimeException('unexpected error on json_decode');
-        }
+        return $this->errorDetails;
+    }
+
+    public function setErrorDetails(?\ArrayObject $errorDetails): void
+    {
+        $this->errorDetails = $errorDetails;
     }
 }

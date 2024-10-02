@@ -6,6 +6,7 @@ namespace Dbp\Relay\CoreBundle\DependencyInjection;
 
 use Dbp\Relay\CoreBundle\Auth\ProxyAuthenticator;
 use Dbp\Relay\CoreBundle\DB\MigrateCommand;
+use Dbp\Relay\CoreBundle\Extension\ExtensionTrait;
 use Dbp\Relay\CoreBundle\Logging\LoggingProcessor;
 use Dbp\Relay\CoreBundle\Queue\TestMessage;
 use Dbp\Relay\CoreBundle\Queue\Utils as QueueUtils;
@@ -19,6 +20,8 @@ use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
 class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExtensionInterface
 {
+    use ExtensionTrait;
+
     public function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
         $loader = new YamlFileLoader(
@@ -42,6 +45,8 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
 
         $definition = $container->getDefinition(LoggingProcessor::class);
         $definition->addMethodCall('setMaskConfig', [self::getLoggingChannels($container)]);
+
+        $this->addResourceClassDirectory($container, __DIR__.'/../Exception');
     }
 
     /**
@@ -138,7 +143,7 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
                 'defaults' => [
                     'extra_properties' => [
                         'standard_put' => true,
-                        'rfc_7807_compliant_errors' => false,
+                        'rfc_7807_compliant_errors' => true,
                     ],
                     'normalization_context' => [
                         'skip_null_values' => false,
