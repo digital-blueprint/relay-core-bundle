@@ -43,11 +43,12 @@ final class ErrorProvider implements ProviderInterface
 
         if ($exception instanceof ApiError) {
             $apiError = $exception;
+            $apiError->originalTrace = $exception->getTrace();
         } else {
             $status = $operation->getStatus() ?? 500;
             $apiError = ApiError::createFromException($exception, $status);
             if (!$this->debug && $status >= 500) {
-                $apiError->setDetail('Internal Server Error');
+                $apiError->setDetail('Internal Server Error'); // don't leak original exception message
             }
         }
 

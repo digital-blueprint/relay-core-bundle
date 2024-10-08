@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## v0.1.184
+## v0.1.185
 
 * inject custom ErrorProvider to continue sending 'hydra:' error attributes which were removed in api-platfrom 3.4.2
 
