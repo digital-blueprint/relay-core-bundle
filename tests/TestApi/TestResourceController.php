@@ -9,6 +9,7 @@ use Dbp\Relay\CoreBundle\Rest\CustomControllerTrait;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class TestResourceController extends AbstractController
 {
@@ -43,6 +44,10 @@ class TestResourceController extends AbstractController
             throw new ApiError(Response::HTTP_I_AM_A_TEAPOT);
         } elseif ($test === 'ApiError500') {
             throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR, "it wasn't me");
+        } elseif ($test === 'HttpException418') {
+            throw new HttpException(418, 'not again');
+        } elseif ($test === 'HttpException500') {
+            throw new HttpException(500, 'totally unexpected');
         } elseif ($test === 'UnhandledError') {
             throw new \RuntimeException('oh no');
         } elseif ($test === 'denyAccessUnlessGranted') {

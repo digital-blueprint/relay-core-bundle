@@ -81,6 +81,8 @@ class ApiErrorTest extends ApiTestCase
             'detail1' => '1',
             'detail2' => ['2', '3'],
         ]);
+        $this->assertArrayNotHasKey('hydra:title', $content);
+        $this->assertArrayNotHasKey('hydra:description', $content);
         $content = json_decode($response->getContent(false), false, flags: JSON_THROW_ON_ERROR);
         $this->assertIsObject($content->{'relay:errorDetails'});
         $this->assertIsArray($content->{'relay:errorDetails'}->detail2);
@@ -149,12 +151,75 @@ class ApiErrorTest extends ApiTestCase
         $this->assertSame($content['status'], 500);
     }
 
-    public function testUnhandledError()
+    public function testHttpException418()
+    {
+        $client = $this->withUser('user', [], '42');
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=HttpException418',
+            ['headers' => [
+                'Authorization' => 'Bearer 42',
+                'Accept' => 'application/ld+json',
+            ],
+            ]);
+        $this->assertSame(418, $response->getStatusCode());
+        $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
+        $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
+        $this->assertSame($content['hydra:title'], 'I\'m a teapot');
+        $this->assertSame($content['hydra:description'], 'not again');
+        $this->assertSame($content['title'], 'I\'m a teapot');
+        $this->assertSame($content['detail'], 'not again');
+        $this->assertSame($content['status'], 418);
+        $this->assertArrayNotHasKey('relay:errorId', $content);
+        $this->assertArrayNotHasKey('relay:errorDetails', $content);
+    }
+
+    public function testHttpException500()
+    {
+        $client = $this->withUser('user', [], '42');
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=HttpException500',
+            ['headers' => [
+                'Authorization' => 'Bearer 42',
+                'Accept' => 'application/ld+json',
+            ],
+            ]);
+        $this->assertSame(500, $response->getStatusCode());
+        $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
+        $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
+        $this->assertSame($content['hydra:title'], 'Internal Server Error');
+        $this->assertSame($content['hydra:description'], 'Internal Server Error');
+        $this->assertSame($content['title'], 'Internal Server Error');
+        $this->assertSame($content['detail'], 'Internal Server Error');
+        $this->assertSame($content['status'], 500);
+        $this->assertArrayNotHasKey('relay:errorId', $content);
+        $this->assertArrayNotHasKey('relay:errorDetails', $content);
+    }
+
+    public function testUnhandledErrorDefaultOutputFormat()
     {
         $client = $this->withUser('user', [], '42');
         $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=UnhandledError',
             ['headers' => [
                 'Authorization' => 'Bearer 42',
+            ],
+            ]);
+        $this->assertSame(500, $response->getStatusCode());
+        $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
+        $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
+        $this->assertSame($content['title'], 'Internal Server Error');
+        $this->assertSame($content['detail'], 'Internal Server Error');
+        $this->assertSame($content['status'], 500);
+        $this->assertSame($content['hydra:title'], 'Internal Server Error');
+        $this->assertSame($content['hydra:description'], 'Internal Server Error');
+        $this->assertArrayNotHasKey('relay:errorId', $content);
+        $this->assertArrayNotHasKey('relay:errorDetails', $content);
+    }
+
+    public function testUnhandledErrorJsonLd()
+    {
+        $client = $this->withUser('user', [], '42');
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=UnhandledError',
+            ['headers' => [
+                'Authorization' => 'Bearer 42',
+                'Accept' => 'application/ld+json',
             ],
             ]);
         $this->assertSame(500, $response->getStatusCode());
