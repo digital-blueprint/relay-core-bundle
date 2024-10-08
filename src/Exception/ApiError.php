@@ -6,8 +6,10 @@ namespace Dbp\Relay\CoreBundle\Exception;
 
 use ApiPlatform\Metadata\Error as Operation;
 use ApiPlatform\Metadata\ErrorResource;
+use ApiPlatform\Metadata\Exception\HttpExceptionInterface;
 use ApiPlatform\State\ApiResource\Error;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface as SymfonyHttpExceptionInterface;
 use Symfony\Component\Serializer\Attribute\Context;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Attribute\SerializedName;
@@ -39,6 +41,20 @@ use Symfony\Component\WebLink\Link;
             ],
             name: '_api_errors_hydra',
         ),
+        new Operation(
+            outputFormats: ['jsonapi' => ['application/vnd.api+json']],
+            routeName: 'api_errors',
+            normalizationContext: [
+                'groups' => ['jsonapi'],
+                'skip_null_values' => true,
+                'rfc_7807_compliant_errors' => true,
+            ],
+            name: '_api_errors_jsonapi',
+        ),
+        new Operation(
+            routeName: 'api_errors',
+            name: '_api_errors'
+        ),
     ],
     uriVariables: ['status'],
     openapi: false,
@@ -47,18 +63,13 @@ use Symfony\Component\WebLink\Link;
 )]
 class ApiError extends Error
 {
-    #[SerializedName('relay:errorId')]
-    #[Groups(['jsonld', 'jsonproblem'])]
     private ?string $errorId = null;
-
-    #[SerializedName('relay:errorDetails')]
-    #[Groups(['jsonld', 'jsonproblem'])]
-    #[Context([Serializer::EMPTY_ARRAY_AS_OBJECT => true])]
     private ?\ArrayObject $errorDetails = null;
 
-    public function __construct(int $statusCode, ?string $message = '')
+    public function __construct(int $statusCode, string $message = '')
     {
-        parent::__construct(Response::$statusTexts[$statusCode] ?? 'undefined status code', $message, $statusCode);
+        parent::__construct(Response::$statusTexts[$statusCode] ?? 'An error occurred', $message, $statusCode,
+            type: "/errors/$statusCode");
     }
 
     public static function withDetails(int $statusCode, ?string $message = '', string $errorId = '', array $errorDetails = []): ApiError
@@ -70,6 +81,21 @@ class ApiError extends Error
         return $apiError;
     }
 
+    public static function createFromException(\Exception|\Throwable $exception, int $status): ApiError
+    {
+        $apiError = new self($status, $exception->getMessage());
+
+        $headers = ($exception instanceof SymfonyHttpExceptionInterface || $exception instanceof HttpExceptionInterface) ?
+            $exception->getHeaders() : [];
+        $apiError->setHeaders($headers);
+
+        $apiError->originalTrace = $exception->getTrace();
+
+        return $apiError;
+    }
+
+    #[SerializedName('relay:errorId')]
+    #[Groups(['jsonld', 'jsonproblem'])]
     public function getErrorId(): ?string
     {
         return $this->errorId;
@@ -80,6 +106,9 @@ class ApiError extends Error
         $this->errorId = $errorId;
     }
 
+    #[SerializedName('relay:errorDetails')]
+    #[Groups(['jsonld', 'jsonproblem'])]
+    #[Context([Serializer::EMPTY_ARRAY_AS_OBJECT => true])]
     public function getErrorDetails(): ?\ArrayObject
     {
         return $this->errorDetails;
@@ -88,5 +117,19 @@ class ApiError extends Error
     public function setErrorDetails(?\ArrayObject $errorDetails): void
     {
         $this->errorDetails = $errorDetails;
+    }
+
+    #[SerializedName('hydra:title')]
+    #[Groups(['jsonld'])]
+    public function getHydraTitle(): ?string
+    {
+        return $this->getTitle();
+    }
+
+    #[SerializedName('hydra:description')]
+    #[Groups(['jsonld'])]
+    public function getHydraDescription(): ?string
+    {
+        return $this->getDetail();
     }
 }

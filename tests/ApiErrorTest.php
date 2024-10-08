@@ -17,8 +17,8 @@ class ApiErrorTest extends ApiTestCase
         $error = new ApiError(400, 'foobar');
         $this->assertSame('foobar', $error->getDetail());
         $this->assertSame(400, $error->getStatusCode());
+        $this->assertSame(400, $error->getStatus());
         $this->assertSame('Bad Request', $error->getTitle());
-        $this->assertSame('foobar', $error->getDetail());
         $this->assertSame(null, $error->getErrorDetails());
         $this->assertSame(null, $error->getErrorId());
     }
@@ -28,6 +28,7 @@ class ApiErrorTest extends ApiTestCase
         $error = ApiError::withDetails(424, 'message', 'id', ['foo' => 'bar']);
         $this->assertSame('message', $error->getDetail());
         $this->assertSame(424, $error->getStatusCode());
+        $this->assertSame(424, $error->getStatus());
         $this->assertSame('Failed Dependency', $error->getTitle());
         $this->assertEquals(['foo' => 'bar'], (array) $error->getErrorDetails());
         $this->assertSame('id', $error->getErrorId());
@@ -47,6 +48,9 @@ class ApiErrorTest extends ApiTestCase
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
         $this->assertSame($content['hydra:title'], 'I\'m a teapot');
         $this->assertSame($content['hydra:description'], 'some message');
+        $this->assertSame($content['title'], 'I\'m a teapot');
+        $this->assertSame($content['detail'], 'some message');
+        $this->assertSame($content['status'], 418);
         $this->assertSame($content['relay:errorId'], 'some-error-id');
         $this->assertSame($content['relay:errorDetails'], [
             'detail1' => '1',
@@ -57,7 +61,6 @@ class ApiErrorTest extends ApiTestCase
         $this->assertIsArray($content->{'relay:errorDetails'}->detail2);
     }
 
-    // do we really want other attribute names (errorId, errorDetails instead of relay:errorId, relay:errorDetails) for jsonproblem?
     public function testApiErrorDetailsJson()
     {
         $client = $this->withUser('user', [], '42');
@@ -72,6 +75,7 @@ class ApiErrorTest extends ApiTestCase
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
         $this->assertSame($content['title'], 'I\'m a teapot');
         $this->assertSame($content['detail'], 'some message');
+        $this->assertSame($content['status'], 418);
         $this->assertSame($content['relay:errorId'], 'some-error-id');
         $this->assertSame($content['relay:errorDetails'], [
             'detail1' => '1',
@@ -96,6 +100,9 @@ class ApiErrorTest extends ApiTestCase
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
         $this->assertSame($content['hydra:title'], 'I\'m a teapot');
         $this->assertSame($content['hydra:description'], '');
+        $this->assertSame($content['title'], 'I\'m a teapot');
+        $this->assertSame($content['detail'], '');
+        $this->assertSame($content['status'], 418);
         $this->assertSame($content['relay:errorId'], '');
         $this->assertSame($content['relay:errorDetails'], []);
         $content = json_decode($response->getContent(false), false, flags: JSON_THROW_ON_ERROR);
@@ -116,6 +123,9 @@ class ApiErrorTest extends ApiTestCase
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
         $this->assertSame($content['hydra:title'], 'I\'m a teapot');
         $this->assertSame($content['hydra:description'], '');
+        $this->assertSame($content['title'], 'I\'m a teapot');
+        $this->assertSame($content['detail'], '');
+        $this->assertSame($content['status'], 418);
         $this->assertArrayNotHasKey('relay:errorId', $content);
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
     }
@@ -134,6 +144,9 @@ class ApiErrorTest extends ApiTestCase
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
         $this->assertSame($content['hydra:title'], 'Internal Server Error');
         $this->assertSame($content['hydra:description'], "it wasn't me");
+        $this->assertSame($content['title'], 'Internal Server Error');
+        $this->assertSame($content['detail'], "it wasn't me");
+        $this->assertSame($content['status'], 500);
     }
 
     public function testUnhandledError()
@@ -147,8 +160,11 @@ class ApiErrorTest extends ApiTestCase
         $this->assertSame(500, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
-        $this->assertSame($content['hydra:title'], 'An error occurred');
-        $this->assertSame($content['hydra:description'], 'oh no');
+        $this->assertSame($content['title'], 'Internal Server Error');
+        $this->assertSame($content['detail'], 'Internal Server Error');
+        $this->assertSame($content['status'], 500);
+        $this->assertSame($content['hydra:title'], 'Internal Server Error');
+        $this->assertSame($content['hydra:description'], 'Internal Server Error');
         $this->assertArrayNotHasKey('relay:errorId', $content);
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
     }
@@ -165,8 +181,11 @@ class ApiErrorTest extends ApiTestCase
         $this->assertSame(500, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
-        $this->assertSame($content['title'], 'An error occurred');
-        $this->assertSame($content['detail'], 'oh no');
+        $this->assertSame($content['title'], 'Internal Server Error');
+        $this->assertSame($content['detail'], 'Internal Server Error');
+        $this->assertSame($content['status'], 500);
+        $this->assertArrayNotHasKey('hydra:title', $content);
+        $this->assertArrayNotHasKey('hydra:description', $content);
         $this->assertArrayNotHasKey('relay:errorId', $content);
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
     }

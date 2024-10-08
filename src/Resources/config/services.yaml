@@ -133,3 +133,8 @@ services:
 
   Dbp\Relay\CoreBundle\User\UserAttributeProviderProviderInterface:
     '@Dbp\Relay\CoreBundle\User\UserAttributeProviderProvider'
+
+  Dbp\Relay\CoreBundle\Exception\ErrorProvider:
+    autowire: true
+    autoconfigure: true
+

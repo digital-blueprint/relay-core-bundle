@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.1.184
+
+* use custom ErrorProvider to continue sending 'hydra:' error attributes which were removed in api-platfrom 3.4.2
+
 ## v0.1.183
 
 * make ApiError an api-platform ErrorResource, remove the custom ApiError normalizer, and set rfc_7807_compliant_errors to true
