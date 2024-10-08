@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* hide 'description' attribute when serialization API errors
+
 ## v0.1.185
 
 * inject custom ErrorProvider to continue sending 'hydra:' error attributes which were removed in api-platfrom 3.4.2
