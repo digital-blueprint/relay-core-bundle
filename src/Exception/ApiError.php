@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface as SymfonyHttpExceptionInterface;
 use Symfony\Component\Serializer\Attribute\Context;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\Ignore;
 use Symfony\Component\Serializer\Attribute\SerializedName;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\WebLink\Link;
@@ -119,6 +120,9 @@ class ApiError extends Error
         $this->errorDetails = $errorDetails;
     }
 
+    /**
+     * @deprecated Use getTitle() instead
+     */
     #[SerializedName('hydra:title')]
     #[Groups(['jsonld'])]
     public function getHydraTitle(): ?string
@@ -126,10 +130,19 @@ class ApiError extends Error
         return $this->getTitle();
     }
 
+    /**
+     * @deprecated Use getDetail() instead
+     */
     #[SerializedName('hydra:description')]
     #[Groups(['jsonld'])]
     public function getHydraDescription(): ?string
     {
         return $this->getDetail();
+    }
+
+    #[Ignore]
+    public function getDescription(): ?string
+    {
+        return parent::getDescription();
     }
 }

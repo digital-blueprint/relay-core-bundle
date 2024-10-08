@@ -56,6 +56,7 @@ class ApiErrorTest extends ApiTestCase
             'detail1' => '1',
             'detail2' => ['2', '3'],
         ]);
+        $this->assertArrayNotHasKey('description', $content);
         $content = json_decode($response->getContent(false), false, flags: JSON_THROW_ON_ERROR);
         $this->assertIsObject($content->{'relay:errorDetails'});
         $this->assertIsArray($content->{'relay:errorDetails'}->detail2);
@@ -83,6 +84,7 @@ class ApiErrorTest extends ApiTestCase
         ]);
         $this->assertArrayNotHasKey('hydra:title', $content);
         $this->assertArrayNotHasKey('hydra:description', $content);
+        $this->assertArrayNotHasKey('description', $content);
         $content = json_decode($response->getContent(false), false, flags: JSON_THROW_ON_ERROR);
         $this->assertIsObject($content->{'relay:errorDetails'});
         $this->assertIsArray($content->{'relay:errorDetails'}->detail2);
@@ -107,6 +109,7 @@ class ApiErrorTest extends ApiTestCase
         $this->assertSame($content['status'], 418);
         $this->assertSame($content['relay:errorId'], '');
         $this->assertSame($content['relay:errorDetails'], []);
+        $this->assertArrayNotHasKey('description', $content);
         $content = json_decode($response->getContent(false), false, flags: JSON_THROW_ON_ERROR);
         $this->assertIsObject($content->{'relay:errorDetails'});
     }
@@ -130,6 +133,7 @@ class ApiErrorTest extends ApiTestCase
         $this->assertSame($content['status'], 418);
         $this->assertArrayNotHasKey('relay:errorId', $content);
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
+        $this->assertArrayNotHasKey('description', $content);
     }
 
     public function testApiError500()
@@ -149,6 +153,7 @@ class ApiErrorTest extends ApiTestCase
         $this->assertSame($content['title'], 'Internal Server Error');
         $this->assertSame($content['detail'], "it wasn't me");
         $this->assertSame($content['status'], 500);
+        $this->assertArrayNotHasKey('description', $content);
     }
 
     public function testHttpException418()
@@ -170,6 +175,7 @@ class ApiErrorTest extends ApiTestCase
         $this->assertSame($content['status'], 418);
         $this->assertArrayNotHasKey('relay:errorId', $content);
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
+        $this->assertArrayNotHasKey('description', $content);
     }
 
     public function testHttpException500()
@@ -191,6 +197,7 @@ class ApiErrorTest extends ApiTestCase
         $this->assertSame($content['status'], 500);
         $this->assertArrayNotHasKey('relay:errorId', $content);
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
+        $this->assertArrayNotHasKey('description', $content);
     }
 
     public function testUnhandledErrorDefaultOutputFormat()
@@ -211,6 +218,7 @@ class ApiErrorTest extends ApiTestCase
         $this->assertSame($content['hydra:description'], 'Internal Server Error');
         $this->assertArrayNotHasKey('relay:errorId', $content);
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
+        $this->assertArrayNotHasKey('description', $content);
     }
 
     public function testUnhandledErrorJsonLd()
@@ -232,6 +240,7 @@ class ApiErrorTest extends ApiTestCase
         $this->assertSame($content['hydra:description'], 'Internal Server Error');
         $this->assertArrayNotHasKey('relay:errorId', $content);
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
+        $this->assertArrayNotHasKey('description', $content);
     }
 
     public function testUnhandledErrorJson()
@@ -253,5 +262,6 @@ class ApiErrorTest extends ApiTestCase
         $this->assertArrayNotHasKey('hydra:description', $content);
         $this->assertArrayNotHasKey('relay:errorId', $content);
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
+        $this->assertArrayNotHasKey('description', $content);
     }
 }
