@@ -17,8 +17,7 @@ class ApiErrorTest extends ApiTestCase
         $error = new ApiError(400, 'foobar');
         $this->assertSame('foobar', $error->getDetail());
         $this->assertSame(400, $error->getStatusCode());
-        $this->assertSame(400, $error->getStatus());
-        $this->assertSame('Bad Request', $error->getTitle());
+        $this->assertSame('foobar', $error->getMessage());
         $this->assertSame(null, $error->getErrorDetails());
         $this->assertSame(null, $error->getErrorId());
     }
@@ -28,8 +27,7 @@ class ApiErrorTest extends ApiTestCase
         $error = ApiError::withDetails(424, 'message', 'id', ['foo' => 'bar']);
         $this->assertSame('message', $error->getDetail());
         $this->assertSame(424, $error->getStatusCode());
-        $this->assertSame(424, $error->getStatus());
-        $this->assertSame('Failed Dependency', $error->getTitle());
+        $this->assertSame('message', $error->getMessage());
         $this->assertEquals(['foo' => 'bar'], (array) $error->getErrorDetails());
         $this->assertSame('id', $error->getErrorId());
     }
