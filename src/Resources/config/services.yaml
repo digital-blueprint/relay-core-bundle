@@ -137,4 +137,5 @@ services:
   Dbp\Relay\CoreBundle\Exception\ErrorProvider:
     autowire: true
     autoconfigure: true
-
+    arguments:
+      $debug: '%kernel.debug%'

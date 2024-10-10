@@ -13,10 +13,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 trait UserAuthTrait
 {
-    public function withUser(?string $userIdentifier, array $symfonyRoles = [], ?string $token = null): Client
+    public function withUser(?string $userIdentifier, array $symfonyRoles = [], ?string $token = null, array $kernelOptions = []): Client
     {
         KernelTestCase::ensureKernelShutdown();
-        $client = ApiTestCase::createClient();
+        $client = ApiTestCase::createClient($kernelOptions);
 
         $testAuthenticator = $client->getContainer()->get(TestAuthenticator::class);
         assert($testAuthenticator instanceof TestAuthenticator);

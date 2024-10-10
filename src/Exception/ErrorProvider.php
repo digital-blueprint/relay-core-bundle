@@ -15,7 +15,6 @@ namespace Dbp\Relay\CoreBundle\Exception;
 
 use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\Operation;
-use ApiPlatform\Metadata\ResourceClassResolverInterface;
 use ApiPlatform\State\ProviderInterface;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
 use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
@@ -29,7 +28,7 @@ use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 #[AsTaggedItem('api_platform.state.error_provider')]
 final class ErrorProvider implements ProviderInterface
 {
-    public function __construct(private readonly bool $debug = false, private ?ResourceClassResolverInterface $resourceClassResolver = null)
+    public function __construct(private readonly bool $debug)
     {
     }
 

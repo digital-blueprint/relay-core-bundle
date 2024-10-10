@@ -191,9 +191,9 @@ class ApiErrorTest extends ApiTestCase
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
         $this->assertSame($content['hydra:title'], 'Internal Server Error');
-        $this->assertSame($content['hydra:description'], 'Internal Server Error');
+        $this->assertSame($content['hydra:description'], 'totally unexpected');
         $this->assertSame($content['title'], 'Internal Server Error');
-        $this->assertSame($content['detail'], 'Internal Server Error');
+        $this->assertSame($content['detail'], 'totally unexpected');
         $this->assertSame($content['status'], 500);
         $this->assertArrayNotHasKey('relay:errorId', $content);
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
@@ -212,10 +212,10 @@ class ApiErrorTest extends ApiTestCase
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
         $this->assertSame($content['title'], 'Internal Server Error');
-        $this->assertSame($content['detail'], 'Internal Server Error');
+        $this->assertSame($content['detail'], 'oh no');
         $this->assertSame($content['status'], 500);
         $this->assertSame($content['hydra:title'], 'Internal Server Error');
-        $this->assertSame($content['hydra:description'], 'Internal Server Error');
+        $this->assertSame($content['hydra:description'], 'oh no');
         $this->assertArrayNotHasKey('relay:errorId', $content);
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
         $this->assertArrayNotHasKey('description', $content);
@@ -234,13 +234,16 @@ class ApiErrorTest extends ApiTestCase
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
         $this->assertSame($content['title'], 'Internal Server Error');
-        $this->assertSame($content['detail'], 'Internal Server Error');
+        $this->assertSame($content['detail'], 'oh no');
         $this->assertSame($content['status'], 500);
         $this->assertSame($content['hydra:title'], 'Internal Server Error');
-        $this->assertSame($content['hydra:description'], 'Internal Server Error');
+        $this->assertSame($content['hydra:description'], 'oh no');
         $this->assertArrayNotHasKey('relay:errorId', $content);
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
         $this->assertArrayNotHasKey('description', $content);
+
+        $this->assertTrue($client->getKernel()->isDebug());
+        $this->assertArrayHasKey('trace', $content);
     }
 
     public function testUnhandledErrorJson()
@@ -256,12 +259,90 @@ class ApiErrorTest extends ApiTestCase
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
         $this->assertSame($content['title'], 'Internal Server Error');
-        $this->assertSame($content['detail'], 'Internal Server Error');
+        $this->assertSame($content['detail'], 'oh no');
         $this->assertSame($content['status'], 500);
         $this->assertArrayNotHasKey('hydra:title', $content);
         $this->assertArrayNotHasKey('hydra:description', $content);
         $this->assertArrayNotHasKey('relay:errorId', $content);
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
         $this->assertArrayNotHasKey('description', $content);
+
+        $this->assertTrue($client->getKernel()->isDebug());
+        $this->assertArrayHasKey('trace', $content);
+    }
+
+    public function testUnhandledWithoutDebug()
+    {
+        $client = $this->withUser('user', [], '42', kernelOptions: ['debug' => false]);
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=UnhandledError',
+            ['headers' => [
+                'Authorization' => 'Bearer 42',
+                'Accept' => 'application/ld+json',
+            ],
+            ]);
+        $this->assertSame(500, $response->getStatusCode());
+        $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
+        $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
+
+        // No trace with debug
+        $this->assertFalse($client->getKernel()->isDebug());
+        $this->assertArrayNotHasKey('trace', $content);
+
+        // No details with 5xx and debug
+        $this->assertSame($content['title'], 'Internal Server Error');
+        $this->assertSame($content['detail'], 'Internal Server Error');
+        $this->assertSame($content['status'], 500);
+        $this->assertSame($content['hydra:title'], 'Internal Server Error');
+        $this->assertSame($content['hydra:description'], 'Internal Server Error');
+    }
+
+    public function testHttpException500WithoutDebug()
+    {
+        $client = $this->withUser('user', [], '42', kernelOptions: ['debug' => false]);
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=HttpException500',
+            ['headers' => [
+                'Authorization' => 'Bearer 42',
+                'Accept' => 'application/ld+json',
+            ],
+            ]);
+        $this->assertSame(500, $response->getStatusCode());
+        $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
+        $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
+
+        // No trace with debug
+        $this->assertFalse($client->getKernel()->isDebug());
+        $this->assertArrayNotHasKey('trace', $content);
+
+        // No details with 5xx and debug
+        $this->assertSame($content['title'], 'Internal Server Error');
+        $this->assertSame($content['detail'], 'Internal Server Error');
+        $this->assertSame($content['status'], 500);
+        $this->assertSame($content['hydra:title'], 'Internal Server Error');
+        $this->assertSame($content['hydra:description'], 'Internal Server Error');
+    }
+
+    public function testHttpException400WithoutDebug()
+    {
+        $client = $this->withUser('user', [], '42', kernelOptions: ['debug' => false]);
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=HttpException418',
+            ['headers' => [
+                'Authorization' => 'Bearer 42',
+                'Accept' => 'application/ld+json',
+            ],
+            ]);
+        $this->assertSame(418, $response->getStatusCode());
+        $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
+        $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
+
+        // No trace with debug
+        $this->assertFalse($client->getKernel()->isDebug());
+        $this->assertArrayNotHasKey('trace', $content);
+
+        // No details with 5xx and debug
+        $this->assertSame($content['title'], "I'm a teapot");
+        $this->assertSame($content['detail'], 'not again');
+        $this->assertSame($content['status'], 418);
+        $this->assertSame($content['hydra:title'], "I'm a teapot");
+        $this->assertSame($content['hydra:description'], 'not again');
     }
 }
