@@ -2,7 +2,11 @@
 
 ## Unreleased
 
+## v0.1.186
+
 * hide 'description' attribute when serialization API errors
+* Restore the ApiError API from v0.1.182
+* Fix ApiError not serializing the description in debug mode for 5xx errors
 
 ## v0.1.185
 
