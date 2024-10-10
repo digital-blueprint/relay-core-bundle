@@ -343,4 +343,30 @@ class ApiErrorTest extends ApiTestCase
         $this->assertSame($content['hydra:title'], "I'm a teapot");
         $this->assertSame($content['hydra:description'], 'not again');
     }
+
+    public function testApiError500NoDebug()
+    {
+        $client = $this->withUser('user', [], '42', kernelOptions: ['debug' => false]);
+        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=ApiError500',
+            ['headers' => [
+                'Authorization' => 'Bearer 42',
+                'Accept' => 'application/ld+json',
+            ],
+            ]);
+        $this->assertSame(500, $response->getStatusCode());
+        $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
+        $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
+        $this->assertSame($content['hydra:title'], 'Internal Server Error');
+        $this->assertSame($content['hydra:description'], "it wasn't me");
+        $this->assertSame($content['title'], 'Internal Server Error');
+        $this->assertSame($content['detail'], "it wasn't me");
+        $this->assertSame($content['status'], 500);
+        $this->assertArrayNotHasKey('relay:errorId', $content);
+        $this->assertArrayNotHasKey('relay:errorDetails', $content);
+        $this->assertArrayNotHasKey('description', $content);
+
+        // No trace with debug
+        $this->assertFalse($client->getKernel()->isDebug());
+        $this->assertArrayNotHasKey('trace', $content);
+    }
 }
