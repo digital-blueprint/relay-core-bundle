@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.1.187
+
+* Restore default ErrorProvider behavior which leaves exceptions that already are api-platform resources untouched 
+
 ## v0.1.186
 
 * hide 'description' attribute when serialization API errors
