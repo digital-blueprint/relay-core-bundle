@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Authorization\Serializer;
 
-use ApiPlatform\State\Pagination\PaginatorInterface;
 use ApiPlatform\State\Pagination\PartialPaginatorInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
