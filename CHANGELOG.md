@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.188
+
 * Remove conflict with doctrine/dbal v4, now that all dependencies are compatible with it
 
 ## v0.1.187
