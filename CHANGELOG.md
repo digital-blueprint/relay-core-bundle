@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## v0.1.189
+
+* Work around Symfony doctrine annotation detection getting a false positive in this bundle.
+  It would try to load the annotations driver in that case, which no longer exists in newer
+  doctrine.
+
 ## v0.1.188
 
 * Remove conflict with doctrine/dbal v4, now that all dependencies are compatible with it
