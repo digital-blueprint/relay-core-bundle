@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Entity;
 
 /**
- * @deprecated Use  Dbp\Relay\CoreBundle\Rest\Entity\EntityInterface instead
+ * @deprecated Use the interface in Dbp\Relay\CoreBundle\Rest instead
  */
 interface NamedEntityInterface extends \Dbp\Relay\CoreBundle\Rest\Entity\NamedEntityInterface
 {
