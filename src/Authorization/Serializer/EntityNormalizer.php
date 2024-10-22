@@ -18,8 +18,7 @@ class EntityNormalizer implements NormalizerAwareInterface, NormalizerInterface
 {
     use NormalizerAwareTrait;
 
-    private const NORMALIZER_ALREADY_CALLED_CONTEXT_KEY = self::class.'n';
-    private const DENORMALIZER_ALREADY_CALLED_CONTEXT_KEY = self::class.'d';
+    private const ALREADY_CALLED_CONTEXT_KEY = self::class;
     private const GROUPS_CONTEXT_KEY = 'groups';
     private const RESOURCE_CLASS_CONTEXT_KEY = 'resource_class';
 
@@ -58,7 +57,7 @@ class EntityNormalizer implements NormalizerAwareInterface, NormalizerInterface
 
     public function normalize(mixed $object, ?string $format = null, array $context = []): mixed
     {
-        $context[self::NORMALIZER_ALREADY_CALLED_CONTEXT_KEY] = true;
+        $context[self::ALREADY_CALLED_CONTEXT_KEY] = true;
 
         $resourceClass = $context[self::RESOURCE_CLASS_CONTEXT_KEY];
 
@@ -76,7 +75,7 @@ class EntityNormalizer implements NormalizerAwareInterface, NormalizerInterface
         // for entities, which makes the classname unreliable (instanceof would work, but not with our callback map).
         // Therefore, we are using the resource class from the context here
         // BUT have to exclude paginators which seem to have the resource class of the items that they hold.
-        if (isset($context[self::NORMALIZER_ALREADY_CALLED_CONTEXT_KEY]) || !is_object($data) || $data instanceof PartialPaginatorInterface) {
+        if (isset($context[self::ALREADY_CALLED_CONTEXT_KEY]) || !is_object($data) || $data instanceof PartialPaginatorInterface) {
             return false;
         }
 
