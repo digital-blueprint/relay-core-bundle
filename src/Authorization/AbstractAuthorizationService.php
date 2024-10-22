@@ -43,11 +43,13 @@ abstract class AbstractAuthorizationService
      */
     public function setConfig(array $config): void
     {
-        $this->setUpAccessControlPolicies(
-            $config[AuthorizationConfigDefinition::ROLES_CONFIG_NODE] ?? [],
-            array_merge($config[AuthorizationConfigDefinition::RESOURCE_PERMISSIONS_CONFIG_NODE] ?? [],
-                $config[AuthorizationConfigDefinition::POLICIES_CONFIG_NODE] ?? []),
-            $config[AuthorizationConfigDefinition::ATTRIBUTES_CONFIG_NODE] ?? []);
+        if ($authorizationConfig = $config[AuthorizationConfigDefinition::AUTHORIZATION_CONFIG_NODE] ?? null) {
+            $this->setUpAccessControlPolicies(
+                $authorizationConfig[AuthorizationConfigDefinition::ROLES_CONFIG_NODE] ?? [],
+                array_merge($authorizationConfig[AuthorizationConfigDefinition::RESOURCE_PERMISSIONS_CONFIG_NODE] ?? [],
+                    $authorizationConfig[AuthorizationConfigDefinition::POLICIES_CONFIG_NODE] ?? []),
+                $authorizationConfig[AuthorizationConfigDefinition::ATTRIBUTES_CONFIG_NODE] ?? []);
+        }
     }
 
     /**
