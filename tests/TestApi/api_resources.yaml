@@ -6,7 +6,6 @@ resources:
     operations:
       ApiPlatform\Metadata\Get:
         provider: Dbp\Relay\CoreBundle\Tests\TestApi\TestResourceProvider
-        method:
         uriTemplate: "/test/test-resources/{identifier}"
 
       custom_controller_get_json:

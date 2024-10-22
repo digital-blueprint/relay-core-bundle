@@ -15,6 +15,9 @@ use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
+/**
+ * @deprecated since version 0.1.188, use AbstractAuthorizationService::showOutputGroupsForEntityInstanceIf instead
+ */
 class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements NormalizerInterface, NormalizerAwareInterface, DenormalizerInterface, DenormalizerAwareInterface
 {
     use NormalizerAwareTrait;
@@ -165,13 +168,13 @@ class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements
 
     private function loadConfig(array $entityConfigNodes): void
     {
-        $roleExpressions = [];
+        $resourcePermissionExpressions = [];
         foreach ($entityConfigNodes as $entityShortName => $entityNode) {
             $entityClassName = $entityNode[AuthorizationConfigDefinition::ENTITY_CLASS_NAME_CONFIG_NODE];
             $attributeNames = [];
 
             foreach ($entityNode[AuthorizationConfigDefinition::ENTITY_READ_ACCESS_CONFIG_NODE] ?? [] as $attributeName => $attributeAuthorizationExpression) {
-                $roleExpressions[self::toReadAttributeId($entityShortName, $attributeName)] = $attributeAuthorizationExpression;
+                $resourcePermissionExpressions[self::toReadAttributeId($entityShortName, $attributeName)] = $attributeAuthorizationExpression;
                 $attributeNames[] = $attributeName;
             }
             $this->entityClassNameToReadAttributeNamesMapping[$entityClassName] = [
@@ -181,7 +184,7 @@ class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements
 
             $attributeNames = [];
             foreach ($entityNode[AuthorizationConfigDefinition::ENTITY_WRITE_ACCESS_CONFIG_NODE] ?? [] as $attributeName => $attributeAuthorizationExpression) {
-                $roleExpressions[self::toWriteAttributeId($entityShortName, $attributeName)] = $attributeAuthorizationExpression;
+                $resourcePermissionExpressions[self::toWriteAttributeId($entityShortName, $attributeName)] = $attributeAuthorizationExpression;
                 $attributeNames[] = $attributeName;
             }
             $this->entityClassNameToWriteAttributeNamesMapping[$entityClassName] = [
@@ -190,7 +193,7 @@ class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements
             ];
         }
 
-        $this->configure($roleExpressions);
+        $this->setUpAccessControlPolicies(resourcePermissions: $resourcePermissionExpressions);
     }
 
     private static function toReadAttributeId(string $entityShortName, string $attributeName): string

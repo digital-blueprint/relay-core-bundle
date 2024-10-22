@@ -34,13 +34,13 @@ class AbstractAuthorizationServiceTest extends TestCase
     public function testGetUserAttribute()
     {
         $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
-        $this->assertEquals(true, $authorizationService->getUserAttribute('ROLE_USER'));
-        $this->assertEquals(false, $authorizationService->getUserAttribute('ROLE_ADMIN'));
+        $this->assertTrue($authorizationService->getUserAttribute('ROLE_USER'));
+        $this->assertFalse($authorizationService->getUserAttribute('ROLE_ADMIN'));
         $this->assertEquals('test@example.com', $authorizationService->getUserAttribute('EMAIL'));
 
         $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::ADMIN_USER_IDENTIFIER);
-        $this->assertEquals(false, $authorizationService->getUserAttribute('ROLE_USER'));
-        $this->assertEquals(true, $authorizationService->getUserAttribute('ROLE_ADMIN'));
+        $this->assertFalse($authorizationService->getUserAttribute('ROLE_USER'));
+        $this->assertTrue($authorizationService->getUserAttribute('ROLE_ADMIN'));
         $this->assertEquals('test@example.com', $authorizationService->getUserAttribute('EMAIL'));
     }
 
@@ -64,87 +64,127 @@ class AbstractAuthorizationServiceTest extends TestCase
         }
     }
 
-    public function testIsGrantedWithoutResource()
+    public function testIsGrantedRole()
     {
         $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
-        $this->assertTrue($authorizationService->isGranted('MAY_USE'));
-        $this->assertFalse($authorizationService->isGranted('MAY_MANAGE'));
+        $this->assertTrue($authorizationService->isGrantedRole('MAY_USE'));
+        $this->assertFalse($authorizationService->isGrantedRole('MAY_MANAGE'));
 
         $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::ADMIN_USER_IDENTIFIER);
-        $this->assertTrue($authorizationService->isGranted('MAY_USE'));
-        $this->assertTrue($authorizationService->isGranted('MAY_MANAGE'));
+        $this->assertTrue($authorizationService->isGrantedRole('MAY_USE'));
+        $this->assertTrue($authorizationService->isGrantedRole('MAY_MANAGE'));
     }
 
-    public function testIsGrantedWithResource()
+    public function testIsGrantedResourcePermission()
     {
         $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
-        $this->assertTrue($authorizationService->isGranted('MAY_ACCESS', new TestEntity('public')));
-        $this->assertFalse($authorizationService->isGranted('MAY_ACCESS', new TestEntity('private')));
+        $this->assertTrue($authorizationService->isGrantedResourcePermission('MAY_ACCESS', new TestEntity('public')));
+        $this->assertFalse($authorizationService->isGrantedResourcePermission('MAY_ACCESS', new TestEntity('private')));
 
         $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::ADMIN_USER_IDENTIFIER);
-        $this->assertTrue($authorizationService->isGranted('MAY_ACCESS', new TestEntity('public')));
-        $this->assertTrue($authorizationService->isGranted('MAY_ACCESS', new TestEntity('private')));
+        $this->assertTrue($authorizationService->isGrantedResourcePermission('MAY_ACCESS', new TestEntity('public')));
+        $this->assertTrue($authorizationService->isGrantedResourcePermission('MAY_ACCESS', new TestEntity('private')));
     }
 
-    public function testIsGrantedWithResourceAlias()
-    {
-        $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
-        $this->assertTrue($authorizationService->isGranted('MAY_ACCESS_RESOURCE_ALIAS', new TestEntity('public'), 'testEntity'));
-    }
-
-    public function testIsGrantedUndefinedPolicy()
+    public function testIsGrantedUndefinedRole()
     {
         $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
         try {
-            $authorizationService->isGranted('undefined');
+            $authorizationService->isGrantedRole('undefined');
             $this->fail('exception not thrown as expected');
         } catch (AuthorizationException $authorizationException) {
-            $this->assertEquals(AuthorizationException::POLICY_UNDEFINED, $authorizationException->getCode());
+            $this->assertEquals(AuthorizationException::ROLE_UNDEFINED, $authorizationException->getCode());
         }
     }
 
-    public function testGetAttributeInfinitePolicyLoop()
+    public function testIsGrantedUndefinedResourcePermission()
     {
         $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
         try {
-            $authorizationService->isGranted('INFINITE_POLICY');
+            $authorizationService->isGrantedResourcePermission('undefined', new TestEntity());
             $this->fail('exception not thrown as expected');
         } catch (AuthorizationException $authorizationException) {
-            $this->assertEquals(AuthorizationException::INFINITE_EXRPESSION_LOOP_DETECTED, $authorizationException->getCode());
+            $this->assertEquals(AuthorizationException::RESOURCE_PERMISSION_UNDEFINED, $authorizationException->getCode());
         }
     }
 
-    public function testIsGrantedWithUndefinedUserAttribute()
+    public function testGetAttributeInfiniteRoleLoop()
     {
         $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
         try {
-            $authorizationService->isGranted('USER_ATTRIBUTE_UNDEFINED_POLICY');
+            $authorizationService->isGrantedRole('INFINITE_EXPRESSION');
+            $this->fail('exception not thrown as expected');
+        } catch (AuthorizationException $authorizationException) {
+            $this->assertEquals(AuthorizationException::INFINITE_EXPRESSION_LOOP_DETECTED, $authorizationException->getCode());
+        }
+    }
+
+    public function testGetAttributeInfiniteResourcePermissionLoop()
+    {
+        $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
+        try {
+            $authorizationService->isGrantedResourcePermission('INFINITE_EXPRESSION', new TestEntity());
+            $this->fail('exception not thrown as expected');
+        } catch (AuthorizationException $authorizationException) {
+            $this->assertEquals(AuthorizationException::INFINITE_EXPRESSION_LOOP_DETECTED, $authorizationException->getCode());
+        }
+    }
+
+    public function testIsGrantedRoleWithUndefinedUserAttribute()
+    {
+        $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
+        try {
+            $authorizationService->isGrantedRole('USER_ATTRIBUTE_UNDEFINED');
             $this->fail('exception not thrown as expected');
         } catch (UserAttributeException $userAttributeException) {
             $this->assertEquals(UserAttributeException::USER_ATTRIBUTE_UNDEFINED, $userAttributeException->getCode());
         }
     }
 
-    public function testDenyAccessUnlessGrantedWithoutResource()
+    public function testIsGrantedResourcePermissionWithUndefinedUserAttribute()
     {
         $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
-        $authorizationService->denyAccessUnlessIsGranted('MAY_USE');
-
         try {
-            $authorizationService->denyAccessUnlessIsGranted('MAY_MANAGE');
+            $authorizationService->isGrantedResourcePermission('USER_ATTRIBUTE_UNDEFINED', new TestEntity());
             $this->fail('exception not thrown as expected');
-        } catch (ApiError $apiError) {
-            $this->assertEquals(403, $apiError->getStatusCode());
+        } catch (UserAttributeException $userAttributeException) {
+            $this->assertEquals(UserAttributeException::USER_ATTRIBUTE_UNDEFINED, $userAttributeException->getCode());
         }
     }
 
-    public function testDenyAccessUnlessGrantedWithResource()
+    public function testDeprecateDenyAccessUnlessGranted()
     {
         $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
         $authorizationService->denyAccessUnlessIsGranted('MAY_ACCESS', new TestEntity('public'));
 
         try {
             $authorizationService->denyAccessUnlessIsGranted('MAY_ACCESS', new TestEntity('private'));
+            $this->fail('exception not thrown as expected');
+        } catch (ApiError $apiError) {
+            $this->assertEquals(403, $apiError->getStatusCode());
+        }
+    }
+
+    public function testDenyAccessUnlessGrantedRole()
+    {
+        $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
+        $authorizationService->denyAccessUnlessIsGrantedRole('MAY_USE');
+
+        try {
+            $authorizationService->denyAccessUnlessIsGrantedRole('MAY_MANAGE');
+            $this->fail('exception not thrown as expected');
+        } catch (ApiError $apiError) {
+            $this->assertEquals(403, $apiError->getStatusCode());
+        }
+    }
+
+    public function testDenyAccessUnlessGrantedResourcePermission()
+    {
+        $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
+        $authorizationService->denyAccessUnlessIsGrantedResourcePermission('MAY_ACCESS', new TestEntity('public'));
+
+        try {
+            $authorizationService->denyAccessUnlessIsGrantedResourcePermission('MAY_ACCESS', new TestEntity('private'));
             $this->fail('exception not thrown as expected');
         } catch (ApiError $apiError) {
             $this->assertEquals(403, $apiError->getStatusCode());
@@ -184,7 +224,7 @@ class AbstractAuthorizationServiceTest extends TestCase
             $authorizationService->getAttribute('INFINITE_ATTRIBUTE');
             $this->fail('exception not thrown as expected');
         } catch (AuthorizationException $authorizationException) {
-            $this->assertEquals(AuthorizationException::INFINITE_EXRPESSION_LOOP_DETECTED, $authorizationException->getCode());
+            $this->assertEquals(AuthorizationException::INFINITE_EXPRESSION_LOOP_DETECTED, $authorizationException->getCode());
         }
     }
 
@@ -192,19 +232,35 @@ class AbstractAuthorizationServiceTest extends TestCase
     {
         $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
         try {
-            $authorizationService->getAttribute('USER_ATTRIBUTE_UNDEFINED_ATTRIBUTE');
+            $authorizationService->getAttribute('USER_ATTRIBUTE_UNDEFINED');
             $this->fail('exception not thrown as expected');
         } catch (UserAttributeException $userAttributeException) {
             $this->assertEquals(UserAttributeException::USER_ATTRIBUTE_UNDEFINED, $userAttributeException->getCode());
         }
     }
 
-    public function testIsPolicyDefined(): void
+    public function testDeprecateIsPolicyDefined(): void
     {
         $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
 
-        $this->assertTrue($authorizationService->isPolicyDefined('MAY_USE'));
+        $this->assertTrue($authorizationService->isPolicyDefined('MAY_ACCESS'));
         $this->assertFalse($authorizationService->isPolicyDefined('404'));
+    }
+
+    public function testIsRoleDefined(): void
+    {
+        $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
+
+        $this->assertTrue($authorizationService->isRoleDefined('MAY_USE'));
+        $this->assertFalse($authorizationService->isRoleDefined('404'));
+    }
+
+    public function testIsResourcePermissionDefined(): void
+    {
+        $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
+
+        $this->assertTrue($authorizationService->isResourcePermissionDefined('MAY_ACCESS'));
+        $this->assertFalse($authorizationService->isResourcePermissionDefined('404'));
     }
 
     public function testIsAttributeDefined(): void
@@ -215,17 +271,35 @@ class AbstractAuthorizationServiceTest extends TestCase
         $this->assertFalse($authorizationService->isAttributeDefined('404'));
     }
 
-    public function testGetPolicyNames(): void
+    public function testDeprecateGetPolicyNames(): void
     {
         $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
         $policyNames = $authorizationService->getPolicyNames();
-        $this->assertCount(6, $policyNames);
-        $this->assertEquals('MAY_USE', $policyNames[0]);
-        $this->assertEquals('MAY_MANAGE', $policyNames[1]);
-        $this->assertEquals('MAY_ACCESS', $policyNames[2]);
-        $this->assertEquals('MAY_ACCESS_RESOURCE_ALIAS', $policyNames[3]);
-        $this->assertEquals('INFINITE_POLICY', $policyNames[4]);
-        $this->assertEquals('USER_ATTRIBUTE_UNDEFINED_POLICY', $policyNames[5]);
+        $this->assertCount(3, $policyNames);
+        $this->assertEquals('MAY_ACCESS', $policyNames[0]);
+        $this->assertEquals('INFINITE_EXPRESSION', $policyNames[1]);
+        $this->assertEquals('USER_ATTRIBUTE_UNDEFINED', $policyNames[2]);
+    }
+
+    public function testGetRoleNames(): void
+    {
+        $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
+        $roleNames = $authorizationService->getRoleNames();
+        $this->assertCount(4, $roleNames);
+        $this->assertEquals('MAY_USE', $roleNames[0]);
+        $this->assertEquals('MAY_MANAGE', $roleNames[1]);
+        $this->assertEquals('INFINITE_EXPRESSION', $roleNames[2]);
+        $this->assertEquals('USER_ATTRIBUTE_UNDEFINED', $roleNames[3]);
+    }
+
+    public function testGetResourcePermissionNames(): void
+    {
+        $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
+        $policyNames = $authorizationService->getResourcePermissionNames();
+        $this->assertCount(3, $policyNames);
+        $this->assertEquals('MAY_ACCESS', $policyNames[0]);
+        $this->assertEquals('INFINITE_EXPRESSION', $policyNames[1]);
+        $this->assertEquals('USER_ATTRIBUTE_UNDEFINED', $policyNames[2]);
     }
 
     public function testGetAttributeNames(): void
@@ -236,7 +310,7 @@ class AbstractAuthorizationServiceTest extends TestCase
         $this->assertEquals('MY_ORG_IDS', $attributeNames[0]);
         $this->assertEquals('NULL_ATTRIBUTE', $attributeNames[1]);
         $this->assertEquals('INFINITE_ATTRIBUTE', $attributeNames[2]);
-        $this->assertEquals('USER_ATTRIBUTE_UNDEFINED_ATTRIBUTE', $attributeNames[3]);
+        $this->assertEquals('USER_ATTRIBUTE_UNDEFINED', $attributeNames[3]);
     }
 
     private function getTestAuthorizationService(string $userIdentifier): TestAuthorizationService
@@ -247,18 +321,20 @@ class AbstractAuthorizationServiceTest extends TestCase
             'EMAIL' => 'test@example.com',
             'NULL' => null,
         ]);
-        $authorizationService->configure([
+        $authorizationService->setUpAccessControlPolicies([
             'MAY_USE' => 'user.get("ROLE_USER") || user.get("ROLE_ADMIN")',
             'MAY_MANAGE' => 'user.get("ROLE_ADMIN")',
-            'MAY_ACCESS' => 'user.get("ROLE_ADMIN") || resource.getIdentifier() !== "private"',
-            'MAY_ACCESS_RESOURCE_ALIAS' => 'user.get("ROLE_ADMIN") || testEntity.getIdentifier() !== "private"',
-            'INFINITE_POLICY' => 'user.isGranted("INFINITE_POLICY")',
-            'USER_ATTRIBUTE_UNDEFINED_POLICY' => 'user.get("undefined")',
+            'INFINITE_EXPRESSION' => 'user.isGranted("INFINITE_EXPRESSION")',
+            'USER_ATTRIBUTE_UNDEFINED' => 'user.get("undefined")',
+        ], [
+            'MAY_ACCESS' => 'user.get("ROLE_ADMIN") || resource.getIdentifier() === "public"',
+            'INFINITE_EXPRESSION' => 'user.isGranted("INFINITE_EXPRESSION")',
+            'USER_ATTRIBUTE_UNDEFINED' => 'user.get("undefined")',
         ], [
             'MY_ORG_IDS' => 'Relay.ternaryOperator(user.get("ROLE_ADMIN"), [1, 2, 3], [1])',
             'NULL_ATTRIBUTE' => 'null',
             'INFINITE_ATTRIBUTE' => 'user.getAttribute("INFINITE_ATTRIBUTE")',
-            'USER_ATTRIBUTE_UNDEFINED_ATTRIBUTE' => 'user.get("undefined")',
+            'USER_ATTRIBUTE_UNDEFINED' => 'user.get("undefined")',
         ]);
 
         return $authorizationService;

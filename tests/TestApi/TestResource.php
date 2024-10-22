@@ -9,12 +9,15 @@ use Symfony\Component\Serializer\Annotation\Groups;
 class TestResource
 {
     #[Groups(['TestResource:output'])]
-    private string $identifier;
+    private ?string $identifier = null;
 
     #[Groups(['TestResource:output'])]
-    private ?string $content;
+    private ?string $content = null;
 
-    public function getIdentifier(): string
+    #[Groups(['TestResource:output:admin'])]
+    private ?string $secret = null;
+
+    public function getIdentifier(): ?string
     {
         return $this->identifier;
     }
@@ -32,5 +35,15 @@ class TestResource
     public function setContent(?string $content): void
     {
         $this->content = $content;
+    }
+
+    public function getSecret(): ?string
+    {
+        return $this->secret;
+    }
+
+    public function setSecret(?string $secret): void
+    {
+        $this->secret = $secret;
     }
 }

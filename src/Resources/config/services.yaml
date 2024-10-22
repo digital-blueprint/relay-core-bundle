@@ -139,3 +139,12 @@ services:
     autoconfigure: true
     arguments:
       $debug: '%kernel.debug%'
+
+  Dbp\Relay\CoreBundle\Authorization\Serializer\EntityNormalizer:
+    autowire: true
+    autoconfigure: true
+
+  Dbp\Relay\CoreBundle\Authorization\Serializer\SerializerContextBuilder:
+    autowire: true
+    decorates: 'api_platform.serializer.context_builder'
+    arguments: ['@.inner']

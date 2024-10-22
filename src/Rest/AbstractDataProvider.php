@@ -115,7 +115,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $this->isSortEnabled =
             $config[Rest::ROOT_CONFIG_NODE][Query::ROOT_CONFIG_NODE][Sort::ROOT_CONFIG_NODE][Sort::ENABLE_SORT_CONFIG_NODE] ?? false;
 
-        parent::configure(array_merge(
+        parent::setUpAccessControlPolicies(roles: array_merge(
             $this->localDataAccessChecker->getPolicies(),
             $this->preparedFiltersController->getPolicies()));
     }
@@ -365,7 +365,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         if ($filterQueryString === null) {
             throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, 'Prepared filter undefined.', ErrorIds::PREPARED_FILTER_UNDEFINED);
         }
-        if ($this->isGranted(PreparedFilters::getPolicyNameByFilterIdentifier($preparedFilterId)) === false) {
+        if ($this->isGrantedRole(PreparedFilters::getPolicyNameByFilterIdentifier($preparedFilterId)) === false) {
             throw ApiError::withDetails(Response::HTTP_FORBIDDEN, 'Access to prepared filter denied.', ErrorIds::PREPARED_FILTER_ACCESS_DENIED);
         }
 

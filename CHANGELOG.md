@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## v0.1.190
+
+* Divide access control policies into 'roles' (resource dependent) and 'resource permissions' (resource dependent),
+  deprecating 'policies', which can be both. This helps to do things more intelligently and efficiently,
+  since 'roles' can be evaluated per class, as opposed 'resource permissions' which are evaluated per resource instance.
+* Add support for showing additional output (normalization) groups depending on
+  roles/resource permissions/arbitrary conditions
+
 ## v0.1.189
 
 * Work around Symfony doctrine annotation detection getting a false positive in this bundle.

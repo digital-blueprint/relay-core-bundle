@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Authorization;
 
+use Dbp\Relay\CoreBundle\Authorization\Serializer\EntityNormalizer;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\User\UserAttributeException;
 use Dbp\Relay\CoreBundle\User\UserAttributeService;
@@ -15,6 +16,7 @@ abstract class AbstractAuthorizationService
     private UserAttributeService $userAttributeService;
     private AuthorizationExpressionChecker $authorizationExpressionChecker;
     private AuthorizationUser $currentAuthorizationUser;
+    private ?EntityNormalizer $entityNormalizer = null;
 
     public function __construct()
     {
@@ -28,20 +30,37 @@ abstract class AbstractAuthorizationService
         $this->userAttributeService = $userAttributeService;
     }
 
+    #[Required]
+    public function __injectEntityNormalizer(EntityNormalizer $entityNormalizer): void
+    {
+        $this->entityNormalizer = $entityNormalizer;
+
+        $this->setUpInputAndOutputGroups();
+    }
+
     /**
      * Method for bundle config injection. Don't call in your code  (use @see AbstractAuthorizationService::configure() instead).
      */
     public function setConfig(array $config): void
     {
-        $this->loadConfig($config[AuthorizationConfigDefinition::AUTHORIZATION_CONFIG_NODE] ?? null);
+        $this->setUpAccessControlPolicies(
+            $config[AuthorizationConfigDefinition::ROLES_CONFIG_NODE] ?? [],
+            array_merge($config[AuthorizationConfigDefinition::RESOURCE_PERMISSIONS_CONFIG_NODE] ?? [],
+                $config[AuthorizationConfigDefinition::POLICIES_CONFIG_NODE] ?? []),
+            $config[AuthorizationConfigDefinition::ATTRIBUTES_CONFIG_NODE] ?? []);
     }
 
+    /**
+     * @deprecated Since v0.1.188, use setUp instead.
+     */
     public function configure(array $policies = [], array $attributes = []): void
     {
-        $this->loadConfig([
-            AuthorizationConfigDefinition::POLICIES_CONFIG_NODE => $policies,
-            AuthorizationConfigDefinition::ATTRIBUTES_CONFIG_NODE => $attributes,
-        ]);
+        $this->setUpAccessControlPolicies([], $policies, $attributes);
+    }
+
+    public function setUpAccessControlPolicies(array $roles = [], array $resourcePermissions = [], array $attributes = []): void
+    {
+        $this->authorizationExpressionChecker->setExpressions($roles, $resourcePermissions, $attributes);
     }
 
     public function isAttributeDefined(string $attributeName): bool
@@ -57,47 +76,131 @@ abstract class AbstractAuthorizationService
         return $this->authorizationExpressionChecker->getAttributeExpressionNames();
     }
 
-    public function isPolicyDefined(string $policyName): bool
+    public function isRoleDefined(string $policyName): bool
     {
-        return $this->authorizationExpressionChecker->isPolicyExpressionDefined($policyName);
+        return $this->authorizationExpressionChecker->isRoleExpressionDefined($policyName);
     }
 
     /**
      * @return string[]
      */
-    public function getPolicyNames(): array
+    public function getRoleNames(): array
     {
-        return $this->authorizationExpressionChecker->getPolicyExpressionNames();
+        return $this->authorizationExpressionChecker->getRoleExpressionNames();
+    }
+
+    public function isResourcePermissionDefined(string $policyName): bool
+    {
+        return $this->authorizationExpressionChecker->isResourcePermissionExpressionDefined($policyName);
     }
 
     /**
-     * Checks the given policy for the current user and the resource $resource. Throws a 'forbidden' exception if
-     * access is not granted.
+     * @return string[]
+     */
+    public function getResourcePermissionNames(): array
+    {
+        return $this->authorizationExpressionChecker->getResourcePermissionExpressionNames();
+    }
+
+    /**
+     * @deprecated Since v0.1.188 use isRoleDefined or isResourcePermissionDefined instead
+     */
+    public function isPolicyDefined(string $policyName): bool
+    {
+        return $this->authorizationExpressionChecker->isResourcePermissionExpressionDefined($policyName);
+    }
+
+    /**
+     * @deprecated Since v0.1.188 use getRoleNames or getResourcePermissionNames instead
      *
+     * @return string[]
+     */
+    public function getPolicyNames(): array
+    {
+        return $this->authorizationExpressionChecker->getResourcePermissionExpressionNames();
+    }
+
+    /**
      * @throws ApiError               HTTP Forbidden exception if access is not granted
      * @throws AuthorizationException If the policy is not declared
+     *
+     * @deprecated Since v0.1.188, use denyAccessUnlessIsGrantedRole, or denyAccessUnlessIsGrantedResourcePermission
+     * (for resource dependent permissions) instead
+     *
+     * Checks the given policy for the current user and the resource $resource. Throws a 'forbidden' exception if
+     * access is not granted.
      */
     public function denyAccessUnlessIsGranted(string $policyName, mixed $resource = null, ?string $resourceAlias = null): void
     {
-        if ($this->isGrantedInternal($policyName, $resource, $resourceAlias) === false) {
-            throw ApiError::withDetails(Response::HTTP_FORBIDDEN, 'access denied. policy failed: '.$policyName);
+        if ($this->isGrantedResourcePermissionInternal($policyName, $resource) === false) {
+            throw new ApiError(Response::HTTP_FORBIDDEN);
         }
     }
 
     /**
+     * @throws ApiError               HTTP Forbidden exception if access is not granted
+     * @throws AuthorizationException If the policy is not declared
+     *
+     * Checks the given policy for the current user and the resource $resource. Throws a 'forbidden' exception if
+     * access is not granted.
+     */
+    public function denyAccessUnlessIsGrantedRole(string $roleName): void
+    {
+        if ($this->isGrantedRoleInternal($roleName) === false) {
+            throw new ApiError(Response::HTTP_FORBIDDEN);
+        }
+    }
+
+    /**
+     * @throws ApiError               HTTP Forbidden exception if access is not granted
+     * @throws AuthorizationException If the policy is not declared
+     *
+     * Checks the given policy for the current user and the resource $resource. Throws a 'forbidden' exception if
+     * access is not granted.
+     */
+    public function denyAccessUnlessIsGrantedResourcePermission(string $resourcePermissionName, object $resource): void
+    {
+        if ($this->isGrantedResourcePermissionInternal($resourcePermissionName, $resource) === false) {
+            throw new ApiError(Response::HTTP_FORBIDDEN);
+        }
+    }
+
+    /**
+     * Returns true if role is granted, false otherwise.
+     *
+     * @throws AuthorizationException
+     */
+    public function isGrantedRole(string $roleName): bool
+    {
+        return $this->isGrantedRoleInternal($roleName);
+    }
+
+    /**
+     * Returns true if resource permission is granted, false otherwise.
+     *
+     * @throws AuthorizationException
+     */
+    public function isGrantedResourcePermission(string $resourcePermissionsName, mixed $resource): bool
+    {
+        return $this->isGrantedResourcePermissionInternal($resourcePermissionsName, $resource);
+    }
+
+    /**
+     * @deprecated Since v0.1.188, use isGrantedRole, or isGrantedResourcePermission (for resource dependent permissions) instead
+     *
      * Checks the given policy for the current user and the resource $resource. Returns true if access is granted, false otherwise.
      *
      * @throws AuthorizationException If the policy is not declared
      */
     public function isGranted(string $policyName, mixed $resource = null, ?string $resourceAlias = null): bool
     {
-        return $this->isGrantedInternal($policyName, $resource, $resourceAlias);
+        return $this->isGrantedResourcePermissionInternal($policyName, $resource);
     }
 
     /**
      * Evaluates the attribute expression $attributeExpressionName und returns its result.
      *
-     * @param mixed|null $defaultValue The value to return if the expression evaluates to 'null'
+     * @param mixed $defaultValue The value to return if the expression evaluates to 'null'
      *
      * @throws AuthorizationException If the attribute is not declared
      */
@@ -134,14 +237,55 @@ abstract class AbstractAuthorizationService
         return $this->userAttributeService->getCurrentUserAttribute($userAttributeName, $defaultValue);
     }
 
-    private function loadConfig(?array $config): void
+    /**
+     * @param ?callable(string): bool $condition Condition for the groups to be added. The default is true.
+     */
+    protected function showOutputGroupsForEntityClassIf(string $entityClass, array $outputGroups, ?callable $condition = null): void
     {
-        if ($config !== null) {
-            $roleExpressions = $config[AuthorizationConfigDefinition::POLICIES_CONFIG_NODE] ?? [];
-            $attributeExpressions = $config[AuthorizationConfigDefinition::ATTRIBUTES_CONFIG_NODE] ?? [];
+        $this->entityNormalizer->registerGetOutputGroupsToAddForEntityClassCallback($entityClass,
+            function (string $entityClass) use ($condition, $outputGroups) {
+                return $condition === null || $condition($entityClass) ? $outputGroups : [];
+            });
+    }
 
-            $this->authorizationExpressionChecker->setExpressions($roleExpressions, $attributeExpressions);
-        }
+    protected function showOutputGroupsForEntityClassIfGrantedRoles(string $entityClass, array $outputGroups, array $requiredRoles): void
+    {
+        $this->entityNormalizer->registerGetOutputGroupsToAddForEntityClassCallback($entityClass,
+            function () use ($requiredRoles, $outputGroups) {
+                foreach ($requiredRoles as $requiredRole) {
+                    if (!$this->isGrantedRole($requiredRole)) {
+                        return [];
+                    }
+                }
+
+                return $outputGroups;
+            });
+    }
+
+    /**
+     * @param callable(object, string): bool $condition
+     */
+    protected function showOutputGroupsForEntityInstanceIf(string $entityClass, array $outputGroups, callable $condition): void
+    {
+        $this->entityNormalizer->registerGetOutputGroupsToAddForEntityInstanceCallback($entityClass,
+            function (object $entityInstance, string $entityClass) use ($condition, $outputGroups) {
+                return $condition($entityInstance, $entityClass) ? $outputGroups : [];
+            });
+    }
+
+    protected function showOutputGroupsForEntityInstanceIfGrantedResourcePermissions(
+        string $entityClass, array $outputGroups, array $requiredResourcePermissions): void
+    {
+        $this->entityNormalizer->registerGetOutputGroupsToAddForEntityInstanceCallback($entityClass,
+            function (object $entityInstance) use ($requiredResourcePermissions, $outputGroups) {
+                foreach ($requiredResourcePermissions as $requiredResourcePermission) {
+                    if (!$this->isGrantedResourcePermission($requiredResourcePermission, $entityInstance)) {
+                        return [];
+                    }
+                }
+
+                return $outputGroups;
+            });
     }
 
     /**
@@ -155,8 +299,20 @@ abstract class AbstractAuthorizationService
     /**
      * @throws AuthorizationException
      */
-    private function isGrantedInternal(string $policyName, $resource, ?string $resourceAlias = null): bool
+    private function isGrantedRoleInternal(string $roleName): bool
     {
-        return $this->authorizationExpressionChecker->isGranted($this->currentAuthorizationUser, $policyName, $resource, $resourceAlias);
+        return $this->authorizationExpressionChecker->isGrantedRole($this->currentAuthorizationUser, $roleName);
+    }
+
+    /**
+     * @throws AuthorizationException
+     */
+    private function isGrantedResourcePermissionInternal(string $resourcePermission, ?object $resource): bool
+    {
+        return $this->authorizationExpressionChecker->isGrantedResourcePermission($this->currentAuthorizationUser, $resourcePermission, $resource);
+    }
+
+    protected function setUpInputAndOutputGroups(): void
+    {
     }
 }

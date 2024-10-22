@@ -141,7 +141,8 @@ class UserAttributeMuxer
 
         // Prevent endless recursions by only emitting an event for each attribute only once
         if (in_array($attributeName, $this->attributeStack, true)) {
-            throw new UserAttributeException(sprintf('infinite loop caused by a %s subscriber. authorization attribute: %s', GetUserAttributeEvent::class, $attributeName), UserAttributeException::INFINITE_EVENT_LOOP_DETECTED);
+            throw new UserAttributeException(sprintf('infinite loop caused by a %s subscriber. authorization attribute: %s',
+                GetUserAttributeEvent::class, $attributeName), UserAttributeException::INFINITE_EVENT_LOOP_DETECTED);
         }
         array_push($this->attributeStack, $attributeName);
         try {

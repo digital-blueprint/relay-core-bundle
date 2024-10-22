@@ -7,22 +7,18 @@ namespace Dbp\Relay\CoreBundle\Authorization\Serializer;
 use ApiPlatform\State\SerializerContextBuilderInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-class SerializerContextBuilder implements SerializerContextBuilderInterface
+/**
+ * @internal
+ */
+final class SerializerContextBuilder implements SerializerContextBuilderInterface
 {
     private const GROUPS_CONTEXT_KEY = 'groups';
     private const RESOURCE_CLASS_CONTEXT_KEY = 'resource_class';
-    private array $getNormalizationGroupsToAddCallbacks = [];
 
-    public function __construct(private readonly SerializerContextBuilderInterface $decorated)
+    public function __construct(
+        private readonly SerializerContextBuilderInterface $decorated,
+        private readonly EntityNormalizer $entityNormalizer)
     {
-    }
-
-    /**
-     * @param callable(string): array $getNormalizationGroupsToAddCallback
-     */
-    public function registerAddNormalizationGroupsCallback(string $entityClass, callable $getNormalizationGroupsToAddCallback): void
-    {
-        $this->getNormalizationGroupsToAddCallbacks[$entityClass] = $getNormalizationGroupsToAddCallback;
     }
 
     public function createFromRequest(Request $request, bool $normalization, ?array $extractedAttributes = null): array
@@ -30,14 +26,16 @@ class SerializerContextBuilder implements SerializerContextBuilderInterface
         $context = $this->decorated->createFromRequest($request, $normalization, $extractedAttributes);
         $resourceClass = $context[self::RESOURCE_CLASS_CONTEXT_KEY] ?? null;
 
-        if (null !== $resourceClass && isset($context[self::GROUPS_CONTEXT_KEY])) {
+        if (null !== $resourceClass) {
             if ($normalization
-                && ($getNormalizationGroupsCallback = $this->getNormalizationGroupsToAddCallback[$resourceClass] ?? null)) {
-                $context[self::GROUPS_CONTEXT_KEY] = array_merge($context[self::GROUPS_CONTEXT_KEY],
-                    $getNormalizationGroupsCallback($resourceClass));
+                && ($getOutputGroupsToAddCallbacks =
+                    $this->entityNormalizer->tryGetGetOutputGroupsToAddForEntityClassCallback($resourceClass))) {
+                foreach ($getOutputGroupsToAddCallbacks as $getOutputGroupsToAddCallback) {
+                    $context[self::GROUPS_CONTEXT_KEY] = array_merge($context[self::GROUPS_CONTEXT_KEY] ?? [],
+                        $getOutputGroupsToAddCallback($resourceClass));
+                }
             }
         }
-        // TODO: denormalization
 
         return $context;
     }

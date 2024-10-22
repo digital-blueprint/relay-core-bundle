@@ -85,7 +85,7 @@ class LocalDataAccessChecker
 
     public function isGrantedReadAccess(string $localDataAttributeName, AbstractAuthorizationService $authorizationService): bool
     {
-        return $authorizationService->isGranted(self::getReadPolicyName($localDataAttributeName));
+        return $authorizationService->isGrantedRole(self::getReadPolicyName($localDataAttributeName));
     }
 
     /**

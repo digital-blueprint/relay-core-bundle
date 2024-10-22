@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Tests;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
+use Dbp\Relay\CoreBundle\TestUtils\Internal\TestAuthenticator;
 use Dbp\Relay\CoreBundle\TestUtils\UserAuthTrait;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -27,10 +28,17 @@ class ApiTest extends ApiTestCase
         $this->assertJson($response->getContent(false));
     }
 
-    public function testSimpleProvider()
+    public function testSimpleProviderNoAuth()
     {
         $client = $this->withUser('foobar');
         $response = $client->request('GET', '/test/test-resources/foobar');
+        $this->assertSame(401, $response->getStatusCode());
+    }
+
+    public function testSimpleProviderAuth()
+    {
+        $client = $this->withUser('foobar', token: TestAuthenticator::TEST_TOKEN);
+        $response = $client->request('GET', '/test/test-resources/foobar', ['headers' => ['Authorization' => 'Bearer '.TestAuthenticator::TEST_TOKEN]]);
         $this->assertSame(200, $response->getStatusCode());
         $this->assertStringStartsWith('application/ld+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(), true, flags: JSON_THROW_ON_ERROR);

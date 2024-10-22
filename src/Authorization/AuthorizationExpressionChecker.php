@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Authorization;
 
 use Dbp\Relay\CoreBundle\ExpressionLanguage\ExpressionLanguage;
-use Dbp\Relay\CoreBundle\Helpers\Tools;
 
 /**
  * @internal
@@ -18,41 +17,40 @@ class AuthorizationExpressionChecker
     private ExpressionLanguage $expressionLanguage;
 
     /** @var string[] */
-    private array $policyExpressions;
+    private array $roleExpressions = [];
 
     /** @var string[] */
-    private array $attributeExpressions;
+    private array $resourcePermissionExpressions = [];
 
     /** @var string[] */
-    private array $policyExpressionStack;
+    private array $attributeExpressions = [];
 
     /** @var string[] */
-    private array $attributeExpressionStack;
+    private array $resourcePermissionExpressionStack = [];
+
+    /** @var string[] */
+    private array $roleExpressionStack = [];
+
+    /** @var string[] */
+    private array $attributeExpressionStack = [];
 
     public function __construct()
     {
         $this->expressionLanguage = new ExpressionLanguage();
-        $this->policyExpressions = [];
-        $this->attributeExpressions = [];
-        $this->policyExpressionStack = [];
-        $this->attributeExpressionStack = [];
     }
 
-    public function setExpressions(array $policyExpressions, array $attributeExpressions): void
+    public function setExpressions(array $roleExpressions, array $resourcePermissionExpressions, array $attributeExpressions): void
     {
-        $this->policyExpressions = $policyExpressions;
+        $this->roleExpressions = $roleExpressions;
+        $this->resourcePermissionExpressions = $resourcePermissionExpressions;
         $this->attributeExpressions = $attributeExpressions;
     }
 
-    /**
-     * @param mixed|null $defaultValue
-     *
-     * @return mixed|null
-     */
-    public function evalAttributeExpression(AuthorizationUser $currentAuthorizationUser, string $expressionName, $defaultValue = null)
+    public function evalAttributeExpression(AuthorizationUser $currentAuthorizationUser,
+        string $expressionName, mixed $defaultValue = null): mixed
     {
         if (in_array($expressionName, $this->attributeExpressionStack, true)) {
-            throw new AuthorizationException(sprintf('infinite loop caused by authorization attribute expression %s detected', $expressionName), AuthorizationException::INFINITE_EXRPESSION_LOOP_DETECTED);
+            throw new AuthorizationException(sprintf('infinite loop caused by authorization attribute expression %s detected', $expressionName), AuthorizationException::INFINITE_EXPRESSION_LOOP_DETECTED);
         }
         array_push($this->attributeExpressionStack, $expressionName);
 
@@ -71,29 +69,62 @@ class AuthorizationExpressionChecker
         }
     }
 
+    public function isGrantedRole(AuthorizationUser $currentAuthorizationUser, string $roleName)
+    {
+        if (in_array($roleName, $this->roleExpressionStack, true)) {
+            throw new AuthorizationException(sprintf('infinite loop caused by authorization role expression %s detected', $roleName),
+                AuthorizationException::INFINITE_EXPRESSION_LOOP_DETECTED);
+        }
+        array_push($this->roleExpressionStack, $roleName);
+
+        try {
+            $roleExpression = $this->roleExpressions[$roleName] ?? null;
+            if ($roleExpression === null) {
+                throw new AuthorizationException(sprintf('role \'%s\' undefined', $roleName), AuthorizationException::ROLE_UNDEFINED);
+            }
+
+            // shortcuts for popular (default) policies:
+            if ($roleExpression === 'true') {
+                return true;
+            } elseif ($roleExpression === 'false') {
+                return false;
+            }
+
+            $variables = [
+                self::USER_VARIABLE_NAME => $currentAuthorizationUser,
+            ];
+
+            return $this->expressionLanguage->evaluate($roleExpression, $variables);
+        } finally {
+            array_pop($this->roleExpressionStack);
+        }
+    }
+
     /**
      * Currently, there are no custom privileges. As opposed to roles and attributes, they can't be cached per privilege, since there values depend on the subject.
      * Might be a future requirement.
      *
      * @throws AuthorizationException
      */
-    public function isGranted(AuthorizationUser $currentAuthorizationUser, string $policyName, $resource, ?string $resourceAlias = null): bool
+    public function isGrantedResourcePermission(AuthorizationUser $currentAuthorizationUser, string $resourcePermissionName, ?object $resource): bool
     {
-        if (in_array($policyName, $this->policyExpressionStack, true)) {
-            throw new AuthorizationException(sprintf('infinite loop caused by authorization right expression %s detected', $policyName), AuthorizationException::INFINITE_EXRPESSION_LOOP_DETECTED);
+        if (in_array($resourcePermissionName, $this->resourcePermissionExpressionStack, true)) {
+            throw new AuthorizationException(sprintf('infinite loop caused by authorization right expression %s detected', $resourcePermissionName),
+                AuthorizationException::INFINITE_EXPRESSION_LOOP_DETECTED);
         }
-        array_push($this->policyExpressionStack, $policyName);
+        array_push($this->resourcePermissionExpressionStack, $resourcePermissionName);
 
         try {
-            $policyExpression = $this->policyExpressions[$policyName] ?? null;
-            if ($policyExpression === null) {
-                throw new AuthorizationException(sprintf('policy \'%s\' undefined', $policyName), AuthorizationException::POLICY_UNDEFINED);
+            $resourcePermissionExpression = $this->resourcePermissionExpressions[$resourcePermissionName] ?? null;
+            if ($resourcePermissionExpression === null) {
+                throw new AuthorizationException(sprintf('resource permission \'%s\' undefined', $resourcePermissionName),
+                    AuthorizationException::RESOURCE_PERMISSION_UNDEFINED);
             }
 
             // shortcuts for popular (default) policies:
-            if ($policyExpression === 'true') {
+            if ($resourcePermissionExpression === 'true') {
                 return true;
-            } elseif ($policyExpression === 'false') {
+            } elseif ($resourcePermissionExpression === 'false') {
                 return false;
             }
 
@@ -102,13 +133,9 @@ class AuthorizationExpressionChecker
                 self::DEFAULT_RESOURCE_VARIABLE_NAME => $resource,
             ];
 
-            if (!Tools::isNullOrEmpty($resourceAlias)) {
-                $variables[$resourceAlias] = $resource;
-            }
-
-            return $this->expressionLanguage->evaluate($policyExpression, $variables);
+            return $this->expressionLanguage->evaluate($resourcePermissionExpression, $variables);
         } finally {
-            array_pop($this->policyExpressionStack);
+            array_pop($this->resourcePermissionExpressionStack);
         }
     }
 
@@ -125,16 +152,29 @@ class AuthorizationExpressionChecker
         return array_keys($this->attributeExpressions);
     }
 
-    public function isPolicyExpressionDefined(string $policyExpressionName): bool
+    public function isRoleExpressionDefined(string $policyExpressionName): bool
     {
-        return isset($this->policyExpressions[$policyExpressionName]);
+        return isset($this->roleExpressions[$policyExpressionName]);
     }
 
     /**
      * @return string[]
      */
-    public function getPolicyExpressionNames(): array
+    public function getRoleExpressionNames(): array
     {
-        return array_keys($this->policyExpressions);
+        return array_keys($this->roleExpressions);
+    }
+
+    public function isResourcePermissionExpressionDefined(string $policyExpressionName): bool
+    {
+        return isset($this->resourcePermissionExpressions[$policyExpressionName]);
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getResourcePermissionExpressionNames(): array
+    {
+        return array_keys($this->resourcePermissionExpressions);
     }
 }

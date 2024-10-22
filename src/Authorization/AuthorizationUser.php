@@ -13,12 +13,8 @@ use Dbp\Relay\CoreBundle\User\UserAttributeException;
  */
 class AuthorizationUser
 {
-    /** @var AbstractAuthorizationService */
-    private $authorizationService;
-
-    public function __construct(AbstractAuthorizationService $authorizationService)
+    public function __construct(private readonly AbstractAuthorizationService $authorizationService)
     {
-        $this->authorizationService = $authorizationService;
     }
 
     /**
@@ -38,25 +34,37 @@ class AuthorizationUser
     }
 
     /**
-     * @param mixed $defaultValue
-     *
-     * @return mixed|null
-     *
      * @throws AuthorizationException
      */
-    public function getAttribute(string $attributeName, $defaultValue = null)
+    public function getAttribute(string $attributeName, mixed $defaultValue = null): mixed
     {
         return $this->authorizationService->getAttribute($attributeName, $defaultValue);
     }
 
     /**
-     * @param mixed $resource
+     * @deprecated Since v0.1.188, use isGrantedRole, or isGrantedResourcePermission (for resource dependent permissions) instead
      *
      * @throws AuthorizationException
      */
-    public function isGranted(string $policyName, $resource = null): bool
+    public function isGranted(string $policyName, ?object $resource = null): bool
     {
-        return $this->authorizationService->isGranted($policyName, $resource);
+        return $this->authorizationService->isGrantedResourcePermission($policyName, $resource);
+    }
+
+    /**
+     * @throws AuthorizationException
+     */
+    public function isGrantedRole(string $roleName): bool
+    {
+        return $this->authorizationService->isGrantedRole($roleName);
+    }
+
+    /**
+     * @throws AuthorizationException
+     */
+    public function isGrantedResourcePermission(string $resourcePermissionsName, object $resource): bool
+    {
+        return $this->authorizationService->isGrantedResourcePermission($resourcePermissionsName, $resource);
     }
 
     /**
