@@ -12,7 +12,7 @@ use Dbp\Relay\CoreBundle\ExpressionLanguage\ExpressionLanguage;
 class AuthorizationExpressionChecker
 {
     private const USER_VARIABLE_NAME = 'user';
-    private const DEFAULT_RESOURCE_VARIABLE_NAME = 'resource';
+    private const RESOURCE_VARIABLE_NAME = 'resource';
 
     private ExpressionLanguage $expressionLanguage;
 
@@ -52,7 +52,7 @@ class AuthorizationExpressionChecker
         if (in_array($expressionName, $this->attributeExpressionStack, true)) {
             throw new AuthorizationException(sprintf('infinite loop caused by authorization attribute expression %s detected', $expressionName), AuthorizationException::INFINITE_EXPRESSION_LOOP_DETECTED);
         }
-        array_push($this->attributeExpressionStack, $expressionName);
+        $this->attributeExpressionStack[] = $expressionName;
 
         try {
             if (($expression = $this->attributeExpressions[$expressionName] ?? null) !== null) {
@@ -75,7 +75,7 @@ class AuthorizationExpressionChecker
             throw new AuthorizationException(sprintf('infinite loop caused by authorization role expression %s detected', $roleName),
                 AuthorizationException::INFINITE_EXPRESSION_LOOP_DETECTED);
         }
-        array_push($this->roleExpressionStack, $roleName);
+        $this->roleExpressionStack[] = $roleName;
 
         try {
             $roleExpression = $this->roleExpressions[$roleName] ?? null;
@@ -106,13 +106,13 @@ class AuthorizationExpressionChecker
      *
      * @throws AuthorizationException
      */
-    public function isGrantedResourcePermission(AuthorizationUser $currentAuthorizationUser, string $resourcePermissionName, ?object $resource): bool
+    public function isGrantedResourcePermission(AuthorizationUser $currentAuthorizationUser, string $resourcePermissionName, mixed $resource): bool
     {
         if (in_array($resourcePermissionName, $this->resourcePermissionExpressionStack, true)) {
             throw new AuthorizationException(sprintf('infinite loop caused by authorization right expression %s detected', $resourcePermissionName),
                 AuthorizationException::INFINITE_EXPRESSION_LOOP_DETECTED);
         }
-        array_push($this->resourcePermissionExpressionStack, $resourcePermissionName);
+        $this->resourcePermissionExpressionStack[] = $resourcePermissionName;
 
         try {
             $resourcePermissionExpression = $this->resourcePermissionExpressions[$resourcePermissionName] ?? null;
@@ -130,7 +130,7 @@ class AuthorizationExpressionChecker
 
             $variables = [
                 self::USER_VARIABLE_NAME => $currentAuthorizationUser,
-                self::DEFAULT_RESOURCE_VARIABLE_NAME => $resource,
+                self::RESOURCE_VARIABLE_NAME => $resource,
             ];
 
             return $this->expressionLanguage->evaluate($resourcePermissionExpression, $variables);

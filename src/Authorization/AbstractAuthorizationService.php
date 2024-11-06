@@ -160,7 +160,7 @@ abstract class AbstractAuthorizationService
      * Checks the given policy for the current user and the resource $resource. Throws a 'forbidden' exception if
      * access is not granted.
      */
-    public function denyAccessUnlessIsGrantedResourcePermission(string $resourcePermissionName, object $resource): void
+    public function denyAccessUnlessIsGrantedResourcePermission(string $resourcePermissionName, mixed $resource): void
     {
         if ($this->isGrantedResourcePermissionInternal($resourcePermissionName, $resource) === false) {
             throw new ApiError(Response::HTTP_FORBIDDEN);
@@ -309,7 +309,7 @@ abstract class AbstractAuthorizationService
     /**
      * @throws AuthorizationException
      */
-    private function isGrantedResourcePermissionInternal(string $resourcePermission, ?object $resource): bool
+    private function isGrantedResourcePermissionInternal(string $resourcePermission, mixed $resource): bool
     {
         return $this->authorizationExpressionChecker->isGrantedResourcePermission($this->currentAuthorizationUser, $resourcePermission, $resource);
     }
