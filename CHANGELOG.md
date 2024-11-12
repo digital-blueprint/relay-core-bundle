@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## v0.1.191
+
+* Update the vendored JS bundle containing the API docs login component. Most importantly
+  this updates the Keycloak JS adapter to the latest version.
+
 ## v0.1.190
 
 * Divide access control policies into 'roles' (resource dependent) and 'resource permissions' (resource dependent),
