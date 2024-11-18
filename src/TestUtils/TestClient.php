@@ -14,6 +14,7 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 class TestClient
 {
     public const TEST_USER_IDENTIFIER = 'testuser';
+    public const TEST_TOKEN = TestAuthenticator::TEST_TOKEN;
 
     protected Client $client;
 

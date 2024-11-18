@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## v0.1.192
+
+* Rename to AuthorizationConfigDefinition::addResourcePermission
+* Expose test token constant
+
 ## v0.1.191
 
 * Update the vendored JS bundle containing the API docs login component. Most importantly

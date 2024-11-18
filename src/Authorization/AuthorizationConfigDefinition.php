@@ -52,9 +52,9 @@ class AuthorizationConfigDefinition
         return $this;
     }
 
-    public function addResourceActions(string $resourceActionsName, string $defaultExpression = 'false', string $info = ''): AuthorizationConfigDefinition
+    public function addResourcePermission(string $resourcePermissionName, string $defaultExpression = 'false', string $info = ''): AuthorizationConfigDefinition
     {
-        Tools::pushToSubarray($this->configDefinition, self::RESOURCE_PERMISSIONS_KEY, [$resourceActionsName, $defaultExpression, $info]);
+        Tools::pushToSubarray($this->configDefinition, self::RESOURCE_PERMISSIONS_KEY, [$resourcePermissionName, $defaultExpression, $info]);
 
         return $this;
     }
