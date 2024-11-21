@@ -57,10 +57,9 @@ class EntityNormalizer implements NormalizerAwareInterface, NormalizerInterface
 
     public function normalize(mixed $object, ?string $format = null, array $context = []): mixed
     {
-        $context[self::ALREADY_CALLED_CONTEXT_KEY] = true;
+        $this->setAlreadyNormalized($object, $context);
 
         $resourceClass = $context[self::RESOURCE_CLASS_CONTEXT_KEY];
-
         foreach ($this->getOutputGroupsToAddForEntityInstanceCallbacks[$resourceClass] as $getOutputGroupsToAddForEntityInstanceCallback) {
             $context[self::GROUPS_CONTEXT_KEY] = array_merge($context[self::GROUPS_CONTEXT_KEY] ?? [],
                 $getOutputGroupsToAddForEntityInstanceCallback($object, $resourceClass));
@@ -71,17 +70,27 @@ class EntityNormalizer implements NormalizerAwareInterface, NormalizerInterface
 
     public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
     {
-        // WORKAROUND: get_class($data) is not safe for the given $data, since it api-platform/doctrine? uses proxy classes
-        // for entities, which makes the classname unreliable (instanceof would work, but not with our callback map).
+        // WORKAROUND: get_class($data) is not safe for the given $data, since api-platform/doctrine?
+        // (sometimes) uses proxy classes for entities,
+        // which makes the classname unreliable (instanceof would work, but not with our callback map).
         // Therefore, we are using the resource class from the context here
-        // BUT have to exclude paginators which seem to have the resource class of the items that they hold.
-        if (isset($context[self::ALREADY_CALLED_CONTEXT_KEY]) || !is_object($data) || $data instanceof PartialPaginatorInterface) {
-            return false;
-        }
+        // YET have to exclude paginators which seem to have the resource class of the items that they hold.
+        return is_object($data)
+            && false === $data instanceof PartialPaginatorInterface
+            && isset($this->getOutputGroupsToAddForEntityInstanceCallbacks[$context[self::RESOURCE_CLASS_CONTEXT_KEY] ?? null])
+            && false === $this->wasAlreadyNormalized($data, $context);
+    }
 
-        $resourceClass = $context[self::RESOURCE_CLASS_CONTEXT_KEY] ?? null;
+    private function setAlreadyNormalized(object $entity, array &$context): void
+    {
+        // we do already called prevention on an object basis, bacause when calling this normalizer only once
+        // per root entity (like in the api-platform docs) the normalization
+        // of relations (child entities) doesn't work as intented (because they inherit the parent context(s))
+        $context[self::ALREADY_CALLED_CONTEXT_KEY][spl_object_hash($entity)] = true;
+    }
 
-        return $resourceClass !== null
-            && isset($this->getOutputGroupsToAddForEntityInstanceCallbacks[$resourceClass]);
+    private function wasAlreadyNormalized(object $entity, array &$context): bool
+    {
+        return isset($context[self::ALREADY_CALLED_CONTEXT_KEY][spl_object_hash($entity)]);
     }
 }

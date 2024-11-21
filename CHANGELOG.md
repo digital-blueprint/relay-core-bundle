@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Fix EntityNormalizer to work with entity relations (child entities)
+
 ## v0.1.192
 
 * Rename to AuthorizationConfigDefinition::addResourcePermission
