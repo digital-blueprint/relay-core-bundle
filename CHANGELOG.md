@@ -3,6 +3,7 @@
 ## Unreleased
 
 * Fix EntityNormalizer to work with entity relations (child entities)
+* The deprecated bundle config key "messenger_transport_dsn" has been removed. Use "queue_dsn" instead.
 
 ## v0.1.192
 
