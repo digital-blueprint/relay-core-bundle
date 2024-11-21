@@ -274,10 +274,6 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
 
         // https://symfony.com/doc/4.4/messenger.html#transports-async-queued-messages
         $messengerTransportDsn = $config['queue_dsn'];
-        if ($messengerTransportDsn === '') {
-            // backward compatibility
-            $messengerTransportDsn = $config['messenger_transport_dsn'];
-        }
         $unusedMessages = [];
         if ($container->hasParameter('dbp_api.messenger_routing')) {
             $extraRouting = $container->getParameter('dbp_api.messenger_routing');
