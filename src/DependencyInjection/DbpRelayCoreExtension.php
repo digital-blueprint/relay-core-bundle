@@ -268,44 +268,41 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
             'channels' => array_keys(self::getLoggingChannels($container)),
         ]);
 
-        $routing = [
-            TestMessage::class => QueueUtils::QUEUE_TRANSPORT_NAME,
-        ];
-
+        // Collect all registered messages for the routing config
         // https://symfony.com/doc/4.4/messenger.html#transports-async-queued-messages
         $messengerTransportDsn = $config['queue_dsn'];
-        $unusedMessages = [];
+        $messengerRouting = [];
         if ($container->hasParameter('dbp_api.messenger_routing')) {
-            $extraRouting = $container->getParameter('dbp_api.messenger_routing');
-            $routing = array_merge($routing, $extraRouting);
+            $messengerRouting = $container->getParameter('dbp_api.messenger_routing');
+        }
 
-            if ($messengerTransportDsn === '') {
-                $unusedMessages = array_keys($extraRouting);
-            }
-        } else {
-            // By always setting a transport, we ensure that the messenger commands work in all cases, even if they
-            // are not stricly needed
-            if ($messengerTransportDsn === '') {
-                $messengerTransportDsn = 'in-memory://dummy-queue-not-configured';
+        // If no transport is configured, we set a dummy one, so at least everything works (except messages will
+        // never be handled). In the health check we error out if this is the case but there are messages to be routed.
+        $unusedMessages = [];
+        if ($messengerTransportDsn === '') {
+            $messengerTransportDsn = 'in-memory://dummy-queue-not-configured';
+            if ($messengerRouting) {
+                $unusedMessages = array_keys($messengerRouting);
             }
         }
         $container->setParameter('dbp_api.messenger_unused_messages', $unusedMessages);
 
-        $messengerConfig = [
-            'transports' => [
-                QueueUtils::QUEUE_TRANSPORT_NAME => [
-                    'dsn' => $messengerTransportDsn,
-                    'failure_transport' => QueueUtils::QUEUE_TRANSPORT_FAILED_NAME,
-                ],
-                QueueUtils::QUEUE_TRANSPORT_FAILED_NAME => $messengerTransportDsn,
-            ],
-            'routing' => $routing,
-            // https://symfony.com/blog/new-in-symfony-5-4-messenger-improvements
-            'reset_on_message' => true,
-        ];
-
         $container->loadFromExtension('framework', [
-            'messenger' => $messengerConfig,
+            'messenger' => [
+                'transports' => [
+                    QueueUtils::QUEUE_TRANSPORT_NAME => [
+                        'dsn' => $messengerTransportDsn,
+                        'failure_transport' => QueueUtils::QUEUE_TRANSPORT_FAILED_NAME,
+                    ],
+                    QueueUtils::QUEUE_TRANSPORT_FAILED_NAME => $messengerTransportDsn,
+                ],
+                'routing' => [
+                    TestMessage::class => QueueUtils::QUEUE_TRANSPORT_NAME,
+                    ...$messengerRouting,
+                ],
+                // https://symfony.com/blog/new-in-symfony-5-4-messenger-improvements
+                'reset_on_message' => true,
+            ],
         ]);
 
         // https://symfony.com/doc/5.3/components/lock.html

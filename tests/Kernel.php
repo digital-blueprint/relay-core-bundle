@@ -60,6 +60,8 @@ class Kernel extends BaseKernel
             ],
         ]);
 
+        // Inspecting the failed transport doesn't work with the in-memory transport, so setup a sqlite
+        // transport for testing.
         $container->extension('doctrine', [
             'dbal' => [
                 'connections' => [
