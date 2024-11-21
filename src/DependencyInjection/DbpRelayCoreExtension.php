@@ -15,7 +15,6 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use Symfony\Component\HttpFoundation\Session\SessionFactoryInterface;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
 class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExtensionInterface
@@ -119,39 +118,31 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
             ],
         ]);
 
-        // Disable for <3.x. In 3.x this doesn't exist and fails
-        if (class_exists('ApiPlatform\Core\Bridge\Symfony\Bundle\ApiPlatformBundle')) {
-            $container->prependExtensionConfig('api_platform', [
-                'metadata_backward_compatibility_layer' => false,
-                'path_segment_name_generator' => 'api_platform.path_segment_name_generator.dash',
-            ]);
-        } else {
-            $container->prependExtensionConfig('api_platform', [
-                'formats' => [
-                    'jsonld' => ['application/ld+json'],
+        $container->prependExtensionConfig('api_platform', [
+            'formats' => [
+                'jsonld' => ['application/ld+json'],
+            ],
+            'error_formats' => [
+                'jsonld' => ['application/ld+json'],
+            ],
+            'docs_formats' => [
+                'jsonld' => ['application/ld+json'],
+                'jsonopenapi' => ['application/vnd.openapi+json'],
+                'html' => ['text/html'],
+            ],
+            'event_listeners_backward_compatibility_layer' => false,
+            'keep_legacy_inflector' => false,
+            'defaults' => [
+                'extra_properties' => [
+                    'standard_put' => true,
+                    'rfc_7807_compliant_errors' => true,
                 ],
-                'error_formats' => [
-                    'jsonld' => ['application/ld+json'],
+                'normalization_context' => [
+                    'skip_null_values' => false,
                 ],
-                'docs_formats' => [
-                    'jsonld' => ['application/ld+json'],
-                    'jsonopenapi' => ['application/vnd.openapi+json'],
-                    'html' => ['text/html'],
-                ],
-                'event_listeners_backward_compatibility_layer' => false,
-                'keep_legacy_inflector' => false,
-                'defaults' => [
-                    'extra_properties' => [
-                        'standard_put' => true,
-                        'rfc_7807_compliant_errors' => true,
-                    ],
-                    'normalization_context' => [
-                        'skip_null_values' => false,
-                    ],
-                ],
-                'path_segment_name_generator' => 'api_platform.metadata.path_segment_name_generator.dash',
-            ]);
-        }
+            ],
+            'path_segment_name_generator' => 'api_platform.metadata.path_segment_name_generator.dash',
+        ]);
 
         // Improved logging defaults
         $container->loadFromExtension('framework', [
