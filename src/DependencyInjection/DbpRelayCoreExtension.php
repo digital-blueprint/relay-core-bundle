@@ -313,13 +313,9 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
                 QueueUtils::QUEUE_TRANSPORT_FAILED_NAME => $messengerTransportDsn,
             ],
             'routing' => $routing,
+            // https://symfony.com/blog/new-in-symfony-5-4-messenger-improvements
+            'reset_on_message' => true,
         ];
-
-        // Symfony 5.4+
-        // https://symfony.com/blog/new-in-symfony-5-4-messenger-improvements
-        if (interface_exists(SessionFactoryInterface::class)) {
-            $messengerConfig['reset_on_message'] = true;
-        }
 
         $container->loadFromExtension('framework', [
             'messenger' => $messengerConfig,
