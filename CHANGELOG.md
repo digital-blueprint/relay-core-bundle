@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.193
+
 * Add support for PHP 8.4
 * Fix EntityNormalizer to work with entity relations (child entities)
 * The deprecated bundle config key "messenger_transport_dsn" has been removed. Use "queue_dsn" instead.
