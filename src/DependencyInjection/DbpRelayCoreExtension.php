@@ -144,32 +144,35 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
             'path_segment_name_generator' => 'api_platform.metadata.path_segment_name_generator.dash',
         ]);
 
-        // Improved logging defaults
+        // Improved logging defaults:
+        // Starting with Symfony 7.0 it is recommended to enable php_errors.logs also in production.
+        // There is no good reason to split up logs in any case, so force enable it.
+        // See https://github.com/symfony/symfony/pull/51325 for the upstream change.
+        // Additionally, with 7.1 the defaults for which errors get which logging levels was cleaned
+        // up to match what leads to an error in the debug env, so backport that too by copying the mapping.
+        // See https://github.com/symfony/symfony/pull/54046 for the upstream change.
+        $loggerMapping = [
+            \E_DEPRECATED => LogLevel::INFO,
+            \E_USER_DEPRECATED => LogLevel::INFO,
+            \E_NOTICE => LogLevel::ERROR,
+            \E_USER_NOTICE => LogLevel::ERROR,
+            \E_WARNING => LogLevel::ERROR,
+            \E_USER_WARNING => LogLevel::ERROR,
+            \E_COMPILE_WARNING => LogLevel::ERROR,
+            \E_CORE_WARNING => LogLevel::ERROR,
+            \E_USER_ERROR => LogLevel::CRITICAL,
+            \E_RECOVERABLE_ERROR => LogLevel::CRITICAL,
+            \E_COMPILE_ERROR => LogLevel::CRITICAL,
+            \E_PARSE => LogLevel::CRITICAL,
+            \E_ERROR => LogLevel::CRITICAL,
+            \E_CORE_ERROR => LogLevel::CRITICAL,
+        ];
+        if (\PHP_VERSION_ID < 80400) {
+            $loggerMapping[\E_STRICT] = LogLevel::ERROR;
+        }
         $container->loadFromExtension('framework', [
             'php_errors' => [
-                // Starting with Symfony 7.0 it is recommended to enable php_errors.logs also in production.
-                // There is no good reason to split up logs in any case, so force enable it.
-                // See https://github.com/symfony/symfony/pull/51325 for the upstream change.
-                // Additionally, with 7.1 the defaults for which errors get which logging levels was cleaned
-                // up to match what leads to an error in the debug env, so backport that too by copying the mapping.
-                // See https://github.com/symfony/symfony/pull/54046 for the upstream change.
-                'log' => [
-                    \E_DEPRECATED => LogLevel::INFO,
-                    \E_USER_DEPRECATED => LogLevel::INFO,
-                    \E_NOTICE => LogLevel::ERROR,
-                    \E_USER_NOTICE => LogLevel::ERROR,
-                    \E_STRICT => LogLevel::ERROR,
-                    \E_WARNING => LogLevel::ERROR,
-                    \E_USER_WARNING => LogLevel::ERROR,
-                    \E_COMPILE_WARNING => LogLevel::ERROR,
-                    \E_CORE_WARNING => LogLevel::ERROR,
-                    \E_USER_ERROR => LogLevel::CRITICAL,
-                    \E_RECOVERABLE_ERROR => LogLevel::CRITICAL,
-                    \E_COMPILE_ERROR => LogLevel::CRITICAL,
-                    \E_PARSE => LogLevel::CRITICAL,
-                    \E_ERROR => LogLevel::CRITICAL,
-                    \E_CORE_ERROR => LogLevel::CRITICAL,
-                ],
+                'log' => $loggerMapping,
             ],
         ]);
 
