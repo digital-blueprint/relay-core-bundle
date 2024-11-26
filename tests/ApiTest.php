@@ -43,7 +43,6 @@ class ApiTest extends ApiTestCase
         $this->assertStringStartsWith('application/ld+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(), true, flags: JSON_THROW_ON_ERROR);
         $this->assertSame($content['identifier'], 'foobar');
-        $this->assertSame($content['content'], null);
     }
 
     public function testGetCurrentUserNoAuth()

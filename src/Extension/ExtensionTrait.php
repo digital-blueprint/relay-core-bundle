@@ -14,7 +14,7 @@ trait ExtensionTrait
      */
     public function addResourceClassDirectory(ContainerBuilder $container, string $directory): void
     {
-        $this->extendArrayParameter(
+        self::extendArrayParameter(
             $container, 'api_platform.resource_class_directories', [$directory]);
     }
 
@@ -24,7 +24,7 @@ trait ExtensionTrait
      */
     public function addRouteResource(ContainerBuilder $container, $resource, ?string $type = null): void
     {
-        $this->extendArrayParameter(
+        self::extendArrayParameter(
             $container, 'dbp_api.route_resources', [[$resource, $type]]);
     }
 
@@ -38,7 +38,7 @@ trait ExtensionTrait
         if (!in_array($method, $allowed, true)) {
             throw new \RuntimeException('Method can only be one of: '.implode(', ', $allowed));
         }
-        $this->extendArrayParameter($container, 'dbp_api.paths_to_hide', [[$path, $method]]);
+        self::extendArrayParameter($container, 'dbp_api.paths_to_hide', [[$path, $method]]);
     }
 
     /**
@@ -46,8 +46,8 @@ trait ExtensionTrait
      */
     public function addQueueMessageClass(ContainerBuilder $container, string $messageClass): void
     {
-        $this->ensureInPrepend($container);
-        $this->extendArrayParameter($container, 'dbp_api.messenger_routing', [
+        self::ensureInPrepend($container);
+        self::extendArrayParameter($container, 'dbp_api.messenger_routing', [
             $messageClass => Utils::QUEUE_TRANSPORT_NAME,
         ]);
     }
@@ -59,8 +59,8 @@ trait ExtensionTrait
      */
     public function addExposeHeader(ContainerBuilder $container, string $headerName)
     {
-        $this->ensureInPrepend($container);
-        $this->extendArrayParameter(
+        self::ensureInPrepend($container);
+        self::extendArrayParameter(
             $container, 'dbp_api.expose_headers', [$headerName]
         );
     }
@@ -72,8 +72,8 @@ trait ExtensionTrait
      */
     public function addAllowHeader(ContainerBuilder $container, string $headerName)
     {
-        $this->ensureInPrepend($container);
-        $this->extendArrayParameter(
+        self::ensureInPrepend($container);
+        self::extendArrayParameter(
             $container, 'dbp_api.allow_headers', [$headerName]
         );
     }
@@ -83,13 +83,13 @@ trait ExtensionTrait
      */
     public function registerEntityManager(ContainerBuilder $container, string $entityManagerName): void
     {
-        $this->ensureInPrepend($container);
-        $this->extendArrayParameter(
+        self::ensureInPrepend($container);
+        self::extendArrayParameter(
             $container, 'dbp_api.entity_managers', [$entityManagerName]
         );
     }
 
-    private function ensureInPrepend(ContainerBuilder $container)
+    private static function ensureInPrepend(ContainerBuilder $container): void
     {
         // Some things can only be called in prepend, so that the core bundle can forward them
         // to other bundles in prepend() as well.
@@ -98,7 +98,7 @@ trait ExtensionTrait
         }
     }
 
-    private function extendArrayParameter(ContainerBuilder $container, string $parameter, array $values)
+    private static function extendArrayParameter(ContainerBuilder $container, string $parameter, array $values): void
     {
         if (!$container->hasParameter($parameter)) {
             $container->setParameter($parameter, []);
@@ -123,8 +123,8 @@ trait ExtensionTrait
      */
     public function registerLoggingChannel(ContainerBuilder $container, string $channelName, bool $mask = true): void
     {
-        $this->ensureInPrepend($container);
-        $this->extendArrayParameter(
+        self::ensureInPrepend($container);
+        self::extendArrayParameter(
             $container, 'dbp_api.logging_channels', [[$channelName, $mask]]
         );
     }

@@ -6,9 +6,13 @@ namespace Dbp\Relay\CoreBundle\Tests;
 
 use ApiPlatform\Symfony\Bundle\ApiPlatformBundle;
 use Dbp\Relay\CoreBundle\DbpRelayCoreBundle;
-use Dbp\Relay\CoreBundle\Tests\TestApi\TestResource;
-use Dbp\Relay\CoreBundle\Tests\TestApi\TestResourceController;
-use Dbp\Relay\CoreBundle\Tests\TestApi\TestResourceProvider;
+use Dbp\Relay\CoreBundle\Tests\TestApi\Authorization\TestApiAuthorizationService;
+use Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceController;
+use Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceProcessor;
+use Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceProvider;
+use Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestSubResourceProcessor;
+use Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestSubResourceProvider;
+use Dbp\Relay\CoreBundle\Tests\TestApi\Service\TestResourceService;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Nelmio\CorsBundle\NelmioCorsBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
@@ -23,6 +27,8 @@ use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 class Kernel extends BaseKernel
 {
     use MicroKernelTrait;
+
+    public const TEST_ENTITY_MANAGER_ID = 'dbp_relay_core_test';
 
     public function registerBundles(): iterable
     {
@@ -43,9 +49,14 @@ class Kernel extends BaseKernel
 
     protected function configureContainer(ContainerConfigurator $container)
     {
+        $container->services()->set(TestApiAuthorizationService::class)->public()->autoconfigure()->autowire()
+            ->call('setConfig', [TestApiAuthorizationService::getTestConfig()]);
+        $container->services()->set(TestResourceService::class)->public()->autoconfigure()->autowire();
         $container->services()->set(TestResourceController::class)->public()->autoconfigure()->autowire();
-        $container->services()->set(TestResource::class)->public()->autoconfigure()->autowire();
+        $container->services()->set(TestResourceProcessor::class)->public()->autoconfigure()->autowire();
         $container->services()->set(TestResourceProvider::class)->public()->autoconfigure()->autowire();
+        $container->services()->set(TestSubResourceProcessor::class)->public()->autoconfigure()->autowire();
+        $container->services()->set(TestSubResourceProvider::class)->public()->autoconfigure()->autowire();
 
         $container->import('@DbpRelayCoreBundle/Resources/config/services_test.yaml');
         $container->extension('framework', [
@@ -65,16 +76,31 @@ class Kernel extends BaseKernel
         $container->extension('doctrine', [
             'dbal' => [
                 'connections' => [
-                    'in_memory_test' => [
+                    self::TEST_ENTITY_MANAGER_ID => [
                         'url' => 'sqlite:///:memory:',
                         'driver' => 'pdo_sqlite',
+                    ],
+                ],
+            ],
+            'orm' => [
+                'entity_managers' => [
+                    self::TEST_ENTITY_MANAGER_ID => [
+                        'naming_strategy' => 'doctrine.orm.naming_strategy.underscore_number_aware',
+                        'connection' => self::TEST_ENTITY_MANAGER_ID,
+                        'mappings' => [
+                            self::TEST_ENTITY_MANAGER_ID => [
+                                'type' => 'attribute',
+                                'dir' => __DIR__.'/TestApi/Entity',
+                                'prefix' => 'Dbp\Relay\CoreBundle\Tests\TestApi\Entity',
+                            ],
+                        ],
                     ],
                 ],
             ],
         ]);
 
         $container->extension('dbp_relay_core', [
-            'queue_dsn' => 'doctrine://in_memory_test',
+            'queue_dsn' => 'doctrine://dbp_relay_core_test',
         ]);
     }
 }

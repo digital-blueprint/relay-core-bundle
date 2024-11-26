@@ -1,11 +1,26 @@
 resources:
-  Dbp\Relay\CoreBundle\Tests\TestApi\TestResource:
+  Dbp\Relay\CoreBundle\Tests\TestApi\Entity\TestResource:
     normalizationContext:
       groups: ["TestResource:output"]
+    denormalizationContext:
+      groups: [ "TestResource:input" ]
 
     operations:
       ApiPlatform\Metadata\Get:
-        provider: Dbp\Relay\CoreBundle\Tests\TestApi\TestResourceProvider
+        provider: Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceProvider
+        uriTemplate: "/test/test-resources/{identifier}"
+
+      ApiPlatform\Metadata\GetCollection:
+        provider: Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceProvider
+        uriTemplate: "/test/test-resources"
+
+      ApiPlatform\Metadata\Post:
+        processor: Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceProcessor
+        uriTemplate: "/test/test-resources"
+
+      ApiPlatform\Metadata\Delete:
+        provider: Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceProvider
+        processor: Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceProcessor
         uriTemplate: "/test/test-resources/{identifier}"
 
       custom_controller_get_json:
@@ -16,15 +31,39 @@ resources:
           json: ['application/json']
         read: false
         uriTemplate: "/test/test-resources/{identifier}/custom_controller_json"
-        controller: Dbp\Relay\CoreBundle\Tests\TestApi\TestResourceController
+        controller: Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceController
 
       custom_controller_get_default:
         class: ApiPlatform\Metadata\Get
         method: GET
         read: false
         uriTemplate: "/test/test-resources/{identifier}/custom_controller"
-        controller: Dbp\Relay\CoreBundle\Tests\TestApi\TestResourceController
+        controller: Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceController
 
     properties:
       identifier:
         identifier: true
+
+  Dbp\Relay\CoreBundle\Tests\TestApi\Entity\TestSubResource:
+    normalizationContext:
+      groups: [ "TestSubResource:output" ]
+    denormalizationContext:
+      groups: [ "TestSubResource:input" ]
+
+    operations:
+      ApiPlatform\Metadata\Get:
+        provider: Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestSubResourceProvider
+        uriTemplate: "/test/test-sub-resources/{identifier}"
+
+      ApiPlatform\Metadata\GetCollection:
+        provider: Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestSubResourceProvider
+        uriTemplate: "/test/test-sub-resources"
+
+      ApiPlatform\Metadata\Post:
+        processor: Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestSubResourceProcessor
+        uriTemplate: "/test/test-sub-resources"
+
+      ApiPlatform\Metadata\Delete:
+        provider: Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestSubResourceProvider
+        processor: Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestSubResourceProcessor
+        uriTemplate: "/test/test-sub-resources/{identifier}"

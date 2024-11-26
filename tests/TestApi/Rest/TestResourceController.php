@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\CoreBundle\Tests\TestApi;
+namespace Dbp\Relay\CoreBundle\Tests\TestApi\Rest;
 
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Rest\CustomControllerTrait;
+use Dbp\Relay\CoreBundle\Tests\TestApi\Entity\TestResource;
+use Dbp\Relay\CoreBundle\Tests\TestApi\Service\TestResourceService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,6 +16,10 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 class TestResourceController extends AbstractController
 {
     use CustomControllerTrait;
+
+    public function __construct(private readonly TestResourceService $testResourceService)
+    {
+    }
 
     /**
      * @throws ApiError
