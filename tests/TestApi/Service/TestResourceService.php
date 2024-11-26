@@ -17,7 +17,7 @@ class TestResourceService
 
     public function addTestResource(TestResource $testResource): TestResource
     {
-        $testResource->setIdentifier((string) Uuid::v7());
+        $testResource->setIdentifier((string) Uuid::v4());
 
         $this->entityManager->persist($testResource);
         $this->entityManager->flush();
@@ -44,7 +44,7 @@ class TestResourceService
 
     public function addTestSubResource(TestSubResource $testSubResource): TestSubResource
     {
-        $testSubResource->setIdentifier((string) Uuid::v7());
+        $testSubResource->setIdentifier((string) Uuid::v4());
 
         $this->entityManager->persist($testSubResource);
         $this->entityManager->flush();

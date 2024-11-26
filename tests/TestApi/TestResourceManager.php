@@ -29,7 +29,7 @@ class TestResourceManager
         ?string $secret = self::SECRET_DEFAULT): TestResource
     {
         $testResource = new TestResource();
-        $testResource->setIdentifier((string) Uuid::v7());
+        $testResource->setIdentifier((string) Uuid::v4());
         $testResource->setContent($content);
         $testResource->setIsPublic($isPublic);
         $testResource->setSecret($secret);
@@ -57,7 +57,7 @@ class TestResourceManager
         bool $isPublic = self::IS_PUBLIC_DEFAULT, ?string $password = self::PASSWORD_DEFAULT): TestSubResource
     {
         $testSubResource = new TestSubResource();
-        $testSubResource->setIdentifier((string) Uuid::v7());
+        $testSubResource->setIdentifier((string) Uuid::v4());
         $testSubResource->setTestResource($testResource);
         $testSubResource->setIsPublic($isPublic);
         $testSubResource->setPassword($password);
