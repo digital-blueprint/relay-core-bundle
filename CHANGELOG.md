@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## v0.1.194
+
+* Add DoctrineConfiguration to help bundles with the Doctrine setup
+* Add test utilities (like the TestEntityManager) to help bundles to test using an in-memory database 
+
 ## v0.1.193
 
 * Add support for PHP 8.4
