@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Add Doctrine/QueryHelper utility class
+
 ## v0.1.194
 
 * Add DoctrineConfiguration to help bundles with the Doctrine setup

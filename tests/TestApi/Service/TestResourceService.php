@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\TestApi\Service;
 
+use Dbp\Relay\CoreBundle\Doctrine\QueryHelper;
+use Dbp\Relay\CoreBundle\Rest\Options;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Entity\TestResource;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Entity\TestSubResource;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,54 +20,48 @@ class TestResourceService
     public function addTestResource(TestResource $testResource): TestResource
     {
         $testResource->setIdentifier((string) Uuid::v4());
-
-        $this->entityManager->persist($testResource);
-        $this->entityManager->flush();
+        QueryHelper::saveEntity($testResource, $this->entityManager);
 
         return $testResource;
     }
 
     public function getTestResource(string $identifier): ?TestResource
     {
-        return $this->entityManager->getRepository(TestResource::class)->findOneBy(['identifier' => $identifier]);
+        return QueryHelper::tryGetEntityById($identifier, TestResource::class, $this->entityManager);
     }
 
-    public function getTestResources(int $currentPageNumber, int $maxNumItemsPerPage, array $filters = []): array
+    public function getTestResources(int $currentPageNumber, int $maxNumItemsPerPage, array $filters = [], array $options = []): array
     {
-        // TODO
-        return [];
+        return QueryHelper::getEntities(TestResource::class, $this->entityManager,
+            $currentPageNumber, $maxNumItemsPerPage, Options::getFilter($options));
     }
 
     public function removeTestResource(TestResource $testResource): void
     {
-        $this->entityManager->remove($testResource);
-        $this->entityManager->flush();
+        QueryHelper::removeEntity($testResource, $this->entityManager);
     }
 
     public function addTestSubResource(TestSubResource $testSubResource): TestSubResource
     {
         $testSubResource->setIdentifier((string) Uuid::v4());
-
-        $this->entityManager->persist($testSubResource);
-        $this->entityManager->flush();
+        QueryHelper::saveEntity($testSubResource, $this->entityManager);
 
         return $testSubResource;
     }
 
     public function removeTestSubResource(TestSubResource $testSubResource): void
     {
-        $this->entityManager->remove($testSubResource);
-        $this->entityManager->flush();
+        QueryHelper::removeEntity($testSubResource, $this->entityManager);
     }
 
     public function getTestSubResource(string $identifier): ?TestSubResource
     {
-        return $this->entityManager->getRepository(TestSubResource::class)->findOneBy(['identifier' => $identifier]);
+        return QueryHelper::tryGetEntityById($identifier, TestSubResource::class, $this->entityManager);
     }
 
-    public function getTestSubResources(int $currentPageNumber, int $maxNumItemsPerPage, array $filters = []): array
+    public function getTestSubResources(int $currentPageNumber, int $maxNumItemsPerPage, array $filters = [], array $options = []): array
     {
-        // TODO
-        return [];
+        return QueryHelper::getEntities(TestSubResource::class, $this->entityManager,
+            $currentPageNumber, $maxNumItemsPerPage, Options::getFilter($options));
     }
 }

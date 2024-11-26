@@ -51,6 +51,6 @@ class TestResourceProvider extends AbstractDataProvider
 
     protected function getPage(int $currentPageNumber, int $maxNumItemsPerPage, array $filters = [], array $options = []): array
     {
-        return $this->testResourceService->getTestResources($currentPageNumber, $maxNumItemsPerPage, $filters);
+        return $this->testResourceService->getTestResources($currentPageNumber, $maxNumItemsPerPage, $filters, $options);
     }
 }

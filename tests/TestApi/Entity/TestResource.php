@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Table(name: 'test_resources')]
 #[ORM\Entity]
@@ -22,6 +23,10 @@ class TestResource
     #[Groups(['TestResource:input', 'TestResource:output'])]
     private ?string $content = null;
 
+    #[ORM\Column(type: 'integer', nullable: true)]
+    #[Groups(['TestResource:input', 'TestResource:output'])]
+    private ?int $number = null;
+
     #[ORM\Column(type: 'boolean')]
     #[Groups(['TestResource:input', 'TestResource:output', 'TestSubResource:output'])]
     private bool $isPublic = false;
@@ -33,6 +38,17 @@ class TestResource
     #[ORM\OneToMany(targetEntity: TestSubResource::class, mappedBy: 'testResource')]
     #[Groups(['TestResource:output'])]
     private Collection $subResources;
+
+    public static function createTestResource(): TestResource
+    {
+        $resource = new TestResource();
+        $resource->setIdentifier((string) Uuid::v4());
+        $resource->setContent('This is a test resource.');
+        $resource->setIsPublic(true);
+        $resource->setSecret('test-secret');
+
+        return $resource;
+    }
 
     public function __construct()
     {
@@ -57,6 +73,16 @@ class TestResource
     public function setContent(?string $content): void
     {
         $this->content = $content;
+    }
+
+    public function getNumber(): ?int
+    {
+        return $this->number;
+    }
+
+    public function setNumber(?int $number): void
+    {
+        $this->number = $number;
     }
 
     public function getIsPublic(): bool

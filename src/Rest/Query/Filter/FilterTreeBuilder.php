@@ -125,9 +125,57 @@ class FilterTreeBuilder
      *
      * @throws FilterException
      */
+    public function iStartsWith(string $field, string $value): FilterTreeBuilder
+    {
+        $this->currentNode->appendChild(new ConditionNode($field, OperatorType::I_STARTS_WITH_OPERATOR, $value));
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     *
+     * @throws FilterException
+     */
+    public function iEndsWith(string $field, string $value): FilterTreeBuilder
+    {
+        $this->currentNode->appendChild(new ConditionNode($field, OperatorType::I_ENDS_WITH_OPERATOR, $value));
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     *
+     * @throws FilterException
+     */
     public function equals(string $field, $value): FilterTreeBuilder
     {
         $this->currentNode->appendChild(new ConditionNode($field, OperatorType::EQUALS_OPERATOR, $value));
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     *
+     * @throws FilterException
+     */
+    public function greaterThanOrEqual(string $string, int $int): FilterTreeBuilder
+    {
+        $this->currentNode->appendChild(new ConditionNode($string, OperatorType::GREATER_THAN_OR_EQUAL_OPERATOR, $int));
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     *
+     * @throws FilterException
+     */
+    public function lessThanOrEqual(string $string, int $int): FilterTreeBuilder
+    {
+        $this->currentNode->appendChild(new ConditionNode($string, OperatorType::LESS_THAN_OR_EQUAL_OPERATOR, $int));
 
         return $this;
     }

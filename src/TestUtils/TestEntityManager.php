@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\TestUtils;
 
+use Dbp\Relay\CoreBundle\Doctrine\QueryHelper;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
-use Dbp\Relay\CoreBundle\Rest\Query\Pagination\Pagination;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -51,8 +51,7 @@ class TestEntityManager
     public function saveEntity(object $entity): void
     {
         try {
-            $this->entityManager->persist($entity);
-            $this->entityManager->flush();
+            QueryHelper::saveEntity($entity, $this->entityManager);
         } catch (\Throwable $exception) {
             throw new \RuntimeException($exception->getMessage());
         }
@@ -61,8 +60,7 @@ class TestEntityManager
     public function removeEntity(object $entity): void
     {
         try {
-            $this->entityManager->remove($entity);
-            $this->entityManager->flush();
+            QueryHelper::removeEntity($entity, $this->entityManager);
         } catch (\Throwable $exception) {
             throw new \RuntimeException($exception->getMessage());
         }
@@ -76,8 +74,7 @@ class TestEntityManager
         }
 
         try {
-            return $this->entityManager->getRepository($entityClassName)
-                ->findOneBy(['identifier' => $identifier]);
+            return QueryHelper::tryGetEntityById($identifier, $entityClassName, $this->entityManager);
         } catch (\Throwable $exception) {
             throw new \RuntimeException($exception->getMessage());
         }
@@ -91,21 +88,14 @@ class TestEntityManager
     public function getEntities(int $currentPageNumber, int $maxNumItemsPerPage, ?Filter $filter = null,
         ?string $entityClassName = null): array
     {
-        $ENTITY_ALIAS = 'e';
-
         $entityClassName ??= $this->entityClassName;
         if ($entityClassName === null) {
             throw new \RuntimeException('please specify the class of the entity to get');
         }
 
         try {
-            return $this->entityManager->createQueryBuilder()
-                ->select($ENTITY_ALIAS)
-                ->from($entityClassName, $ENTITY_ALIAS)
-                ->getQuery()
-                ->setFirstResult(Pagination::getFirstItemIndex($currentPageNumber, $maxNumItemsPerPage))
-                ->setMaxResults($maxNumItemsPerPage)
-                ->getResult();
+            return QueryHelper::getEntities($entityClassName, $this->entityManager,
+                $currentPageNumber, $maxNumItemsPerPage, $filter);
         } catch (\Throwable $exception) {
             throw new \RuntimeException($exception->getMessage());
         }
