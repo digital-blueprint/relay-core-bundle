@@ -18,6 +18,10 @@ class DoctrineConfiguration
     {
         self::ensureInPrepend($containerBuilder);
 
+        if (!$containerBuilder->hasExtension('doctrine')) {
+            throw new \RuntimeException('configuring doctrine requires the doctrine bundle to be loaded!');
+        }
+
         $connectionId ??= $entityManagerId;
 
         $containerBuilder->prependExtensionConfig('doctrine', [
@@ -53,6 +57,11 @@ class DoctrineConfiguration
     public static function prependMigrationsConfig(ContainerBuilder $containerBuilder,
         string $migrationsNamespace, string $migrationsDirectoryPath): void
     {
+        if (!$containerBuilder->hasExtension('doctrine_migrations')) {
+            throw new \RuntimeException(
+                'configuring doctrine migrations requires the doctrine_migrations bundle to be loaded!');
+        }
+
         $containerBuilder->prependExtensionConfig('doctrine_migrations', [
             'migrations_paths' => [
                 $migrationsNamespace => $migrationsDirectoryPath,
