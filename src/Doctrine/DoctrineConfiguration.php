@@ -55,7 +55,7 @@ class DoctrineConfiguration
     }
 
     public static function prependMigrationsConfig(ContainerBuilder $containerBuilder,
-        string $migrationsNamespace, string $migrationsDirectoryPath): void
+        string $migrationsDirectoryPath, string $migrationsNamespace): void
     {
         if (!$containerBuilder->hasExtension('doctrine_migrations')) {
             throw new \RuntimeException(
