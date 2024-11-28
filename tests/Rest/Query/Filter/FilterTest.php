@@ -211,7 +211,8 @@ class FilterTest extends TestCase
         try {
             /** @var Filter */
             $filter1 = FilterTreeBuilder::create()
-                ->iContains('', '1');
+                ->iContains('', '1')
+                ->end()->createFilter();
         } catch (FilterException $exception) {
             $this->assertEquals(FilterException::CONDITION_FIELD_EMPTY, $exception->getCode());
         }
