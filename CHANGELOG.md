@@ -2,7 +2,10 @@
 
 ## Unreleased
 
+## v0.1.195
+
 * Add Doctrine/QueryHelper utility class
+* Update test utils
 
 ## v0.1.194
 

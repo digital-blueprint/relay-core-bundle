@@ -12,10 +12,14 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class TestEntityManager
 {
+    protected readonly EntityManager $entityManager;
+    protected readonly ?string $entityClassName;
+
     public function __construct(
-        protected readonly EntityManager $entityManager,
-        protected readonly ?string $entityClassName = null)
+        ContainerInterface $container, string $entityManagerId, ?string $entityClassName = null)
     {
+        $this->entityManager = self::setUpEntityManager($container, $entityManagerId);
+        $this->entityClassName = $entityClassName;
     }
 
     public static function setUpEntityManager(ContainerInterface $container, string $entityManagerId): EntityManager
@@ -36,11 +40,6 @@ class TestEntityManager
         }
 
         return $entityManager;
-    }
-
-    public static function create(ContainerInterface $container, string $entityManagerId, ?string $entityClassName = null): self
-    {
-        return new self(self::setUpEntityManager($container, $entityManagerId), $entityClassName);
     }
 
     public function getEntityManager(): EntityManager

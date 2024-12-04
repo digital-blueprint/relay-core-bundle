@@ -22,7 +22,7 @@ class TestResourceManager
 
     public function __construct(ContainerInterface $container)
     {
-        $this->testEntityManager = TestEntityManager::create($container, Kernel::TEST_ENTITY_MANAGER_ID);
+        $this->testEntityManager = new TestEntityManager($container, Kernel::TEST_ENTITY_MANAGER_ID);
     }
 
     public function addTestResource(string $content = self::CONTENT_DEFAULT, bool $isPublic = self::IS_PUBLIC_DEFAULT,
