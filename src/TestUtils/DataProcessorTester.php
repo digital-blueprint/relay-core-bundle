@@ -51,34 +51,40 @@ class DataProcessorTester
 
     public function addItem(mixed $data, array $filters = []): mixed
     {
-        return $this->dataProcessor->process($data, new Post(), [], $this->createContext($filters));
+        return $this->dataProcessor->process($data, new Post(), [],
+            $this->createContext(Request::METHOD_POST, null, $filters, null));
     }
 
     public function replaceItem(mixed $identifier, mixed $data, mixed $previousData, array $filters = []): mixed
     {
         return $this->dataProcessor->process($data, new Put(), [self::IDENTIFIER_NAME => $identifier],
-            $this->createContext($filters, $previousData));
+            $this->createContext(Request::METHOD_PUT, $identifier, $filters, $previousData));
     }
 
     public function updateItem(mixed $identifier, mixed $data, mixed $previousData, array $filters = []): mixed
     {
         return $this->dataProcessor->process($data, new Patch(), [self::IDENTIFIER_NAME => $identifier],
-            $this->createContext($filters, $previousData));
+            $this->createContext(Request::METHOD_PATCH, $identifier, $filters, $previousData));
     }
 
     public function removeItem(mixed $identifier, mixed $data, array $filters = []): void
     {
         $this->dataProcessor->process($data, new Delete(), [self::IDENTIFIER_NAME => $identifier],
-            $this->createContext($filters));
+            $this->createContext(Request::METHOD_DELETE, $identifier, $filters, null));
     }
 
-    private function createContext(array $filters = [], $previousData = null): array
+    private function createContext(string $method, ?string $identifier = null, array $filters = [], mixed $previousData = null): array
     {
+        $request = Request::create(
+            uri: '/test/test-entities'.($identifier ? '/'.$identifier : ''),
+            method: $method);
+        $request->query->replace($filters);
+
         return [
             'resource_class' => $this->resourceClass,
             'groups' => $this->denormalizationGroups,
             'previous_data' => $previousData,
-            'request' => new Request($filters),
+            'request' => $request,
         ];
     }
 }

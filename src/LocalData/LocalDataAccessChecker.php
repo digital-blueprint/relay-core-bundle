@@ -58,6 +58,8 @@ class LocalDataAccessChecker
 
     public function loadConfig(array $config): void
     {
+        $this->attributeConfig = [];
+
         foreach ($config[self::LOCAL_DATA_CONFIG_NODE] ?? [] as $configEntry) {
             $localDataAttributeName = $configEntry[self::LOCAL_DATA_ATTRIBUTE_NAME_CONFIG_NODE];
 

@@ -18,6 +18,7 @@ trait StateProcessorTrait
     {
         $this->currentOperation = $operation;
         $this->currentUriVariables = $uriVariables;
+        $this->currentRequestMethod = $context['request']?->getMethod();
 
         if ($operation instanceof Post) {
             return $this->post($data, $context);

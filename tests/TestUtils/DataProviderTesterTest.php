@@ -8,6 +8,7 @@ use Dbp\Relay\CoreBundle\Tests\Rest\TestDataProvider;
 use Dbp\Relay\CoreBundle\Tests\Rest\TestEntity;
 use Dbp\Relay\CoreBundle\TestUtils\DataProviderTester;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class DataProviderTesterTest extends TestCase
 {
@@ -16,10 +17,10 @@ class DataProviderTesterTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->testDataProvider = TestDataProvider::create();
+        $this->testDataProvider = new TestDataProvider(new EventDispatcher());
         $this->dataProviderTester = DataProviderTester::create(
-            $this->testDataProvider, TestEntity::class, ['TestEntity:output']);
-        TestDataProvider::login($this->testDataProvider);
+            $this->testDataProvider, TestEntity::class, [['TestEntity:output', 'LocalData:output']]);
+        DataProviderTester::login($this->testDataProvider, currentUserAttributes: ['ROLE_ADMIN' => false]);
     }
 
     public function testGetItem(): void

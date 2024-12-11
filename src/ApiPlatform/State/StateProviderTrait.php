@@ -22,6 +22,7 @@ trait StateProviderTrait
     {
         $this->currentOperation = $operation;
         $this->currentUriVariables = $uriVariables;
+        $this->currentRequestMethod = $context['request']?->getMethod();
 
         if ($operation instanceof CollectionOperationInterface) {
             return $this->getCollectionInternal($context);

@@ -6,13 +6,14 @@ namespace Dbp\Relay\CoreBundle\Tests\LocalData;
 
 use Dbp\Relay\CoreBundle\Tests\Rest\TestDataProvider;
 use Dbp\Relay\CoreBundle\Tests\Rest\TestEntity;
+use Dbp\Relay\CoreBundle\TestUtils\DataProviderTester;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class LocalDataTest extends TestCase
 {
-    /** @var TestDataProvider */
-    private $testDataProvider;
+    private ?TestDataProvider $testDataProvider = null;
+    private ?DataProviderTester $dataProviderTester = null;
 
     protected function setUp(): void
     {
@@ -24,8 +25,17 @@ class LocalDataTest extends TestCase
         $eventDispatcher = new EventDispatcher();
         $eventDispatcher->addSubscriber($localDataEventSubscriber);
 
-        $this->testDataProvider = TestDataProvider::create($eventDispatcher);
+        $this->testDataProvider = new TestDataProvider($eventDispatcher);
         $this->testDataProvider->setConfig(self::createAuthzConfig());
+
+        $this->dataProviderTester = DataProviderTester::create($this->testDataProvider,
+            TestEntity::class, [['TestEntity:output', 'LocalData:output']]);
+
+        DataProviderTester::login($this->testDataProvider,
+            TestDataProvider::TEST_USER_IDENTIFIER, [
+                'ROLE_USER' => true,
+                'ROLE_ADMIN' => false,
+            ]);
     }
 
     public function testScalarLocalDataMappingWithScalarSourceValue()
@@ -33,7 +43,8 @@ class LocalDataTest extends TestCase
         // scalar attribute, scalar source attribute  -> return scalar source attribute value
         $localDataAttributeName = 'attribute_1';
         $sourceData = ['src_attribute_1' => 'value_1'];
-        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
+        $this->testDataProvider->setSourceData($sourceData);
+        $testEntity = $this->getTestEntityWithLocalData($localDataAttributeName, $sourceData);
         $this->assertEquals('value_1', $testEntity->getLocalDataValue($localDataAttributeName));
     }
 
@@ -42,7 +53,8 @@ class LocalDataTest extends TestCase
         // scalar attribute, array source attribute -> return scalar source attribute value (i.e. first array element)
         $localDataAttributeName = 'attribute_1';
         $sourceData = ['src_attribute_1' => ['value_1']];
-        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
+        $this->testDataProvider->setSourceData($sourceData);
+        $testEntity = $this->getTestEntityWithLocalData($localDataAttributeName, $sourceData);
         $this->assertEquals('value_1', $testEntity->getLocalDataValue($localDataAttributeName));
     }
 
@@ -51,7 +63,8 @@ class LocalDataTest extends TestCase
         // array attribute, array source attribute -> return array source attribute value
         $localDataAttributeName = 'array_attribute_1';
         $sourceData = ['array_src_attribute_1' => ['value_1']];
-        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
+        $this->testDataProvider->setSourceData($sourceData);
+        $testEntity = $this->getTestEntityWithLocalData($localDataAttributeName, $sourceData);
         $this->assertEquals(['value_1'], $testEntity->getLocalDataValue($localDataAttributeName));
     }
 
@@ -60,7 +73,8 @@ class LocalDataTest extends TestCase
         // array attribute, array source attribute -> return array with scalar source value as only element
         $localDataAttributeName = 'array_attribute_1';
         $sourceData = ['array_src_attribute_1' => 'value_1'];
-        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
+        $this->testDataProvider->setSourceData($sourceData);
+        $testEntity = $this->getTestEntityWithLocalData($localDataAttributeName, $sourceData);
         $this->assertEquals(['value_1'], $testEntity->getLocalDataValue($localDataAttributeName));
     }
 
@@ -69,7 +83,8 @@ class LocalDataTest extends TestCase
         // source data attribute of non-array attribute not available -> local data attribute of entity must be null
         $localDataAttributeName = 'attribute_1';
         $sourceData = [];
-        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
+        $this->testDataProvider->setSourceData($sourceData);
+        $testEntity = $this->getTestEntityWithLocalData($localDataAttributeName, $sourceData);
         $this->assertNull($testEntity->getLocalDataValue($localDataAttributeName));
     }
 
@@ -78,7 +93,8 @@ class LocalDataTest extends TestCase
         // source data attribute of array type attribute not available -> local data attribute of entity must be null
         $localDataAttributeName = 'array_attribute_1';
         $sourceData = [];
-        $testEntity = $this->getTestEntity($localDataAttributeName, $sourceData);
+        $this->testDataProvider->setSourceData($sourceData);
+        $testEntity = $this->getTestEntityWithLocalData($localDataAttributeName, $sourceData);
         $this->assertNull($testEntity->getLocalDataValue($localDataAttributeName));
     }
 
@@ -87,14 +103,15 @@ class LocalDataTest extends TestCase
         // authorization expression of attribute evaluates to false -> value must be null
         $localDataAttributeName = 'attribute_3';
         $sourceData = ['src_attribute_3' => 'value_3'];
-
-        $entity = $this->getTestEntity($localDataAttributeName, $sourceData);
+        $this->testDataProvider->setSourceData($sourceData);
+        $entity = $this->getTestEntityWithLocalData($localDataAttributeName, $sourceData);
         $this->assertNull($entity->getLocalDataValue($localDataAttributeName));
 
         $includeLocal = 'attribute_2,attribute_3';
         $sourceData = ['src_attribute_3' => 'value_3', 'src_attribute_2' => 'value_2'];
 
-        $entity = $this->getTestEntity($includeLocal, $sourceData);
+        $this->testDataProvider->setSourceData($sourceData);
+        $entity = $this->getTestEntityWithLocalData($includeLocal, $sourceData);
         $this->assertNull($entity->getLocalDataValue('attribute_3'));
         $this->assertEquals('value_2', $entity->getLocalDataValue('attribute_2'));
     }
@@ -105,7 +122,8 @@ class LocalDataTest extends TestCase
         $localDataAttributeName = 'attribute_3';
         $sourceData = ['src_attribute_3' => 'value_3'];
 
-        $entities = $this->getTestEntities($localDataAttributeName, [
+        $this->testDataProvider->setSourceData($sourceData);
+        $entities = $this->getTestEntitiesWithLocalData($localDataAttributeName, [
             '0' => $sourceData,
             '1' => $sourceData,
             '2' => $sourceData,
@@ -118,7 +136,8 @@ class LocalDataTest extends TestCase
         $includeLocal = 'attribute_3,attribute_1';
         $sourceData = ['src_attribute_1' => 'value_1', 'src_attribute_3' => 'value_3'];
 
-        $entities = $this->getTestEntities($includeLocal, [
+        $this->testDataProvider->setSourceData($sourceData);
+        $entities = $this->getTestEntitiesWithLocalData($includeLocal, [
             '0' => $sourceData,
             '1' => $sourceData,
         ]);
@@ -188,21 +207,23 @@ class LocalDataTest extends TestCase
         return $config;
     }
 
-    private function getTestEntity(string $includeLocal, array $sourceData): ?TestEntity
+    private function getTestEntityWithLocalData(string $includeLocal, array $sourceData): ?TestEntity
     {
         $filters = [
             'includeLocal' => $includeLocal,
         ];
+        $this->testDataProvider->setSourceData(['id' => $sourceData]);
 
-        return $this->testDataProvider->getTestEntity('id', $filters, ['id' => $sourceData]);
+        return $this->dataProviderTester->getItem('id', $filters);
     }
 
-    private function getTestEntities(string $includeLocal, array $sourceData): array
+    private function getTestEntitiesWithLocalData(string $includeLocal, array $sourceData): array
     {
         $filters = [
             'includeLocal' => $includeLocal,
         ];
+        $this->testDataProvider->setSourceData($sourceData);
 
-        return $this->testDataProvider->getTestEntities($filters, $sourceData);
+        return $this->dataProviderTester->getPage(filters: $filters);
     }
 }

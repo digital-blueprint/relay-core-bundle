@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Rest;
 
-use ApiPlatform\Exception\ResourceClassNotFoundException;
+use ApiPlatform\Metadata\Exception\ResourceClassNotFoundException;
 use ApiPlatform\Metadata\Property\Factory\PropertyNameCollectionFactoryInterface;
 use Dbp\Relay\CoreBundle\ApiPlatform\State\StateProviderInterface;
 use Dbp\Relay\CoreBundle\ApiPlatform\State\StateProviderTrait;
@@ -31,6 +31,7 @@ use Dbp\Relay\CoreBundle\Rest\Query\Sort\Sort;
 use Dbp\Relay\CoreBundle\Rest\Query\Sort\SortException;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Service\Attribute\Required;
 
@@ -150,8 +151,8 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $filters = $context[self::FILTERS_CONTEXT_KEY] ?? [];
         $this->forbidCurrentUserToGetCollectionUnlessAuthorized($filters);
 
-        $resourceClass = $context[self::RESOURCE_CLASS_CONTEXT_KEY] ?? null;
-        $deserializationGroups = $context[self::GROUPS_CONTEXT_KEY] ?? null;
+        $resourceClass = $context[self::RESOURCE_CLASS_CONTEXT_KEY];
+        $deserializationGroups = $context[self::GROUPS_CONTEXT_KEY] ?? [];
 
         $options = $this->createOptions($filters);
 
@@ -211,6 +212,11 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         }
 
         return $isGrantedReadAccess;
+    }
+
+    protected function isGetRequest(): bool
+    {
+        return $this->currentRequestMethod === Request::METHOD_GET;
     }
 
     /**
@@ -333,11 +339,13 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
         $availableAttributePaths = null;
         if ($this->areQueryFiltersEnabled && $filterParameter = Parameters::getFilter($filters)) {
-            $filter = $this->createFilter($filterParameter, $availableAttributePaths = $this->getAvailableAttributePaths($resourceClass, $deserializationGroups));
+            $filter = $this->createFilter($filterParameter,
+                $availableAttributePaths = $this->getAvailableAttributePaths($resourceClass, $deserializationGroups));
         }
 
         if ($this->arePreparedFiltersEnabled && $preparedFilterParameter = Parameters::getPreparedFilter($filters)) {
-            $preparedFilter = $this->createPreparedFilter($preparedFilterParameter, $availableAttributePaths ??= $this->getAvailableAttributePaths($resourceClass, $deserializationGroups));
+            $preparedFilter = $this->createPreparedFilter($preparedFilterParameter,
+                $availableAttributePaths ??= $this->getAvailableAttributePaths($resourceClass, $deserializationGroups));
             try {
                 $filter = $filter !== null ? $filter->combineWith($preparedFilter) : $preparedFilter;
             } catch (FilterException $filterException) {
@@ -376,13 +384,8 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     /**
      * @return string[]
      */
-    private function getAvailableAttributePaths(?string $resourceClass, ?array $deserializationGroups): array
+    private function getAvailableAttributePaths(string $resourceClass, array $deserializationGroups): array
     {
-        if ($resourceClass === null || $deserializationGroups === null) {
-            throw ApiError::withDetails(Response::HTTP_INTERNAL_SERVER_ERROR,
-                'Provider context must contain \''.self::RESOURCE_CLASS_CONTEXT_KEY.'\' and \''.self::GROUPS_CONTEXT_KEY.'\' when using filters to determine available resource properties.');
-        }
-
         $availableAttributePaths = [];
 
         $propertyNamesFactoryOptions = [];

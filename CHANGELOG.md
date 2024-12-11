@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Add method isGetRequest to AbstractStateProvder and getCurrentRequestMethod to StateTrait
+
 ## v0.1.195
 
 * Add Doctrine/QueryHelper utility class

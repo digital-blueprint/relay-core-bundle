@@ -4,14 +4,9 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\Rest;
 
-use ApiPlatform\Metadata\Get;
-use ApiPlatform\Metadata\GetCollection;
-use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\LocalData\LocalDataEventDispatcher;
 use Dbp\Relay\CoreBundle\Rest\AbstractDataProvider;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\Pagination;
-use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
-use Dbp\Relay\CoreBundle\TestUtils\DataProviderTester;
 use Dbp\Relay\CoreBundle\TestUtils\TestAuthorizationService;
 use Dbp\Relay\CoreBundle\User\UserAttributeException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -38,48 +33,11 @@ class TestDataProvider extends AbstractDataProvider
     private bool $isGetItemOperationAllowed = true;
     private bool $isGetCollectionOperationAllowed = true;
 
-    public static function create(?EventDispatcher $eventDispatcher = null,
-        string $currentUserIdentifier = self::TEST_USER_IDENTIFIER, ?array $currentUserAttributes = null): TestDataProvider
-    {
-        $testDataProvider = new TestDataProvider($eventDispatcher ?? new EventDispatcher());
-        DataProviderTester::setUp($testDataProvider, $currentUserIdentifier,
-            $currentUserAttributes ?? [
-                self::ROLE_USER => $currentUserIdentifier === self::TEST_USER_IDENTIFIER,
-                self::ROLE_ADMIN => $currentUserIdentifier === self::ADMIN_USER_IDENTIFIER,
-            ]);
-        $testDataProvider->__injectPropertyNameCollectionFactory(new TestEntityPropertyNameCollectionFactory());
-
-        return $testDataProvider;
-    }
-
-    public static function login(TestDataProvider $testDataProvider,
-        string $currentUserIdentifier = self::TEST_USER_IDENTIFIER, ?array $currentUserAttributes = null): void
-    {
-        DataProviderTester::login($testDataProvider, $currentUserIdentifier, $currentUserAttributes ?? [
-            self::ROLE_USER => $currentUserIdentifier === self::TEST_USER_IDENTIFIER,
-            self::ROLE_ADMIN => $currentUserIdentifier === self::ADMIN_USER_IDENTIFIER,
-        ]);
-    }
-
-    public static function logout(TestDataProvider $testDataProvider): void
-    {
-        DataProviderTester::logout($testDataProvider);
-    }
-
-    protected function __construct(EventDispatcher $eventDispatcher)
+    public function __construct(EventDispatcher $eventDispatcher)
     {
         parent::__construct();
 
         $this->localDataEventDispatcher = new LocalDataEventDispatcher(TestEntity::class, $eventDispatcher);
-    }
-
-    private static function createContext(array $filters): array
-    {
-        return [
-            'filters' => $filters,
-            'resource_class' => TestEntity::class,
-            'groups' => ['TestEntity:output', 'LocalData:output'],
-        ];
     }
 
     public function setAllowUnauthenticatedAccess(bool $allowUnauthenticatedAccess): void
@@ -93,36 +51,6 @@ class TestDataProvider extends AbstractDataProvider
     public function setSourceData(array $sourceData): void
     {
         $this->sourceData = $sourceData;
-    }
-
-    /**
-     * @throws ApiError
-     */
-    public function getTestEntity(string $id, array $filters = [], array $sourceData = []): ?TestEntity
-    {
-        $this->setSourceData($sourceData);
-
-        /** @var TestEntity|null */
-        return $this->provide(new Get(), ['identifier' => $id], self::createContext($filters));
-    }
-
-    /**
-     * @throws ApiError
-     */
-    public function getTestEntities(array $filters = [], array $sourceData = []): array
-    {
-        return $this->getTestEntityPaginator($filters, $sourceData)->getItems();
-    }
-
-    /**
-     * @throws ApiError
-     */
-    public function getTestEntityPaginator(array $filters = [], array $sourceData = []): PartialPaginator
-    {
-        $this->setSourceData($sourceData);
-
-        /** @var PartialPaginator */
-        return $this->provide(new GetCollection(), [], self::createContext($filters));
     }
 
     /**

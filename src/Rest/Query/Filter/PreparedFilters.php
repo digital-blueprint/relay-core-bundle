@@ -51,6 +51,9 @@ class PreparedFilters
 
     public function loadConfig(array $config): void
     {
+        $this->config = [];
+        $this->policies = [];
+
         foreach ($config[self::ROOT_CONFIG_NODE] ?? [] as $configEntry) {
             $filterId = $configEntry[self::IDENTIFIER_CONFIG_NODE];
 

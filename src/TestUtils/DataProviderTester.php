@@ -12,10 +12,6 @@ use Symfony\Component\HttpFoundation\Request;
 
 class DataProviderTester
 {
-    private AbstractDataProvider $dataProvider;
-    private string $resourceClass;
-    private array $normalizationGroups;
-
     /**
      * Use this to set up the given data provider (i.e. inject all required services and set up a test user)
      * and create a new data provider tester instance for it.
@@ -59,11 +55,11 @@ class DataProviderTester
     /**
      * @param string[] $normalizationGroups
      */
-    private function __construct(AbstractDataProvider $dataProvider, string $resourceClass, array $normalizationGroups = [])
+    private function __construct(
+        private readonly AbstractDataProvider $dataProvider,
+        private readonly string $resourceClass,
+        private readonly array $normalizationGroups = [])
     {
-        $this->dataProvider = $dataProvider;
-        $this->resourceClass = $resourceClass;
-        $this->normalizationGroups = $normalizationGroups;
     }
 
     public function getItem(?string $identifier, array $filters = []): ?object
@@ -71,7 +67,7 @@ class DataProviderTester
         $uriVariables = $identifier !== null ? ['identifier' => $identifier] : [];
 
         /** @var object|null */
-        return $this->dataProvider->provide(new Get(), $uriVariables, $this->createContext($filters));
+        return $this->dataProvider->provide(new Get(), $uriVariables, $this->createContext($filters, $identifier));
     }
 
     public function getCollection(array $filters = []): array
@@ -85,7 +81,7 @@ class DataProviderTester
     /**
      * @param int $pageNumber One-based page number
      */
-    public function getPage(int $pageNumber, int $maxNumItemsPerPage, array $filters = []): array
+    public function getPage(int $pageNumber = 1, int $maxNumItemsPerPage = 30, array $filters = []): array
     {
         $filters = array_merge($filters, [
             'page' => $pageNumber,
@@ -95,13 +91,18 @@ class DataProviderTester
         return $this->getCollection($filters);
     }
 
-    private function createContext(array $filters): array
+    private function createContext(array $filters, ?string $identifier = null): array
     {
+        $request = Request::create(
+            uri: '/test/test-entities'.($identifier ? '/'.$identifier : ''),
+            method: Request::METHOD_GET);
+        $request->query->replace($filters);
+
         return [
             'filters' => $filters,
             'resource_class' => $this->resourceClass,
             'groups' => $this->normalizationGroups,
-            'request' => new Request(),
+            'request' => $request,
         ];
     }
 }
