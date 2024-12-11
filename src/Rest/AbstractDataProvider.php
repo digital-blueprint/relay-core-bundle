@@ -214,9 +214,15 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         return $isGrantedReadAccess;
     }
 
-    protected function isGetRequest(): bool
+    /**
+     * Indicates whether the original (root) HTTP request is a GET request.
+     * Note that ApiPlatform internally calls providers during write item operations (PATCH, PUT, and DELETE)
+     * to get the item to process. In those cases this method can be used to distinguish whether we are dealing
+     * with a client (http) GET request (true), or an internal get item/collection request (false).
+     */
+    protected function isRootGetRequest(): bool
     {
-        return $this->currentRequestMethod === Request::METHOD_GET;
+        return $this->getCurrentRootRequestMethod() === Request::METHOD_GET;
     }
 
     /**

@@ -12,7 +12,7 @@ trait StateTrait
     protected static string $identifierName = 'identifier';
     private ?Operation $currentOperation = null;
     private array $currentUriVariables = [];
-    private ?string $currentRequestMethod = null;
+    private ?string $currentRootRequestMethod = null;
 
     protected function getCurrentOperationName(): ?string
     {
@@ -29,8 +29,11 @@ trait StateTrait
         return $this->currentOperation instanceof CollectionOperationInterface;
     }
 
-    protected function getCurrentRequestMethod(): ?string
+    /**
+     * The original (root) HTTP request method.
+     */
+    protected function getCurrentRootRequestMethod(): ?string
     {
-        return $this->currentRequestMethod;
+        return $this->currentRootRequestMethod;
     }
 }

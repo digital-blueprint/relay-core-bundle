@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-* Add method isGetRequest to AbstractStateProvder and getCurrentRequestMethod to StateTrait
+* Add method isGetRequest to AbstractStateProvider and isRootGetRequest to StateTrait
 
 ## v0.1.195
 
