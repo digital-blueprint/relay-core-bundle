@@ -2,7 +2,10 @@
 
 ## Unreleased
 
+## v0.1.196
+
 * Add method isGetRequest to AbstractStateProvider and isRootGetRequest to StateTrait
+* Refactor tests
 
 ## v0.1.195
 
