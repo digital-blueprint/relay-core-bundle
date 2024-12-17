@@ -117,14 +117,17 @@ final class CronManager implements LoggerAwareInterface
         return $this->jobs;
     }
 
-    public function runDueJobs(bool $force = false, ?\DateTimeInterface $currentTime = null)
+    /**
+     * Get all jobs that should have been run between the last time we were called and now.
+     *
+     * @return CronJobInterface[]
+     */
+    public function getDueJobs(bool $force = false, ?\DateTimeInterface $currentTime = null): array
     {
-        // Get all jobs that should have been run between the last time we were called and now
         if ($currentTime === null) {
             $currentTime = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
         }
         $lastDate = $this->getLastExecutionDate();
-        $this->setLastExecutionDate($currentTime);
 
         if ($lastDate === null) {
             $this->logger->info('cron: No last execution time available, will no run anything');
@@ -140,6 +143,18 @@ final class CronManager implements LoggerAwareInterface
                 $toRun[] = $job;
             }
         }
+
+        return $toRun;
+    }
+
+    public function runDueJobs(bool $force = false, ?\DateTimeInterface $currentTime = null)
+    {
+        if ($currentTime === null) {
+            $currentTime = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+        }
+
+        $toRun = $this->getDueJobs($force, $currentTime);
+        $this->setLastExecutionDate($currentTime);
 
         if (count($toRun) === 0) {
             $this->logger->info('cron: No jobs to run');

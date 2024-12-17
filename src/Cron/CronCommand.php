@@ -12,6 +12,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 final class CronCommand extends Command implements LoggerAwareInterface
 {
@@ -47,8 +48,33 @@ final class CronCommand extends Command implements LoggerAwareInterface
         $command = $app->find('cache:pool:prune');
         CachePrune::setPruneCommand($command);
 
-        $this->manager->runDueJobs($force);
+        $io = new SymfonyStyle($input, $output);
+        $currentTime = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+        $io->writeln('Running cron jobs at '.$currentTime->format(\DateTime::ATOM));
+        $jobs = $this->manager->getDueJobs($force, $currentTime);
+        $this->manager->setLastExecutionDate($currentTime);
+        $io->writeln('Found '.count($jobs).' due job(s)');
+        foreach ($jobs as $job) {
+            $io->writeln('<fg=green;options=bold>['.get_class($job).']</>');
+            $io->writeln('<fg=blue;options=bold>Name:</> '.$job->getName());
+            $io->writeln('<fg=blue;options=bold>Cron:</> '.$job->getInterval());
+            $io->writeln('<fg=blue;options=bold>Now:</>  '.$currentTime->format(\DateTime::ATOM));
+            $io->writeln('<fg=blue;options=bold>Next:</> '.$this->manager->getNextDate($job, $currentTime)->format(\DateTime::ATOM));
+            $name = $job->getName();
+            $start = hrtime(true);
+            $io->writeln("Running job: $name");
 
-        return 0;
+            try {
+                $job->run(new CronOptions());
+                $duration = (hrtime(true) - $start) / 1e9;
+                $io->writeln("Finished successfully in $duration seconds");
+            } catch (\Throwable $e) {
+                $duration = (hrtime(true) - $start) / 1e9;
+                $this->logger->error("cron: '$name' failed after $duration seconds", ['exception' => $e]);
+                $io->writeln("<fg=red;options=bold>'$name' failed after $duration seconds: {$e->getMessage()}</>");
+            }
+        }
+
+        return Command::SUCCESS;
     }
 }
