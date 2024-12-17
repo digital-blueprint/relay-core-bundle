@@ -41,6 +41,10 @@ class CronTest extends TestCase
         $current = (new \DateTimeImmutable())->setTimestamp(1676383110);
         $next = CronManager::getNextDate(new CronJob('*/5 * * * *'), $current);
         $this->assertSame(1676383200, $next->getTimestamp());
+
+        $current = new \DateTimeImmutable('2024-12-17T14:10:22+00:00', new \DateTimeZone('UTC'));
+        $next = CronManager::getNextDate(new CronJob('* * * * *'), $current);
+        $this->assertSame('2024-12-17T14:11:00+00:00', $next->format(\DateTime::ATOM));
     }
 
     public function testManager()

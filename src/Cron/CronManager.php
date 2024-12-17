@@ -72,7 +72,7 @@ final class CronManager implements LoggerAwareInterface
     {
         $cronExpression = $job->getInterval();
         $cron = new CronExpression($cronExpression);
-        $nextDate = $cron->getNextRunDate($currentTime, 0, true);
+        $nextDate = $cron->getNextRunDate($currentTime, 0, false);
         $nextDate->setTimezone(new \DateTimeZone('UTC'));
 
         return \DateTimeImmutable::createFromMutable($nextDate);
