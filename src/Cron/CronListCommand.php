@@ -40,8 +40,8 @@ final class CronListCommand extends Command implements LoggerAwareInterface
         foreach ($jobs as $job) {
             $output->writeln('<fg=green;options=bold>['.get_class($job).']</>');
             $output->writeln('<fg=blue;options=bold>Name:</> '.$job->getName());
-            $output->writeln('<fg=blue;options=bold>Cron:</> "'.$job->getInterval().'"');
-            $output->writeln('<fg=blue;options=bold>Now:</> '.$currentTime->format(\DateTime::ATOM));
+            $output->writeln('<fg=blue;options=bold>Cron:</> '.$job->getInterval());
+            $output->writeln('<fg=blue;options=bold>Now:</>  '.$currentTime->format(\DateTime::ATOM));
             $output->writeln('<fg=blue;options=bold>Next:</> '.$this->manager->getNextDate($job, $currentTime)->format(\DateTime::ATOM));
         }
 
