@@ -37,6 +37,7 @@
         "symfony/mime": "^5.4 || ^6.4",
         "symfony/monolog-bundle": "^3.8",
         "symfony/process": "^5.4 || ^6.4",
+        "symfony/property-info": "^6.4",
         "symfony/routing": "^5.4 || ^6.4",
         "symfony/security-bundle": "^5.4 || ^6.4",
         "symfony/security-core": "^5.4 || ^6.4",
