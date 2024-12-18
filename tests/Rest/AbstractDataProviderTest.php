@@ -25,7 +25,6 @@ class AbstractDataProviderTest extends TestCase
         $this->testDataProvider->setConfig(self::getTestConfig());
         $this->testDataProviderTester = DataProviderTester::create($this->testDataProvider,
             TestEntity::class, ['TestEntity:output', 'LocalData:output']);
-        $this->testDataProvider->__injectPropertyNameCollectionFactory(new TestEntityPropertyNameCollectionFactory());
 
         DataProviderTester::login($this->testDataProvider,
             TestDataProvider::TEST_USER_IDENTIFIER, [

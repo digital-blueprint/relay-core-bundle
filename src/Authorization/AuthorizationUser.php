@@ -68,14 +68,10 @@ class AuthorizationUser
     }
 
     /**
-     * @param mixed|null $defaultValue
-     *
-     * @return mixed|null
-     *
      * @throws AuthorizationException
      * @throws UserAttributeException
      */
-    public function get(string $attributeName, $defaultValue = null)
+    public function get(string $attributeName, mixed $defaultValue = null): mixed
     {
         return $this->authorizationService->getUserAttribute($attributeName, $defaultValue);
     }

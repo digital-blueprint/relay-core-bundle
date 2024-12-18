@@ -6,9 +6,12 @@ namespace Dbp\Relay\CoreBundle\TestUtils;
 
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Property\Factory\PropertyInfoPropertyNameCollectionFactory;
 use Dbp\Relay\CoreBundle\Rest\AbstractDataProvider;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\PartialPaginator;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
+use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 
 class DataProviderTester
 {
@@ -33,7 +36,9 @@ class DataProviderTester
         string $currentUserIdentifier = TestAuthorizationService::TEST_USER_IDENTIFIER, array $currentUserAttributes = []): void
     {
         $dataProvider->__injectLocale(new TestLocale());
-        $dataProvider->__injectPropertyNameCollectionFactory(new TestPropertyNameCollectionFactory());
+        $dataProvider->__injectPropertyNameCollectionFactory(
+            new PropertyInfoPropertyNameCollectionFactory(new PropertyInfoExtractor(
+                [new ReflectionExtractor()], [new ReflectionExtractor()])));
 
         self::login($dataProvider, $currentUserIdentifier, $currentUserAttributes);
     }
