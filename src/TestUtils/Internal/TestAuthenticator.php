@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\TestUtils\Internal;
 
-use Dbp\Relay\CoreBundle\TestUtils\TestUserSession;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,14 +29,6 @@ class TestAuthenticator extends AbstractAuthenticator
 
     /** @var string */
     private $token;
-
-    /** @var TestUserSession */
-    private $userSession;
-
-    public function __construct(TestUserSession $userSession)
-    {
-        $this->userSession = $userSession;
-    }
 
     public function setToken(?string $token)
     {
@@ -90,10 +81,6 @@ class TestAuthenticator extends AbstractAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        $this->userSession->setIdentifier($this->user->isServiceAccount() ? null : $this->user->getUserIdentifier());
-        $this->userSession->setRoles($this->user->getRoles());
-        $this->userSession->setIsAuthenticated(true);
-
         return null;
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\TestUtils;
 
+use Dbp\Relay\CoreBundle\TestUtils\Internal\TestAuthenticator;
 use Dbp\Relay\CoreBundle\TestUtils\Internal\TestUser;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -18,12 +19,11 @@ trait UserAuthWebTrait
         KernelTestCase::ensureKernelShutdown();
         $client = WebTestCase::createClient();
         $container = $client->getContainer();
+
+        $testAuthenticator = $container->get(TestAuthenticator::class);
+        assert($testAuthenticator instanceof TestAuthenticator);
         $user = new TestUser($id, $roles);
-        $session = $container->get(TestUserSession::class);
-        assert($session instanceof TestUserSession);
-        $session->setRoles($roles);
-        $session->setIdentifier($id);
-        $session->setIsAuthenticated(true);
+        $testAuthenticator->setUser($user);
 
         $client->loginUser($user, 'api');
 

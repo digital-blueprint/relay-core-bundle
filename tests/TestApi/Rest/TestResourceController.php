@@ -38,9 +38,9 @@ class TestResourceController extends AbstractController
 
         if ($test === 'GetCurrentUser') {
             $resource->setContent(json_encode([
-                'userIdentifier' => $this->userSession->getUserIdentifier(),
+                'userIdentifier' => $this->userSession->isAuthenticated() ? $this->userSession->getUserIdentifier() : null,
                 'isAuthenticated' => $this->userSession->isAuthenticated(),
-                'userRoles' => $this->userSession->getUserRoles(),
+                'userRoles' => $this->userSession->isAuthenticated() ? $this->userSession->getUserRoles() : [],
             ]));
         } elseif ($test === 'ApiErrorDetails') {
             throw ApiError::withDetails(Response::HTTP_I_AM_A_TEAPOT, 'some message', 'some-error-id', ['detail1' => '1', 'detail2' => ['2', '3']]);
