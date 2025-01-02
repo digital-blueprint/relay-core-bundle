@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## v0.1.197
+
+* cron: print information about the cron jobs being run and their status to
+  stdout instead of just logging them.
+* The UserSessionInterface set up via UserAuthWebTrait and UserAuthTrait now
+  behaves like a real user session in more cases, fixing various
+  inconsistencies.
+* Drop support for psalm
+
 ## v0.1.196
 
 * Add method isGetRequest to AbstractStateProvider and isRootGetRequest to StateTrait
