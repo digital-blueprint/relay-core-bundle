@@ -14,33 +14,27 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 class UserAttributeMuxer
 {
     /** @var iterable<UserAttributeProviderInterface> */
-    private $userAttributeProviders;
+    private iterable $userAttributeProviders;
 
     /** @var array<int, array> */
-    private $providerCache;
+    private array $providerCache = [];
 
     /** @var array<int, string[]> */
-    private $availableCache;
-
-    /** @var EventDispatcherInterface */
-    private $eventDispatcher;
+    private array $availableCache = [];
 
     /** @var string[] */
-    private $attributeStack;
+    private array $attributeStack = [];
 
     /**
      * @var ?string[]
      */
-    private $availableCacheAll;
+    private ?array $availableCacheAll = null;
 
-    public function __construct(UserAttributeProviderProviderInterface $userAttributeProviderProvider, EventDispatcherInterface $eventDispatcher)
+    public function __construct(
+        UserAttributeProviderProviderInterface $userAttributeProviderProvider,
+        private readonly EventDispatcherInterface $eventDispatcher)
     {
         $this->userAttributeProviders = $userAttributeProviderProvider->getAuthorizationDataProviders();
-        $this->eventDispatcher = $eventDispatcher;
-        $this->providerCache = [];
-        $this->availableCache = [];
-        $this->availableCacheAll = null;
-        $this->attributeStack = [];
     }
 
     /**
@@ -99,6 +93,9 @@ class UserAttributeMuxer
         return $res[1];
     }
 
+    /**
+     * @throws UserAttributeException
+     */
     private function getProviderUserAttribute(UserAttributeProviderInterface $userAttributeProvider, ?string $userIdentifier, string $attributeName): mixed
     {
         if ($userAttributeProvider instanceof UserAttributeProviderExInterface) {
@@ -114,13 +111,9 @@ class UserAttributeMuxer
     }
 
     /**
-     * @param mixed $defaultValue
-     *
-     * @return mixed
-     *
      * @throws UserAttributeException
      */
-    public function getAttribute(?string $userIdentifier, string $attributeName, $defaultValue = null)
+    public function getAttribute(?string $userIdentifier, string $attributeName, mixed $defaultValue = null): mixed
     {
         if (!in_array($attributeName, $this->getAvailableAttributes(), true)) {
             throw new UserAttributeException(sprintf('attribute \'%s\' undefined', $attributeName), UserAttributeException::USER_ATTRIBUTE_UNDEFINED);

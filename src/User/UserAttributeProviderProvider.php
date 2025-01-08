@@ -10,16 +10,10 @@ namespace Dbp\Relay\CoreBundle\User;
 class UserAttributeProviderProvider implements UserAttributeProviderProviderInterface
 {
     /**
-     * @var iterable<UserAttributeProviderInterface>
-     */
-    private $authorizationDataProviders;
-
-    /**
      * @param iterable<UserAttributeProviderInterface> $authorizationDataProviders
      */
-    public function __construct(iterable $authorizationDataProviders)
+    public function __construct(private readonly iterable $authorizationDataProviders)
     {
-        $this->authorizationDataProviders = $authorizationDataProviders;
     }
 
     /**

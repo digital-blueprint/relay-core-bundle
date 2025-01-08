@@ -14,16 +14,10 @@ use Symfony\Contracts\EventDispatcher\Event;
 class GetAvailableUserAttributesEvent extends Event
 {
     /**
-     * @var string[]
-     */
-    private array $attributes;
-
-    /**
      * @param string[] $attributes
      */
-    public function __construct(array $attributes)
+    public function __construct(private array $attributes)
     {
-        $this->attributes = $attributes;
     }
 
     /**

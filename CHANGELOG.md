@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+* Internalize UserAttributeService and remove getUserAttribute method. Note that the service is only intended to 
+deliver the currently logged-in user's attributes
+
 ## v0.1.198
 
 * TestUserSession: allow setting up a service account user session for unit tests

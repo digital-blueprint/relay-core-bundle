@@ -17,17 +17,12 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 class GetUserAttributeEvent extends Event
 {
-    private UserAttributeMuxer $userAttributeMuxer;
-    private ?string $userIdentifier;
-    private string $attributeName;
-    private mixed $attributeValue;
-
-    public function __construct(UserAttributeMuxer $userAttributeMuxer, string $attributeName, mixed $attributeValue, ?string $userIdentifier)
+    public function __construct(
+        private readonly UserAttributeMuxer $userAttributeMuxer,
+        private readonly string $attributeName,
+        private mixed $attributeValue,
+        private readonly ?string $userIdentifier)
     {
-        $this->userAttributeMuxer = $userAttributeMuxer;
-        $this->userIdentifier = $userIdentifier;
-        $this->attributeName = $attributeName;
-        $this->attributeValue = $attributeValue;
     }
 
     /**
