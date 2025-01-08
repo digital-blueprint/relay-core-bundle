@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.1.198
+
+* TestUserSession: allow setting up a service account user session for unit tests
+
 ## v0.1.197
 
 * cron: print information about the cron jobs being run and their status to

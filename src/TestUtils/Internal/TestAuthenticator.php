@@ -24,18 +24,16 @@ class TestAuthenticator extends AbstractAuthenticator
     public const TEST_TOKEN = '42';
     public const TEST_AUTHORIZATION_HEADER = 'Bearer '.self::TEST_TOKEN;
 
-    /** @var TestUser */
-    private $user;
+    private ?TestUser $user = null;
 
-    /** @var string */
-    private $token;
+    private ?string $token = null;
 
-    public function setToken(?string $token)
+    public function setToken(?string $token): void
     {
         $this->token = $token;
     }
 
-    public function setUser(TestUser $user)
+    public function setUser(TestUser $user): void
     {
         $this->user = $user;
     }

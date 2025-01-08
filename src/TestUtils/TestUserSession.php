@@ -8,25 +8,22 @@ use Dbp\Relay\CoreBundle\API\UserSessionInterface;
 
 class TestUserSession implements UserSessionInterface
 {
-    private ?string $userIdentifier;
-    private array $roles;
-    private bool $isAuthenticated;
-
-    public function __construct(?string $identifier = null, array $roles = [], bool $isAuthenticated = false)
+    public function __construct(
+        private ?string $userIdentifier = null,
+        private array $symfonyRoles = [],
+        private bool $isAuthenticated = false,
+        private readonly bool $isServiceAccount = false)
     {
-        $this->userIdentifier = $identifier;
-        $this->roles = $roles;
-        $this->isAuthenticated = $isAuthenticated;
     }
 
-    public function setIdentifier(?string $identifier)
+    public function setIdentifier(?string $identifier): void
     {
         $this->userIdentifier = $identifier;
     }
 
-    public function setRoles(array $roles)
+    public function setRoles(array $roles): void
     {
-        $this->roles = $roles;
+        $this->symfonyRoles = $roles;
     }
 
     public function setSessionToken(?array $jwt): void
@@ -35,7 +32,7 @@ class TestUserSession implements UserSessionInterface
 
     public function getUserRoles(): array
     {
-        return $this->roles;
+        return $this->symfonyRoles;
     }
 
     public function getUserIdentifier(): ?string
@@ -75,6 +72,6 @@ class TestUserSession implements UserSessionInterface
 
     public function isServiceAccount(): bool
     {
-        return false;
+        return $this->isServiceAccount;
     }
 }
