@@ -6,9 +6,6 @@ namespace Dbp\Relay\CoreBundle\User;
 
 use Dbp\Relay\CoreBundle\API\UserSessionInterface;
 
-/**
- * @internal
- */
 class UserAttributeService
 {
     public function __construct(
