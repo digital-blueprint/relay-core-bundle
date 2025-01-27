@@ -1,6 +1,6 @@
 import '@webcomponents/scoped-custom-element-registry';
 import {html} from 'lit';
-import {ScopedElementsMixin} from '@open-wc/scoped-elements';
+import {ScopedElementsMixin} from '@dbp-toolkit/common';
 import {AuthKeycloak} from '@dbp-toolkit/auth/src/auth-keycloak';
 import {LoginButton} from '@dbp-toolkit/auth/src/login-button';
 import * as commonUtils from '@dbp-toolkit/common/utils';

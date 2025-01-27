@@ -1,13 +1,14 @@
 {
   "name": "auth",
   "version": "0.0.1",
+  "type": "module",
   "main": "src/index.js",
   "license": "LGPL-2.1-or-later",
   "devDependencies": {
     "@eslint/js": "^9.4.0",
     "@rollup/plugin-commonjs": "^28.0.1",
     "@rollup/plugin-json": "^6.0.0",
-    "@rollup/plugin-node-resolve": "^15.0.2",
+    "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-replace": "^6.0.1",
     "@rollup/plugin-terser": "^0.4.1",
     "@rollup/plugin-url": "^8.0.1",
@@ -22,7 +23,7 @@
     "karma-firefox-launcher": "^2.1.0",
     "karma-mocha": "^2.0.1",
     "karma-source-map-support": "^1.4.0",
-    "mocha": "^10.2.0",
+    "mocha": "^11.1.0",
     "playwright-core": "^1.32.3",
     "rollup": "^4.18.0",
     "rollup-plugin-copy": "^3.1.0",
@@ -32,16 +33,15 @@
   "dependencies": {
     "@dbp-toolkit/auth": "^0.3.4",
     "@dbp-toolkit/common": "^0.3.9",
-    "@open-wc/scoped-elements": "^2.1.0",
     "@webcomponents/scoped-custom-element-registry": "^0.0.9",
     "lit": "^3.0"
   },
   "scripts": {
     "clean": "rm dist/*",
-    "build": "rollup --bundleConfigAsCjs -c",
-    "build-test": "rollup --bundleConfigAsCjs -c --environment BUILD:test",
-    "watch": "rollup --bundleConfigAsCjs -c --watch",
-    "test": "npm run build-test && karma start --singleRun",
+    "build": "rollup -c",
+    "build-test": "rollup -c --environment BUILD:test",
+    "watch": "rollup -c --watch",
+    "test": "npm run build-test && karma start karma.conf.cjs --singleRun",
     "lint": "eslint ."
   }
 }
