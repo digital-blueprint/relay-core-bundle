@@ -56,7 +56,7 @@ class QueryHelper
             ->from($entityClassName, $ENTITY_ALIAS);
 
         if ($filter !== null && !$filter->isEmpty()) {
-            self::addFilter($queryBuilder, $ENTITY_ALIAS, $filter);
+            self::addFilter($queryBuilder, $filter, $ENTITY_ALIAS);
         }
 
         return $queryBuilder
@@ -69,9 +69,9 @@ class QueryHelper
     /**
      * @throws \Exception
      */
-    public static function addFilter(QueryBuilder $queryBuilder, string $entityAlias, Filter $filter): QueryBuilder
+    public static function addFilter(QueryBuilder $queryBuilder, Filter $filter, ?string $entityAlias = null): QueryBuilder
     {
-        return $queryBuilder->where(self::createExpression($queryBuilder, $entityAlias, $filter->getRootNode()));
+        return $queryBuilder->andWhere(self::createExpression($queryBuilder, $filter->getRootNode(), $entityAlias ? $entityAlias.'.' : null));
     }
 
     /**
@@ -79,51 +79,51 @@ class QueryHelper
      *
      * @throws \Exception
      */
-    private static function createExpression(QueryBuilder $queryBuilder, string $entityAlias, FilterNode $filterNode): mixed
+    private static function createExpression(QueryBuilder $queryBuilder, FilterNode $filterNode, ?string $attributePrefix): mixed
     {
         if ($filterNode instanceof LogicalFilterNode) {
             switch ($filterNode->getNodeType()) {
                 case FilterNodeType::AND:
                 case FilterNodeType::OR:
                     if (count($filterNode->getChildren()) === 1) {
-                        return self::createExpression($queryBuilder, $entityAlias, $filterNode->getChildren()[0]);
+                        return self::createExpression($queryBuilder, $filterNode->getChildren()[0], $attributePrefix);
                     }
                     $logicalClause = $filterNode->getNodeType() === FilterNodeType::AND ?
                         $queryBuilder->expr()->andX() : $queryBuilder->expr()->orX();
                     foreach ($filterNode->getChildren() as $childNodeDefinition) {
-                        $logicalClause->add(self::createExpression($queryBuilder, $entityAlias, $childNodeDefinition));
+                        $logicalClause->add(self::createExpression($queryBuilder, $childNodeDefinition, $attributePrefix));
                     }
 
                     return $logicalClause;
 
                 case FilterNodeType::NOT:
                     return $queryBuilder->expr()->not(
-                        self::createExpression($queryBuilder, $entityAlias, $filterNode->getChildren()[0]));
+                        self::createExpression($queryBuilder, $filterNode->getChildren()[0], $attributePrefix));
 
                 default:
                     throw new \Exception('invalid filter node type: '.$filterNode->getNodeType());
             }
         } elseif ($filterNode instanceof ConditionFilterNode) {
-            $field = $filterNode->getField();
+            $attributePath = $attributePrefix.$filterNode->getField();
             $value = $filterNode->getValue();
             switch ($filterNode->getOperator()) {
                 case FilterOperatorType::I_CONTAINS_OPERATOR:
-                    return $queryBuilder->expr()->like($entityAlias.'.'.$field,
+                    return $queryBuilder->expr()->like($attributePath,
                         $queryBuilder->expr()->literal('%'.$value.'%'));
                 case FilterOperatorType::EQUALS_OPERATOR: // TODO: case-sensitivity post-precessing required
-                    return $queryBuilder->expr()->eq($entityAlias.'.'.$field,
+                    return $queryBuilder->expr()->eq($attributePath,
                         $queryBuilder->expr()->literal($value));
                 case FilterOperatorType::I_STARTS_WITH_OPERATOR:
-                    return $queryBuilder->expr()->like($entityAlias.'.'.$field,
+                    return $queryBuilder->expr()->like($attributePath,
                         $queryBuilder->expr()->literal($value.'%'));
                 case FilterOperatorType::I_ENDS_WITH_OPERATOR:
-                    return $queryBuilder->expr()->like($entityAlias.'.'.$field,
+                    return $queryBuilder->expr()->like($attributePath,
                         $queryBuilder->expr()->literal('%'.$value));
                 case FilterOperatorType::GREATER_THAN_OR_EQUAL_OPERATOR:
-                    return $queryBuilder->expr()->gte($entityAlias.'.'.$field,
+                    return $queryBuilder->expr()->gte($attributePath,
                         $queryBuilder->expr()->literal($value));
                 case FilterOperatorType::LESS_THAN_OR_EQUAL_OPERATOR:
-                    return $queryBuilder->expr()->lte($entityAlias.'.'.$field,
+                    return $queryBuilder->expr()->lte($attributePath,
                         $queryBuilder->expr()->literal($value));
                 case FilterOperatorType::IN_ARRAY_OPERATOR:
                     if (!is_array($value) || empty($value)) {
@@ -131,9 +131,9 @@ class QueryHelper
                             '" requires non-empty array value');
                     }
 
-                    return $queryBuilder->expr()->in($entityAlias.'.'.$field, $value);
+                    return $queryBuilder->expr()->in($attributePath, $value);
                 case FilterOperatorType::IS_NULL_OPERATOR:
-                    return $queryBuilder->expr()->isNull($entityAlias.'.'.$field);
+                    return $queryBuilder->expr()->isNull($attributePath);
                 default:
                     throw new \Exception('unsupported filter condition operator: '.$filterNode->getOperator());
             }

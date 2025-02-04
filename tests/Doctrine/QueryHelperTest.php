@@ -334,7 +334,19 @@ class QueryHelperTest extends KernelTestCase
             ->iContains('content', 'r b')
             ->equals('number', 2)
             ->createFilter();
-        QueryHelper::addFilter($queryBuilder, $ENTITY_ALIAS, $filter);
+        QueryHelper::addFilter($queryBuilder, $filter, $ENTITY_ALIAS);
+        $testResources = $queryBuilder
+            ->getQuery()
+            ->getResult();
+        $this->assertCount(1, $testResources);
+        $this->assertContainsResource($testResource2, $testResources);
+
+        // same but entity alias is included in the attribute paths:
+        $filter = FilterTreeBuilder::create()
+            ->iContains("$ENTITY_ALIAS.content", 'r b')
+            ->equals("$ENTITY_ALIAS.number", 2)
+            ->createFilter();
+        QueryHelper::addFilter($queryBuilder, $filter);
         $testResources = $queryBuilder
             ->getQuery()
             ->getResult();
