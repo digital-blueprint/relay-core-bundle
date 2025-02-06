@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.199
+
 * Make QueryHelper::addFilter work for JOINS (where there are multiple entity aliases)
 * Add preserveItemKeys filter to Pagination::getPage()
 * Remove UserAttributeService::getUserAttribute method. Note that the service is only intended to 
