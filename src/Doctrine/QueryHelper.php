@@ -138,7 +138,6 @@ class QueryHelper
                     throw new \Exception('unsupported filter condition operator: '.$filterNode->getOperator());
             }
         }
-
         throw new \Exception('invalid filter node instance: '.get_class($filterNode));
     }
 }

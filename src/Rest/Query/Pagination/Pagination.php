@@ -32,7 +32,7 @@ class Pagination
     }
 
     public static function getPage(int $firstResultIndex, int $maxNumResults, callable $getItemsCallback,
-        callable $passesFilterCallback, int $maxNumItemsToGet = 1024): array
+        callable $passesFilterCallback, int $maxNumItemsToGet = 1024, bool $preserveItemKeys = false): array
     {
         $resultPageItems = [];
         if ($maxNumResults > 0) {
@@ -40,10 +40,14 @@ class Pagination
             $done = false;
             $currentFilteredItemIndex = 0;
             while (!$done && ($items = $getItemsCallback($firstItemIndexToGet, $maxNumItemsToGet)) !== []) {
-                foreach ($items as $item) {
+                foreach ($items as $key => $item) {
                     if ($passesFilterCallback($item)) {
                         if ($currentFilteredItemIndex >= $firstResultIndex) {
-                            $resultPageItems[] = $item;
+                            if ($preserveItemKeys) {
+                                $resultPageItems[$key] = $item;
+                            } else {
+                                $resultPageItems[] = $item;
+                            }
                         }
                         if (count($resultPageItems) === $maxNumResults) {
                             $done = true;
