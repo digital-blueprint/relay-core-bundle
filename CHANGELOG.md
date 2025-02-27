@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.200
+
 * Add enforced filters which, when configured, are always applied for collection GET requests and allows
 for the restriction of results based on the logger-in user's authorization attributes
 
