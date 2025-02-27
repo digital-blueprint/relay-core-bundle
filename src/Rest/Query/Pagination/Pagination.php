@@ -62,4 +62,20 @@ class Pagination
 
         return $resultPageItems;
     }
+
+    /**
+     * @param callable(int $currentPageStartIndex, int $maxNumItemsPerPage): array $getPageCallback
+     */
+    public static function getAllResults(callable $getPageCallback, int $maxNumItemsPerPage = 1024): array
+    {
+        $allResults = [];
+        $currentPageStartIndex = 0;
+        do {
+            $resultPage = $getPageCallback($currentPageStartIndex, $maxNumItemsPerPage);
+            $allResults = array_merge($allResults, $resultPage);
+            $currentPageStartIndex += $maxNumItemsPerPage;
+        } while (count($resultPage) === $maxNumItemsPerPage);
+
+        return $allResults;
+    }
 }

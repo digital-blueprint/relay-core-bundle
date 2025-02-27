@@ -329,6 +329,113 @@ class AbstractDataProviderTest extends TestCase
     /**
      * @throws \Exception
      */
+    public function testEnforcedFilter()
+    {
+        $testConfig = self::getTestConfig();
+        $testConfig['rest']['query']['filter']['enforced_filter'] = 'Filter.create().equals("localData.attribute0", true)';
+        $this->testDataProvider->setConfig($testConfig);
+
+        $this->testDataProvider->setSourceData([[]]);
+        $this->testDataProviderTester->getPage();
+        $filter = Options::getFilter($this->testDataProvider->getOptions());
+
+        $expectedFilter = FilterTreeBuilder::create()->equals('localData.attribute0', true)->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    public function testEnforcedFilterInvalid()
+    {
+        // expression does not return a filter tree
+        $testConfig = self::getTestConfig();
+        $testConfig['rest']['query']['filter']['enforced_filter'] = 'true';
+        $this->testDataProvider->setConfig($testConfig);
+
+        $this->testDataProvider->setSourceData([[]]);
+        $this->expectException(\RuntimeException::class);
+        $this->testDataProviderTester->getPage();
+    }
+
+    public function testEnforcedFilterInvalid2()
+    {
+        // filter misspelled
+        $testConfig = self::getTestConfig();
+        $testConfig['rest']['query']['filter']['enforced_filter'] = 'filter.create()';
+        $this->testDataProvider->setConfig($testConfig);
+
+        $this->testDataProvider->setSourceData([[]]);
+        $this->expectException(\RuntimeException::class);
+        $this->testDataProviderTester->getPage();
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testEnforcedFilterInvalid3()
+    {
+        // filter syntax (missing "end")
+        $testConfig = self::getTestConfig();
+        $testConfig['rest']['query']['filter']['enforced_filter'] = 'Filter.create().and()';
+        $this->testDataProvider->setConfig($testConfig);
+
+        $this->testDataProvider->setSourceData([[]]);
+        $this->expectException(\RuntimeException::class);
+        $this->testDataProviderTester->getPage();
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testCombineEnforcedFilterWithQueryFilter()
+    {
+        $testConfig = self::getTestConfig();
+        $testConfig['rest']['query']['filter']['enforced_filter'] = 'Filter.create().equals("localData.attribute0", true)';
+        $this->testDataProvider->setConfig($testConfig);
+
+        $queryParameters = [];
+        parse_str('filter[field0]=value0', $queryParameters);
+        $queryParameters['preparedFilter'] = 'filter0';
+
+        $this->testDataProvider->setSourceData([[]]);
+        $this->testDataProviderTester->getPage(filters: $queryParameters);
+        $filter = Options::getFilter($this->testDataProvider->getOptions());
+
+        $expectedFilter = FilterTreeBuilder::create()
+            ->equals('localData.attribute0', true)
+            ->equals('field0', 'value0')
+            ->iContains('field0', 'value0')
+            ->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testCombineEnforcedFilterWithQueryFilterAndPreparedFilter()
+    {
+        $testConfig = self::getTestConfig();
+        $testConfig['rest']['query']['filter']['enforced_filter'] = 'Filter.create().equals("localData.attribute0", true)';
+        $this->testDataProvider->setConfig($testConfig);
+
+        $queryParameters = [];
+        parse_str('filter[field0]=value0', $queryParameters);
+
+        $this->testDataProvider->setSourceData([[]]);
+        $this->testDataProviderTester->getPage(filters: $queryParameters);
+        $filter = Options::getFilter($this->testDataProvider->getOptions());
+
+        $expectedFilter = FilterTreeBuilder::create()
+            ->equals('localData.attribute0', true)
+            ->equals('field0', 'value0')
+            ->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function testPreparedFilterNotEnabled()
     {
         $config = self::getTestConfig();

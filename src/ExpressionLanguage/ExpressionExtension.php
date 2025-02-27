@@ -13,12 +13,8 @@ namespace Dbp\Relay\CoreBundle\ExpressionLanguage;
  */
 class ExpressionExtension
 {
-    /* @var ExpressionLanguage */
-    private $lang;
-
-    public function __construct(ExpressionLanguage $lang)
+    public function __construct(private readonly ExpressionLanguage $lang)
     {
-        $this->lang = $lang;
     }
 
     public static function str_starts_with()

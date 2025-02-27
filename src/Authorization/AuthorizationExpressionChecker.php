@@ -139,6 +139,14 @@ class AuthorizationExpressionChecker
         }
     }
 
+    public function evaluateCustomExpression(AuthorizationUser $currentAuthorizationUser,
+        string $expression, array $variables = [], mixed $defaultValue = null): mixed
+    {
+        $variables[self::USER_VARIABLE_NAME] = $currentAuthorizationUser;
+
+        return $this->expressionLanguage->evaluate($expression, $variables) ?? $defaultValue;
+    }
+
     public function isAttributeExpressionDefined(string $attributeExpressionName): bool
     {
         return isset($this->attributeExpressions[$attributeExpressionName]);

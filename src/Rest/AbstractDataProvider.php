@@ -15,8 +15,10 @@ use Dbp\Relay\CoreBundle\LocalData\LocalData;
 use Dbp\Relay\CoreBundle\LocalData\LocalDataAccessChecker;
 use Dbp\Relay\CoreBundle\LocalData\LocalDataAwareInterface;
 use Dbp\Relay\CoreBundle\Locale\Locale;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\ExpressionLanguageFilterCreator;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterException;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTreeBuilder;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FromQueryFilterCreator;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\ConditionNode;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\ConstantNode;
@@ -52,6 +54,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     private const FILTERS_CONTEXT_KEY = 'filters';
     private const GROUPS_CONTEXT_KEY = 'groups';
     private const RESOURCE_CLASS_CONTEXT_KEY = 'resource_class';
+    private const EXPRESSION_LANGUAGE_FILTER_CREATOR_VARIABLE_NAME = 'Filter';
 
     private Locale $locale;
     private PreparedFilters $preparedFiltersController;
@@ -63,6 +66,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     private bool $areQueryFiltersEnabled = false;
     private bool $arePreparedFiltersEnabled = false;
     private bool $isSortEnabled = false;
+    private ?string $mandatoryFilterExpression = null;
 
     /**
      * @deprecated Use self::appendConfigNodeDefinitions instead
@@ -111,6 +115,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $filterConfig = $config[Rest::ROOT_CONFIG_NODE][Query::ROOT_CONFIG_NODE][Filter::ROOT_CONFIG_NODE] ?? [];
         $this->areQueryFiltersEnabled = $filterConfig[Filter::ENABLE_QUERY_FILTERS_CONFIG_NODE] ?? false;
         $this->arePreparedFiltersEnabled = $filterConfig[Filter::ENABLE_PREPARED_FILTERS_CONFIG_NODE] ?? false;
+        $this->mandatoryFilterExpression = $filterConfig[Filter::ENFORCED_FILTER_CONFIG_NODE] ?? null;
         $this->preparedFiltersController->loadConfig($filterConfig);
 
         $this->isSortEnabled =
@@ -344,9 +349,18 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $sort = null;
 
         $availableAttributePaths = null;
+        if ($this->mandatoryFilterExpression !== null) {
+            $filter = $this->createFilterFromExpression($this->mandatoryFilterExpression);
+        }
+
         if ($this->areQueryFiltersEnabled && $filterParameter = Parameters::getFilter($filters)) {
-            $filter = $this->createFilter($filterParameter,
+            $queryFilter = $this->createFilter($filterParameter,
                 $availableAttributePaths = $this->getAvailableAttributePaths($resourceClass, $deserializationGroups));
+            try {
+                $filter = $filter !== null ? $filter->combineWith($queryFilter) : $queryFilter;
+            } catch (FilterException $filterException) {
+                throw new \RuntimeException('combing filters with query filter failed: '.$filterException->getMessage());
+            }
         }
 
         if ($this->arePreparedFiltersEnabled && $preparedFilterParameter = Parameters::getPreparedFilter($filters)) {
@@ -355,7 +369,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
             try {
                 $filter = $filter !== null ? $filter->combineWith($preparedFilter) : $preparedFilter;
             } catch (FilterException $filterException) {
-                throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR, $filterException->getMessage());
+                throw new \RuntimeException('combining filters with prepared filter failed: '.$filterException->getMessage());
             }
         }
 
@@ -412,5 +426,25 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         }
 
         return $availableAttributePaths;
+    }
+
+    private function createFilterFromExpression(string $mandatoryFilterExpression)
+    {
+        try {
+            $filterTree = $this->evaluateCustomExpression($mandatoryFilterExpression, [
+                self::EXPRESSION_LANGUAGE_FILTER_CREATOR_VARIABLE_NAME => new ExpressionLanguageFilterCreator(),
+            ]);
+        } catch (\Exception $exception) {
+            throw new \RuntimeException(Filter::ENFORCED_FILTER_CONFIG_NODE.' expression is invalid: '.$exception->getMessage());
+        }
+        if (false === ($filterTree instanceof FilterTreeBuilder)) {
+            throw new \RuntimeException(
+                Filter::ENFORCED_FILTER_CONFIG_NODE.' expression is invalid: must return an instance of FilterTreeBuilder');
+        }
+        try {
+            return $filterTree->createFilter();
+        } catch (FilterException $filterException) {
+            throw new \RuntimeException(Filter::ENFORCED_FILTER_CONFIG_NODE.' filter is invalid: '.$filterException->getMessage());
+        }
     }
 }

@@ -212,6 +212,20 @@ abstract class AbstractAuthorizationService
     }
 
     /**
+     * Evaluates a custom symfony expression that may access the currently logged-in 'user' variable
+     * and the given set of variables.
+     *
+     * @param array<string, mixed> $variables    The set of defined variables
+     * @param mixed                $defaultValue The value to return if the expression evaluates to 'null'
+     */
+    public function evaluateCustomExpression(
+        string $expression, array $variables = [], mixed $defaultValue = null): mixed
+    {
+        return $this->authorizationExpressionChecker->evaluateCustomExpression(
+            $this->currentAuthorizationUser, $expression, $variables, $defaultValue);
+    }
+
+    /**
      * Returns the identifier of the currently logged-in user.
      */
     public function getUserIdentifier(): ?string
