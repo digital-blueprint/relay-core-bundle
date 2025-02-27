@@ -6,6 +6,7 @@ namespace Dbp\Relay\CoreBundle\Rest\Query\Filter;
 
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\AndNode;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\ConditionNode;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\ConstantNode;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\LogicalNode;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\Node;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\NotNode;
@@ -187,7 +188,12 @@ class FilterTreeBuilder
      */
     public function inArray(string $field, array $value): FilterTreeBuilder
     {
-        $this->currentNode->appendChild(new ConditionNode($field, OperatorType::IN_ARRAY_OPERATOR, $value));
+        // empty array means condition can't be fulfilled -> always false
+        if ([] === $value) {
+            $this->currentNode->appendChild(new ConstantNode(false));
+        } else {
+            $this->currentNode->appendChild(new ConditionNode($field, OperatorType::IN_ARRAY_OPERATOR, $value));
+        }
 
         return $this;
     }

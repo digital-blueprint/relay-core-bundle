@@ -217,4 +217,10 @@ class FilterTest extends TestCase
             $this->assertEquals(FilterException::CONDITION_FIELD_EMPTY, $exception->getCode());
         }
     }
+
+    public function testInArrayWithEmptyArray(): void
+    {
+        $filter = FilterTreeBuilder::create()->inArray('field', [])->createFilter();
+        $this->assertTrue($filter->isAlwaysFalse());
+    }
 }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\Rest\Query\Filter;
 
-use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterException;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTreeBuilder;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FromQueryFilterCreator;
@@ -283,7 +282,6 @@ class CreateFilterFromQueryTest extends TestCase
         $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
 
-        $expectedFilter = Filter::create();
         $expectedFilter = FilterTreeBuilder::create()->inArray('field0', ['value0', 'value1'])->createFilter();
 
         $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
