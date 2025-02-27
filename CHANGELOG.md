@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.201
+
 * Filter: Append a constant 'false' node when an 'inArray' condition with an empty array is appended to a filter tree
 
 ## v0.1.200
