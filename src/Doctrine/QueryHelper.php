@@ -6,6 +6,7 @@ namespace Dbp\Relay\CoreBundle\Doctrine;
 
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\ConditionNode as ConditionFilterNode;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\ConstantNode;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\LogicalNode as LogicalFilterNode;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\Node as FilterNode;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\NodeType as FilterNodeType;
@@ -137,6 +138,8 @@ class QueryHelper
                 default:
                     throw new \Exception('unsupported filter condition operator: '.$filterNode->getOperator());
             }
+        } elseif ($filterNode instanceof ConstantNode) {
+            return $queryBuilder->expr()->eq('1', $filterNode->isTrue() ? '1' : '0');
         }
         throw new \Exception('invalid filter node instance: '.get_class($filterNode));
     }
