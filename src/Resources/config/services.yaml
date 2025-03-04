@@ -98,10 +98,6 @@ services:
     autowire: true
     autoconfigure: true
 
-  Dbp\Relay\CoreBundle\Helpers\Locale:
-    autowire: true
-    autoconfigure: true
-
   Dbp\Relay\CoreBundle\Authorization\DebugCommand:
     autowire: true
     autoconfigure: true

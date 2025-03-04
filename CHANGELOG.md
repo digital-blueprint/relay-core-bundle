@@ -3,6 +3,7 @@
 ## Unreleased
 
 * Removed long deprecated GuzzleTools class
+* Removed long deprecated Helpers\Locale class
 
 ## v0.1.202
 
