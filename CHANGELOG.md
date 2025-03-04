@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Removed long deprecated GuzzleTools class
+
 ## v0.1.202
 
 * Rest/Query/Filter: automatically simplify the filter tree on filter creation to simplify the filter and remove
