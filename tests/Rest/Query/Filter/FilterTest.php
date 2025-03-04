@@ -152,18 +152,26 @@ class FilterTest extends TestCase
         $this->assertTrue($filter->isValid());
     }
 
-    /**
-     * @throws FilterException
-     */
     public function testFilterInvalid()
     {
-        // missing children under 'or' node
-        /** @var Filter */
-        $filter = FilterTreeBuilder::create()->or()->end()->createFilter();
+        try {
+            // missing children under 'or' node
+            FilterTreeBuilder::create()->or()->end()->createFilter();
+            $this->fail('Expected FilterException was not thrown');
+        } catch (FilterException $filterException) {
+            $this->assertEquals(FilterException::FILTER_INVALID, $filterException->getCode());
+        }
+    }
 
-        $reason = null;
-        $this->assertFalse($filter->isValid($reason));
-        $this->assertNotEmpty($reason);
+    public function testFilterTreeInvalid()
+    {
+        try {
+            // missing '->end()' call
+            FilterTreeBuilder::create()->or()->createFilter();
+            $this->fail('Expected FilterException was not thrown');
+        } catch (FilterException $filterException) {
+            $this->assertEquals(FilterException::FILTER_TREE_INVALID, $filterException->getCode());
+        }
     }
 
     /**

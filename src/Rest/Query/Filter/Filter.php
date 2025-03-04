@@ -44,9 +44,15 @@ class Filter
         return $rootNode;
     }
 
+    /**
+     * @throws FilterException
+     */
     public static function create(?AndNode $rootNode = null): Filter
     {
-        return new self($rootNode ?? new AndNode());
+        $filter = new self($rootNode ?? new AndNode());
+        $filter->simplify(); // also removes constant nodes
+
+        return $filter;
     }
 
     protected function __construct(AndNode $rootNode)
@@ -75,6 +81,9 @@ class Filter
     }
 
     /**
+     * Simplifies the logical expression that this filter represents.
+     * Removes constant nodes and logical nodes that are not required.
+     *
      * @throws FilterException
      */
     public function simplify(): void
