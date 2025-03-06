@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+* Add Rest/Query/Parameters:getBool helper function and tests
 * Removed long deprecated GuzzleTools class
 * Removed long deprecated Helpers\Locale class
 

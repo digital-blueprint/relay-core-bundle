@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Rest\Query;
 
+use Dbp\Relay\CoreBundle\Exception\ApiError;
+use Symfony\Component\HttpFoundation\Response;
+
 class Parameters
 {
     public const FILTER = 'filter';
@@ -50,5 +53,25 @@ class Parameters
         parse_str($queryString, $queryParameters);
 
         return $queryParameters[$parameterName] ?? [];
+    }
+
+    /**
+     * @throws ApiError
+     */
+    public static function getBool(array $parameters, string $parameterName, bool $defaultValue = false,
+        bool $throwOnSyntaxError = true, bool $throwIfMissing = false): bool
+    {
+        if (($value = $parameters[$parameterName] ?? null) !== null) {
+            $returnValue = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            if ($returnValue !== null) {
+                return $returnValue;
+            } elseif ($throwOnSyntaxError) {
+                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, 'Invalid value for boolean parameter');
+            }
+        } elseif ($throwIfMissing) {
+            throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf('Parameter \'%s\' is required', $parameterName));
+        }
+
+        return $defaultValue;
     }
 }
