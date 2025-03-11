@@ -17,7 +17,6 @@ class Filter
     public const ROOT_CONFIG_NODE = 'filter';
     public const ENABLE_QUERY_FILTERS_CONFIG_NODE = 'enable_query_filters';
     public const ENABLE_PREPARED_FILTERS_CONFIG_NODE = 'enable_prepared_filters';
-    public const ENFORCED_FILTER_CONFIG_NODE = 'enforced_filter';
 
     private AndNode $rootNode;
 
@@ -35,10 +34,6 @@ class Filter
             ->scalarNode(self::ENABLE_PREPARED_FILTERS_CONFIG_NODE)
                 ->info('Indicates whether filtering using prepared filters is enabled.')
                 ->defaultFalse()
-            ->end()
-            ->scalarNode(self::ENFORCED_FILTER_CONFIG_NODE)
-                ->info('Allows the definition of a filter that is used for all get-collection requests.')
-                ->defaultNull()
             ->end();
 
         return $rootNode;

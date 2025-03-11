@@ -26,25 +26,45 @@ class AbstractDataProviderTest extends TestCase
         $this->testDataProviderTester = DataProviderTester::create($this->testDataProvider,
             TestEntity::class, ['TestEntity:output', 'LocalData:output']);
 
+        $this->loginUser();
+    }
+
+    private function loginUser(): void
+    {
+        $userAttributes = $this->getUserAttributeDefaults();
+        $userAttributes['ROLE_USER'] = true;
         DataProviderTester::login($this->testDataProvider,
-            TestDataProvider::TEST_USER_IDENTIFIER, [
-                'ROLE_USER' => true,
-                'ROLE_ADMIN' => false,
-            ]);
+            TestDataProvider::TEST_USER_IDENTIFIER, $userAttributes);
     }
 
     private function loginAdmin(): void
     {
+        $userAttributes = $this->getUserAttributeDefaults();
+        $userAttributes['ROLE_ADMIN'] = true;
         DataProviderTester::login($this->testDataProvider,
-            TestDataProvider::ADMIN_USER_IDENTIFIER, [
-                'ROLE_USER' => false,
-                'ROLE_ADMIN' => true,
-            ]);
+            TestDataProvider::ADMIN_USER_IDENTIFIER, $userAttributes);
+    }
+
+    private function loginViewer(): void
+    {
+        $userAttributes = $this->getUserAttributeDefaults();
+        $userAttributes['ROLE_VIEWER'] = true;
+        DataProviderTester::login($this->testDataProvider,
+            'test_viewer', $userAttributes);
     }
 
     private function logout(): void
     {
-        DataProviderTester::logout($this->testDataProvider);
+        DataProviderTester::logout($this->testDataProvider, $this->getUserAttributeDefaults());
+    }
+
+    private function getUserAttributeDefaults(): array
+    {
+        return [
+            'ROLE_USER' => false,
+            'ROLE_ADMIN' => false,
+            'ROLE_VIEWER' => false,
+        ];
     }
 
     private static function getTestConfig(): array
@@ -55,12 +75,19 @@ class AbstractDataProviderTest extends TestCase
             [
                 'id' => 'filter0',
                 'filter' => 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0',
-                'apply_policy' => 'user.get("ROLE_USER")',
+                'use_policy' => 'user.get("ROLE_USER") || user.get("ROLE_VIEWER")',
             ],
             [
-                'id' => 'filterForbidden',
-                'filter' => 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0',
-                'apply_policy' => 'user.get("ROLE_ADMIN")',
+                'id' => 'filterUseAdminOnly',
+                'filter' => 'filter[identifier]=foo',
+                'use_policy' => 'user.get("ROLE_ADMIN")',
+                'force_use_policy' => 'user.get("ROLE_VIEWER")',
+            ],
+            [
+                'id' => 'filterPublic',
+                'filter' => 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=IS_NULL',
+                'use_policy' => 'true',
+                'force_use_policy' => 'user.get("ROLE_VIEWER")',
             ],
         ];
         $config['rest']['query']['sort']['enable_sort'] = true;
@@ -275,8 +302,13 @@ class AbstractDataProviderTest extends TestCase
         parse_str('filter[field0]=value0', $queryParameters);
 
         $this->testDataProvider->setSourceData([[]]);
-        $this->testDataProviderTester->getPage(filters: $queryParameters);
-        $this->assertNull(Options::getFilter($this->testDataProvider->getOptions()));
+        try {
+            $this->testDataProviderTester->getPage(filters: $queryParameters);
+            $this->fail('ApiError not thrown as expected');
+        } catch (ApiError $apiError) {
+            $this->assertEquals(Response::HTTP_BAD_REQUEST, $apiError->getStatusCode());
+            $this->assertEquals(ErrorIds::QUERY_FILTERS_DISABLED, $apiError->getErrorId());
+        }
     }
 
     /**
@@ -315,7 +347,7 @@ class AbstractDataProviderTest extends TestCase
     /**
      * @throws \Exception
      */
-    public function testPreparedFilter()
+    public function testRequestedFilter()
     {
         $this->testDataProvider->setSourceData([[]]);
         $this->testDataProviderTester->getPage(filters: ['preparedFilter' => 'filter0']);
@@ -329,69 +361,54 @@ class AbstractDataProviderTest extends TestCase
     /**
      * @throws \Exception
      */
-    public function testEnforcedFilter()
+    public function testForcedFilters()
     {
-        $testConfig = self::getTestConfig();
-        $testConfig['rest']['query']['filter']['enforced_filter'] = 'Filter.create().equals("localData.attribute0", true)';
-        $this->testDataProvider->setConfig($testConfig);
+        // 'filterUseAdminOnly' and 'filterPublic' must be applied without being requested (forced)
+        $this->loginViewer();
 
         $this->testDataProvider->setSourceData([[]]);
         $this->testDataProviderTester->getPage();
         $filter = Options::getFilter($this->testDataProvider->getOptions());
 
-        $expectedFilter = FilterTreeBuilder::create()->equals('localData.attribute0', true)->createFilter();
+        $expectedFilter = FilterTreeBuilder::create()
+            ->equals('identifier', 'foo')
+            ->isNull('field0')
+            ->createFilter();
 
         $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
     }
 
-    public function testEnforcedFilterInvalid()
+    /**
+     * @throws \Exception
+     */
+    public function testCombineRequestedFilterWithForcedFilters()
     {
-        // expression does not return a filter tree
-        $testConfig = self::getTestConfig();
-        $testConfig['rest']['query']['filter']['enforced_filter'] = 'true';
-        $this->testDataProvider->setConfig($testConfig);
+        // 'filterUseAdminOnly' and 'filterPublic' must be applied without being requested (forced) and combined
+        // with requested filter 'filter0'
+        $this->loginViewer();
+
+        $queryParameters = [
+            'preparedFilter' => 'filter0',
+        ];
 
         $this->testDataProvider->setSourceData([[]]);
-        $this->expectException(\RuntimeException::class);
-        $this->testDataProviderTester->getPage();
-    }
+        $this->testDataProviderTester->getPage(filters: $queryParameters);
+        $filter = Options::getFilter($this->testDataProvider->getOptions());
 
-    public function testEnforcedFilterInvalid2()
-    {
-        // filter misspelled
-        $testConfig = self::getTestConfig();
-        $testConfig['rest']['query']['filter']['enforced_filter'] = 'filter.create()';
-        $this->testDataProvider->setConfig($testConfig);
+        $expectedFilter = FilterTreeBuilder::create()
+            ->iContains('field0', 'value0')
+            ->equals('identifier', 'foo')
+            ->isNull('field0')
+            ->createFilter();
 
-        $this->testDataProvider->setSourceData([[]]);
-        $this->expectException(\RuntimeException::class);
-        $this->testDataProviderTester->getPage();
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
     }
 
     /**
      * @throws \Exception
      */
-    public function testEnforcedFilterInvalid3()
+    public function testCombineRequestedFilterWithQueryFilter()
     {
-        // filter syntax (missing "end")
-        $testConfig = self::getTestConfig();
-        $testConfig['rest']['query']['filter']['enforced_filter'] = 'Filter.create().and()';
-        $this->testDataProvider->setConfig($testConfig);
-
-        $this->testDataProvider->setSourceData([[]]);
-        $this->expectException(\RuntimeException::class);
-        $this->testDataProviderTester->getPage();
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function testCombineEnforcedFilterWithQueryFilter()
-    {
-        $testConfig = self::getTestConfig();
-        $testConfig['rest']['query']['filter']['enforced_filter'] = 'Filter.create().equals("localData.attribute0", true)';
-        $this->testDataProvider->setConfig($testConfig);
-
         $queryParameters = [];
         parse_str('filter[field0]=value0', $queryParameters);
         $queryParameters['preparedFilter'] = 'filter0';
@@ -401,7 +418,6 @@ class AbstractDataProviderTest extends TestCase
         $filter = Options::getFilter($this->testDataProvider->getOptions());
 
         $expectedFilter = FilterTreeBuilder::create()
-            ->equals('localData.attribute0', true)
             ->equals('field0', 'value0')
             ->iContains('field0', 'value0')
             ->createFilter();
@@ -412,22 +428,45 @@ class AbstractDataProviderTest extends TestCase
     /**
      * @throws \Exception
      */
-    public function testCombineEnforcedFilterWithQueryFilterAndPreparedFilter()
+    public function testCombineRequestedFilterWithQueryFilterAndForcedFilter()
     {
-        $testConfig = self::getTestConfig();
-        $testConfig['rest']['query']['filter']['enforced_filter'] = 'Filter.create().equals("localData.attribute0", true)';
-        $this->testDataProvider->setConfig($testConfig);
+        $this->loginViewer();
 
         $queryParameters = [];
         parse_str('filter[field0]=value0', $queryParameters);
+        $queryParameters['preparedFilter'] = 'filter0';
 
         $this->testDataProvider->setSourceData([[]]);
         $this->testDataProviderTester->getPage(filters: $queryParameters);
         $filter = Options::getFilter($this->testDataProvider->getOptions());
 
         $expectedFilter = FilterTreeBuilder::create()
-            ->equals('localData.attribute0', true)
             ->equals('field0', 'value0')
+            ->iContains('field0', 'value0')
+            ->equals('identifier', 'foo')
+            ->isNull('field0')
+            ->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    public function testCombineRequestedFilterWithQueryFilterAndForcedFilterRemoveDuplicateFilters()
+    {
+        // 'filterPublic' is requested and forced -> must be present in the combined filter only once
+        $this->loginViewer();
+
+        $queryParameters = [];
+        parse_str('filter[field0]=value0', $queryParameters);
+        $queryParameters['preparedFilter'] = 'filterPublic';
+
+        $this->testDataProvider->setSourceData([[]]);
+        $this->testDataProviderTester->getPage(filters: $queryParameters);
+        $filter = Options::getFilter($this->testDataProvider->getOptions());
+
+        $expectedFilter = FilterTreeBuilder::create()
+            ->equals('field0', 'value0')
+            ->isNull('field0')
+            ->equals('identifier', 'foo')
             ->createFilter();
 
         $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
@@ -443,8 +482,13 @@ class AbstractDataProviderTest extends TestCase
         $this->testDataProvider->setConfig($config);
 
         $this->testDataProvider->setSourceData([[]]);
-        $this->testDataProviderTester->getPage(filters: ['preparedFilter' => 'filter0']);
-        $this->assertNull(Options::getFilter($this->testDataProvider->getOptions()));
+        try {
+            $this->testDataProviderTester->getPage(filters: ['preparedFilter' => 'filter0']);
+            $this->fail('ApiError not thrown as expected');
+        } catch (ApiError $apiError) {
+            $this->assertEquals(Response::HTTP_BAD_REQUEST, $apiError->getStatusCode());
+            $this->assertEquals(ErrorIds::PREPARED_FILTERS_DISABLED, $apiError->getErrorId());
+        }
     }
 
     /**
@@ -465,11 +509,11 @@ class AbstractDataProviderTest extends TestCase
     /**
      * @throws \Exception
      */
-    public function testPreparedFilterForbidden()
+    public function testRequestedFilterForbidden()
     {
         try {
             $this->testDataProvider->setSourceData([[]]);
-            $this->testDataProviderTester->getPage(filters: ['preparedFilter' => 'filterForbidden']);
+            $this->testDataProviderTester->getPage(filters: ['preparedFilter' => 'filterUseAdminOnly']);
             $this->fail('exception not thrown as expected');
         } catch (ApiError $exception) {
             $this->assertEquals(Response::HTTP_FORBIDDEN, $exception->getStatusCode());
@@ -568,7 +612,12 @@ class AbstractDataProviderTest extends TestCase
         parse_str($querySting, $queryParameters);
 
         $this->testDataProvider->setSourceData([[]]);
-        $this->testDataProviderTester->getPage(filters: $queryParameters);
-        $this->assertNull(Options::getSort($this->testDataProvider->getOptions()));
+        try {
+            $this->testDataProviderTester->getPage(filters: $queryParameters);
+            $this->fail('ApiError not thrown as expected');
+        } catch (ApiError $apiError) {
+            $this->assertEquals(Response::HTTP_BAD_REQUEST, $apiError->getStatusCode());
+            $this->assertEquals(ErrorIds::SORT_DISABLED, $apiError->getErrorId());
+        }
     }
 }

@@ -12,9 +12,9 @@ use PHPUnit\Framework\TestCase;
 
 class PreparedFilterTest extends TestCase
 {
-    private $preparedFilterProvider;
+    private ?PreparedFilters $preparedFilterProvider = null;
 
-    private $config;
+    private ?array $config = null;
 
     protected function setUp(): void
     {
@@ -24,12 +24,23 @@ class PreparedFilterTest extends TestCase
             [
                 'id' => 'filter0',
                 'filter' => 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0',
-                'apply_policy' => 'user.get("ROLE_USER")',
+                'use_policy' => 'user.get("ROLE_USER")',
+                'force_use_policy' => 'true',
             ],
             [
                 'id' => 'filterShortcut',
                 'filter' => 'filter[field0]=value0',
-                'apply_policy' => 'true',
+                'use_policy' => 'true',
+                'force_use_policy' => 'user.get("ROLE_VIEWER")',
+            ],
+            [
+                'id' => 'filterShortcut2',
+                'filter' => 'filter[field0]=value2',
+                'use_policy' => 'user.get("ROLE_ADMIN")',
+                'force_use_policy' => 'user.get("ROLE_USER")',
+            ],
+            [
+                'id' => 'filterDefault',
             ],
         ]];
 
@@ -37,13 +48,26 @@ class PreparedFilterTest extends TestCase
         $this->preparedFilterProvider->loadConfig($this->config);
     }
 
-    public function testGetPolicies()
+    public function testGetUsePolicies()
     {
-        $policies = $this->preparedFilterProvider->getPolicies();
+        $policies = $this->preparedFilterProvider->getUsePolicies();
 
         $this->assertCount(count($this->config['prepared_filters']), $policies);
-        $this->assertEquals('user.get("ROLE_USER")', $policies[PreparedFilters::getPolicyNameByFilterIdentifier('filter0')]);
-        $this->assertEquals('true', $policies[PreparedFilters::getPolicyNameByFilterIdentifier('filterShortcut')]);
+        $this->assertEquals('user.get("ROLE_USER")', $policies['filter0']);
+        $this->assertEquals('true', $policies['filterShortcut']);
+        $this->assertEquals('user.get("ROLE_ADMIN")', $policies['filterShortcut2']);
+        $this->assertEquals('false', $policies['filterDefault']);
+    }
+
+    public function testGetForceUsePolicies()
+    {
+        $policies = $this->preparedFilterProvider->getForceUsePolicies();
+
+        $this->assertCount(count($this->config['prepared_filters']), $policies);
+        $this->assertEquals('true', $policies['filter0']);
+        $this->assertEquals('user.get("ROLE_VIEWER")', $policies['filterShortcut']);
+        $this->assertEquals('user.get("ROLE_USER")', $policies['filterShortcut2']);
+        $this->assertEquals('false', $policies['filterDefault']);
     }
 
     /**
@@ -51,6 +75,10 @@ class PreparedFilterTest extends TestCase
      */
     public function testPreparedFilter()
     {
+        $this->assertFalse($this->preparedFilterProvider->isPreparedFilterDefined('foo'));
+        $this->assertTrue($this->preparedFilterProvider->isPreparedFilterDefined('filter0'));
+
+        $this->assertNull($this->preparedFilterProvider->getPreparedFilterQueryString('foo'));
         $preparedFilterQueryString = $this->preparedFilterProvider->getPreparedFilterQueryString('filter0');
         $this->assertNotNull($preparedFilterQueryString);
 

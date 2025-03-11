@@ -28,7 +28,7 @@ class TestEntity implements LocalDataAwareInterface
         return $this->identifier;
     }
 
-    public function setIdentifier(?string $identifier)
+    public function setIdentifier(?string $identifier): void
     {
         $this->identifier = $identifier;
     }

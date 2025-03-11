@@ -15,16 +15,21 @@ class PreparedFilters
     private const ROOT_CONFIG_NODE = 'prepared_filters';
     private const IDENTIFIER_CONFIG_NODE = 'id';
     private const FILTER_CONFIG_NODE = 'filter';
-    private const APPLY_POLICY_CONFIG_NODE = 'apply_policy';
+    private const USE_POLICY_CONFIG_NODE = 'use_policy';
+    private const FORCE_USE_POLICY_CONFIG_NODE = 'force_use_policy';
 
     private const FILTER_CONFIG_KEY = 'filter';
-    private const POLICY_PREFIX = '@apply-filter:';
+    private const USE_POLICY_PREFIX = '@use-filter:';
+    private const FORCE_USE_POLICY_PREFIX = '@force-use-filter:';
 
-    /** @var array[] */
+    /** @var array<int, array<string, mixed>> */
     private array $config = [];
 
-    /** @var string[] */
-    private array $policies = [];
+    /** @var array<string, string> */
+    private array $usePolicies = [];
+
+    /** @var array<string, string> */
+    private array $forceUsePolicies = [];
 
     public static function getConfigNodeDefinition(): NodeDefinition
     {
@@ -36,9 +41,13 @@ class PreparedFilters
             ->scalarNode(self::IDENTIFIER_CONFIG_NODE)
             ->info('The identifier of the prepared filter.')
             ->end()
-            ->scalarNode(self::APPLY_POLICY_CONFIG_NODE)
+            ->scalarNode(self::USE_POLICY_CONFIG_NODE)
             ->defaultValue('false')
-            ->info('A boolean expression evaluable by the Symfony Expression Language determining whether the current user may apply the prepared filter. Available parameters: user.')
+            ->info('A boolean policy expression that determines whether the current user may apply the prepared filter. Available parameters: user.')
+            ->end()
+            ->scalarNode(self::FORCE_USE_POLICY_CONFIG_NODE)
+            ->defaultValue('false')
+            ->info('A boolean policy expression that determines whether the usage of the filter is forced for the current user. Available parameters: user.')
             ->end()
             ->scalarNode(self::FILTER_CONFIG_NODE)
             ->defaultValue('')
@@ -52,40 +61,43 @@ class PreparedFilters
     public function loadConfig(array $config): void
     {
         $this->config = [];
-        $this->policies = [];
+        $this->usePolicies = [];
+        $this->forceUsePolicies = [];
 
         foreach ($config[self::ROOT_CONFIG_NODE] ?? [] as $configEntry) {
-            $filterId = $configEntry[self::IDENTIFIER_CONFIG_NODE];
+            $filterIdentifier = $configEntry[self::IDENTIFIER_CONFIG_NODE];
 
-            if (isset($this->config[$filterId])) {
-                throw new \RuntimeException(sprintf('multiple config entries for prepared filter \'%s\'', $filterId));
+            if (isset($this->config[$filterIdentifier])) {
+                throw new \RuntimeException(sprintf('multiple config entries for prepared filter \'%s\'', $filterIdentifier));
             }
             $attributeConfigEntry = [];
             $attributeConfigEntry[self::FILTER_CONFIG_KEY] = $configEntry[self::FILTER_CONFIG_NODE] ?? '';
-            $this->config[$filterId] = $attributeConfigEntry;
+            $this->config[$filterIdentifier] = $attributeConfigEntry;
 
-            // applying the filter is forbidden by default
-            $this->policies[self::getPolicyNameByFilterIdentifier($filterId)] = $configEntry[self::APPLY_POLICY_CONFIG_NODE] ?? 'false';
+            // using the filter is forbidden by default
+            $this->usePolicies[$filterIdentifier] = $configEntry[self::USE_POLICY_CONFIG_NODE] ?? 'false';
+            // forcing the usage of the filter is disabled by default
+            $this->forceUsePolicies[$filterIdentifier] = $configEntry[self::FORCE_USE_POLICY_CONFIG_NODE] ?? 'false';
         }
     }
 
-    public function getPolicies(): array
+    public function getUsePolicies(): array
     {
-        return $this->policies;
+        return $this->usePolicies;
     }
 
-    public static function getPolicyNameByFilterIdentifier(string $filterIdentifier): string
+    public function getForceUsePolicies(): array
     {
-        return self::POLICY_PREFIX.$filterIdentifier;
+        return $this->forceUsePolicies;
+    }
+
+    public function isPreparedFilterDefined(string $filterIdentifier): bool
+    {
+        return isset($this->config[$filterIdentifier]);
     }
 
     public function getPreparedFilterQueryString(string $filterIdentifier): ?string
     {
-        $preparedFilterConfig = $this->config[$filterIdentifier] ?? null;
-        if ($preparedFilterConfig === null) {
-            return null;
-        }
-
-        return $preparedFilterConfig[self::FILTER_CONFIG_KEY];
+        return $this->config[$filterIdentifier][self::FILTER_CONFIG_KEY] ?? null;
     }
 }

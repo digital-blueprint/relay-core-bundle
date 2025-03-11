@@ -15,10 +15,8 @@ use Dbp\Relay\CoreBundle\LocalData\LocalData;
 use Dbp\Relay\CoreBundle\LocalData\LocalDataAccessChecker;
 use Dbp\Relay\CoreBundle\LocalData\LocalDataAwareInterface;
 use Dbp\Relay\CoreBundle\Locale\Locale;
-use Dbp\Relay\CoreBundle\Rest\Query\Filter\ExpressionLanguageFilterCreator;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterException;
-use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTreeBuilder;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FromQueryFilterCreator;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\ConditionNode;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\ConstantNode;
@@ -54,7 +52,6 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     private const FILTERS_CONTEXT_KEY = 'filters';
     private const GROUPS_CONTEXT_KEY = 'groups';
     private const RESOURCE_CLASS_CONTEXT_KEY = 'resource_class';
-    private const EXPRESSION_LANGUAGE_FILTER_CREATOR_VARIABLE_NAME = 'Filter';
 
     private Locale $locale;
     private PreparedFilters $preparedFiltersController;
@@ -66,7 +63,6 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     private bool $areQueryFiltersEnabled = false;
     private bool $arePreparedFiltersEnabled = false;
     private bool $isSortEnabled = false;
-    private ?string $mandatoryFilterExpression = null;
 
     /**
      * @deprecated Use self::appendConfigNodeDefinitions instead
@@ -115,15 +111,12 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $filterConfig = $config[Rest::ROOT_CONFIG_NODE][Query::ROOT_CONFIG_NODE][Filter::ROOT_CONFIG_NODE] ?? [];
         $this->areQueryFiltersEnabled = $filterConfig[Filter::ENABLE_QUERY_FILTERS_CONFIG_NODE] ?? false;
         $this->arePreparedFiltersEnabled = $filterConfig[Filter::ENABLE_PREPARED_FILTERS_CONFIG_NODE] ?? false;
-        $this->mandatoryFilterExpression = $filterConfig[Filter::ENFORCED_FILTER_CONFIG_NODE] ?? null;
         $this->preparedFiltersController->loadConfig($filterConfig);
 
         $this->isSortEnabled =
             $config[Rest::ROOT_CONFIG_NODE][Query::ROOT_CONFIG_NODE][Sort::ROOT_CONFIG_NODE][Sort::ENABLE_SORT_CONFIG_NODE] ?? false;
 
-        parent::setUpAccessControlPolicies(roles: array_merge(
-            $this->localDataAccessChecker->getPolicies(),
-            $this->preparedFiltersController->getPolicies()));
+        parent::setUpAccessControlPolicies(roles: $this->localDataAccessChecker->getPolicies());
     }
 
     /**
@@ -347,25 +340,24 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     {
         $filter = null;
         $sort = null;
+        $availableAttributePaths = $this->getAvailableAttributePaths($resourceClass, $deserializationGroups);
 
-        $availableAttributePaths = null;
-        if ($this->mandatoryFilterExpression !== null) {
-            $filter = $this->createFilterFromExpression($this->mandatoryFilterExpression);
-        }
-
-        if ($this->areQueryFiltersEnabled && $filterParameter = Parameters::getFilter($filters)) {
-            $queryFilter = $this->createFilter($filterParameter,
-                $availableAttributePaths = $this->getAvailableAttributePaths($resourceClass, $deserializationGroups));
-            try {
-                $filter = $filter !== null ? $filter->combineWith($queryFilter) : $queryFilter;
-            } catch (FilterException $filterException) {
-                throw new \RuntimeException('combing filters with query filter failed: '.$filterException->getMessage());
+        if ($filterParameter = Parameters::getFilter($filters)) {
+            if ($this->areQueryFiltersEnabled === false) {
+                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, 'query filters are disabled',
+                    ErrorIds::QUERY_FILTERS_DISABLED);
             }
+            $filter = $this->createFilter($filterParameter, $availableAttributePaths);
         }
 
-        if ($this->arePreparedFiltersEnabled && $preparedFilterParameter = Parameters::getPreparedFilter($filters)) {
-            $preparedFilter = $this->createPreparedFilter($preparedFilterParameter,
-                $availableAttributePaths ??= $this->getAvailableAttributePaths($resourceClass, $deserializationGroups));
+        $requestedFilterIdentifier = Parameters::getPreparedFilter($filters);
+        if ($requestedFilterIdentifier !== null && $this->arePreparedFiltersEnabled === false) {
+            throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, 'prepared filters are disabled',
+                ErrorIds::PREPARED_FILTERS_DISABLED);
+        }
+
+        $preparedFilter = $this->createPreparedFilter($requestedFilterIdentifier, $availableAttributePaths);
+        if ($preparedFilter !== null) {
             try {
                 $filter = $filter !== null ? $filter->combineWith($preparedFilter) : $preparedFilter;
             } catch (FilterException $filterException) {
@@ -373,32 +365,67 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
             }
         }
 
-        if ($this->isSortEnabled && $sortParameter = Parameters::getSort($filters)) {
-            $sort = $this->createSort($sortParameter,
-                $availableAttributePaths ?? $this->getAvailableAttributePaths($resourceClass, $deserializationGroups));
+        if ($sortParameter = Parameters::getSort($filters)) {
+            if ($this->isSortEnabled === false) {
+                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, 'sort is disabled', ErrorIds::SORT_DISABLED);
+            }
+            $sort = $this->createSort($sortParameter, $availableAttributePaths);
         }
 
         return [$filter, $sort];
     }
 
     /**
+     * Creates a combined filter from an optional requested (prepared) filter and
+     * the list of filters whose usage is forced for the current user by combining them with
+     * logical AND (&&).
      * NOTE: Currently, local data attribute access policies are not removed from prepared filters since the attributes used in the filter
      * do not leak to the user.
      *
      * @throws ApiError
      */
-    private function createPreparedFilter(string $preparedFilterId, array $availableAttributePaths): Filter
+    private function createPreparedFilter(?string $requestedFilterIdentifier, array $availableAttributePaths): ?Filter
     {
-        $filterQueryString = $this->preparedFiltersController->getPreparedFilterQueryString($preparedFilterId);
-        if ($filterQueryString === null) {
-            throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, 'Prepared filter undefined.', ErrorIds::PREPARED_FILTER_UNDEFINED);
-        }
-        if ($this->isGrantedRole(PreparedFilters::getPolicyNameByFilterIdentifier($preparedFilterId)) === false) {
-            throw ApiError::withDetails(Response::HTTP_FORBIDDEN, 'Access to prepared filter denied.', ErrorIds::PREPARED_FILTER_ACCESS_DENIED);
+        $filtersToApplyIdentifiers = [];
+
+        if ($requestedFilterIdentifier !== null) {
+            if (false === $this->preparedFiltersController->isPreparedFilterDefined($requestedFilterIdentifier)) {
+                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST,
+                    'Prepared filter undefined', ErrorIds::PREPARED_FILTER_UNDEFINED);
+            }
+            if (false === $this->evaluateCustomExpression(
+                $this->preparedFiltersController->getUsePolicies()[$requestedFilterIdentifier])) {
+                throw ApiError::withDetails(Response::HTTP_FORBIDDEN,
+                    'Access to prepared filter denied', ErrorIds::PREPARED_FILTER_ACCESS_DENIED);
+            }
+
+            $filtersToApplyIdentifiers[] = $requestedFilterIdentifier;
         }
 
-        return $this->createFilter(
-            Parameters::getQueryParametersFromQueryString($filterQueryString, Parameters::FILTER), $availableAttributePaths, false);
+        foreach ($this->preparedFiltersController->getForceUsePolicies() as $filterIdentifier => $forceUsePolicy) {
+            if (true === $this->evaluateCustomExpression($forceUsePolicy)) {
+                $filtersToApplyIdentifiers[] = $filterIdentifier;
+            }
+        }
+
+        $filtersToApplyIdentifiers = array_unique($filtersToApplyIdentifiers);
+
+        /* @var Filter $combinedFilter */
+        $combinedFilter = null;
+        foreach ($filtersToApplyIdentifiers as $filterIdentifier) {
+            $filterQueryString = $this->preparedFiltersController->getPreparedFilterQueryString($filterIdentifier);
+
+            $filter = $this->createFilter(
+                Parameters::getQueryParametersFromQueryString($filterQueryString, Parameters::FILTER),
+                $availableAttributePaths, false);
+            try {
+                $combinedFilter = $combinedFilter === null ? $filter : $combinedFilter->combineWith($filter);
+            } catch (FilterException $filterException) {
+                throw new \RuntimeException('combining prepared filters failed: '.$filterException->getMessage());
+            }
+        }
+
+        return $combinedFilter;
     }
 
     /**
@@ -426,25 +453,5 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         }
 
         return $availableAttributePaths;
-    }
-
-    private function createFilterFromExpression(string $mandatoryFilterExpression)
-    {
-        try {
-            $filterTree = $this->evaluateCustomExpression($mandatoryFilterExpression, [
-                self::EXPRESSION_LANGUAGE_FILTER_CREATOR_VARIABLE_NAME => new ExpressionLanguageFilterCreator(),
-            ]);
-        } catch (\Exception $exception) {
-            throw new \RuntimeException(Filter::ENFORCED_FILTER_CONFIG_NODE.' expression is invalid: '.$exception->getMessage());
-        }
-        if (false === ($filterTree instanceof FilterTreeBuilder)) {
-            throw new \RuntimeException(
-                Filter::ENFORCED_FILTER_CONFIG_NODE.' expression is invalid: must return an instance of FilterTreeBuilder');
-        }
-        try {
-            return $filterTree->createFilter();
-        } catch (FilterException $filterException) {
-            throw new \RuntimeException(Filter::ENFORCED_FILTER_CONFIG_NODE.' filter is invalid: '.$filterException->getMessage());
-        }
     }
 }

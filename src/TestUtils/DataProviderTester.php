@@ -52,9 +52,10 @@ class DataProviderTester
         TestAuthorizationService::setUp($dataProvider, $currentUserIdentifier, $currentUserAttributes);
     }
 
-    public static function logout(AbstractDataProvider $dataProvider): void
+    public static function logout(AbstractDataProvider $dataProvider, array $userAttributeDefaults = []): void
     {
-        TestAuthorizationService::setUp($dataProvider, TestAuthorizationService::UNAUTHENTICATED_USER_IDENTIFIER);
+        TestAuthorizationService::setUp($dataProvider,
+            TestAuthorizationService::UNAUTHENTICATED_USER_IDENTIFIER, $userAttributeDefaults);
     }
 
     /**
