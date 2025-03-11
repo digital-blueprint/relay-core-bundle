@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.204
+
 * Remove enforced filters (as introduced in v0.1.200) and update prepared filters such that they now have a `use_policy` (is the current user
 allowed to request the filter?) and a `force_use_policy` (is the usage of the filter forced for the current user?) 
 
