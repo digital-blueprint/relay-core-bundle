@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.205
+
 * Add Rest/Tools: Centralize the fix for multipart/form-data PATCH requests (where parameters are not present by default)
 
 ## v0.1.204
