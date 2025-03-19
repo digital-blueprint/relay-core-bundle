@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Add Rest/Tools: Centralize the fix for multipart/form-data PATCH requests (where parameters are not present by default)
+
 ## v0.1.204
 
 * Remove enforced filters (as introduced in v0.1.200) and update prepared filters such that they now have a `use_policy` (is the current user
