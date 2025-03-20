@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.206
+
 * Drop support for PHP 8.1
 * Drop support for Symfony 5
 * Drop support for api-platform 3.2/3.3
