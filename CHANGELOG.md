@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Drop support for PHP 8.1
+
 ## v0.1.205
 
 * Add Rest/Tools: Centralize the fix for multipart/form-data PATCH requests (where parameters are not present by default)
