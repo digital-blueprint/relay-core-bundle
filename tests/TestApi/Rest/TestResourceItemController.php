@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
-class TestResourceController extends AbstractController
+class TestResourceItemController extends AbstractController
 {
     use CustomControllerTrait;
 
@@ -24,7 +24,7 @@ class TestResourceController extends AbstractController
     /**
      * @throws ApiError
      */
-    public function __invoke(string $identifier, Request $request): ?TestResource
+    public function __invoke(Request $request, string $identifier): ?TestResource
     {
         $test = $request->get('test');
         $parameter = $request->get('param');
@@ -33,11 +33,11 @@ class TestResourceController extends AbstractController
             $this->requireAuthentication();
         }
 
-        $resource = new TestResource();
-        $resource->setIdentifier($identifier);
+        $testResource = new TestResource();
+        $testResource->setIdentifier($identifier);
 
         if ($test === 'GetCurrentUser') {
-            $resource->setContent(json_encode([
+            $testResource->setContent(json_encode([
                 'userIdentifier' => $this->userSession->isAuthenticated() ? $this->userSession->getUserIdentifier() : null,
                 'isAuthenticated' => $this->userSession->isAuthenticated(),
                 'userRoles' => $this->userSession->isAuthenticated() ? $this->userSession->getUserRoles() : [],
@@ -62,10 +62,14 @@ class TestResourceController extends AbstractController
             }
             $this->denyAccessUnlessGranted($parameter);
         } elseif ($test === 'GetResourceAuthenticatedOnly') {
+        } elseif ($test === 'CustomControllerTesterTest_ItemOperation') {
+            $testResource->setContent($request->query->get('content'));
+            $testResource->setIsPublic($request->request->get('isPublic', false));
+            $testResource->setFile($request->files->get('file'));
         } else {
             throw new \RuntimeException('unknown test: '.$test);
         }
 
-        return $resource;
+        return $testResource;
     }
 }

@@ -7,7 +7,7 @@ namespace Dbp\Relay\CoreBundle\Tests;
 use ApiPlatform\Symfony\Bundle\ApiPlatformBundle;
 use Dbp\Relay\CoreBundle\DbpRelayCoreBundle;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Authorization\TestApiAuthorizationService;
-use Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceController;
+use Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceItemController;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceProcessor;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceProvider;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestSubResourceProcessor;
@@ -52,7 +52,7 @@ class Kernel extends BaseKernel
         $container->services()->set(TestApiAuthorizationService::class)->public()->autoconfigure()->autowire()
             ->call('setConfig', [TestApiAuthorizationService::getTestConfig()]);
         $container->services()->set(TestResourceService::class)->public()->autoconfigure()->autowire();
-        $container->services()->set(TestResourceController::class)->public()->autoconfigure()->autowire();
+        $container->services()->set(TestResourceItemController::class)->public()->autoconfigure()->autowire();
         $container->services()->set(TestResourceProcessor::class)->public()->autoconfigure()->autowire();
         $container->services()->set(TestResourceProvider::class)->public()->autoconfigure()->autowire();
         $container->services()->set(TestSubResourceProcessor::class)->public()->autoconfigure()->autowire();

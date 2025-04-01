@@ -7,6 +7,7 @@ namespace Dbp\Relay\CoreBundle\Tests\TestApi\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\Uuid;
 
@@ -38,6 +39,7 @@ class TestResource
     #[ORM\OneToMany(targetEntity: TestSubResource::class, mappedBy: 'testResource')]
     #[Groups(['TestResource:output'])]
     private Collection $subResources;
+    private ?UploadedFile $file = null;
 
     public static function createTestResource(): TestResource
     {
@@ -113,5 +115,15 @@ class TestResource
     public function setSubResources(Collection $subResources): void
     {
         $this->subResources = $subResources;
+    }
+
+    public function setFile(UploadedFile $file): void
+    {
+        $this->file = $file;
+    }
+
+    public function getFile(): ?UploadedFile
+    {
+        return $this->file;
     }
 }

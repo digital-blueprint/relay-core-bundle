@@ -31,14 +31,14 @@ resources:
           json: ['application/json']
         read: false
         uriTemplate: "/test/test-resources/{identifier}/custom_controller_json"
-        controller: Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceController
+        controller: Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceItemController
 
       custom_controller_get_default:
         class: ApiPlatform\Metadata\Get
         method: GET
         read: false
         uriTemplate: "/test/test-resources/{identifier}/custom_controller"
-        controller: Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceController
+        controller: Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceItemController
 
     properties:
       identifier:

@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 
-class DataProviderTester
+class DataProviderTester extends AbstractRestTester
 {
     /**
      * Use this to set up the given data provider (i.e. inject all required services and set up a test user)
@@ -44,28 +44,14 @@ class DataProviderTester
     }
 
     /**
-     * Use this to set up a test user with the given user attributes.
-     */
-    public static function login(AbstractDataProvider $dataProvider,
-        string $currentUserIdentifier = TestAuthorizationService::TEST_USER_IDENTIFIER, array $currentUserAttributes = []): void
-    {
-        TestAuthorizationService::setUp($dataProvider, $currentUserIdentifier, $currentUserAttributes);
-    }
-
-    public static function logout(AbstractDataProvider $dataProvider, array $userAttributeDefaults = []): void
-    {
-        TestAuthorizationService::setUp($dataProvider,
-            TestAuthorizationService::UNAUTHENTICATED_USER_IDENTIFIER, $userAttributeDefaults);
-    }
-
-    /**
      * @param string[] $normalizationGroups
      */
     private function __construct(
         private readonly AbstractDataProvider $dataProvider,
-        private readonly string $resourceClass,
-        private readonly array $normalizationGroups = [])
+        string $resourceClass,
+        array $normalizationGroups = [])
     {
+        parent::__construct($resourceClass, normalizationGroups: $normalizationGroups);
     }
 
     public function getItem(?string $identifier, array $filters = []): ?object
@@ -73,13 +59,15 @@ class DataProviderTester
         $uriVariables = $identifier !== null ? ['identifier' => $identifier] : [];
 
         /** @var object|null */
-        return $this->dataProvider->provide(new Get(), $uriVariables, $this->createContext($filters, $identifier));
+        return $this->dataProvider->provide(new Get(), $uriVariables,
+            $this->createContext(Request::METHOD_GET, $identifier, $filters));
     }
 
     public function getCollection(array $filters = []): array
     {
-        /** @var PartialPaginator */
-        $partialPaginator = $this->dataProvider->provide(new GetCollection(), [], $this->createContext($filters));
+        /** @var PartialPaginator $partialPaginator */
+        $partialPaginator = $this->dataProvider->provide(new GetCollection(), [],
+            $this->createContext(Request::METHOD_GET, filters: $filters));
 
         return $partialPaginator->getItems();
     }
@@ -95,20 +83,5 @@ class DataProviderTester
         ]);
 
         return $this->getCollection($filters);
-    }
-
-    private function createContext(array $filters, ?string $identifier = null): array
-    {
-        $request = Request::create(
-            uri: '/test/test-entities'.($identifier ? '/'.$identifier : ''),
-            method: Request::METHOD_GET);
-        $request->query->replace($filters);
-
-        return [
-            'filters' => $filters,
-            'resource_class' => $this->resourceClass,
-            'groups' => $this->normalizationGroups,
-            'request' => $request,
-        ];
     }
 }

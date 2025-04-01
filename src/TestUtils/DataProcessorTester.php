@@ -11,13 +11,9 @@ use ApiPlatform\Metadata\Put;
 use Dbp\Relay\CoreBundle\Rest\AbstractDataProcessor;
 use Symfony\Component\HttpFoundation\Request;
 
-class DataProcessorTester
+class DataProcessorTester extends AbstractRestTester
 {
     private const IDENTIFIER_NAME = 'identifier';
-
-    private AbstractDataProcessor $dataProcessor;
-    private string $resourceClass;
-    private array $denormalizationGroups;
 
     /**
      * Use this to set up the given data processor (i.e. inject all required services and set up a test user)
@@ -39,14 +35,13 @@ class DataProcessorTester
     public static function setUp(AbstractDataProcessor $dataProcessor,
         string $currentUserIdentifier = TestAuthorizationService::TEST_USER_IDENTIFIER, array $currentUserAttributes = []): void
     {
-        TestAuthorizationService::setUp($dataProcessor, $currentUserIdentifier, $currentUserAttributes);
+        self::login($dataProcessor, $currentUserIdentifier, $currentUserAttributes);
     }
 
-    private function __construct(AbstractDataProcessor $dataProcessor, string $resourceClass, array $denormalizationGroups = [])
+    private function __construct(
+        private readonly AbstractDataProcessor $dataProcessor, string $resourceClass, array $denormalizationGroups = [])
     {
-        $this->dataProcessor = $dataProcessor;
-        $this->resourceClass = $resourceClass;
-        $this->denormalizationGroups = $denormalizationGroups;
+        parent::__construct($resourceClass, denormalizationGroups: $denormalizationGroups);
     }
 
     public function addItem(mixed $data, array $filters = []): mixed
@@ -71,20 +66,5 @@ class DataProcessorTester
     {
         $this->dataProcessor->process($data, new Delete(), [self::IDENTIFIER_NAME => $identifier],
             $this->createContext(Request::METHOD_DELETE, $identifier, $filters, null));
-    }
-
-    private function createContext(string $method, ?string $identifier = null, array $filters = [], mixed $previousData = null): array
-    {
-        $request = Request::create(
-            uri: '/test/test-entities'.($identifier ? '/'.$identifier : ''),
-            method: $method);
-        $request->query->replace($filters);
-
-        return [
-            'resource_class' => $this->resourceClass,
-            'groups' => $this->denormalizationGroups,
-            'previous_data' => $previousData,
-            'request' => $request,
-        ];
     }
 }

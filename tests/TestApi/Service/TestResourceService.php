@@ -13,7 +13,7 @@ use Symfony\Component\Uid\Uuid;
 
 class TestResourceService
 {
-    public function __construct(private readonly EntityManagerInterface $entityManager)
+    public function __construct(private readonly ?EntityManagerInterface $entityManager = null)
     {
     }
 
