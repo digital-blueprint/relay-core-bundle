@@ -16,8 +16,7 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
  */
 class TestDataProvider extends AbstractDataProvider
 {
-    public const ROLE_USER = 'ROLE_USER';
-    public const ROLE_ADMIN = 'ROLE_ADMIN';
+    public const IS_ADMIN_USER_ATTRIBUTE = 'IS_ADMIN';
     public const TEST_USER_IDENTIFIER = TestAuthorizationService::TEST_USER_IDENTIFIER;
     public const ADMIN_USER_IDENTIFIER = TestAuthorizationService::ADMIN_USER_IDENTIFIER;
     public const INCLUDE_ADMIN_ONLY_ENTITIES_FILTER = 'includeAdminOnlyEntities';
@@ -136,7 +135,7 @@ class TestDataProvider extends AbstractDataProvider
         $testEntity = $item;
         assert($testEntity instanceof TestEntity);
 
-        return ($this->isAuthenticated() && $this->getUserAttribute(self::ROLE_ADMIN))
+        return ($this->isAuthenticated() && $this->getUserAttribute(self::IS_ADMIN_USER_ATTRIBUTE))
             || !str_starts_with($testEntity->getIdentifier(), '_');
     }
 
@@ -145,7 +144,7 @@ class TestDataProvider extends AbstractDataProvider
      */
     protected function isCurrentUserAuthorizedToGetCollection(array $filters): bool
     {
-        return ($this->isAuthenticated() && $this->getUserAttribute(self::ROLE_ADMIN))
+        return ($this->isAuthenticated() && $this->getUserAttribute(self::IS_ADMIN_USER_ATTRIBUTE))
             || ($filters[self::INCLUDE_ADMIN_ONLY_ENTITIES_FILTER] ?? null) === null;
     }
 }

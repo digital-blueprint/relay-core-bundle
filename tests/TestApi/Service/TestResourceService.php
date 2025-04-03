@@ -6,14 +6,16 @@ namespace Dbp\Relay\CoreBundle\Tests\TestApi\Service;
 
 use Dbp\Relay\CoreBundle\Doctrine\QueryHelper;
 use Dbp\Relay\CoreBundle\Rest\Options;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterException;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTreeBuilder;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Entity\TestResource;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Entity\TestSubResource;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Uid\Uuid;
 
-class TestResourceService
+readonly class TestResourceService
 {
-    public function __construct(private readonly ?EntityManagerInterface $entityManager = null)
+    public function __construct(private ?EntityManagerInterface $entityManager = null)
     {
     }
 
@@ -25,11 +27,28 @@ class TestResourceService
         return $testResource;
     }
 
-    public function getTestResource(string $identifier): ?TestResource
+    public function getTestResource(string $identifier, array $filters = [], array $options = []): ?TestResource
     {
-        return QueryHelper::tryGetEntityById($identifier, TestResource::class, $this->entityManager);
+        try {
+            $filter = FilterTreeBuilder::create()
+                ->equals('identifier', $identifier)
+                ->createFilter();
+            if ($filterFromOptions = Options::getFilter($options)) {
+                $filter->combineWith($filterFromOptions);
+            }
+        } catch (FilterException $filterException) {
+            throw new \RuntimeException('failed to create filter: '.$filterException->getMessage());
+        }
+
+        $entityPage = QueryHelper::getEntities(TestResource::class, $this->entityManager,
+            1, 1, $filter);
+
+        return false === empty($entityPage) ? $entityPage[0] : null;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function getTestResources(int $currentPageNumber, int $maxNumItemsPerPage, array $filters = [], array $options = []): array
     {
         return QueryHelper::getEntities(TestResource::class, $this->entityManager,

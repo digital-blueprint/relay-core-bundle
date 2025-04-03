@@ -7,7 +7,7 @@ namespace Dbp\Relay\CoreBundle\Tests\Authorization;
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Entity\TestResource;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Entity\TestSubResource;
-use Dbp\Relay\CoreBundle\Tests\TestApi\TestResourceManager;
+use Dbp\Relay\CoreBundle\Tests\TestApi\TestResourceEntityManager;
 use Dbp\Relay\CoreBundle\TestUtils\TestClient;
 use Dbp\Relay\CoreBundle\TestUtils\UserAuthTrait;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,13 +17,13 @@ class EntityNormalizerApiTest extends ApiTestCase
 {
     use UserAuthTrait;
 
-    private const TEST_CONTENT = TestResourceManager::CONTENT_DEFAULT;
-    private const TEST_SECRET = TestResourceManager::SECRET_DEFAULT;
-    private const TEST_IS_PUBLIC = TestResourceManager::IS_PUBLIC_DEFAULT;
-    private const TEST_PASSWORD = TestResourceManager::PASSWORD_DEFAULT;
+    private const TEST_CONTENT = TestResourceEntityManager::CONTENT_DEFAULT;
+    private const TEST_SECRET = TestResourceEntityManager::SECRET_DEFAULT;
+    private const TEST_IS_PUBLIC = TestResourceEntityManager::IS_PUBLIC_DEFAULT;
+    private const TEST_PASSWORD = TestResourceEntityManager::PASSWORD_DEFAULT;
 
     private ?TestClient $testClient = null;
-    private ?TestResourceManager $testResourceManager = null;
+    private ?TestResourceEntityManager $testResourceManager = null;
 
     protected function setUp(): void
     {
@@ -31,7 +31,7 @@ class EntityNormalizerApiTest extends ApiTestCase
         $this->getTestClient()->setUpUser(userIdentifier: TestClient::TEST_USER_IDENTIFIER, userAttributes: ['IS_ADMIN' => false]);
         $this->getTestClient()->getClient()->disableReboot();
 
-        $this->testResourceManager = new TestResourceManager($this->testClient->getContainer());
+        $this->testResourceManager = new TestResourceEntityManager($this->testClient->getContainer());
     }
 
     protected function getTestClient(

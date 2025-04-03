@@ -41,7 +41,7 @@ class TestResourceProvider extends AbstractDataProvider
             return $instance;
         }
 
-        $testResource = $this->testResourceService->getTestResource($id);
+        $testResource = $this->testResourceService->getTestResource($id, $filters, $options);
         if ($filters['debug'] ?? false) {
             dump($testResource);
         }
@@ -49,6 +49,9 @@ class TestResourceProvider extends AbstractDataProvider
         return $testResource;
     }
 
+    /**
+     * @throws \Exception
+     */
     protected function getPage(int $currentPageNumber, int $maxNumItemsPerPage, array $filters = [], array $options = []): array
     {
         return $this->testResourceService->getTestResources($currentPageNumber, $maxNumItemsPerPage, $filters, $options);

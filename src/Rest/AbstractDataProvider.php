@@ -63,6 +63,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     private bool $areQueryFiltersEnabled = false;
     private bool $arePreparedFiltersEnabled = false;
     private bool $isSortEnabled = false;
+    private ?array $availableAttributePaths = null;
 
     /**
      * @deprecated Use self::appendConfigNodeDefinitions instead
@@ -129,11 +130,26 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $filters = $context[self::FILTERS_CONTEXT_KEY] ?? [];
         $options = $this->createOptions($filters);
 
-        $item = $this->getItemById($id, $filters, $options);
+        $resourceClass = $context[self::RESOURCE_CLASS_CONTEXT_KEY] ?? null;
+        $deserializationGroups = $context[self::GROUPS_CONTEXT_KEY] ?? [];
 
-        if ($item !== null) {
-            $this->forbidCurrentUserToAccessItemUnlessAuthorized(self::GET_ITEM_OPERATION, $item, $filters);
-            $this->addForbiddenLocalDataAttributesWithNullValue([$item], $options, $filters);
+        $getAvailableAttributePaths = function () use ($resourceClass, $deserializationGroups): array {
+            return $resourceClass !== null ?
+                $this->getAvailableAttributePaths($resourceClass, $deserializationGroups) :
+                [];
+        };
+        $preparedFilter = $this->createPreparedFilter(null, $getAvailableAttributePaths);
+        if ($preparedFilter !== null) {
+            $this->setFilterOption($options, $preparedFilter);
+        }
+
+        $item = null;
+        if (true !== $preparedFilter?->isAlwaysFalse()) {
+            $item = $this->getItemById($id, $filters, $options);
+            if ($item !== null) {
+                $this->forbidCurrentUserToAccessItemUnlessAuthorized(self::GET_ITEM_OPERATION, $item, $filters);
+                $this->addForbiddenLocalDataAttributesWithNullValue([$item], $options, $filters);
+            }
         }
 
         return $item;
@@ -156,20 +172,9 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
         [$filter, $sort] = $this->getFilterAndSort($filters, $resourceClass, $deserializationGroups);
 
-        $returnEmptyPage = false;
         if ($filter !== null) {
-            try {
-                $filter->simplify();
-            } catch (FilterException $filterException) {
-                throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR, $filterException->getMessage());
-            }
-            if ($filter->isAlwaysFalse()) {
-                $returnEmptyPage = true;
-            } elseif (!$filter->isAlwaysTrue()) {
-                Options::setFilter($options, $filter);
-            }
+            $this->setFilterOption($options, $filter);
         }
-
         if ($sort !== null) {
             Options::setSort($options, $sort);
         }
@@ -178,7 +183,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $currentPageNumber = Pagination::getCurrentPageNumber($filters);
         $maxNumItemsPerPage = Pagination::getMaxNumItemsPerPage($filters);
 
-        if (!$returnEmptyPage) {
+        if (true !== $filter?->isAlwaysFalse()) {
             $pageItems = $this->getPage($currentPageNumber, $maxNumItemsPerPage, $filters, $options);
             $this->addForbiddenLocalDataAttributesWithNullValue($pageItems, $options, $filters);
         }
@@ -243,16 +248,18 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     }
 
     /**
+     * @param callable (): array $getAvailableAttributePaths
+     *
      * @throws ApiError
      */
-    private function createFilter(mixed $filterParameters, array $availableAttributePaths, bool $removeForbiddenLocalDataAttributeConditions = true): Filter
+    private function createFilter(mixed $filterParameters, callable $getAvailableAttributePaths, bool $removeForbiddenLocalDataAttributeConditions = true): Filter
     {
         if (is_array($filterParameters) === false) {
             throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, '\''.Parameters::FILTER.'\' parameter must be an array. Square brackets missing.', ErrorIds::FILTER_PARAMETER_MUST_BE_AN_ARRAY);
         }
         try {
             $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
-                $filterParameters, $availableAttributePaths);
+                $filterParameters, $getAvailableAttributePaths());
             if ($removeForbiddenLocalDataAttributeConditions) {
                 $this->removeForbiddenLocalDataAttributeConditionsFromFilterRecursively($filter->getRootNode());
             }
@@ -264,16 +271,17 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     }
 
     /**
-     * @param string|array $sortQueryParameters
+     * @param string|array       $sortQueryParameters
+     * @param callable (): array $getAvailableAttributePaths
      *
      * @throws ApiError
      */
-    private function createSort(mixed $sortQueryParameters, array $availableAttributePaths): ?Sort
+    private function createSort(mixed $sortQueryParameters, callable $getAvailableAttributePaths): ?Sort
     {
         try {
             $sortFields = [];
             foreach (FromQuerySortCreator::createSortFromQueryParameters(
-                $sortQueryParameters, $availableAttributePaths)->getSortFields() as $sortField) {
+                $sortQueryParameters, $getAvailableAttributePaths())->getSortFields() as $sortField) {
                 if (($localDataAttributeName = LocalData::tryGetLocalDataAttributeName(Sort::getPath($sortField))) === null
                     || $this->isGrantedReadAccessToLocalDataAttribute($localDataAttributeName)) {
                     $sortFields[] = $sortField;
@@ -340,14 +348,16 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     {
         $filter = null;
         $sort = null;
-        $availableAttributePaths = $this->getAvailableAttributePaths($resourceClass, $deserializationGroups);
+        $getAvailableAttributePaths = function () use ($resourceClass, $deserializationGroups): array {
+            return $this->getAvailableAttributePaths($resourceClass, $deserializationGroups);
+        };
 
         if ($filterParameter = Parameters::getFilter($filters)) {
             if ($this->areQueryFiltersEnabled === false) {
                 throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, 'query filters are disabled',
                     ErrorIds::QUERY_FILTERS_DISABLED);
             }
-            $filter = $this->createFilter($filterParameter, $availableAttributePaths);
+            $filter = $this->createFilter($filterParameter, $getAvailableAttributePaths);
         }
 
         $requestedFilterIdentifier = Parameters::getPreparedFilter($filters);
@@ -356,7 +366,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
                 ErrorIds::PREPARED_FILTERS_DISABLED);
         }
 
-        $preparedFilter = $this->createPreparedFilter($requestedFilterIdentifier, $availableAttributePaths);
+        $preparedFilter = $this->createPreparedFilter($requestedFilterIdentifier, $getAvailableAttributePaths);
         if ($preparedFilter !== null) {
             try {
                 $filter = $filter !== null ? $filter->combineWith($preparedFilter) : $preparedFilter;
@@ -369,7 +379,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
             if ($this->isSortEnabled === false) {
                 throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, 'sort is disabled', ErrorIds::SORT_DISABLED);
             }
-            $sort = $this->createSort($sortParameter, $availableAttributePaths);
+            $sort = $this->createSort($sortParameter, $getAvailableAttributePaths);
         }
 
         return [$filter, $sort];
@@ -382,9 +392,11 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
      * NOTE: Currently, local data attribute access policies are not removed from prepared filters since the attributes used in the filter
      * do not leak to the user.
      *
+     * @param callable (): array $getAvailableAttributePaths
+     *
      * @throws ApiError
      */
-    private function createPreparedFilter(?string $requestedFilterIdentifier, array $availableAttributePaths): ?Filter
+    private function createPreparedFilter(?string $requestedFilterIdentifier, callable $getAvailableAttributePaths): ?Filter
     {
         $filtersToApplyIdentifiers = [];
 
@@ -417,7 +429,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
 
             $filter = $this->createFilter(
                 Parameters::getQueryParametersFromQueryString($filterQueryString, Parameters::FILTER),
-                $availableAttributePaths, false);
+                $getAvailableAttributePaths, false);
             try {
                 $combinedFilter = $combinedFilter === null ? $filter : $combinedFilter->combineWith($filter);
             } catch (FilterException $filterException) {
@@ -433,25 +445,39 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
      */
     private function getAvailableAttributePaths(string $resourceClass, array $deserializationGroups): array
     {
-        $availableAttributePaths = [];
+        if ($this->availableAttributePaths === null) {
+            $this->availableAttributePaths = [];
 
-        $propertyNamesFactoryOptions = [];
-        Tools::removeValueFromArray($deserializationGroups, 'LocalData:output');
-        $propertyNamesFactoryOptions['serializer_groups'] = $deserializationGroups;
+            $propertyNamesFactoryOptions = [];
+            Tools::removeValueFromArray($deserializationGroups, 'LocalData:output');
+            $propertyNamesFactoryOptions['serializer_groups'] = $deserializationGroups;
 
-        try {
-            foreach ($this->propertyNameCollectionFactory->create(
-                $resourceClass, $propertyNamesFactoryOptions) as $propertyName) {
-                $availableAttributePaths[] = $propertyName;
+            try {
+                foreach ($this->propertyNameCollectionFactory->create(
+                    $resourceClass, $propertyNamesFactoryOptions) as $propertyName) {
+                    $this->availableAttributePaths[] = $propertyName;
+                }
+            } catch (ResourceClassNotFoundException $exception) {
+                throw new \RuntimeException($exception->getMessage());
             }
-        } catch (ResourceClassNotFoundException $exception) {
-            throw new \RuntimeException($exception->getMessage());
+
+            foreach ($this->localDataAccessChecker->getConfiguredLocalDataAttributeNames() as $localDataAttributeName) {
+                $this->availableAttributePaths[] = LocalData::getAttributePath($localDataAttributeName);
+            }
         }
 
-        foreach ($this->localDataAccessChecker->getConfiguredLocalDataAttributeNames() as $localDataAttributeName) {
-            $availableAttributePaths[] = LocalData::getAttributePath($localDataAttributeName);
-        }
+        return $this->availableAttributePaths;
+    }
 
-        return $availableAttributePaths;
+    private function setFilterOption(array &$options, Filter $filter): void
+    {
+        try {
+            $filter->simplify();
+        } catch (FilterException $filterException) {
+            throw new \RuntimeException($filterException->getMessage());
+        }
+        if (false === $filter->isAlwaysTrue()) {
+            Options::setFilter($options, $filter);
+        }
     }
 }

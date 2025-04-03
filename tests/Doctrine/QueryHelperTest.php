@@ -6,9 +6,8 @@ namespace Dbp\Relay\CoreBundle\Tests\Doctrine;
 
 use Dbp\Relay\CoreBundle\Doctrine\QueryHelper;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTreeBuilder;
-use Dbp\Relay\CoreBundle\Tests\Kernel;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Entity\TestResource;
-use Dbp\Relay\CoreBundle\TestUtils\TestEntityManager;
+use Dbp\Relay\CoreBundle\Tests\TestApi\TestResourceEntityManager;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -18,8 +17,7 @@ class QueryHelperTest extends KernelTestCase
 
     protected function setUp(): void
     {
-        $this->entityManager = TestEntityManager::setUpEntityManager(self::bootKernel()->getContainer(),
-            Kernel::TEST_ENTITY_MANAGER_ID);
+        $this->entityManager = (new TestResourceEntityManager(self::bootKernel()->getContainer()))->getEntityManager();
     }
 
     public function testSaveEntity(): void

@@ -29,7 +29,7 @@ class TestUserAttributeProvider implements UserAttributeProviderExInterface
         $this->defaultAttributes = $defaultAttributes;
     }
 
-    public function addUser(string $userIdentifier, array $userAttributes = []): void
+    public function addUser(?string $userIdentifier, array $userAttributes = []): void
     {
         $this->userAttributes[$userIdentifier] = $userAttributes;
     }

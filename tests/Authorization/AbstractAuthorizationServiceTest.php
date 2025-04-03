@@ -13,6 +13,9 @@ use PHPUnit\Framework\TestCase;
 
 class AbstractAuthorizationServiceTest extends TestCase
 {
+    protected const IS_ADMIN_USER_ATTRIBUTE = 'IS_ADMIN';
+    protected const IS_USER_USER_ATTRIBUTE = 'IS_USER';
+
     public function testGetUserIdentifier()
     {
         $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
@@ -34,13 +37,13 @@ class AbstractAuthorizationServiceTest extends TestCase
     public function testGetUserAttribute()
     {
         $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
-        $this->assertTrue($authorizationService->getUserAttribute('ROLE_USER'));
-        $this->assertFalse($authorizationService->getUserAttribute('ROLE_ADMIN'));
+        $this->assertTrue($authorizationService->getUserAttribute(self::IS_USER_USER_ATTRIBUTE));
+        $this->assertFalse($authorizationService->getUserAttribute(self::IS_ADMIN_USER_ATTRIBUTE));
         $this->assertEquals('test@example.com', $authorizationService->getUserAttribute('EMAIL'));
 
         $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::ADMIN_USER_IDENTIFIER);
-        $this->assertFalse($authorizationService->getUserAttribute('ROLE_USER'));
-        $this->assertTrue($authorizationService->getUserAttribute('ROLE_ADMIN'));
+        $this->assertFalse($authorizationService->getUserAttribute(self::IS_USER_USER_ATTRIBUTE));
+        $this->assertTrue($authorizationService->getUserAttribute(self::IS_ADMIN_USER_ATTRIBUTE));
         $this->assertEquals('test@example.com', $authorizationService->getUserAttribute('EMAIL'));
     }
 
@@ -316,22 +319,22 @@ class AbstractAuthorizationServiceTest extends TestCase
     private function getTestAuthorizationService(string $userIdentifier): TestAuthorizationService
     {
         $authorizationService = TestAuthorizationService::create($userIdentifier, [
-            'ROLE_USER' => $userIdentifier === TestAuthorizationService::TEST_USER_IDENTIFIER,
-            'ROLE_ADMIN' => $userIdentifier === TestAuthorizationService::ADMIN_USER_IDENTIFIER,
+            self::IS_USER_USER_ATTRIBUTE => $userIdentifier === TestAuthorizationService::TEST_USER_IDENTIFIER,
+            self::IS_ADMIN_USER_ATTRIBUTE => $userIdentifier === TestAuthorizationService::ADMIN_USER_IDENTIFIER,
             'EMAIL' => 'test@example.com',
             'NULL' => null,
         ]);
         $authorizationService->setUpAccessControlPolicies([
-            'MAY_USE' => 'user.get("ROLE_USER") || user.get("ROLE_ADMIN")',
-            'MAY_MANAGE' => 'user.get("ROLE_ADMIN")',
+            'MAY_USE' => 'user.get("'.self::IS_USER_USER_ATTRIBUTE.'") || user.get("'.self::IS_ADMIN_USER_ATTRIBUTE.'")',
+            'MAY_MANAGE' => 'user.get("'.self::IS_ADMIN_USER_ATTRIBUTE.'")',
             'INFINITE_EXPRESSION' => 'user.isGranted("INFINITE_EXPRESSION")',
             'USER_ATTRIBUTE_UNDEFINED' => 'user.get("undefined")',
         ], [
-            'MAY_ACCESS' => 'user.get("ROLE_ADMIN") || resource.getIdentifier() === "public"',
+            'MAY_ACCESS' => 'user.get("'.self::IS_ADMIN_USER_ATTRIBUTE.'") || resource.getIdentifier() === "public"',
             'INFINITE_EXPRESSION' => 'user.isGranted("INFINITE_EXPRESSION")',
             'USER_ATTRIBUTE_UNDEFINED' => 'user.get("undefined")',
         ], [
-            'MY_ORG_IDS' => 'Relay.ternaryOperator(user.get("ROLE_ADMIN"), [1, 2, 3], [1])',
+            'MY_ORG_IDS' => 'Relay.ternaryOperator(user.get("'.self::IS_ADMIN_USER_ATTRIBUTE.'"), [1, 2, 3], [1])',
             'NULL_ATTRIBUTE' => 'null',
             'INFINITE_ATTRIBUTE' => 'user.getAttribute("INFINITE_ATTRIBUTE")',
             'USER_ATTRIBUTE_UNDEFINED' => 'user.get("undefined")',

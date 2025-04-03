@@ -32,7 +32,7 @@ class AbstractDataProviderTest extends TestCase
     private function loginUser(): void
     {
         $userAttributes = $this->getUserAttributeDefaults();
-        $userAttributes['ROLE_USER'] = true;
+        $userAttributes['IS_USER'] = true;
         DataProviderTester::login($this->testDataProvider,
             TestDataProvider::TEST_USER_IDENTIFIER, $userAttributes);
     }
@@ -40,7 +40,7 @@ class AbstractDataProviderTest extends TestCase
     private function loginAdmin(): void
     {
         $userAttributes = $this->getUserAttributeDefaults();
-        $userAttributes['ROLE_ADMIN'] = true;
+        $userAttributes['IS_ADMIN'] = true;
         DataProviderTester::login($this->testDataProvider,
             TestDataProvider::ADMIN_USER_IDENTIFIER, $userAttributes);
     }
@@ -48,7 +48,7 @@ class AbstractDataProviderTest extends TestCase
     private function loginViewer(): void
     {
         $userAttributes = $this->getUserAttributeDefaults();
-        $userAttributes['ROLE_VIEWER'] = true;
+        $userAttributes['IS_VIEWER'] = true;
         DataProviderTester::login($this->testDataProvider,
             'test_viewer', $userAttributes);
     }
@@ -61,9 +61,9 @@ class AbstractDataProviderTest extends TestCase
     private function getUserAttributeDefaults(): array
     {
         return [
-            'ROLE_USER' => false,
-            'ROLE_ADMIN' => false,
-            'ROLE_VIEWER' => false,
+            'IS_USER' => false,
+            'IS_ADMIN' => false,
+            'IS_VIEWER' => false,
         ];
     }
 
@@ -75,19 +75,19 @@ class AbstractDataProviderTest extends TestCase
             [
                 'id' => 'filter0',
                 'filter' => 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0',
-                'use_policy' => 'user.get("ROLE_USER") || user.get("ROLE_VIEWER")',
+                'use_policy' => 'user.get("IS_USER") || user.get("IS_VIEWER")',
             ],
             [
                 'id' => 'filterUseAdminOnly',
                 'filter' => 'filter[identifier]=foo',
-                'use_policy' => 'user.get("ROLE_ADMIN")',
-                'force_use_policy' => 'user.get("ROLE_VIEWER")',
+                'use_policy' => 'user.get("IS_ADMIN")',
+                'force_use_policy' => 'user.get("IS_VIEWER")',
             ],
             [
                 'id' => 'filterPublic',
                 'filter' => 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=IS_NULL',
                 'use_policy' => 'true',
-                'force_use_policy' => 'user.get("ROLE_VIEWER")',
+                'force_use_policy' => 'user.get("IS_VIEWER")',
             ],
         ];
         $config['rest']['query']['sort']['enable_sort'] = true;
@@ -580,6 +580,25 @@ class AbstractDataProviderTest extends TestCase
 
         $expectedFilter = FilterTreeBuilder::create()
             ->iContains('field0', 'value0')->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    public function testForcedFilterWithGetItem(): void
+    {
+        // forced filters must be applied to getItem() as well
+        $this->testDataProvider->setSourceData(['id' => []]);
+        $this->testDataProviderTester->getItem('id');
+        $this->assertNull(Options::getFilter($this->testDataProvider->getOptions()));
+
+        $this->loginViewer();
+        $this->testDataProviderTester->getItem('id');
+        $filter = Options::getFilter($this->testDataProvider->getOptions());
+
+        $expectedFilter = FilterTreeBuilder::create()
+            ->equals('identifier', 'foo')
+            ->isNull('field0')
+            ->createFilter();
 
         $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
     }

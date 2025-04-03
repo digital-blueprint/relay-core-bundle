@@ -20,7 +20,7 @@ class DataProviderTesterTest extends TestCase
         $this->testDataProvider = new TestDataProvider(new EventDispatcher());
         $this->dataProviderTester = DataProviderTester::create(
             $this->testDataProvider, TestEntity::class, [['TestEntity:output', 'LocalData:output']]);
-        DataProviderTester::login($this->testDataProvider, currentUserAttributes: ['ROLE_ADMIN' => false]);
+        DataProviderTester::login($this->testDataProvider, currentUserAttributes: ['IS_ADMIN' => false]);
     }
 
     public function testGetItem(): void

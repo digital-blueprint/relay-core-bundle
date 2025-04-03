@@ -10,6 +10,16 @@ use Dbp\Relay\CoreBundle\Tests\TestApi\Entity\TestSubResource;
 
 class TestApiAuthorizationService extends AbstractAuthorizationService
 {
+    public const IS_USER_USER_ATTRIBUTE = 'IS_USER';
+    public const IS_ADMIN_USER_ATTRIBUTE = 'IS_ADMIN';
+    public const IS_VIEWER_USER_ATTRIBUTE = 'IS_VIEWER';
+
+    public const DEFAULT_USER_ATTRIBUTES = [
+        self::IS_USER_USER_ATTRIBUTE => false,
+        self::IS_ADMIN_USER_ATTRIBUTE => false,
+        self::IS_VIEWER_USER_ATTRIBUTE => false,
+    ];
+
     protected function setUpInputAndOutputGroups(): void
     {
         $this->showOutputGroupsForEntityClassIf(TestResource::class, ['TestResource:output:admin'],

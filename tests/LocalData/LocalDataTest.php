@@ -33,8 +33,8 @@ class LocalDataTest extends TestCase
 
         DataProviderTester::login($this->testDataProvider,
             TestDataProvider::TEST_USER_IDENTIFIER, [
-                'ROLE_USER' => true,
-                'ROLE_ADMIN' => false,
+                'IS_USER' => true,
+                'IS_ADMIN' => false,
             ]);
     }
 

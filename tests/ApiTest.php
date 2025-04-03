@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Tests;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
+use Dbp\Relay\CoreBundle\Tests\TestApi\Authorization\TestApiAuthorizationService;
+use Dbp\Relay\CoreBundle\Tests\TestApi\TestResourceEntityManager;
 use Dbp\Relay\CoreBundle\TestUtils\Internal\TestAuthenticator;
+use Dbp\Relay\CoreBundle\TestUtils\TestClient;
 use Dbp\Relay\CoreBundle\TestUtils\UserAuthTrait;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -125,5 +128,17 @@ class ApiTest extends ApiTestCase
         $client = $this->withUser(null, ['ROLE_FOO'], 'xxx');
         $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=ROLE_FOO', ['headers' => ['Authorization' => 'Bearer xxx']]);
         $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function testHydraPrefixesInGetCollectionResponse(): void
+    {
+        $testClient = new TestClient(ApiTestCase::createClient());
+        $testClient->setUpUser(userAttributes: TestApiAuthorizationService::DEFAULT_USER_ATTRIBUTES);
+        TestResourceEntityManager::setUp($testClient->getContainer());
+        $response = $testClient->get('/test/test-resources');
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+        $content = json_decode($response->getContent(), true, flags: JSON_THROW_ON_ERROR);
+        $this->assertArrayHasKey('hydra:member', $content);
+        $this->assertArrayHasKey('hydra:view', $content);
     }
 }

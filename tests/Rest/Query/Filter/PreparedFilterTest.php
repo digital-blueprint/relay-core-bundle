@@ -24,20 +24,20 @@ class PreparedFilterTest extends TestCase
             [
                 'id' => 'filter0',
                 'filter' => 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0',
-                'use_policy' => 'user.get("ROLE_USER")',
+                'use_policy' => 'user.get("IS_USER")',
                 'force_use_policy' => 'true',
             ],
             [
                 'id' => 'filterShortcut',
                 'filter' => 'filter[field0]=value0',
                 'use_policy' => 'true',
-                'force_use_policy' => 'user.get("ROLE_VIEWER")',
+                'force_use_policy' => 'user.get("IS_VIEWER")',
             ],
             [
                 'id' => 'filterShortcut2',
                 'filter' => 'filter[field0]=value2',
-                'use_policy' => 'user.get("ROLE_ADMIN")',
-                'force_use_policy' => 'user.get("ROLE_USER")',
+                'use_policy' => 'user.get("IS_ADMIN")',
+                'force_use_policy' => 'user.get("IS_USER")',
             ],
             [
                 'id' => 'filterDefault',
@@ -53,9 +53,9 @@ class PreparedFilterTest extends TestCase
         $policies = $this->preparedFilterProvider->getUsePolicies();
 
         $this->assertCount(count($this->config['prepared_filters']), $policies);
-        $this->assertEquals('user.get("ROLE_USER")', $policies['filter0']);
+        $this->assertEquals('user.get("IS_USER")', $policies['filter0']);
         $this->assertEquals('true', $policies['filterShortcut']);
-        $this->assertEquals('user.get("ROLE_ADMIN")', $policies['filterShortcut2']);
+        $this->assertEquals('user.get("IS_ADMIN")', $policies['filterShortcut2']);
         $this->assertEquals('false', $policies['filterDefault']);
     }
 
@@ -65,8 +65,8 @@ class PreparedFilterTest extends TestCase
 
         $this->assertCount(count($this->config['prepared_filters']), $policies);
         $this->assertEquals('true', $policies['filter0']);
-        $this->assertEquals('user.get("ROLE_VIEWER")', $policies['filterShortcut']);
-        $this->assertEquals('user.get("ROLE_USER")', $policies['filterShortcut2']);
+        $this->assertEquals('user.get("IS_VIEWER")', $policies['filterShortcut']);
+        $this->assertEquals('user.get("IS_USER")', $policies['filterShortcut2']);
         $this->assertEquals('false', $policies['filterDefault']);
     }
 

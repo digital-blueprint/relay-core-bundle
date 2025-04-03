@@ -13,6 +13,7 @@ use Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceProvider;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestSubResourceProcessor;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestSubResourceProvider;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Service\TestResourceService;
+use Dbp\Relay\CoreBundle\Tests\TestApi\TestApi;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Nelmio\CorsBundle\NelmioCorsBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
@@ -27,8 +28,6 @@ use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 class Kernel extends BaseKernel
 {
     use MicroKernelTrait;
-
-    public const TEST_ENTITY_MANAGER_ID = 'dbp_relay_core_test';
 
     public function registerBundles(): iterable
     {
@@ -76,7 +75,7 @@ class Kernel extends BaseKernel
         $container->extension('doctrine', [
             'dbal' => [
                 'connections' => [
-                    self::TEST_ENTITY_MANAGER_ID => [
+                    TestApi::ENTITY_MANAGER_ID => [
                         'url' => 'sqlite:///:memory:',
                         'driver' => 'pdo_sqlite',
                     ],
@@ -84,11 +83,11 @@ class Kernel extends BaseKernel
             ],
             'orm' => [
                 'entity_managers' => [
-                    self::TEST_ENTITY_MANAGER_ID => [
+                    TestApi::ENTITY_MANAGER_ID => [
                         'naming_strategy' => 'doctrine.orm.naming_strategy.underscore_number_aware',
-                        'connection' => self::TEST_ENTITY_MANAGER_ID,
+                        'connection' => TestApi::ENTITY_MANAGER_ID,
                         'mappings' => [
-                            self::TEST_ENTITY_MANAGER_ID => [
+                            TestApi::ENTITY_MANAGER_ID => [
                                 'type' => 'attribute',
                                 'dir' => __DIR__.'/TestApi/Entity',
                                 'prefix' => 'Dbp\Relay\CoreBundle\Tests\TestApi\Entity',
@@ -100,7 +99,7 @@ class Kernel extends BaseKernel
         ]);
 
         $container->extension('dbp_relay_core', [
-            'queue_dsn' => 'doctrine://dbp_relay_core_test',
+            'queue_dsn' => 'doctrine://'.TestApi::ENTITY_MANAGER_ID,
         ]);
     }
 }
