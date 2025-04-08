@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.207
+
 * filter query parameter syntax: require string values to be quoted with double quotes to be able to
 distinguish between strings and numeric/boolean values and be type safe
 * force use filters (where `force_use_policy` evaluates to `true`) for get item operations as well,
