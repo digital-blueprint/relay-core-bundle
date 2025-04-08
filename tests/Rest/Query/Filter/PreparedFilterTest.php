@@ -23,19 +23,19 @@ class PreparedFilterTest extends TestCase
         $this->config = ['prepared_filters' => [
             [
                 'id' => 'filter0',
-                'filter' => 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0',
+                'filter' => 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]="value0"',
                 'use_policy' => 'user.get("IS_USER")',
                 'force_use_policy' => 'true',
             ],
             [
                 'id' => 'filterShortcut',
-                'filter' => 'filter[field0]=value0',
+                'filter' => 'filter[field0]="value0"',
                 'use_policy' => 'true',
                 'force_use_policy' => 'user.get("IS_VIEWER")',
             ],
             [
                 'id' => 'filterShortcut2',
-                'filter' => 'filter[field0]=value2',
+                'filter' => 'filter[field0]="value2"',
                 'use_policy' => 'user.get("IS_ADMIN")',
                 'force_use_policy' => 'user.get("IS_USER")',
             ],

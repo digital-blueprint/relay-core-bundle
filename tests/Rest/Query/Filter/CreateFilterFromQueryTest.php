@@ -20,7 +20,7 @@ class CreateFilterFromQueryTest extends TestCase
         $queryParameters = ['foo' => ['condition' => [
             'path' => 'field0',
             'operator' => 'I_CONTAINS',
-            'value' => 'value0',
+            'value' => '"value0"',
         ]]];
 
         $filter = FromQueryFilterCreator::createFilterFromQueryParameters($queryParameters, ['field0']);
@@ -32,7 +32,7 @@ class CreateFilterFromQueryTest extends TestCase
 
     public function testGetQueryParametersFromQueryString()
     {
-        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0';
+        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]="value0"';
 
         $filterParameters =
             Parameters::getQueryParametersFromQueryString($querySting, 'filter');
@@ -40,7 +40,7 @@ class CreateFilterFromQueryTest extends TestCase
         $queryParameters['foo'] = ['condition' => [
             'path' => 'field0',
             'operator' => 'I_CONTAINS',
-            'value' => 'value0',
+            'value' => '"value0"',
         ]];
 
         $this->assertEquals($queryParameters, $filterParameters);
@@ -51,7 +51,7 @@ class CreateFilterFromQueryTest extends TestCase
      */
     public function testCreateFromQueryString()
     {
-        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0';
+        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]="value0"';
 
         $usedAttributePaths = [];
         $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
@@ -63,12 +63,108 @@ class CreateFilterFromQueryTest extends TestCase
         $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
     }
 
+    public function testBoolValues(): void
+    {
+        $querySting = 'filter[field0]=true';
+
+        $usedAttributePaths = [];
+        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0'], $usedAttributePaths);
+
+        $expectedFilter = FilterTreeBuilder::create()->equals('field0', true)->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+
+        $querySting = 'filter[field0]=false';
+
+        $usedAttributePaths = [];
+        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0'], $usedAttributePaths);
+
+        $expectedFilter = FilterTreeBuilder::create()->equals('field0', false)->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    public function testNumericValues(): void
+    {
+        $querySting = 'filter[field0]=10';
+
+        $usedAttributePaths = [];
+        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0'], $usedAttributePaths);
+
+        $expectedFilter = FilterTreeBuilder::create()->equals('field0', 10)->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+
+        $querySting = 'filter[field0]=0.42';
+
+        $usedAttributePaths = [];
+        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0'], $usedAttributePaths);
+
+        $expectedFilter = FilterTreeBuilder::create()->equals('field0', 0.42)->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    public function testStringValues(): void
+    {
+        $querySting = 'filter[field0]="10"';
+
+        $usedAttributePaths = [];
+        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0'], $usedAttributePaths);
+
+        $expectedFilter = FilterTreeBuilder::create()->equals('field0', '10')->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+
+        $querySting = 'filter[field0]="true"';
+
+        $usedAttributePaths = [];
+        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0'], $usedAttributePaths);
+
+        $expectedFilter = FilterTreeBuilder::create()->equals('field0', 'true')->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    public function testArrayValues(): void
+    {
+        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=IN&'.
+            'filter[foo][condition][value][0]=10&filter[foo][condition][value][1]=11';
+
+        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
+
+        $expectedFilter = FilterTreeBuilder::create()->inArray('field0', [10, 11])->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+
+        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=IN&'.
+            'filter[foo][condition][value][0]=false&filter[foo][condition][value][1]=true';
+
+        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
+
+        $expectedFilter = FilterTreeBuilder::create()->inArray('field0', [false, true])->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
     /**
      * @throws \Exception
      */
     public function testAndGroup()
     {
-        $querySting = 'filter[test_group][group][conjunction]=AND&filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0&&filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=field1&filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]=value1&&filter[bar][condition][memberOf]=test_group';
+        $querySting = 'filter[test_group][group][conjunction]=AND&filter[foo][condition][path]=field0&'.
+            'filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]="value0"&'.
+            'filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=field1&'.
+            'filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]="value1"&'.
+            'filter[bar][condition][memberOf]=test_group';
 
         $usedAttributePaths = [];
         $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
@@ -90,7 +186,11 @@ class CreateFilterFromQueryTest extends TestCase
      */
     public function testOrGroup()
     {
-        $querySting = 'filter[test_group][group][conjunction]=OR&filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0&&filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=field1&filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]=value1&&filter[bar][condition][memberOf]=test_group';
+        $querySting = 'filter[test_group][group][conjunction]=OR&filter[foo][condition][path]=field0&'.
+            'filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]="value0"&'.
+            'filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=field1&'.
+            'filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]="value1"&'.
+            'filter[bar][condition][memberOf]=test_group';
 
         $usedAttributePaths = [];
         $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
@@ -112,7 +212,11 @@ class CreateFilterFromQueryTest extends TestCase
      */
     public function testNotAndGroup()
     {
-        $querySting = 'filter[test_group][group][conjunction]=NOT_AND&filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0&&filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=field1&filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]=value1&&filter[bar][condition][memberOf]=test_group';
+        $querySting = 'filter[test_group][group][conjunction]=NOT_AND&filter[foo][condition][path]=field0&'.
+            'filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]="value0"&'.
+            'filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=field1&'.
+            'filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]="value1"&'.
+            'filter[bar][condition][memberOf]=test_group';
 
         $usedAttributePaths = [];
         $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
@@ -136,7 +240,7 @@ class CreateFilterFromQueryTest extends TestCase
      */
     public function testNotOrGroup()
     {
-        $querySting = 'filter[test_group][group][conjunction]=NOT_OR&filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0&&filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=field1&filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]=value1&&filter[bar][condition][memberOf]=test_group';
+        $querySting = 'filter[test_group][group][conjunction]=NOT_OR&filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]="value0"&&filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=field1&filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]="value1"&&filter[bar][condition][memberOf]=test_group';
 
         $usedAttributePaths = [];
         $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
@@ -160,7 +264,7 @@ class CreateFilterFromQueryTest extends TestCase
      */
     public function testConditionDefaultOperatorEquals()
     {
-        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][value]=value0';
+        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][value]="value0"';
 
         $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
@@ -175,7 +279,7 @@ class CreateFilterFromQueryTest extends TestCase
      */
     public function testCreateFromShortcut()
     {
-        $querySting = 'filter[field0][value]=value0';
+        $querySting = 'filter[field0][value]="value0"';
 
         $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
@@ -190,7 +294,7 @@ class CreateFilterFromQueryTest extends TestCase
      */
     public function testCreateFromUltraShortcut()
     {
-        $querySting = 'filter[field0]=value0';
+        $querySting = 'filter[field0]="value0"';
 
         $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
@@ -205,7 +309,7 @@ class CreateFilterFromQueryTest extends TestCase
      */
     public function testAttributePathUndefinedException()
     {
-        $querySting = 'filter[field0]=value0';
+        $querySting = 'filter[field0]="value0"';
 
         try {
             FromQueryFilterCreator::createFilterFromQueryParameters(
@@ -262,7 +366,7 @@ class CreateFilterFromQueryTest extends TestCase
      */
     public function testConditionNullOperatorWithValueException()
     {
-        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=IS_NULL&filter[foo][condition][value]=value0';
+        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=IS_NULL&filter[foo][condition][value]="value0"';
 
         try {
             FromQueryFilterCreator::createFilterFromQueryParameters(
@@ -277,7 +381,7 @@ class CreateFilterFromQueryTest extends TestCase
      */
     public function testConditionInArrayOperator()
     {
-        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=IN&filter[foo][condition][value][0]=value0&filter[foo][condition][value][1]=value1';
+        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=IN&filter[foo][condition][value][0]="value0"&filter[foo][condition][value][1]="value1"';
 
         $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
@@ -292,7 +396,7 @@ class CreateFilterFromQueryTest extends TestCase
      */
     public function testConditionInArrayOperatorWithNonArrayValueException()
     {
-        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=IN&filter[foo][condition][value]=value0';
+        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=IN&filter[foo][condition][value]="value0"';
 
         try {
             FromQueryFilterCreator::createFilterFromQueryParameters(
@@ -322,7 +426,7 @@ class CreateFilterFromQueryTest extends TestCase
      */
     public function testConditionOperatorUndefinedException()
     {
-        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=foobar&filter[foo][condition][value]=value0';
+        $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=foobar&filter[foo][condition][value]="value0"';
 
         try {
             FromQueryFilterCreator::createFilterFromQueryParameters(
@@ -337,7 +441,7 @@ class CreateFilterFromQueryTest extends TestCase
      */
     public function testReservedFilterItemId()
     {
-        $querySting = 'filter[@root][condition][path]=field0&filter[@root][condition][operator]=EQ&filter[@root][condition][value]=value0';
+        $querySting = 'filter[@root][condition][path]=field0&filter[@root][condition][operator]=EQ&filter[@root][condition][value]="value0"';
 
         try {
             FromQueryFilterCreator::createFilterFromQueryParameters(
@@ -352,7 +456,7 @@ class CreateFilterFromQueryTest extends TestCase
      */
     public function testConjunctionUndefined()
     {
-        $querySting = 'filter[or_group][group][conjunction]=ORISH&filter[foo][condition][path]=field0&filter[foo][condition][operator]=EQ&filter[foo][condition][value]=value0&filter[bar][condition][path]=field0&filter[bar][condition][operator]=EQ&filter[bar][condition][value]=value1';
+        $querySting = 'filter[or_group][group][conjunction]=ORISH&filter[foo][condition][path]=field0&filter[foo][condition][operator]=EQ&filter[foo][condition][value]="value0"&filter[bar][condition][path]=field0&filter[bar][condition][operator]=EQ&filter[bar][condition][value]="value1"';
 
         try {
             FromQueryFilterCreator::createFilterFromQueryParameters(

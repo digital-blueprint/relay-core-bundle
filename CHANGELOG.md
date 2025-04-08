@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+* filter query parameter syntax: require string values to be quoted with double quotes to be able to
+distinguish between strings and numeric/boolean values and be type safe
+* force use filters (where `force_use_policy` evaluates to `true`) for get item operations as well,
+for get item and get collection to be consistent. NOTE: implementors are responsible to apply those filters
+in their overrides of `getItemById` (filters are found in the `$options` parameter, like for `getPage`).
+
 ## v0.1.206
 
 * Drop support for PHP 8.1

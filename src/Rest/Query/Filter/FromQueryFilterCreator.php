@@ -266,30 +266,53 @@ class FromQueryFilterCreator
             $usedAttributePaths[] = $attributePath;
         }
 
-        $filterTreeBuilder->appendChild(new ConditionNode($attributePath, self::toConditionNodeOperator($operator), $value));
+        $filterTreeBuilder->appendChild(new ConditionNode($attributePath,
+            self::toConditionNodeOperator($operator), self::toConditionNodeValue($value)));
     }
 
     private static function toConditionNodeOperator(string $operator): string
     {
-        switch ($operator) {
-            case self::EQUALS_OPERATOR:
-                return OperatorType::EQUALS_OPERATOR;
-            case self::LESS_THAN_OR_EQUAL_OPERATOR:
-                return OperatorType::LESS_THAN_OR_EQUAL_OPERATOR;
-            case self::GREATER_THAN_OR_EQUAL_OPERATOR:
-                return OperatorType::GREATER_THAN_OR_EQUAL_OPERATOR;
-            case self::I_STARTS_WITH_OPERATOR:
-                return OperatorType::I_STARTS_WITH_OPERATOR;
-            case self::I_CONTAINS_OPERATOR:
-                return OperatorType::I_CONTAINS_OPERATOR;
-            case self::I_ENDS_WITH_OPERATOR:
-                return OperatorType::I_ENDS_WITH_OPERATOR;
-            case self::IN_ARRAY_OPERATOR:
-                return OperatorType::IN_ARRAY_OPERATOR;
-            case self::IS_NULL_OPERATOR:
-                return OperatorType::IS_NULL_OPERATOR;
-            default:
-                throw new \UnexpectedValueException('Unsupported operator type: '.$operator);
+        return match ($operator) {
+            self::EQUALS_OPERATOR => OperatorType::EQUALS_OPERATOR,
+            self::LESS_THAN_OR_EQUAL_OPERATOR => OperatorType::LESS_THAN_OR_EQUAL_OPERATOR,
+            self::GREATER_THAN_OR_EQUAL_OPERATOR => OperatorType::GREATER_THAN_OR_EQUAL_OPERATOR,
+            self::I_STARTS_WITH_OPERATOR => OperatorType::I_STARTS_WITH_OPERATOR,
+            self::I_CONTAINS_OPERATOR => OperatorType::I_CONTAINS_OPERATOR,
+            self::I_ENDS_WITH_OPERATOR => OperatorType::I_ENDS_WITH_OPERATOR,
+            self::IN_ARRAY_OPERATOR => OperatorType::IN_ARRAY_OPERATOR,
+            self::IS_NULL_OPERATOR => OperatorType::IS_NULL_OPERATOR,
+            default => throw new \UnexpectedValueException('Unsupported operator type: '.$operator),
+        };
+    }
+
+    /**
+     * @throws FilterException
+     */
+    private static function toConditionNodeValue(string|array|null $value): string|int|bool|float|array|null
+    {
+        if ($value === null) {
+            return null;
+        } elseif (is_array($value)) {
+            $convertedArray = [];
+            foreach ($value as $arrayElement) {
+                $convertedArray[] = self::toConditionNodeValue($arrayElement);
+            }
+
+            return $convertedArray;
+        } else {
+            if ($value === 'true') {
+                return true;
+            } elseif ($value === 'false') {
+                return false;
+            } elseif (is_numeric($value)) {
+                return $value + 0;
+            } else {
+                if (preg_match('/^"(.+)"$/', $value, $matches)) {
+                    return $matches[1]; // The string without the quotes
+                } else {
+                    throw new FilterException('string values must be quoted', FilterException::CONDITION_VALUE_ERROR);
+                }
+            }
         }
     }
 
@@ -298,7 +321,7 @@ class FromQueryFilterCreator
      *
      * @throws FilterException
      */
-    private static function validateConditionFilterItem(array $conditionFilterItem)
+    private static function validateConditionFilterItem(array $conditionFilterItem): void
     {
         if (!isset($conditionFilterItem[self::PATH_KEY])) {
             throw new FilterException("Filter parameter is missing a '".self::PATH_KEY."' key.", FilterException::CONDITION_PATH_MISSING);

@@ -98,7 +98,7 @@ class TestResourceProviderTest extends WebTestCase
         $config['rest']['query']['filter']['prepared_filters'] = [
             [
                 'id' => 'publicOnly',
-                'filter' => 'filter[isPublic]=1',
+                'filter' => 'filter[isPublic]=true',
                 'force_use_policy' => '!user.get("'.TestApiAuthorizationService::IS_ADMIN_USER_ATTRIBUTE.'")',
             ],
         ];

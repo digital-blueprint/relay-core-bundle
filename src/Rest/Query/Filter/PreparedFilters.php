@@ -19,8 +19,6 @@ class PreparedFilters
     private const FORCE_USE_POLICY_CONFIG_NODE = 'force_use_policy';
 
     private const FILTER_CONFIG_KEY = 'filter';
-    private const USE_POLICY_PREFIX = '@use-filter:';
-    private const FORCE_USE_POLICY_PREFIX = '@force-use-filter:';
 
     /** @var array<int, array<string, mixed>> */
     private array $config = [];

@@ -74,12 +74,12 @@ class AbstractDataProviderTest extends TestCase
         $config['rest']['query']['filter']['prepared_filters'] = [
             [
                 'id' => 'filter0',
-                'filter' => 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0',
+                'filter' => 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]="value0"',
                 'use_policy' => 'user.get("IS_USER") || user.get("IS_VIEWER")',
             ],
             [
                 'id' => 'filterUseAdminOnly',
-                'filter' => 'filter[identifier]=foo',
+                'filter' => 'filter[identifier]="foo"',
                 'use_policy' => 'user.get("IS_ADMIN")',
                 'force_use_policy' => 'user.get("IS_VIEWER")',
             ],
@@ -278,7 +278,7 @@ class AbstractDataProviderTest extends TestCase
     public function testFilterQueryParameter()
     {
         $queryParameters = [];
-        parse_str('filter[field0]=value0', $queryParameters);
+        parse_str('filter[field0]="value0"', $queryParameters);
 
         $this->testDataProvider->setSourceData([[]]);
         $this->testDataProviderTester->getPage(filters: $queryParameters);
@@ -299,7 +299,7 @@ class AbstractDataProviderTest extends TestCase
         $this->testDataProvider->setConfig($config);
 
         $queryParameters = [];
-        parse_str('filter[field0]=value0', $queryParameters);
+        parse_str('filter[field0]="value0"', $queryParameters);
 
         $this->testDataProvider->setSourceData([[]]);
         try {
@@ -410,7 +410,7 @@ class AbstractDataProviderTest extends TestCase
     public function testCombineRequestedFilterWithQueryFilter()
     {
         $queryParameters = [];
-        parse_str('filter[field0]=value0', $queryParameters);
+        parse_str('filter[field0]="value0"', $queryParameters);
         $queryParameters['preparedFilter'] = 'filter0';
 
         $this->testDataProvider->setSourceData([[]]);
@@ -433,7 +433,7 @@ class AbstractDataProviderTest extends TestCase
         $this->loginViewer();
 
         $queryParameters = [];
-        parse_str('filter[field0]=value0', $queryParameters);
+        parse_str('filter[field0]="value0"', $queryParameters);
         $queryParameters['preparedFilter'] = 'filter0';
 
         $this->testDataProvider->setSourceData([[]]);
@@ -456,7 +456,7 @@ class AbstractDataProviderTest extends TestCase
         $this->loginViewer();
 
         $queryParameters = [];
-        parse_str('filter[field0]=value0', $queryParameters);
+        parse_str('filter[field0]="value0"', $queryParameters);
         $queryParameters['preparedFilter'] = 'filterPublic';
 
         $this->testDataProvider->setSourceData([[]]);
@@ -527,7 +527,7 @@ class AbstractDataProviderTest extends TestCase
     public function testFilterWithLocalDataAttribute()
     {
         $queryParameters = [];
-        parse_str('filter[localData.attribute0]=value0', $queryParameters);
+        parse_str('filter[localData.attribute0]="value0"', $queryParameters);
 
         $this->testDataProvider->setSourceData([[]]);
         $this->testDataProviderTester->getPage(filters: $queryParameters);
@@ -544,7 +544,7 @@ class AbstractDataProviderTest extends TestCase
     public function testFilterWithForbiddenLocalDataAttribute()
     {
         $queryParameters = [];
-        parse_str('filter[localData.forbiddenAttribute]=value0', $queryParameters);
+        parse_str('filter[localData.forbiddenAttribute]="value0"', $queryParameters);
 
         $this->testDataProvider->setSourceData([[]]);
         $this->assertEmpty($this->testDataProviderTester->getPage(filters: $queryParameters));
@@ -556,7 +556,12 @@ class AbstractDataProviderTest extends TestCase
     public function testFilterWithForbiddenLocalDataAttributeInAndGroup()
     {
         // condition with forbidden attribute evaluates to constant 'false' -> parent AND group evaluates to 'false'
-        $querySting = 'filter[test_group][group][conjunction]=AND&filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0&&filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=localData.forbiddenAttribute&filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]=value1&&filter[bar][condition][memberOf]=test_group';
+        $querySting =
+            'filter[test_group][group][conjunction]=AND&filter[foo][condition][path]=field0&'.
+            'filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]="value0"&&'.
+            'filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=localData.forbiddenAttribute&'.
+            'filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]="value1"&&'.
+            'filter[bar][condition][memberOf]=test_group';
         $queryParameters = [];
         parse_str($querySting, $queryParameters);
 
@@ -570,7 +575,7 @@ class AbstractDataProviderTest extends TestCase
     public function testFilterWithForbiddenLocalDataAttributeInOrGroup()
     {
         // condition with forbidden attribute evaluates to constant 'false', which is to be removed from the parent OR group
-        $querySting = 'filter[test_group][group][conjunction]=OR&filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]=value0&&filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=localData.forbiddenAttribute&filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]=value1&&filter[bar][condition][memberOf]=test_group';
+        $querySting = 'filter[test_group][group][conjunction]=OR&filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]="value0"&&filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=localData.forbiddenAttribute&filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]="value1"&&filter[bar][condition][memberOf]=test_group';
         $queryParameters = [];
         parse_str($querySting, $queryParameters);
 
