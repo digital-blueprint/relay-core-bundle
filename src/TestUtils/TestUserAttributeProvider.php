@@ -44,7 +44,7 @@ class TestUserAttributeProvider implements UserAttributeProviderExInterface
 
     public function getUserAttributes(?string $userIdentifier): array
     {
-        if ($userIdentifier === null || ($userAttributes = $this->userAttributes[$userIdentifier] ?? null) === null) {
+        if (($userAttributes = $this->userAttributes[$userIdentifier] ?? null) === null) {
             return $this->defaultAttributes;
         }
 

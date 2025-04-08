@@ -27,7 +27,7 @@ class AbstractAuthorizationServiceTest extends TestCase
         $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
         $this->assertTrue($authorizationService->isAuthenticated());
 
-        $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::UNAUTHENTICATED_USER_IDENTIFIER);
+        $authorizationService = $this->getTestAuthorizationService(isAuthenticated: false);
         $this->assertFalse($authorizationService->isAuthenticated());
     }
 
@@ -316,14 +316,14 @@ class AbstractAuthorizationServiceTest extends TestCase
         $this->assertEquals('USER_ATTRIBUTE_UNDEFINED', $attributeNames[3]);
     }
 
-    private function getTestAuthorizationService(string $userIdentifier): TestAuthorizationService
+    private function getTestAuthorizationService(?string $userIdentifier = null, bool $isAuthenticated = true): TestAuthorizationService
     {
         $authorizationService = TestAuthorizationService::create($userIdentifier, [
             self::IS_USER_USER_ATTRIBUTE => $userIdentifier === TestAuthorizationService::TEST_USER_IDENTIFIER,
             self::IS_ADMIN_USER_ATTRIBUTE => $userIdentifier === TestAuthorizationService::ADMIN_USER_IDENTIFIER,
             'EMAIL' => 'test@example.com',
             'NULL' => null,
-        ]);
+        ], isAuthenticated: $isAuthenticated);
         $authorizationService->setUpAccessControlPolicies([
             'MAY_USE' => 'user.get("'.self::IS_USER_USER_ATTRIBUTE.'") || user.get("'.self::IS_ADMIN_USER_ATTRIBUTE.'")',
             'MAY_MANAGE' => 'user.get("'.self::IS_ADMIN_USER_ATTRIBUTE.'")',

@@ -20,8 +20,7 @@ class AbstractRestTester
 
     public static function logout(AbstractAuthorizationService $authorizationService, array $userAttributeDefaults = []): void
     {
-        TestAuthorizationService::setUp($authorizationService,
-            TestAuthorizationService::UNAUTHENTICATED_USER_IDENTIFIER, $userAttributeDefaults);
+        TestAuthorizationService::setUp($authorizationService, currentUserAttributes: $userAttributeDefaults, isAuthenticated: false);
     }
 
     protected function __construct(

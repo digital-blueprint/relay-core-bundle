@@ -37,7 +37,7 @@ class TestUserSession implements UserSessionInterface
 
     public function getUserIdentifier(): ?string
     {
-        return $this->userIdentifier;
+        return $this->isAuthenticated && $this->isServiceAccount === false ? $this->userIdentifier : null;
     }
 
     public function isAuthenticated(): bool
