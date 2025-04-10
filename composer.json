@@ -15,7 +15,7 @@
         "guzzlehttp/guzzle": "^7.5",
         "kekos/multipart-form-data-parser": "^1.1",
         "kevinrob/guzzle-cache-middleware": "^4.0 || ^5.0 || ^6.0",
-        "monolog/monolog": "^2.9 || ^3.2",
+        "monolog/monolog": "^3.2",
         "nelmio/cors-bundle": "^2.2",
         "nyholm/psr7": "^1.8",
         "psr/cache": "^1.0.1 || ^2.0.0 || ^3.0.0",

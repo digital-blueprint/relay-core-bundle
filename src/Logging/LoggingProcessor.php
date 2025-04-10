@@ -112,14 +112,9 @@ final class LoggingProcessor implements ProcessorInterface
             }
         }
 
-        if (Logger::API === 2) {
-            return $arrayRecord;
-        } else {
-            // @phpstan-ignore new.interface
-            return new LogRecord(
-                $arrayRecord['datetime'], $arrayRecord['channel'], Logger::toMonologLevel($arrayRecord['level']),
-                $arrayRecord['message'], $arrayRecord['context'], $arrayRecord['extra'],
-                $record->formatted); // // @phpstan-ignore property.nonObject
-        }
+        return new LogRecord(
+            $arrayRecord['datetime'], $arrayRecord['channel'], Logger::toMonologLevel($arrayRecord['level']),
+            $arrayRecord['message'], $arrayRecord['context'], $arrayRecord['extra'],
+            $record->formatted);
     }
 }

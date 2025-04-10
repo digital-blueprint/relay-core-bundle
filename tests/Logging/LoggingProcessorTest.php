@@ -21,17 +21,11 @@ class LoggingProcessorTest extends WebTestCase
         $record['level_name'] ??= 'DEBUG';
         $record['datetime'] ??= new \DateTimeImmutable();
 
-        // Paper over the monolog v2 vs v3 differences and only work with arrays
-        if (Logger::API !== 2) {
-            // @phpstan-ignore new.interface
-            $record = new LogRecord(
-                $record['datetime'], $record['channel'], Logger::toMonologLevel($record['level']),
-                $record['message'], $record['context'] ?? [], $record['extra'] ?? []);
+        $record = new LogRecord(
+            $record['datetime'], $record['channel'], Logger::toMonologLevel($record['level']),
+            $record['message'], $record['context'] ?? [], $record['extra'] ?? []);
 
-            return $processor->__invoke($record)->toArray();
-        } else {
-            return $processor->__invoke($record);
-        }
+        return $processor->__invoke($record)->toArray();
     }
 
     public function testAllFieldsArePreserved()
