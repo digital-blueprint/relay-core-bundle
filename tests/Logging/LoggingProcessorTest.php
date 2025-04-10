@@ -23,6 +23,7 @@ class LoggingProcessorTest extends WebTestCase
 
         // Paper over the monolog v2 vs v3 differences and only work with arrays
         if (Logger::API !== 2) {
+            // @phpstan-ignore new.interface
             $record = new LogRecord(
                 $record['datetime'], $record['channel'], Logger::toMonologLevel($record['level']),
                 $record['message'], $record['context'] ?? [], $record['extra'] ?? []);
