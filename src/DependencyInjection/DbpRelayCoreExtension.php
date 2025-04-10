@@ -118,6 +118,20 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
             ],
         ]);
 
+        if (interface_exists('ApiPlatform\Metadata\ErrorResourceInterface')) {
+            $container->prependExtensionConfig('api_platform', [
+                'use_symfony_listeners' => true, // 4 only
+                'serializer' => [
+                    'hydra_prefix' => true,      // 4 only
+                ],
+            ]);
+        } else {
+            $container->prependExtensionConfig('api_platform', [
+                'event_listeners_backward_compatibility_layer' => false, // 3 only
+                'keep_legacy_inflector' => false, // 3 only
+            ]);
+        }
+
         $container->prependExtensionConfig('api_platform', [
             'formats' => [
                 'jsonld' => ['application/ld+json'],
@@ -130,8 +144,6 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
                 'jsonopenapi' => ['application/vnd.openapi+json'],
                 'html' => ['text/html'],
             ],
-            'event_listeners_backward_compatibility_layer' => false,
-            'keep_legacy_inflector' => false,
             'defaults' => [
                 'extra_properties' => [
                     'standard_put' => true,
