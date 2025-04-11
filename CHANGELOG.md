@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.1.208
+
+* Add support for Api-Platform v4
+
 ## v0.1.207
 
 * filter query parameter syntax: require string values to be quoted with double quotes to be able to
