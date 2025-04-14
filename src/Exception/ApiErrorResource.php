@@ -15,7 +15,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Attribute\SerializedName;
 use Symfony\Component\Serializer\Serializer;
 
-#[ErrorResource]
+#[ErrorResource(openapi: false)]
 class ApiErrorResource extends Error
 {
     private ?string $errorId = null;
