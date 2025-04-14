@@ -11,6 +11,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Process\Process;
@@ -23,14 +24,14 @@ final class MigrateCommand extends Command implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    private $entityManagers;
-    private $appKernel;
+    private array $entityManagers = [];
 
-    public function __construct(KernelInterface $appKernel)
+    public function __construct(
+        private readonly KernelInterface $appKernel,
+        private readonly EventDispatcherInterface $eventDispatcher)
     {
         parent::__construct();
         $this->logger = new NullLogger();
-        $this->appKernel = $appKernel;
     }
 
     protected function configure(): void
@@ -39,7 +40,7 @@ final class MigrateCommand extends Command implements LoggerAwareInterface
         $this->setDescription('Run all database migrations');
     }
 
-    public function setEntityManagers(array $entityManagers)
+    public function setEntityManagers(array $entityManagers): void
     {
         $this->entityManagers = $entityManagers;
     }
@@ -57,7 +58,7 @@ final class MigrateCommand extends Command implements LoggerAwareInterface
      *
      * This assumes <project-dir>/bin/console exists (which it hopefully does)
      */
-    public function runConsoleCommand(array $inputArgs, InputInterface $input, OutputInterface $output)
+    public function runConsoleCommand(array $inputArgs, InputInterface $input, OutputInterface $output): void
     {
         // Ensure everything is where we expect it to be
         $filesystem = new Filesystem();
@@ -123,6 +124,9 @@ final class MigrateCommand extends Command implements LoggerAwareInterface
             $output->writeln("Migrating $em:");
             $this->runConsoleCommand(['doctrine:migrations:migrate', '--em',  $em], $input, $output);
         }
+
+        $migratePostEvent = new MigratePostEvent($output);
+        $this->eventDispatcher->dispatch($migratePostEvent);
 
         return Command::SUCCESS;
     }
