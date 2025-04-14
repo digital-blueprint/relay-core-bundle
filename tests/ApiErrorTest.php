@@ -12,6 +12,14 @@ class ApiErrorTest extends ApiTestCase
 {
     use UserAuthTrait;
 
+    public static function setUpBeforeClass(): void
+    {
+        $reflection = new \ReflectionClass(ApiTestCase::class);
+        if ($reflection->hasProperty('alwaysBootKernel')) {
+            static::$alwaysBootKernel = true;
+        }
+    }
+
     public function testBasics()
     {
         $error = new ApiError(400, 'foobar');

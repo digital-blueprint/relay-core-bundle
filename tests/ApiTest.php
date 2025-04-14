@@ -16,6 +16,14 @@ class ApiTest extends ApiTestCase
 {
     use UserAuthTrait;
 
+    public static function setUpBeforeClass(): void
+    {
+        $reflection = new \ReflectionClass(ApiTestCase::class);
+        if ($reflection->hasProperty('alwaysBootKernel')) {
+            static::$alwaysBootKernel = true;
+        }
+    }
+
     public function testIndex()
     {
         $client = $this->withUser('foobar');
