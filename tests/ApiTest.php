@@ -7,22 +7,15 @@ namespace Dbp\Relay\CoreBundle\Tests;
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Authorization\TestApiAuthorizationService;
 use Dbp\Relay\CoreBundle\Tests\TestApi\TestResourceEntityManager;
+use Dbp\Relay\CoreBundle\TestUtils\AbstractApiTest;
 use Dbp\Relay\CoreBundle\TestUtils\Internal\TestAuthenticator;
 use Dbp\Relay\CoreBundle\TestUtils\TestClient;
 use Dbp\Relay\CoreBundle\TestUtils\UserAuthTrait;
 use Symfony\Component\HttpFoundation\Response;
 
-class ApiTest extends ApiTestCase
+class ApiTest extends AbstractApiTest
 {
     use UserAuthTrait;
-
-    public static function setUpBeforeClass(): void
-    {
-        $reflection = new \ReflectionClass(ApiTestCase::class);
-        if ($reflection->hasProperty('alwaysBootKernel')) {
-            static::$alwaysBootKernel = true;
-        }
-    }
 
     public function testIndex()
     {
