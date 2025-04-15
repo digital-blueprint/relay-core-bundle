@@ -11,13 +11,13 @@ abstract class AbstractApiTest extends ApiTestCase
     protected ?TestClient $testClient = null;
 
     /**
-     * WORKAROUND deprecation warning.
+     * WORKAROUND deprecation warning on self::createClient().
      */
     public static function setUpBeforeClass(): void
     {
         $reflection = new \ReflectionClass(ApiTestCase::class);
         if ($reflection->hasProperty('alwaysBootKernel')) {
-            static::$alwaysBootKernel = true;
+            static::$alwaysBootKernel = true; // @phpstan-ignore-line
         }
     }
 
@@ -30,8 +30,18 @@ abstract class AbstractApiTest extends ApiTestCase
 
     protected function login(
         string $userIdentifier = TestAuthorizationService::TEST_USER_IDENTIFIER,
-        array $userAttributes = []): void
+        ?array $userAttributes = null): void
     {
-        $this->testClient->setUpUser($userIdentifier, userAttributes: $userAttributes);
+        $this->testClient->setUpUser($userIdentifier, userAttributes: $userAttributes ?? $this->getUserAttributeDefaultValues());
+    }
+
+    /**
+     * Override to define the user attribute default values.
+     *
+     * @return array<string, mixed> A mapping from user attribute name to default value
+     */
+    protected function getUserAttributeDefaultValues(): array
+    {
+        return [];
     }
 }

@@ -4,21 +4,13 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests;
 
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
+use Dbp\Relay\CoreBundle\TestUtils\AbstractApiTest;
 use Dbp\Relay\CoreBundle\TestUtils\UserAuthTrait;
 
-class ApiErrorTest extends ApiTestCase
+class ApiErrorTest extends AbstractApiTest
 {
     use UserAuthTrait;
-
-    public static function setUpBeforeClass(): void
-    {
-        $reflection = new \ReflectionClass(ApiTestCase::class);
-        if ($reflection->hasProperty('alwaysBootKernel')) {
-            static::$alwaysBootKernel = true;
-        }
-    }
 
     public function testBasics()
     {
