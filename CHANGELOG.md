@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.1.210
+
+- support both api-platform 3 and 4
+
 ## v0.1.209
 
 - add MigratePostEvent that is fired after a successful DB migration
