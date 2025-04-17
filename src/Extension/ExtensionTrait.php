@@ -31,6 +31,8 @@ trait ExtensionTrait
     /**
      * Registers a specific operation for an API path to be hidden from the API documentation.
      * Hides GET by default, $method can be one of GET, POST, DELETE, POST, PUT.
+     *
+     * @deprecated set "openapi: false" on the api-platform "Operation" instead
      */
     public function addPathToHide(ContainerBuilder $container, string $path, string $method = 'GET'): void
     {
