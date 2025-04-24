@@ -31,13 +31,13 @@ use Symfony\Component\Uid\Uuid;
             provider: TestResourceProvider::class
         ),
         new Post(
-            processor: TestResourceProcessor::class,
-            uriTemplate: '/test/test-resources'
+            uriTemplate: '/test/test-resources',
+            processor: TestResourceProcessor::class
         ),
         new Delete(
+            uriTemplate: '/test/test-resources/{identifier}',
             provider: TestResourceProvider::class,
-            processor: TestResourceProcessor::class,
-            uriTemplate: '/test/test-resources/{identifier}'
+            processor: TestResourceProcessor::class
         ),
         new Get(
             uriTemplate: '/test/test-resources/{identifier}/custom_controller_json',
