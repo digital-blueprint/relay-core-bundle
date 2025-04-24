@@ -4,6 +4,15 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\TestApi\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceItemController;
+use Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceProcessor;
+use Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceProvider;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -11,10 +20,53 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\Uuid;
 
+#[ApiResource(
+    operations: [
+        new Get(
+            uriTemplate: '/test/test-resources/{identifier}',
+            provider: TestResourceProvider::class
+        ),
+        new GetCollection(
+            uriTemplate: '/test/test-resources',
+            provider: TestResourceProvider::class
+        ),
+        new Post(
+            processor: TestResourceProcessor::class,
+            uriTemplate: '/test/test-resources'
+        ),
+        new Delete(
+            provider: TestResourceProvider::class,
+            processor: TestResourceProcessor::class,
+            uriTemplate: '/test/test-resources/{identifier}'
+        ),
+        new Get(
+            uriTemplate: '/test/test-resources/{identifier}/custom_controller_json',
+            formats: [
+                'json' => ['application/json'],
+            ],
+            controller: TestResourceItemController::class,
+            read: false,
+            name: 'custom_controller_get_json'
+        ),
+        new Get(
+            uriTemplate: '/test/test-resources/{identifier}/custom_controller',
+            controller: TestResourceItemController::class,
+            read: false,
+            name: 'custom_controller_get_default'
+        ),
+    ],
+    normalizationContext: [
+        'groups' => ['TestResource:output'],
+    ],
+    denormalizationContext: [
+        'groups' => ['TestResource:input'],
+    ]
+)]
 #[ORM\Table(name: 'test_resources')]
 #[ORM\Entity]
 class TestResource
 {
+    #[ApiProperty(identifier: true)]
     #[ORM\Id]
     #[ORM\Column(type: 'string', length: 50)]
     #[Groups(['TestResource:input', 'TestResource:output', 'TestSubResource:output'])]
