@@ -24,6 +24,13 @@ class ApiTest extends AbstractApiTest
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
     }
 
+    public function testError()
+    {
+        $client = $this->withUser('foobar');
+        $response = $client->request('GET', '/errors/444');
+        $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+    }
+
     public function testJSONLD()
     {
         $client = $this->withUser('foobar');

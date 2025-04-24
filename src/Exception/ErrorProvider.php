@@ -35,12 +35,14 @@ final class ErrorProvider implements ProviderInterface
     {
     }
 
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): object
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): ?object
     {
-        if (!($request = $context['request'] ?? null)
-            || !$operation instanceof HttpOperation
-            || null === ($exception = $request->attributes->get('exception'))) {
+        if (!($request = $context['request'] ?? null) || !$operation instanceof HttpOperation) {
             throw new \RuntimeException('Not an HTTP request');
+        }
+
+        if (!($exception = $request->attributes->get('exception'))) {
+            return null;
         }
 
         if ($this->resourceClassResolver?->isResourceClass($exception::class)) {
