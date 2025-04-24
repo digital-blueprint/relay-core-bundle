@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.1.211
+
+- Fix an internal error when requesting /errors/XXX
+
 ## v0.1.210
 
 - support both api-platform 3 and 4
