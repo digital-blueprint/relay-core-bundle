@@ -22,10 +22,7 @@ class RoutingLoader extends Loader
         $this->params = $params;
     }
 
-    /**
-     * @return mixed
-     */
-    public function load($resource, ?string $type = null)
+    public function load($resource, ?string $type = null): mixed
     {
         $routes = new RouteCollection();
 

@@ -117,7 +117,7 @@ services:
   Dbp\Relay\CoreBundle\User\UserAttributeProviderProvider:
     autowire: true
     autoconfigure: true
-    arguments: [ !tagged user.user_attribute_provider ]
+    arguments: [ !tagged_iterator user.user_attribute_provider ]
 
   Dbp\Relay\CoreBundle\User\UserAttributeMuxer:
     autowire: true

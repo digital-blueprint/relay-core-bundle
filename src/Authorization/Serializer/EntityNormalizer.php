@@ -52,7 +52,7 @@ class EntityNormalizer implements NormalizerAwareInterface, NormalizerInterface
             $entityClass, $getOutputGroupsToAddCallback);
     }
 
-    public function normalize(mixed $object, ?string $format = null, array $context = []): mixed
+    public function normalize(mixed $object, ?string $format = null, array $context = []): string|float|int|bool|\ArrayObject|array|null
     {
         $this->setAlreadyNormalized($object, $context);
 
