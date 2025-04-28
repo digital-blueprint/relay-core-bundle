@@ -11,9 +11,6 @@ use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-/**
- * @method array getSupportedTypes(?string $format)
- */
 class EntityNormalizer implements NormalizerAwareInterface, NormalizerInterface
 {
     use NormalizerAwareTrait;
@@ -92,5 +89,10 @@ class EntityNormalizer implements NormalizerAwareInterface, NormalizerInterface
     private function wasAlreadyNormalized(object $entity, array &$context): bool
     {
         return isset($context[self::ALREADY_CALLED_CONTEXT_KEY][spl_object_hash($entity)]);
+    }
+
+    public function getSupportedTypes(?string $format): array
+    {
+        return $this->normalizer->getSupportedTypes($format);
     }
 }
