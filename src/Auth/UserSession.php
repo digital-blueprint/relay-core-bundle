@@ -6,7 +6,7 @@ namespace Dbp\Relay\CoreBundle\Auth;
 
 use Dbp\Relay\CoreBundle\API\UserSessionInterface;
 use Dbp\Relay\CoreBundle\API\UserSessionProviderInterface;
-use Symfony\Component\Security\Core\Security;
+use Symfony\Bundle\SecurityBundle\Security;
 
 /**
  * This service provides user session information, either sourcing information from the active auth provider
