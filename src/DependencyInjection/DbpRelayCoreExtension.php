@@ -195,7 +195,6 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
         ]);
 
         $container->loadFromExtension('security', [
-            'enable_authenticator_manager' => true,
             'firewalls' => [
                 'dev' => [
                     'pattern' => '^/(_(profiler|wdt)|css|images|js)/',
@@ -315,8 +314,6 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
                     TestMessage::class => QueueUtils::QUEUE_TRANSPORT_NAME,
                     ...$messengerRouting,
                 ],
-                // https://symfony.com/blog/new-in-symfony-5-4-messenger-improvements
-                'reset_on_message' => true,
             ],
         ]);
 
