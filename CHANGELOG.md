@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.1.212
+
+- deprecate Pagination::getAllResults and introduce Pagination::getAllResultsPageNumberBased and Pagination::getAllResultsPageStartIndexBased
+
 ## v0.1.211
 
 - Fix an internal error when requesting /errors/XXX
