@@ -64,18 +64,48 @@ class Pagination
     }
 
     /**
-     * @param callable(int $currentPageStartIndex, int $maxNumItemsPerPage): array $getPageCallback
+     * @deprecated Use self::getAllResultsPageStartIndexBased
+     *
+     * @param callable(int $currentPageStartIndex, int $maxNumItemsPerPage): iterable $getPageCallback
      */
     public static function getAllResults(callable $getPageCallback, int $maxNumItemsPerPage = 1024): array
     {
-        $allResults = [];
+        return iterator_to_array(self::getAllResultsPageStartIndexBased($getPageCallback, $maxNumItemsPerPage));
+    }
+
+    /**
+     * Returns an iterator over all results given a (page-number-based) get-page callback. Page numbers start from 1.
+     *
+     * @param callable(int $currentPageNumber, int $maxNumItemsPerPage): iterable $getPageByPageNumberCallback
+     */
+    public static function getAllResultsPageNumberBased(callable $getPageByPageNumberCallback, int $maxNumItemsPerPage = 1024): \Generator
+    {
+        $currentPageNumber = 1;
+        do {
+            $numPageItems = 0;
+            foreach ($getPageByPageNumberCallback($currentPageNumber, $maxNumItemsPerPage) as $resulItem) {
+                ++$numPageItems;
+                yield $resulItem;
+            }
+            ++$currentPageNumber;
+        } while ($numPageItems >= $maxNumItemsPerPage);
+    }
+
+    /**
+     * Returns an iterator over all results given a (page-start-index-based) get-page callback. Page indices start from 0.
+     *
+     * @param callable(int $currentPageStartIndex, int $maxNumItemsPerPage): array $getPageByPageStartIndexCallback
+     */
+    public static function getAllResultsPageStartIndexBased(callable $getPageByPageStartIndexCallback, int $maxNumItemsPerPage = 1024): \Generator
+    {
         $currentPageStartIndex = 0;
         do {
-            $resultPage = $getPageCallback($currentPageStartIndex, $maxNumItemsPerPage);
-            $allResults = array_merge($allResults, $resultPage);
+            $numPageItems = 0;
+            foreach ($getPageByPageStartIndexCallback($currentPageStartIndex, $maxNumItemsPerPage) as $resulItem) {
+                ++$numPageItems;
+                yield $resulItem;
+            }
             $currentPageStartIndex += $maxNumItemsPerPage;
-        } while (count($resultPage) === $maxNumItemsPerPage);
-
-        return $allResults;
+        } while ($numPageItems >= $maxNumItemsPerPage);
     }
 }

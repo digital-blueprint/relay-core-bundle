@@ -8,7 +8,6 @@ use Dbp\Relay\CoreBundle\Doctrine\QueryHelper;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\SchemaTool;
-use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class TestEntityManager
@@ -17,7 +16,7 @@ class TestEntityManager
     protected readonly ?string $entityClassName;
 
     public function __construct(
-        Container $container, string $entityManagerId, ?string $entityClassName = null)
+        ContainerInterface $container, string $entityManagerId, ?string $entityClassName = null)
     {
         $this->entityManager = self::setUpEntityManager($container, $entityManagerId);
         $this->entityClassName = $entityClassName;
