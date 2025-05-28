@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Swagger;
 
 use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
+use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\OpenApi;
 
@@ -27,6 +28,8 @@ final class OpenApiDecorator implements OpenApiFactoryInterface
     public function __invoke(array $context = []): OpenApi
     {
         $openApi = $this->decorated->__invoke($context);
+
+        // Hide methods that are marked hidden
         $pathsToHide = $this->pathsToHide;
         $paths = $openApi->getPaths();
         $newPaths = new Paths();
@@ -47,6 +50,25 @@ final class OpenApiDecorator implements OpenApiFactoryInterface
             if ($pathItem->getPatch() !== null && in_array([$path, 'PATCH'], $pathsToHide, true)) {
                 $pathItem = $pathItem->withPatch(null);
             }
+            $newPaths->addPath($path, $pathItem);
+        }
+
+        // Add an "Accept-Language" header to each method
+        $langParam = new Parameter(
+            name: 'Accept-Language',
+            in: 'header',
+            description: 'Preferred language for the response content',
+            required: false,
+            schema: [
+                'type' => 'string',
+                'enum' => ['de', 'en'],
+                'default' => 'en',
+            ],
+        );
+        $newPaths = new Paths();
+        foreach ($paths->getPaths() as $path => $pathItem) {
+            $pathItem = $paths->getPath($path);
+            $pathItem = $pathItem->withParameters(array_merge($pathItem->getParameters() ?? [], [$langParam]));
             $newPaths->addPath($path, $pathItem);
         }
 
