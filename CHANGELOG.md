@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.213
+
 - rest/query/filters: validate filter operators and values on construction of ConditionNode
 
 ## v0.1.212
