@@ -57,8 +57,19 @@ class OperatorType
         self::IS_NULL_OPERATOR,
     ];
 
+    private const STRING_OPERATORS = [
+        self::I_CONTAINS_OPERATOR,
+        self::I_STARTS_WITH_OPERATOR,
+        self::I_ENDS_WITH_OPERATOR,
+    ];
+
     public static function exists(string $operator): bool
     {
         return in_array($operator, self::ALL, true);
+    }
+
+    public static function isStringOperator(string $operator): bool
+    {
+        return in_array($operator, self::STRING_OPERATORS, true);
     }
 }

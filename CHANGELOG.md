@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- rest/query/filters: validate filter operators and values on construction of ConditionNode
+
 ## v0.1.212
 
 - deprecate Pagination::getAllResults and introduce Pagination::getAllResultsPageNumberBased and Pagination::getAllResultsPageStartIndexBased

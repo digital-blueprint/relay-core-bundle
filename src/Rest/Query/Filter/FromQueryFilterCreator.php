@@ -252,17 +252,19 @@ class FromQueryFilterCreator
      */
     private static function appendConditionNode(array $condition, FilterTreeBuilder $filterTreeBuilder, array $availableAttributePaths, ?array &$usedAttributePaths = null): void
     {
-        self::validateConditionFilterItem($condition);
+        $attributePath = $condition[self::PATH_KEY] ?? null;
+        if ($attributePath === null) {
+            throw new FilterException("Filter parameter is missing a '".self::PATH_KEY."' key.", FilterException::CONDITION_PATH_MISSING);
+        }
 
-        $attributePath = $condition[self::PATH_KEY];
-        $value = (isset($condition[self::VALUE_KEY])) ? $condition[self::VALUE_KEY] : null;
-        $operator = (isset($condition[self::OPERATOR_KEY])) ? $condition[self::OPERATOR_KEY] : null;
+        $value = $condition[self::VALUE_KEY] ?? null;
+        $operator = $condition[self::OPERATOR_KEY] ?? null;
 
-        if (!in_array($attributePath, $availableAttributePaths, true)) {
+        if (false === in_array($attributePath, $availableAttributePaths, true)) {
             throw new FilterException('Undefined attribute: '.$attributePath, FilterException::ATTRIBUTE_PATH_UNDEFINED);
         }
 
-        if ($usedAttributePaths !== null && !in_array($attributePath, $usedAttributePaths, true)) {
+        if ($usedAttributePaths !== null && false === in_array($attributePath, $usedAttributePaths, true)) {
             $usedAttributePaths[] = $attributePath;
         }
 
@@ -270,6 +272,9 @@ class FromQueryFilterCreator
             self::toConditionNodeOperator($operator), self::toConditionNodeValue($value)));
     }
 
+    /**
+     * @throws FilterException
+     */
     private static function toConditionNodeOperator(string $operator): string
     {
         return match ($operator) {
@@ -281,7 +286,8 @@ class FromQueryFilterCreator
             self::I_ENDS_WITH_OPERATOR => OperatorType::I_ENDS_WITH_OPERATOR,
             self::IN_ARRAY_OPERATOR => OperatorType::IN_ARRAY_OPERATOR,
             self::IS_NULL_OPERATOR => OperatorType::IS_NULL_OPERATOR,
-            default => throw new \UnexpectedValueException('Unsupported operator type: '.$operator),
+            default => throw new FilterException('undefined condition operator: '.$operator,
+                FilterException::CONDITION_OPERATOR_UNDEFINED),
         };
     }
 
@@ -313,36 +319,6 @@ class FromQueryFilterCreator
                     throw new FilterException('string values must be quoted', FilterException::CONDITION_VALUE_ERROR);
                 }
             }
-        }
-    }
-
-    /**
-     * Validates the filter has the required fields.
-     *
-     * @throws FilterException
-     */
-    private static function validateConditionFilterItem(array $conditionFilterItem): void
-    {
-        if (!isset($conditionFilterItem[self::PATH_KEY])) {
-            throw new FilterException("Filter parameter is missing a '".self::PATH_KEY."' key.", FilterException::CONDITION_PATH_MISSING);
-        }
-
-        $operator = $conditionFilterItem[self::OPERATOR_KEY];
-        $value = $conditionFilterItem[self::VALUE_KEY] ?? null;
-        if ($value === null) {
-            if ($operator !== self::IS_NULL_OPERATOR) {
-                throw new FilterException("Filter parameter is missing a '".self::VALUE_KEY."' key.", FilterException::CONDITION_VALUE_ERROR);
-            }
-        } elseif ($operator === self::IS_NULL_OPERATOR) {
-            throw new FilterException('Filters using the '.$operator.' operator must not provide a value.', FilterException::CONDITION_VALUE_ERROR);
-        } elseif ($operator === self::IN_ARRAY_OPERATOR) {
-            if (!is_array($value)) {
-                throw new FilterException('Filters using the "'.$operator.'"" operator must provide an array type value.', FilterException::CONDITION_VALUE_ERROR);
-            }
-        }
-
-        if (!in_array($operator, self::$allowedOperators, true)) {
-            throw new FilterException('Undefined condition operator: '.$operator, FilterException::CONDITION_OPERATOR_UNDEFINED);
         }
     }
 }

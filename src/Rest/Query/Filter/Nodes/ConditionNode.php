@@ -33,6 +33,24 @@ class ConditionNode extends Node
             throw new FilterException('undefined condition operator: '.$operator, FilterException::CONDITION_OPERATOR_UNDEFINED);
         }
 
+        if ($operator === OperatorType::IS_NULL_OPERATOR) {
+            if ($value !== null) {
+                throw new FilterException('Filters using the "'.$operator.
+                    '" operator must not provide a value.', FilterException::CONDITION_VALUE_ERROR);
+            }
+        } elseif ($value === null) {
+            throw new FilterException('Filters using the "'.$operator.
+                '"" operator must provide a value.', FilterException::CONDITION_VALUE_ERROR);
+        }
+
+        if (OperatorType::isStringOperator($operator) && false === is_string($value)) {
+            throw new FilterException('Filters using the "'.$operator.
+                '"" operator require a non-empty string value', FilterException::CONDITION_VALUE_ERROR);
+        } elseif ($operator === OperatorType::IN_ARRAY_OPERATOR && false === is_array($value)) {
+            throw new FilterException('Filters using the "'.$operator.
+                '"" operator must provide an array value.', FilterException::CONDITION_VALUE_ERROR);
+        }
+
         $this->field = $field;
         $this->operator = $operator;
         $this->value = $value;
@@ -72,18 +90,12 @@ class ConditionNode extends Node
         $this->operator = $operator;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getValue()
+    public function getValue(): mixed
     {
         return $this->value;
     }
 
-    /**
-     * @param mixed $value
-     */
-    public function setValue($value): void
+    public function setValue(mixed $value): void
     {
         $this->value = $value;
     }
