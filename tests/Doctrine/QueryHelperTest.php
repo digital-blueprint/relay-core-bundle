@@ -61,7 +61,71 @@ class QueryHelperTest extends KernelTestCase
         $this->assertEquals($testResource->getIdentifier(), $testResourceFromGet->getIdentifier());
     }
 
-    public function testGetEntities(): void
+    public function testGetEntitiesPageNumberBased(): void
+    {
+        $testResource1 = TestResource::createTestResource();
+        $testResource2 = TestResource::createTestResource();
+        $testResource3 = TestResource::createTestResource();
+
+        $testResource1->setContent('test resource 1');
+        $testResource2->setContent('test resource 2');
+        $testResource3->setContent('test resource 3');
+
+        $this->entityManager->persist($testResource1);
+        $this->entityManager->persist($testResource2);
+        $this->entityManager->persist($testResource3);
+        $this->entityManager->flush();
+
+        $testResources = QueryHelper::getEntitiesPageNumberBased(TestResource::class, $this->entityManager);
+        $this->assertCount(3, $testResources);
+        $this->assertContainsResource($testResource1, $testResources);
+        $this->assertContainsResource($testResource2, $testResources);
+        $this->assertContainsResource($testResource3, $testResources);
+
+        $testResourcePage1 = QueryHelper::getEntitiesPageNumberBased(TestResource::class, $this->entityManager, 1, 2);
+        $this->assertCount(2, $testResourcePage1);
+        $testResourcePage2 = QueryHelper::getEntitiesPageNumberBased(TestResource::class, $this->entityManager, 2, 2);
+        $this->assertCount(1, $testResourcePage2);
+        $testResources = array_merge($testResourcePage1, $testResourcePage2);
+        $this->assertContainsResource($testResource1, $testResources);
+        $this->assertContainsResource($testResource2, $testResources);
+        $this->assertContainsResource($testResource3, $testResources);
+    }
+
+    public function testGetEntitiesPageStartIndexBased(): void
+    {
+        $testResource1 = TestResource::createTestResource();
+        $testResource2 = TestResource::createTestResource();
+        $testResource3 = TestResource::createTestResource();
+
+        $testResource1->setContent('test resource 1');
+        $testResource2->setContent('test resource 2');
+        $testResource3->setContent('test resource 3');
+
+        $this->entityManager->persist($testResource1);
+        $this->entityManager->persist($testResource2);
+        $this->entityManager->persist($testResource3);
+        $this->entityManager->flush();
+
+        $testResources = QueryHelper::getEntitiesPageStartIndexBased(TestResource::class, $this->entityManager);
+        $this->assertCount(3, $testResources);
+        $this->assertContainsResource($testResource1, $testResources);
+        $this->assertContainsResource($testResource2, $testResources);
+        $this->assertContainsResource($testResource3, $testResources);
+
+        $testResourcePage1 = QueryHelper::getEntitiesPageStartIndexBased(
+            TestResource::class, $this->entityManager, 0, 2);
+        $this->assertCount(2, $testResourcePage1);
+        $testResourcePage2 = QueryHelper::getEntitiesPageStartIndexBased(
+            TestResource::class, $this->entityManager, 2, 2);
+        $this->assertCount(1, $testResourcePage2);
+        $testResources = array_merge($testResourcePage1, $testResourcePage2);
+        $this->assertContainsResource($testResource1, $testResources);
+        $this->assertContainsResource($testResource2, $testResources);
+        $this->assertContainsResource($testResource3, $testResources);
+    }
+
+    public function testDeprecateGetEntities(): void
     {
         $testResource1 = TestResource::createTestResource();
         $testResource2 = TestResource::createTestResource();
@@ -114,7 +178,7 @@ class QueryHelperTest extends KernelTestCase
         $filter = FilterTreeBuilder::create()
             ->iContains('content', 'bar')
             ->createFilter();
-        $testResources = QueryHelper::getEntities(TestResource::class, $this->entityManager, filter: $filter);
+        $testResources = QueryHelper::getEntitiesPageNumberBased(TestResource::class, $this->entityManager, filter: $filter);
         $this->assertCount(3, $testResources);
         $this->assertContainsResource($testResource1, $testResources);
         $this->assertContainsResource($testResource2, $testResources);
@@ -123,35 +187,35 @@ class QueryHelperTest extends KernelTestCase
         $filter = FilterTreeBuilder::create()
             ->iStartsWith('content', 'bar')
             ->createFilter();
-        $testResources = QueryHelper::getEntities(TestResource::class, $this->entityManager, filter: $filter);
+        $testResources = QueryHelper::getEntitiesPageNumberBased(TestResource::class, $this->entityManager, filter: $filter);
         $this->assertCount(1, $testResources);
         $this->assertContainsResource($testResource2, $testResources);
 
         $filter = FilterTreeBuilder::create()
             ->iEndsWith('content', 'bar')
             ->createFilter();
-        $testResources = QueryHelper::getEntities(TestResource::class, $this->entityManager, filter: $filter);
+        $testResources = QueryHelper::getEntitiesPageNumberBased(TestResource::class, $this->entityManager, filter: $filter);
         $this->assertCount(1, $testResources);
         $this->assertContainsResource($testResource3, $testResources);
 
         $filter = FilterTreeBuilder::create()
             ->iEndsWith('content', 'bar')
             ->createFilter();
-        $testResources = QueryHelper::getEntities(TestResource::class, $this->entityManager, filter: $filter);
+        $testResources = QueryHelper::getEntitiesPageNumberBased(TestResource::class, $this->entityManager, filter: $filter);
         $this->assertCount(1, $testResources);
         $this->assertContainsResource($testResource3, $testResources);
 
         $filter = FilterTreeBuilder::create()
             ->equals('number', 3)
             ->createFilter();
-        $testResources = QueryHelper::getEntities(TestResource::class, $this->entityManager, filter: $filter);
+        $testResources = QueryHelper::getEntitiesPageNumberBased(TestResource::class, $this->entityManager, filter: $filter);
         $this->assertCount(1, $testResources);
         $this->assertContainsResource($testResource3, $testResources);
 
         $filter = FilterTreeBuilder::create()
             ->greaterThanOrEqual('number', 2)
             ->createFilter();
-        $testResources = QueryHelper::getEntities(TestResource::class, $this->entityManager, filter: $filter);
+        $testResources = QueryHelper::getEntitiesPageNumberBased(TestResource::class, $this->entityManager, filter: $filter);
         $this->assertCount(2, $testResources);
         $this->assertContainsResource($testResource2, $testResources);
         $this->assertContainsResource($testResource3, $testResources);
@@ -159,7 +223,7 @@ class QueryHelperTest extends KernelTestCase
         $filter = FilterTreeBuilder::create()
             ->lessThanOrEqual('number', 2)
             ->createFilter();
-        $testResources = QueryHelper::getEntities(TestResource::class, $this->entityManager, filter: $filter);
+        $testResources = QueryHelper::getEntitiesPageNumberBased(TestResource::class, $this->entityManager, filter: $filter);
         $this->assertCount(2, $testResources);
         $this->assertContainsResource($testResource1, $testResources);
         $this->assertContainsResource($testResource2, $testResources);
@@ -167,24 +231,36 @@ class QueryHelperTest extends KernelTestCase
         $filter = FilterTreeBuilder::create()
             ->isNull('secret')
             ->createFilter();
-        $testResources = QueryHelper::getEntities(TestResource::class, $this->entityManager, filter: $filter);
+        $testResources = QueryHelper::getEntitiesPageNumberBased(TestResource::class, $this->entityManager, filter: $filter);
         $this->assertCount(1, $testResources);
         $this->assertContainsResource($testResource3, $testResources);
 
         $filter = FilterTreeBuilder::create()
             ->inArray('number', [1, 2])
             ->createFilter();
-        $testResources = QueryHelper::getEntities(TestResource::class, $this->entityManager, filter: $filter);
+        $testResources = QueryHelper::getEntitiesPageNumberBased(TestResource::class, $this->entityManager, filter: $filter);
         $this->assertCount(2, $testResources);
         $this->assertContainsResource($testResource1, $testResources);
         $this->assertContainsResource($testResource2, $testResources);
 
         // test pagination with filter:
-        $testResourcePage1 = QueryHelper::getEntities(
+        $testResourcePage1 = QueryHelper::getEntitiesPageNumberBased(
             TestResource::class, $this->entityManager, 1, 1, filter: $filter);
         $this->assertCount(1, $testResourcePage1);
-        $testResourcePage2 = QueryHelper::getEntities(
+        $testResourcePage2 = QueryHelper::getEntitiesPageNumberBased(
             TestResource::class, $this->entityManager, 2, 1, filter: $filter);
+        $this->assertCount(1, $testResourcePage2);
+
+        $testResources = array_merge($testResourcePage1, $testResourcePage2);
+        $this->assertCount(2, $testResources);
+        $this->assertContainsResource($testResource1, $testResources);
+        $this->assertContainsResource($testResource2, $testResources);
+
+        $testResourcePage1 = QueryHelper::getEntitiesPageStartIndexBased(
+            TestResource::class, $this->entityManager, 0, 1, filter: $filter);
+        $this->assertCount(1, $testResourcePage1);
+        $testResourcePage2 = QueryHelper::getEntitiesPageStartIndexBased(
+            TestResource::class, $this->entityManager, 1, 1, filter: $filter);
         $this->assertCount(1, $testResourcePage2);
 
         $testResources = array_merge($testResourcePage1, $testResourcePage2);
@@ -217,7 +293,7 @@ class QueryHelperTest extends KernelTestCase
             ->iContains('content', 'r b')
             ->equals('number', 2)
             ->createFilter();
-        $testResources = QueryHelper::getEntities(TestResource::class, $this->entityManager, filter: $filter);
+        $testResources = QueryHelper::getEntitiesPageNumberBased(TestResource::class, $this->entityManager, filter: $filter);
         $this->assertCount(1, $testResources);
         $this->assertContainsResource($testResource2, $testResources);
 
@@ -227,7 +303,7 @@ class QueryHelperTest extends KernelTestCase
                ->isNull('secret')
             ->end()
             ->createFilter();
-        $testResources = QueryHelper::getEntities(TestResource::class, $this->entityManager, filter: $filter);
+        $testResources = QueryHelper::getEntitiesPageNumberBased(TestResource::class, $this->entityManager, filter: $filter);
         $this->assertCount(3, $testResources);
         $this->assertContainsResource($testResource1, $testResources);
         $this->assertContainsResource($testResource2, $testResources);
@@ -244,7 +320,7 @@ class QueryHelperTest extends KernelTestCase
                ->end()
             ->end()
             ->createFilter();
-        $testResources = QueryHelper::getEntities(TestResource::class, $this->entityManager, filter: $filter);
+        $testResources = QueryHelper::getEntitiesPageNumberBased(TestResource::class, $this->entityManager, filter: $filter);
         $this->assertCount(2, $testResources);
         $this->assertContainsResource($testResource2, $testResources);
         $this->assertContainsResource($testResource3, $testResources);
@@ -258,7 +334,7 @@ class QueryHelperTest extends KernelTestCase
                 ->iStartsWith('content', 'foo')
             ->end()
             ->createFilter();
-        $testResources = QueryHelper::getEntities(TestResource::class, $this->entityManager, filter: $filter);
+        $testResources = QueryHelper::getEntitiesPageNumberBased(TestResource::class, $this->entityManager, filter: $filter);
         $this->assertCount(1, $testResources);
         $this->assertContainsResource($testResource1, $testResources);
 
@@ -267,7 +343,7 @@ class QueryHelperTest extends KernelTestCase
             ->iStartsWith('content', 'foo')
             ->end()
             ->createFilter();
-        $testResources = QueryHelper::getEntities(TestResource::class, $this->entityManager, filter: $filter);
+        $testResources = QueryHelper::getEntitiesPageNumberBased(TestResource::class, $this->entityManager, filter: $filter);
         $this->assertCount(2, $testResources);
         $this->assertContainsResource($testResource2, $testResources);
         $this->assertContainsResource($testResource3, $testResources);
@@ -280,7 +356,7 @@ class QueryHelperTest extends KernelTestCase
                 ->iStartsWith('content', 'foo')
             ->end()
             ->createFilter();
-        $testResources = QueryHelper::getEntities(TestResource::class, $this->entityManager, filter: $filter);
+        $testResources = QueryHelper::getEntitiesPageNumberBased(TestResource::class, $this->entityManager, filter: $filter);
         $this->assertCount(2, $testResources);
         $this->assertContainsResource($testResource1, $testResources);
         $this->assertContainsResource($testResource3, $testResources);
@@ -292,7 +368,7 @@ class QueryHelperTest extends KernelTestCase
                 ->iStartsWith('content', 'baz')
             ->end()
             ->createFilter();
-        $testResources = QueryHelper::getEntities(TestResource::class, $this->entityManager, filter: $filter);
+        $testResources = QueryHelper::getEntitiesPageNumberBased(TestResource::class, $this->entityManager, filter: $filter);
         $this->assertCount(0, $testResources);
     }
 

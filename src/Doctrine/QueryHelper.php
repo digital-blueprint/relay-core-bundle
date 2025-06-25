@@ -46,10 +46,47 @@ class QueryHelper
     }
 
     /**
+     * Page numbering starts with 1.
+     */
+    public static function getEntitiesPageNumberBased(string $entityClassName, EntityManager $entityManager,
+        int $currentPageNumber = 1, int $maxNumItemsPerPage = 30, ?Filter $filter = null): array
+    {
+        return self::getEntitiesInternal($entityClassName, $entityManager,
+            Pagination::getFirstItemIndex($currentPageNumber, $maxNumItemsPerPage), $maxNumItemsPerPage, $filter);
+    }
+
+    /**
+     * The first page start index is 0.
+     */
+    public static function getEntitiesPageStartIndexBased(string $entityClassName, EntityManager $entityManager,
+        int $currentPageStartIndex = 0, int $maxNumItemsPerPage = 30, ?Filter $filter = null): array
+    {
+        return self::getEntitiesInternal($entityClassName, $entityManager,
+            $currentPageStartIndex, $maxNumItemsPerPage, $filter);
+    }
+
+    /**
+     * @deprecated Use getEntitiesPageNumberBased instead
+     *
      * @throws \Exception
      */
     public static function getEntities(string $entityClassName, EntityManager $entityManager,
         int $currentPageNumber = 1, int $maxNumItemsPerPage = 30, ?Filter $filter = null): array
+    {
+        return self::getEntitiesInternal($entityClassName, $entityManager,
+            Pagination::getFirstItemIndex($currentPageNumber, $maxNumItemsPerPage), $maxNumItemsPerPage, $filter);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public static function addFilter(QueryBuilder $queryBuilder, Filter $filter, ?string $entityAlias = null): QueryBuilder
+    {
+        return $queryBuilder->andWhere(self::createExpression($queryBuilder, $filter->getRootNode(), $entityAlias ? $entityAlias.'.' : null));
+    }
+
+    private static function getEntitiesInternal(string $entityClassName, EntityManager $entityManager,
+        int $currentPageStartIndex, int $maxNumItemsPerPage, ?Filter $filter = null): array
     {
         $ENTITY_ALIAS = 'e';
         $queryBuilder = $entityManager->createQueryBuilder()
@@ -62,17 +99,9 @@ class QueryHelper
 
         return $queryBuilder
             ->getQuery()
-            ->setFirstResult(Pagination::getFirstItemIndex($currentPageNumber, $maxNumItemsPerPage))
+            ->setFirstResult($currentPageStartIndex)
             ->setMaxResults($maxNumItemsPerPage)
             ->getResult();
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public static function addFilter(QueryBuilder $queryBuilder, Filter $filter, ?string $entityAlias = null): QueryBuilder
-    {
-        return $queryBuilder->andWhere(self::createExpression($queryBuilder, $filter->getRootNode(), $entityAlias ? $entityAlias.'.' : null));
     }
 
     /**

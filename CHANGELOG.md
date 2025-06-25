@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Deprecate QueryHelper::getEntities and add  QueryHelper::getEntitiesPageNumberBased and QueryHelper::getEntitiesPageStartIndexBased and 
+
 ## v0.1.213
 
 - rest/query/filters: validate filter operators and values on construction of ConditionNode
