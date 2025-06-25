@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.214
+
 - Deprecate QueryHelper::getEntities and add  QueryHelper::getEntitiesPageNumberBased and QueryHelper::getEntitiesPageStartIndexBased and 
 
 ## v0.1.213
