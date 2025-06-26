@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Rework user attribute provision: Split up UserAttributeProviderInterface into UserAttributeCollectionProviderInterface and
+UserAttributeItemProviderInterface.
+
 ## v0.1.214
 
 - Deprecate QueryHelper::getEntities and add  QueryHelper::getEntitiesPageNumberBased and QueryHelper::getEntitiesPageStartIndexBased and 

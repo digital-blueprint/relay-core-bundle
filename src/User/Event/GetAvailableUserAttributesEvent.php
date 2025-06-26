@@ -7,18 +7,14 @@ namespace Dbp\Relay\CoreBundle\User\Event;
 use Symfony\Contracts\EventDispatcher\Event;
 
 /**
- * This hook can be used to change the set of available attributes.
- *
- * You can extend the set, or remove attributes.
+ * This hook can be used to add attributes to the set of available attributes.
  */
 class GetAvailableUserAttributesEvent extends Event
 {
     /**
-     * @param string[] $attributes
+     * @var string[]
      */
-    public function __construct(private array $attributes)
-    {
-    }
+    private array $attributes = [];
 
     /**
      * @param string[] $attributes

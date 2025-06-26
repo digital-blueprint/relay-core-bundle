@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\TestUtils;
 
+use Dbp\Relay\CoreBundle\User\UserAttributeCollectionProviderInterface;
 use Dbp\Relay\CoreBundle\User\UserAttributeException;
-use Dbp\Relay\CoreBundle\User\UserAttributeProviderExInterface;
 
-class TestUserAttributeProvider implements UserAttributeProviderExInterface
+class TestUserAttributeProvider implements UserAttributeCollectionProviderInterface
 {
     /**
      * Mapping user identifiers to user attribute maps (attribute name => attribute value).
@@ -57,6 +57,9 @@ class TestUserAttributeProvider implements UserAttributeProviderExInterface
         return $userAttributes;
     }
 
+    /**
+     * @throws UserAttributeException
+     */
     public function getUserAttribute(?string $userIdentifier, string $name): mixed
     {
         $attributes = $this->getUserAttributes($userIdentifier);
