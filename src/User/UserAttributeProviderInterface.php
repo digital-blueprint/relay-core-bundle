@@ -17,8 +17,6 @@ interface UserAttributeProviderInterface
      * If the user attribute with the given $name is not defined for this provider,
      * i.e., hasUserAttribute($name) returns false, it should throw UserAttributeException.
      *
-     * @return array<string, mixed>
-     *
      * @throws UserAttributeException
      */
     public function getUserAttribute(?string $userIdentifier, string $name): mixed;
