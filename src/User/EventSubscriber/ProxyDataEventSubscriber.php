@@ -16,19 +16,14 @@ class ProxyDataEventSubscriber extends AbstractProxyDataEventSubscriber
 
     public const USER_ID_PARAMETER_NAME = 'userId';
 
-    /** @var UserAttributeMuxer */
-    private $userAttributeMuxer;
+    private static bool $isCurrentlyActive = false;
 
-    /** @var bool */
-    private static $isCurrentlyActive = false;
-
-    public function __construct(UserAttributeMuxer $userAttributeMuxer)
+    public function __construct(private readonly UserAttributeMuxer $userAttributeMuxer)
     {
-        $this->userAttributeMuxer = $userAttributeMuxer;
     }
 
     /**
-     * Indicates, that the event subscriber is currently busy handling a proxy data event.
+     * Indicates that the event subscriber is currently busy handling a proxy data event.
      */
     public static function isCurrentlyActive(): bool
     {
@@ -72,19 +67,21 @@ class ProxyDataEventSubscriber extends AbstractProxyDataEventSubscriber
         }
     }
 
+    /**
+     * idled in the course of changing the UserAttributeProviderInterface from "get-all-available-attributes" to
+     * "has-get-attribute".
+     */
     private function getAvailableAttributes(): array
     {
-        return $this->userAttributeMuxer->getAvailableAttributes();
+        return [];
     }
 
+    /**
+     * idled in the course of changing the UserAttributeProviderInterface from "get-all-available-attributes" to
+     * "has-get-attribute".
+     */
     private function getUserAttributes(string $userIdentifier): array
     {
-        $userAttributes = [];
-
-        foreach ($this->userAttributeMuxer->getAvailableAttributes() as $attributeName) {
-            $userAttributes[$attributeName] = $this->userAttributeMuxer->getAttribute($userIdentifier, $attributeName);
-        }
-
-        return $userAttributes;
+        return [];
     }
 }

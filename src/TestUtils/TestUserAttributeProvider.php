@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\TestUtils;
 
-use Dbp\Relay\CoreBundle\User\UserAttributeCollectionProviderInterface;
 use Dbp\Relay\CoreBundle\User\UserAttributeException;
+use Dbp\Relay\CoreBundle\User\UserAttributeProviderInterface;
 
-class TestUserAttributeProvider implements UserAttributeCollectionProviderInterface
+class TestUserAttributeProvider implements UserAttributeProviderInterface
 {
     /**
      * Mapping user identifiers to user attribute maps (attribute name => attribute value).
@@ -34,14 +34,6 @@ class TestUserAttributeProvider implements UserAttributeCollectionProviderInterf
         $this->userAttributes[$userIdentifier] = $userAttributes;
     }
 
-    /**
-     * @return string[]
-     */
-    public function getAvailableAttributes(): array
-    {
-        return array_keys($this->defaultAttributes);
-    }
-
     public function getUserAttributes(?string $userIdentifier): array
     {
         if (($userAttributes = $this->userAttributes[$userIdentifier] ?? null) === null) {
@@ -62,16 +54,22 @@ class TestUserAttributeProvider implements UserAttributeCollectionProviderInterf
      */
     public function getUserAttribute(?string $userIdentifier, string $name): mixed
     {
-        $attributes = $this->getUserAttributes($userIdentifier);
-        if (!array_key_exists($name, $attributes)) {
-            throw new UserAttributeException('unknown '.$name, UserAttributeException::USER_ATTRIBUTE_UNDEFINED);
+        if ($userAttributes = $this->userAttributes[$userIdentifier] ?? null) {
+            if (array_key_exists($name, $userAttributes)) {
+                return $userAttributes[$name];
+            }
         }
 
-        return $attributes[$name];
+        if (array_key_exists($name, $this->defaultAttributes)) {
+            return $this->defaultAttributes[$name];
+        }
+
+        throw new UserAttributeException("User attribute '$name' is undefined",
+            UserAttributeException::USER_ATTRIBUTE_UNDEFINED);
     }
 
     public function hasUserAttribute(string $name): bool
     {
-        return in_array($name, $this->getAvailableAttributes(), true);
+        return array_key_exists($name, $this->defaultAttributes);
     }
 }

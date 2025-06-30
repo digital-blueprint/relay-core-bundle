@@ -23,9 +23,20 @@ class UserAttributeMuxerTest extends TestCase
         $dummy = new TestUserAttributeProvider(['foo' => null, 'bar' => null]);
         $dummy->addUser('testuser', ['foo' => 42]);
         $mux = new UserAttributeMuxer(new UserAttributeProviderProvider([$dummy]), new EventDispatcher());
-        $this->assertSame(['foo', 'bar'], $mux->getAvailableAttributes());
         $this->assertSame(42, $mux->getAttribute('testuser', 'foo'));
         $this->assertSame(24, $mux->getAttribute('testuser', 'bar', 24));
+    }
+
+    /**
+     * @throws UserAttributeException
+     */
+    public function testUserAttributeUndefined()
+    {
+        $dummy = new TestUserAttributeProvider(['foo' => null, 'bar' => null]);
+        $mux = new UserAttributeMuxer(new UserAttributeProviderProvider([$dummy]), new EventDispatcher());
+        $this->expectException(UserAttributeException::class);
+        $this->expectExceptionCode(UserAttributeException::USER_ATTRIBUTE_UNDEFINED);
+        $mux->getAttribute('testuser', 'baz');
     }
 
     /**
@@ -39,7 +50,6 @@ class UserAttributeMuxerTest extends TestCase
         $dummy2->addUser('testuser', ['bar' => 24]);
 
         $mux = new UserAttributeMuxer(new UserAttributeProviderProvider([$dummy, $dummy2]), new EventDispatcher());
-        $this->assertSame(['foo', 'qux', 'bar', 'baz'], $mux->getAvailableAttributes());
         $this->assertSame(42, $mux->getAttribute('testuser', 'foo'));
         $this->assertSame('default', $mux->getAttribute('testuser', 'qux', 'default'));
         $this->assertSame(24, $mux->getAttribute('testuser', 'bar'));
@@ -47,7 +57,7 @@ class UserAttributeMuxerTest extends TestCase
         $this->assertNull($mux->getAttribute('testuser', 'baz'));
     }
 
-    public function testAvailEvent()
+    public function testAdditionallyDefinedAttributes()
     {
         $dummy = new TestUserAttributeProvider(['foo' => null, 'bar' => null]);
         $dispatched = new EventDispatcher();
@@ -60,7 +70,10 @@ class UserAttributeMuxerTest extends TestCase
         };
         $dispatched->addListener(GetAvailableUserAttributesEvent::class, $getAvail2);
         $mux = new UserAttributeMuxer(new UserAttributeProviderProvider([$dummy]), $dispatched);
-        $this->assertEmpty(array_diff(['foo', 'bar', 'new', 'new2'], $mux->getAvailableAttributes()));
+        $this->assertNull($mux->getAttribute('myuser', 'foo'));
+        $this->assertNull($mux->getAttribute('myuser', 'bar'));
+        $this->assertNull($mux->getAttribute('myuser', 'new'));
+        $this->assertNull($mux->getAttribute('myuser', 'new2'));
     }
 
     /**

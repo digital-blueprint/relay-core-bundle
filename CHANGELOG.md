@@ -2,8 +2,7 @@
 
 ## Unreleased
 
-- Rework user attribute provision: Split up UserAttributeProviderInterface into UserAttributeCollectionProviderInterface and
-UserAttributeItemProviderInterface.
+- Rework user attribute provision: Change UserAttributeProviderInterface from "get-all-available-attributes" to "has-get-attribute"
 
 ## v0.1.214
 
