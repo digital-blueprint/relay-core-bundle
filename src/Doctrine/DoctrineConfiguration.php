@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Doctrine;
 
 use Dbp\Relay\CoreBundle\Extension\ExtensionTrait;
+use Doctrine\Migrations\Version\MigrationFactory as DoctrineMigrationsFactory;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class DoctrineConfiguration
@@ -65,6 +66,9 @@ class DoctrineConfiguration
         $containerBuilder->prependExtensionConfig('doctrine_migrations', [
             'migrations_paths' => [
                 $migrationsNamespace => $migrationsDirectoryPath,
+            ],
+            'services' => [
+                DoctrineMigrationsFactory::class => MigrationFactoryDecorator::class,
             ],
         ]);
     }

@@ -15,6 +15,7 @@ use Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestSubResourceProvider;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Service\TestResourceService;
 use Dbp\Relay\CoreBundle\Tests\TestApi\TestApi;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
+use Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle;
 use Nelmio\CorsBundle\NelmioCorsBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
@@ -38,6 +39,7 @@ class Kernel extends BaseKernel
         yield new MonologBundle();
         yield new ApiPlatformBundle();
         yield new DoctrineBundle();
+        yield new DoctrineMigrationsBundle();
         yield new DbpRelayCoreBundle();
     }
 

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Decorate the 'doctrine.migrations.migrations_factory' service to be able to inject the service container into doctrine
+migration subclasses. 
+- Add AbstractEntityManagerMigration which gets injected the service container and is meant to be subclassed by doctrine migrations versions
+
 ## v0.1.215
 
 - Rework user attribute provision: Change UserAttributeProviderInterface from "get-all-available-attributes" to "has-get-attribute"
