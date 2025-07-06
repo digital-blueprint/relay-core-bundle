@@ -73,9 +73,12 @@
         "symfony/runtime": "^6.4"
     },
     "conflict": {
+        "doctrine/doctrine-bundle": "<2.13.1",
+        "symfony/doctrine-bridge": "<6.4.7",
         "symfony/twig-bridge": ">=6.0 <6.4",
         "symfony/amqp-messenger": ">=6.0 <6.4",
         "symfony/property-info": ">=6.0 <6.4",
+        "symfony/web-link": "<6.4.7",
         "willdurand/negotiation": "<3",
         "dbp/relay-auth-bundle": "*",
         "dbp/relay-core-connector-oidc-bundle": "<=0.1.33"
