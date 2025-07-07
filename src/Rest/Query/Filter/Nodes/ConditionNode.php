@@ -8,25 +8,25 @@ use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterException;
 
 class ConditionNode extends Node
 {
-    public const FIELD_KEY = 'field';
+    public const PATH_KEY = 'path';
     public const OPERATOR_KEY = 'operator';
     public const VALUE_KEY = 'value';
 
     protected const NODE_TYPE = NodeType::CONDITION;
 
-    private string $field;
+    private string $path;
     private string $operator;
     private mixed $value;
 
     /**
      * @throws FilterException
      */
-    public function __construct(string $field, string $operator, mixed $value)
+    public function __construct(string $path, string $operator, mixed $value)
     {
         parent::__construct();
 
-        if ($field === '') {
-            throw new FilterException('field must not be empty', FilterException::CONDITION_FIELD_EMPTY);
+        if ($path === '') {
+            throw new FilterException('path must not be empty', FilterException::CONDITION_PATH_EMPTY);
         }
 
         if (OperatorType::exists($operator) === false) {
@@ -51,26 +51,26 @@ class ConditionNode extends Node
                 '"" operator must provide an array value.', FilterException::CONDITION_VALUE_ERROR);
         }
 
-        $this->field = $field;
+        $this->path = $path;
         $this->operator = $operator;
         $this->value = $value;
     }
 
-    public function getField(): string
+    public function getPath(): string
     {
-        return $this->field;
+        return $this->path;
     }
 
     /**
      * @throws FilterException
      */
-    public function setField(string $field): void
+    public function setPath(string $path): void
     {
-        if ($field === '') {
-            throw new FilterException('field must not be empty', FilterException::CONDITION_FIELD_EMPTY);
+        if ($path === '') {
+            throw new FilterException('condition path must not be empty', FilterException::CONDITION_PATH_EMPTY);
         }
 
-        $this->field = $field;
+        $this->path = $path;
     }
 
     public function getOperator(): string
@@ -102,8 +102,8 @@ class ConditionNode extends Node
 
     public function isValid(?string &$reason = null): bool
     {
-        if ($this->field === '') {
-            $reason = 'field must not be empty';
+        if ($this->path === '') {
+            $reason = 'condition path must not be empty';
 
             return false;
         } elseif (OperatorType::exists($this->operator) === false) {
@@ -117,7 +117,7 @@ class ConditionNode extends Node
 
     public function apply(array $rowData): bool
     {
-        $columnValue = $rowData[$this->field] ?? null;
+        $columnValue = $rowData[$this->path] ?? null;
         switch ($this->operator) {
             case OperatorType::I_CONTAINS_OPERATOR:
                 return \str_contains(strtolower($columnValue), strtolower($this->value));
@@ -131,7 +131,7 @@ class ConditionNode extends Node
     public function toArray(): array
     {
         return [
-            self::FIELD_KEY => $this->field,
+            self::PATH_KEY => $this->path,
             self::OPERATOR_KEY => $this->operator,
             self::VALUE_KEY => $this->value,
         ];

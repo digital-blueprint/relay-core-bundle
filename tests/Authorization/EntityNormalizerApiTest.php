@@ -237,7 +237,7 @@ class EntityNormalizerApiTest extends ApiTestCase
     private function decodeEntityResponse(ResponseInterface $response): array
     {
         if ($response->getStatusCode() !== 200 && $response->getStatusCode() !== 201) {
-            dump($response->getContent(false));
+            var_dump($response->getContent(false));
         }
         $this->assertContains($response->getStatusCode(), [Response::HTTP_OK, Response::HTTP_CREATED]);
 

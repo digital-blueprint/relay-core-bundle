@@ -6,6 +6,7 @@ namespace Dbp\Relay\CoreBundle\Tests\Rest;
 
 use Dbp\Relay\CoreBundle\LocalData\LocalDataEventDispatcher;
 use Dbp\Relay\CoreBundle\Rest\AbstractDataProvider;
+use Dbp\Relay\CoreBundle\Rest\Options;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\Pagination;
 use Dbp\Relay\CoreBundle\TestUtils\TestAuthorizationService;
 use Dbp\Relay\CoreBundle\User\UserAttributeException;
@@ -89,10 +90,13 @@ class TestDataProvider extends AbstractDataProvider
 
     protected function getPage(int $currentPageNumber, int $maxNumItemsPerPage, array $filters = [], array $options = []): array
     {
-        $pageEntities = [];
-
         $this->localDataEventDispatcher->onNewOperation($options);
 
+        $preEvent = new TestEntityPreEvent($options);
+        $this->localDataEventDispatcher->dispatch($preEvent);
+        $options = $preEvent->getOptions();
+
+        $pageEntities = [];
         $pageStartIndex = Pagination::getFirstItemIndex($currentPageNumber, $maxNumItemsPerPage);
         $currentIndex = 0;
         foreach ($this->sourceData as $entityId => $entitySourceData) {

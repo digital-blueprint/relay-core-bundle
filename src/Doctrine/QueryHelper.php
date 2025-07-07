@@ -134,7 +134,7 @@ class QueryHelper
                     throw new \Exception('invalid filter node type: '.$filterNode->getNodeType());
             }
         } elseif ($filterNode instanceof ConditionFilterNode) {
-            $attributePath = $attributePrefix.$filterNode->getField();
+            $attributePath = $attributePrefix.$filterNode->getPath();
             $value = $filterNode->getValue();
             switch ($filterNode->getOperator()) {
                 case FilterOperatorType::I_CONTAINS_OPERATOR:

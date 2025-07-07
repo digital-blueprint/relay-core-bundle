@@ -41,13 +41,13 @@ class FilterTest extends TestCase
         $conditionNode = $orNode[0];
         $this->assertIsArray($conditionNode);
         $this->assertEquals('1', $conditionNode[ConditionNode::VALUE_KEY]);
-        $this->assertEquals('field_1', $conditionNode[ConditionNode::FIELD_KEY]);
+        $this->assertEquals('field_1', $conditionNode[ConditionNode::PATH_KEY]);
         $this->assertEquals(OperatorType::I_CONTAINS_OPERATOR, $conditionNode[ConditionNode::OPERATOR_KEY]);
 
         $conditionNode = $orNode[1];
         $this->assertIsArray($conditionNode);
         $this->assertEquals('2', $conditionNode[ConditionNode::VALUE_KEY]);
-        $this->assertEquals('field_2', $conditionNode[ConditionNode::FIELD_KEY]);
+        $this->assertEquals('field_2', $conditionNode[ConditionNode::PATH_KEY]);
         $this->assertEquals(OperatorType::EQUALS_OPERATOR, $conditionNode[ConditionNode::OPERATOR_KEY]);
 
         $orNode = $andNode['or_1'];
@@ -56,13 +56,13 @@ class FilterTest extends TestCase
         $conditionNode = $orNode[0];
         $this->assertIsArray($conditionNode);
         $this->assertEquals('3', $conditionNode[ConditionNode::VALUE_KEY]);
-        $this->assertEquals('field_3', $conditionNode[ConditionNode::FIELD_KEY]);
+        $this->assertEquals('field_3', $conditionNode[ConditionNode::PATH_KEY]);
         $this->assertEquals(OperatorType::I_CONTAINS_OPERATOR, $conditionNode[ConditionNode::OPERATOR_KEY]);
 
         $conditionNode = $orNode[1];
         $this->assertIsArray($conditionNode);
         $this->assertEquals('4', $conditionNode[ConditionNode::VALUE_KEY]);
-        $this->assertEquals('field_4', $conditionNode[ConditionNode::FIELD_KEY]);
+        $this->assertEquals('field_4', $conditionNode[ConditionNode::PATH_KEY]);
         $this->assertEquals(OperatorType::EQUALS_OPERATOR, $conditionNode[ConditionNode::OPERATOR_KEY]);
     }
 
@@ -222,7 +222,7 @@ class FilterTest extends TestCase
                 ->iContains('', '1')
                 ->end()->createFilter();
         } catch (FilterException $exception) {
-            $this->assertEquals(FilterException::CONDITION_FIELD_EMPTY, $exception->getCode());
+            $this->assertEquals(FilterException::CONDITION_PATH_EMPTY, $exception->getCode());
         }
     }
 

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- AbstractLocalDataEventSubscriber: map local data attribute paths in filter to their respective source attribute paths
+- add FilterTools
 - Decorate the 'doctrine.migrations.migrations_factory' service to be able to inject the service container into doctrine
 migration subclasses. 
 - Add AbstractEntityManagerMigration which gets injected the service container and is meant to be subclassed by doctrine migrations versions

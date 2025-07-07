@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\LocalData;
 
+use Dbp\Relay\CoreBundle\Rest\Options;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTools;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -34,20 +36,19 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
 
         return $treeBuilder->getRootNode()
             ->arrayPrototype()
-                ->children()
-                    ->scalarNode(self::LOCAL_DATA_ATTRIBUTE_CONFIG_NODE)
-                       ->info('The name of the local data attribute.')
-                    ->end()
-                    ->scalarNode(self::SOURCE_ATTRIBUTE_CONFIG_NODE)
-                        ->info('The source attribute to map to the local data attribute. If the source attribute is not found, the default value is used.')
-                    ->end()
-                    ->booleanNode(self::IS_ARRAY_CONFIG_NODE)
-                        ->info('Specifies whether the local data attribute is expected to be of array type. The value of the local data attribute is converted accordingly, if required.')
-                        ->defaultValue(false)
-                    ->end()
-                ->end()
+            ->children()
+            ->scalarNode(self::LOCAL_DATA_ATTRIBUTE_CONFIG_NODE)
+            ->info('The name of the local data attribute.')
             ->end()
-        ;
+            ->scalarNode(self::SOURCE_ATTRIBUTE_CONFIG_NODE)
+            ->info('The source attribute to map to the local data attribute. If the source attribute is not found, the default value is used.')
+            ->end()
+            ->booleanNode(self::IS_ARRAY_CONFIG_NODE)
+            ->info('Specifies whether the local data attribute is expected to be of array type. The value of the local data attribute is converted accordingly, if required.')
+            ->defaultValue(false)
+            ->end()
+            ->end()
+            ->end();
     }
 
     public static function getSubscribedEvents(): array
@@ -88,7 +89,17 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
      */
     public function onEvent(Event $event): void
     {
-        if ($event instanceof LocalDataPostEvent) {
+        if ($event instanceof LocalDataPreEvent) {
+            $options = $event->getOptions();
+            if ($filter = Options::getFilter($options)) {
+                $pathMapping = [];
+                foreach ($this->attributeMapping as $localDataAttributeName => $attributeMapEntry) {
+                    $pathMapping[LocalData::getAttributePath($localDataAttributeName)] = $attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY];
+                }
+                FilterTools::mapConditionPaths($filter, $pathMapping);
+                $event->setOptions($options);
+            }
+        } elseif ($event instanceof LocalDataPostEvent) {
             $localDataAttributes = [];
             foreach ($event->getPendingRequestedAttributes() as $localDataAttributeName) {
                 if (($attributeMapEntry = $this->attributeMapping[$localDataAttributeName] ?? null) !== null) {

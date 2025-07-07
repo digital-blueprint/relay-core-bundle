@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\LocalData;
 
+use Dbp\Relay\CoreBundle\Rest\Options;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterException;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTreeBuilder;
 use Dbp\Relay\CoreBundle\Tests\Rest\TestDataProvider;
 use Dbp\Relay\CoreBundle\Tests\Rest\TestEntity;
 use Dbp\Relay\CoreBundle\TestUtils\DataProviderTester;
@@ -26,7 +30,7 @@ class LocalDataTest extends TestCase
         $eventDispatcher->addSubscriber($localDataEventSubscriber);
 
         $this->testDataProvider = new TestDataProvider($eventDispatcher);
-        $this->testDataProvider->setConfig(self::createAuthzConfig());
+        $this->testDataProvider->setConfig(self::createTestDataProviderConfig());
 
         $this->dataProviderTester = DataProviderTester::create($this->testDataProvider,
             TestEntity::class, [['TestEntity:output', 'LocalData:output']]);
@@ -148,9 +152,49 @@ class LocalDataTest extends TestCase
         $this->assertEquals('value_1', $entities[1]->getLocalDataValue('attribute_1'));
     }
 
-    private static function createAuthzConfig(): array
+    /**
+     * @throws FilterException
+     */
+    public function testLocalDataPreEvent(): void
+    {
+        $queryParameters = [];
+        parse_str('filter[localData.attribute_1]="value_1"', $queryParameters);
+
+        // assert that the local data attribute path is internally mapped to the source attribute path in the filter
+        $this->testDataProvider->setSourceData([[]]);
+        $this->dataProviderTester->getPage(filters: $queryParameters);
+        $filter = Options::getFilter($this->testDataProvider->getOptions());
+
+        $expectedFilter = FilterTreeBuilder::create()->equals('src_attribute_1', 'value_1')->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    private function getTestEntityWithLocalData(string $includeLocal, array $sourceData): ?TestEntity
+    {
+        $filters = [
+            'includeLocal' => $includeLocal,
+        ];
+        $this->testDataProvider->setSourceData(['id' => $sourceData]);
+
+        return $this->dataProviderTester->getItem('id', $filters);
+    }
+
+    private function getTestEntitiesWithLocalData(string $includeLocal, array $sourceData, array $filterQueryParameters = []): array
+    {
+        $filters = [
+            'includeLocal' => $includeLocal,
+        ];
+        $filters = array_merge($filters, $filterQueryParameters);
+        $this->testDataProvider->setSourceData($sourceData);
+
+        return $this->dataProviderTester->getPage(filters: $filters);
+    }
+
+    private static function createTestDataProviderConfig(): array
     {
         $config = [];
+        $config['rest']['query']['filter']['enable_query_filters'] = true;
         $config['local_data'] = [
             [
                 'local_data_attribute' => 'attribute_1',
@@ -205,25 +249,5 @@ class LocalDataTest extends TestCase
         ];
 
         return $config;
-    }
-
-    private function getTestEntityWithLocalData(string $includeLocal, array $sourceData): ?TestEntity
-    {
-        $filters = [
-            'includeLocal' => $includeLocal,
-        ];
-        $this->testDataProvider->setSourceData(['id' => $sourceData]);
-
-        return $this->dataProviderTester->getItem('id', $filters);
-    }
-
-    private function getTestEntitiesWithLocalData(string $includeLocal, array $sourceData): array
-    {
-        $filters = [
-            'includeLocal' => $includeLocal,
-        ];
-        $this->testDataProvider->setSourceData($sourceData);
-
-        return $this->dataProviderTester->getPage(filters: $filters);
     }
 }

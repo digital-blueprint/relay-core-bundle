@@ -6,7 +6,7 @@ namespace Dbp\Relay\CoreBundle\Rest\Query\Filter;
 
 class FilterException extends \Exception
 {
-    public const CONDITION_FIELD_EMPTY = 1;
+    public const CONDITION_PATH_EMPTY = 1;
     public const CONDITION_OPERATOR_UNDEFINED = 2;
     public const RESERVED_FILTER_ITEM_ID = 3;
     public const CONJUNCTION_UNDEFINED = 4;

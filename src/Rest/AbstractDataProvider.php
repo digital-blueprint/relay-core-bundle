@@ -318,7 +318,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         // TODO: replace by Filter::mapConditionNode
         foreach ($logicalNode->getChildren() as $child) {
             if ($child instanceof ConditionNode
-                && ($localDataAttributeName = LocalData::tryGetLocalDataAttributeName($child->getField()))
+                && ($localDataAttributeName = LocalData::tryGetLocalDataAttributeName($child->getPath()))
                 && !$this->isGrantedReadAccessToLocalDataAttribute($localDataAttributeName)) {
                 $logicalNode->removeChild($child);
                 $logicalNode->appendChild(new ConstantNode(false));

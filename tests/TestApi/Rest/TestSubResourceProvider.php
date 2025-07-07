@@ -25,7 +25,7 @@ class TestSubResourceProvider extends AbstractDataProvider
     {
         $testSubResource = $this->testResourceService->getTestSubResource($id);
         if ($filters['debug'] ?? false) {
-            dump($testSubResource);
+            var_dump($testSubResource);
         }
 
         return $testSubResource;

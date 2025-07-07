@@ -43,7 +43,7 @@ class TestResourceProvider extends AbstractDataProvider
 
         $testResource = $this->testResourceService->getTestResource($id, $filters, $options);
         if ($filters['debug'] ?? false) {
-            dump($testResource);
+            var_dump($testResource);
         }
 
         return $testResource;
