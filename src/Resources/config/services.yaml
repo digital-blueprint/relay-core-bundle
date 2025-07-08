@@ -146,5 +146,5 @@ services:
     arguments: ['@.inner']
 
   Dbp\Relay\CoreBundle\Doctrine\MigrationFactoryDecorator:
-    public: true
+    decorates: 'doctrine.migrations.migrations_factory'
     arguments: [ '@.inner', '@service_container' ]
