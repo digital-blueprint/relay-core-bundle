@@ -12,7 +12,6 @@ trait StateTrait
     protected static string $identifierName = 'identifier';
     private ?Operation $currentOperation = null;
     private array $currentUriVariables = [];
-    private ?string $currentRootRequestMethod = null;
 
     protected function getCurrentOperationName(): ?string
     {
@@ -27,13 +26,5 @@ trait StateTrait
     protected function isCurrentOperationACollectionOperation(): bool
     {
         return $this->currentOperation instanceof CollectionOperationInterface;
-    }
-
-    /**
-     * The original (root) HTTP request method.
-     */
-    protected function getCurrentRootRequestMethod(): ?string
-    {
-        return $this->currentRootRequestMethod;
     }
 }

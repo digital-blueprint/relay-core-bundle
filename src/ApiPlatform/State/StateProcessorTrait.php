@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\ApiPlatform\State;
 
 use ApiPlatform\Metadata\Delete;
-use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
@@ -19,10 +18,6 @@ trait StateProcessorTrait
     {
         $this->currentOperation = $operation;
         $this->currentUriVariables = $uriVariables;
-
-        if ($operation instanceof HttpOperation) {
-            $this->currentRootRequestMethod = $operation->getMethod();
-        }
 
         if ($operation instanceof Post) {
             return $this->post($data, $context);

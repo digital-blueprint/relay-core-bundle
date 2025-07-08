@@ -144,7 +144,3 @@ services:
     autowire: true
     decorates: 'api_platform.serializer.context_builder'
     arguments: ['@.inner']
-
-  Dbp\Relay\CoreBundle\Doctrine\MigrationFactoryDecorator:
-    decorates: 'doctrine.migrations.migrations_factory'
-    arguments: [ '@.inner', '@service_container' ]

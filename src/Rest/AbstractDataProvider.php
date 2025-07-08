@@ -31,7 +31,6 @@ use Dbp\Relay\CoreBundle\Rest\Query\Sort\Sort;
 use Dbp\Relay\CoreBundle\Rest\Query\Sort\SortException;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Service\Attribute\Required;
 
@@ -215,17 +214,6 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         }
 
         return $isGrantedReadAccess;
-    }
-
-    /**
-     * Indicates whether the original (root) HTTP request is a GET request.
-     * Note that ApiPlatform internally calls providers during write item operations (PATCH, PUT, and DELETE)
-     * to get the item to process. In those cases this method can be used to distinguish whether we are dealing
-     * with a client (http) GET request (true), or an internal get item/collection request (false).
-     */
-    protected function isRootGetRequest(): bool
-    {
-        return $this->getCurrentRootRequestMethod() === Request::METHOD_GET;
     }
 
     /**
