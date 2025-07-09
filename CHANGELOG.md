@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.216
+
 - AbstractAuthorizationService: add authorization expressions on setupAccessControlPolicies instead of replacing them 
 (allows subclasses of AbstractDataProvider to define authorization expressions without being replaced internally)
 - AbstractLocalDataEventSubscriber: map local data attribute paths in filter to their respective source attribute paths
