@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## v0.1.216
+## v0.1.217
 
 - AbstractAuthorizationService: add authorization expressions on setupAccessControlPolicies instead of replacing them 
 (allows subclasses of AbstractDataProvider to define authorization expressions without being replaced internally)
