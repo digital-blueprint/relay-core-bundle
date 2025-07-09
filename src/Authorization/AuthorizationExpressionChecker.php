@@ -39,11 +39,11 @@ class AuthorizationExpressionChecker
         $this->expressionLanguage = new ExpressionLanguage();
     }
 
-    public function setExpressions(array $roleExpressions, array $resourcePermissionExpressions, array $attributeExpressions): void
+    public function addExpressions(array $roleExpressions, array $resourcePermissionExpressions, array $attributeExpressions): void
     {
-        $this->roleExpressions = $roleExpressions;
-        $this->resourcePermissionExpressions = $resourcePermissionExpressions;
-        $this->attributeExpressions = $attributeExpressions;
+        $this->roleExpressions = array_merge($this->roleExpressions, $roleExpressions);
+        $this->resourcePermissionExpressions = array_merge($this->resourcePermissionExpressions, $resourcePermissionExpressions);
+        $this->attributeExpressions = array_merge($this->attributeExpressions, $attributeExpressions);
     }
 
     public function evalAttributeExpression(AuthorizationUser $currentAuthorizationUser,

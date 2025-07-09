@@ -62,7 +62,7 @@ abstract class AbstractAuthorizationService
 
     public function setUpAccessControlPolicies(array $roles = [], array $resourcePermissions = [], array $attributes = []): void
     {
-        $this->authorizationExpressionChecker->setExpressions($roles, $resourcePermissions, $attributes);
+        $this->authorizationExpressionChecker->addExpressions($roles, $resourcePermissions, $attributes);
     }
 
     public function isAttributeDefined(string $attributeName): bool

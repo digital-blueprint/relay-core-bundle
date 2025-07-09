@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- AbstractAuthorizationService: add authorization expressions on setupAccessControlPolicies instead of replacing them 
+(allows subclasses of AbstractDataProvider to define authorization expressions without being replaced internally)
 - AbstractLocalDataEventSubscriber: map local data attribute paths in filter to their respective source attribute paths
 - add FilterTools
 - Decorate the 'doctrine.migrations.migrations_factory' service to be able to inject the service container into doctrine
