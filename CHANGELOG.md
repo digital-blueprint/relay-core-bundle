@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## v0.1.218
+
+- Allow HEAD for CORS requests as well
+- Drop workaround for broken CORS headers with Apache <=2.4.47 for 304 responses
+  since no one should be using such old Apache versions anymore.
+
 ## v0.1.217
 
 - AbstractAuthorizationService: add authorization expressions on setupAccessControlPolicies instead of replacing them 
