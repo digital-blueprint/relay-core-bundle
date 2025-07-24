@@ -239,14 +239,6 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
                     'allow_headers' => $allowHeaders,
                     'expose_headers' => $exposeHeaders,
                     'max_age' => 3600,
-                    // XXX: Try to work around a bug in Apache, which strips CORS headers from 304 responses:
-                    // https://bz.apache.org/bugzilla/show_bug.cgi?id=51223
-                    // In case the browser has a response cached from another origin, it will send the same etag,
-                    // Apache returns with a 304 without cors headers, the browser serves the cached request with
-                    // wrong 'access-control-allow-origin' and the fetch will fail with a CORS error.
-                    // By always sending '*' the cached response still happens to be valid in that case.
-                    // edit: this is fixed in Apache since 2.4.48, so we can drop this line once we require that version
-                    'forced_allow_origin_value' => '*',
                 ],
             ],
         ]);
