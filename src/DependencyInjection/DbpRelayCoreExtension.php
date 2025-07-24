@@ -235,7 +235,7 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
                 '^/' => [
                     'origin_regex' => true,
                     'allow_origin' => ['^.+$'],
-                    'allow_methods' => ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE'],
+                    'allow_methods' => ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD'],
                     'allow_headers' => $allowHeaders,
                     'expose_headers' => $exposeHeaders,
                     'max_age' => 3600,
