@@ -147,4 +147,5 @@ services:
 
   Dbp\Relay\CoreBundle\Doctrine\MigrationFactoryDecorator:
     decorates: 'doctrine.migrations.migrations_factory'
+    decoration_on_invalid: 'ignore'
     arguments: [ '@.inner', '@service_container' ]

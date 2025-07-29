@@ -14,5 +14,3 @@ services:
 
   Dbp\Relay\CoreBundle\User\UserAttributeProviderProviderInterface:
     '@Dbp\Relay\CoreBundle\TestUtils\TestUserAttributeProviderProvider'
-
-  Dbp\Relay\CoreBundle\Doctrine\MigrationFactoryDecorator: null
