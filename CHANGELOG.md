@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Allow configuration of identifier name for `DataProviderTester` and `DataProcessorTester`
+- Remove strict dependency on doctrine migrations bundle
+
 ## v0.1.218
 
 - Allow HEAD for CORS requests as well

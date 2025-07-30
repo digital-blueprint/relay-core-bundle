@@ -22,11 +22,12 @@ class DataProcessorTester extends AbstractRestTester
      * @param string   $resourceClass         the fully qualified class name of the entity that this data provider provides
      * @param string[] $denormalizationGroups the denormalization groups of the entity that this data provider provides
      */
-    public static function create(AbstractDataProcessor $dataProcessor, string $resourceClass, array $denormalizationGroups = []): DataProcessorTester
+    public static function create(AbstractDataProcessor $dataProcessor, string $resourceClass,
+        array $denormalizationGroups = [], string $identifierName = 'identifier'): DataProcessorTester
     {
         self::setUp($dataProcessor);
 
-        return new DataProcessorTester($dataProcessor, $resourceClass, $denormalizationGroups);
+        return new DataProcessorTester($dataProcessor, $resourceClass, $denormalizationGroups, $identifierName);
     }
 
     /**
@@ -39,9 +40,10 @@ class DataProcessorTester extends AbstractRestTester
     }
 
     private function __construct(
-        private readonly AbstractDataProcessor $dataProcessor, string $resourceClass, array $denormalizationGroups = [])
+        private readonly AbstractDataProcessor $dataProcessor, string $resourceClass,
+        array $denormalizationGroups, string $identifierName)
     {
-        parent::__construct($resourceClass, denormalizationGroups: $denormalizationGroups);
+        parent::__construct($resourceClass, denormalizationGroups: $denormalizationGroups, identifierName: $identifierName);
     }
 
     public function addItem(mixed $data, array $filters = []): mixed
@@ -52,19 +54,19 @@ class DataProcessorTester extends AbstractRestTester
 
     public function replaceItem(mixed $identifier, mixed $data, mixed $previousData, array $filters = []): mixed
     {
-        return $this->dataProcessor->process($data, new Put(), [self::IDENTIFIER_NAME => $identifier],
+        return $this->dataProcessor->process($data, new Put(), [$this->identifierName => $identifier],
             $this->createContext(Request::METHOD_PUT, $identifier, $filters, $previousData));
     }
 
     public function updateItem(mixed $identifier, mixed $data, mixed $previousData, array $filters = []): mixed
     {
-        return $this->dataProcessor->process($data, new Patch(), [self::IDENTIFIER_NAME => $identifier],
+        return $this->dataProcessor->process($data, new Patch(), [$this->identifierName => $identifier],
             $this->createContext(Request::METHOD_PATCH, $identifier, $filters, $previousData));
     }
 
     public function removeItem(mixed $identifier, mixed $data, array $filters = []): void
     {
-        $this->dataProcessor->process($data, new Delete(), [self::IDENTIFIER_NAME => $identifier],
+        $this->dataProcessor->process($data, new Delete(), [$this->identifierName => $identifier],
             $this->createContext(Request::METHOD_DELETE, $identifier, $filters, null));
     }
 }

@@ -26,7 +26,8 @@ class AbstractRestTester
     protected function __construct(
         protected readonly string $resourceClass,
         protected readonly array $normalizationGroups = [],
-        protected readonly array $denormalizationGroups = [])
+        protected readonly array $denormalizationGroups = [],
+        protected readonly string $identifierName = 'identifier')
     {
     }
 

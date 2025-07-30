@@ -22,11 +22,12 @@ class DataProviderTester extends AbstractRestTester
      * @param string   $resourceClass       the fully qualified class name of the entity that this data provider provides
      * @param string[] $normalizationGroups the normalization groups of the entity that this data provider provides
      */
-    public static function create(AbstractDataProvider $dataProvider, string $resourceClass, array $normalizationGroups = []): DataProviderTester
+    public static function create(AbstractDataProvider $dataProvider, string $resourceClass, array $normalizationGroups = [],
+        string $identifierName = 'identifier'): DataProviderTester
     {
         self::setUp($dataProvider);
 
-        return new DataProviderTester($dataProvider, $resourceClass, $normalizationGroups);
+        return new DataProviderTester($dataProvider, $resourceClass, $normalizationGroups, $identifierName);
     }
 
     /**
@@ -49,14 +50,15 @@ class DataProviderTester extends AbstractRestTester
     private function __construct(
         private readonly AbstractDataProvider $dataProvider,
         string $resourceClass,
-        array $normalizationGroups = [])
+        array $normalizationGroups,
+        string $identifierName)
     {
-        parent::__construct($resourceClass, normalizationGroups: $normalizationGroups);
+        parent::__construct($resourceClass, normalizationGroups: $normalizationGroups, identifierName: $identifierName);
     }
 
     public function getItem(?string $identifier, array $filters = []): ?object
     {
-        $uriVariables = $identifier !== null ? ['identifier' => $identifier] : [];
+        $uriVariables = $identifier !== null ? [$this->identifierName => $identifier] : [];
 
         /** @var object|null */
         return $this->dataProvider->provide(new Get(), $uriVariables,
