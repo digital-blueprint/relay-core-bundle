@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.1.220
+
+- Add support for kevinrob/guzzle-cache-middleware v7, drop support for v4
+
 ## v0.1.219
 
 - Allow configuration of identifier name for `DataProviderTester` and `DataProcessorTester`
