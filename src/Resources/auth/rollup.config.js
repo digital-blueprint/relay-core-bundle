@@ -11,6 +11,7 @@ import process from 'node:process';
 const build = (typeof process.env.BUILD !== 'undefined') ? process.env.BUILD : 'local';
 console.log("build: " + build);
 const useTerser = (process.env.ROLLUP_WATCH !== 'true' && build !== 'test');
+let isRolldown = process.argv.some((arg) => arg.includes('rolldown'));
 
 export default (async () => {
     return {
@@ -18,7 +19,7 @@ export default (async () => {
         output: {
             dir: '../public/auth',
             entryFileNames: '[name].js',
-            chunkFileNames: 'shared/[name].[hash].[format].js',
+            chunkFileNames: 'shared/[name].[hash].js',
             format: 'esm',
             sourcemap: true
         },
@@ -27,9 +28,9 @@ export default (async () => {
                 targets: '../public/auth/*',
                 force: true
             }),
-            resolve({browser: true}),
-            commonjs(),
-            json(),
+            !isRolldown && resolve({browser: true}),
+            !isRolldown && commonjs(),
+            !isRolldown && json(),
             useTerser ? terser() : false,
             copy({
                 targets: [
