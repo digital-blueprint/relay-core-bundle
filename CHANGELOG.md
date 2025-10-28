@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## v0.1.221
+
+- api-docs: update vendored bundle, move from rollup to rolldown for bundling
+- Drop support for api-platform v3
+- Move dependencies to split api-platform packages
+
 ## v0.1.220
 
 - Add support for kevinrob/guzzle-cache-middleware v7, drop support for v4
