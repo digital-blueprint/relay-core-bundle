@@ -9,7 +9,7 @@
         "ext-filter": "*",
         "ext-intl": "*",
         "ext-json": "*",
-        "api-platform/core": "^3.4 | ^4.1",
+        "api-platform/core": "^4.1",
         "doctrine/dbal": "^4.2",
         "doctrine/migrations": "^3.9",
         "doctrine/orm": "^3.3",
