@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.1.222
+
+- Restore missing dependency on symfony/asset
+
 ## v0.1.221
 
 - api-docs: update vendored bundle, move from rollup to rolldown for bundling
