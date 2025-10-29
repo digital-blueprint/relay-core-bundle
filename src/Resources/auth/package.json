@@ -10,16 +10,13 @@
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-terser": "^0.4.1",
+    "@web/test-runner": "^0.20.2",
+    "@web/test-runner-playwright": "^0.11.1",
     "chai": "^6.2.0",
     "eslint": "^9.1.0",
     "eslint-plugin-jsdoc": "^61.0.0",
     "glob": "^11.0.0",
     "globals": "^16.0.0",
-    "karma": "^6.0.0",
-    "karma-chrome-launcher": "^3.0.0",
-    "karma-firefox-launcher": "^2.1.0",
-    "karma-mocha": "^2.0.1",
-    "karma-source-map-support": "^1.4.0",
     "mocha": "^11.1.0",
     "playwright-core": "^1.32.3",
     "rolldown": "^1.0.0-beta.42",
@@ -39,7 +36,7 @@
     "build": "rolldown -c rollup.config.js",
     "build-test": "rolldown -c rollup.config.js --environment BUILD:test",
     "watch": "rolldown -c rollup.config.js --watch",
-    "test": "npm run build-test && karma start karma.conf.cjs --singleRun",
+    "test": "npm run build-test && web-test-runner",
     "lint": "eslint ."
   }
 }

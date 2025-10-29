@@ -4,7 +4,7 @@ import globals from "globals";
 
 export default [
     {
-        ignores: ['*.cjs'],
+        ignores: ['*.cjs', 'dist'],
     },
     js.configs.recommended,
     jsdoc.configs["flat/recommended"],
@@ -13,10 +13,9 @@ export default [
             jsdoc: jsdoc,
         },
         languageOptions: {
-            ecmaVersion: 2020,
+            ecmaVersion: 'latest',
             globals: {
                 ...globals.browser,
-                ...globals.es2020,
                 ...globals.mocha,
             },
         },

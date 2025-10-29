@@ -17,7 +17,7 @@ export default (async () => {
     return {
         input: (build != 'test') ? ['src/api-platform-auth.js'] : globSync('test/**/*.js'),
         output: {
-            dir: '../public/auth',
+            dir: (build != 'test') ? '../public/auth' : 'dist',
             entryFileNames: '[name].js',
             chunkFileNames: 'shared/[name].[hash].js',
             format: 'esm',
