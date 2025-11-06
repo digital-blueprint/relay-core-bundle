@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Inject the `EntityNormalizer` into `AbstractAuthorizationService` for testing to avoid null references
+
 ## v0.1.222
 
 - Restore missing dependency on symfony/asset

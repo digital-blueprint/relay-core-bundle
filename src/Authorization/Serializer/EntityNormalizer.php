@@ -6,7 +6,6 @@ namespace Dbp\Relay\CoreBundle\Authorization\Serializer;
 
 use ApiPlatform\State\Pagination\PartialPaginatorInterface;
 use Dbp\Relay\CoreBundle\Helpers\Tools;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -23,10 +22,6 @@ class EntityNormalizer implements NormalizerAwareInterface, NormalizerInterface
     private array $getOutputGroupsToAddForEntityClassCallbacks = [];
     /** @var array<string, callable[]> */
     private array $getOutputGroupsToAddForEntityInstanceCallbacks = [];
-
-    public function __construct(private readonly EventDispatcherInterface $eventDispatcher)
-    {
-    }
 
     /**
      * @param callable(string): array $getOutputGroupsToAddCallback

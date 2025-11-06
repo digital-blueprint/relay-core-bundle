@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\TestUtils;
 
 use Dbp\Relay\CoreBundle\Authorization\AbstractAuthorizationService;
+use Dbp\Relay\CoreBundle\Authorization\Serializer\EntityNormalizer;
 use Dbp\Relay\CoreBundle\User\UserAttributeMuxer;
 use Dbp\Relay\CoreBundle\User\UserAttributeProviderProvider;
 use Dbp\Relay\CoreBundle\User\UserAttributeService;
@@ -39,5 +40,6 @@ class TestAuthorizationService extends AbstractAuthorizationService
             new UserAttributeMuxer(new UserAttributeProviderProvider([$userAttributeProvider]), new EventDispatcher()));
 
         $authorizationService->__injectUserAttributeService($userAttributeService);
+        $authorizationService->__injectEntityNormalizer(new EntityNormalizer());
     }
 }
