@@ -6,11 +6,11 @@ namespace Dbp\Relay\CoreBundle\User;
 
 use Dbp\Relay\CoreBundle\API\UserSessionInterface;
 
-class UserAttributeService
+readonly class UserAttributeService
 {
     public function __construct(
-        private readonly UserSessionInterface $currentUserSession,
-        private readonly UserAttributeMuxer $userAttributeMuxer)
+        private UserSessionInterface $currentUserSession,
+        private UserAttributeMuxer $userAttributeMuxer)
     {
     }
 

@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Inject the `EntityNormalizer` into `AbstractAuthorizationService` for testing to avoid null references
+- TestClient: offer a method to reset the request caches of a given `AbstractAuthorizationService` service
 
 ## v0.1.222
 

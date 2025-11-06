@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\TestUtils;
 
 use ApiPlatform\Symfony\Bundle\Test\Client;
+use Dbp\Relay\CoreBundle\Authorization\AbstractAuthorizationService;
 use Dbp\Relay\CoreBundle\TestUtils\Internal\TestAuthenticator;
 use Dbp\Relay\CoreBundle\TestUtils\Internal\TestUser;
 use Dbp\Relay\CoreBundle\User\UserAttributeMuxer;
@@ -64,6 +65,15 @@ class TestClient
         $userAttributeMuxer = $container->get(UserAttributeMuxer::class);
         assert($userAttributeMuxer instanceof UserAttributeMuxer);
         $userAttributeMuxer->clearCaches();
+    }
+
+    public function clearAuthorizationServiceRequestCaches(string $authorizationServiceId): void
+    {
+        $container = $this->client->getContainer();
+
+        /** @var AbstractAuthorizationService $authorizationService */
+        $authorizationService = $container->get($authorizationServiceId);
+        $authorizationService->clearRequestCaches();
     }
 
     /**

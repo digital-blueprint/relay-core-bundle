@@ -24,6 +24,15 @@ class EntityNormalizer implements NormalizerAwareInterface, NormalizerInterface
     private array $getOutputGroupsToAddForEntityInstanceCallbacks = [];
 
     /**
+     * for testing purposes.
+     */
+    public function reset(): void
+    {
+        $this->getOutputGroupsToAddForEntityClassCallbacks = [];
+        $this->getOutputGroupsToAddForEntityInstanceCallbacks = [];
+    }
+
+    /**
      * @param callable(string): array $getOutputGroupsToAddCallback
      */
     public function registerGetOutputGroupsToAddForEntityClassCallback(string $entityClass,

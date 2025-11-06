@@ -39,6 +39,14 @@ abstract class AbstractAuthorizationService
     }
 
     /**
+     * for testing purposes.
+     */
+    public function clearRequestCaches(): void
+    {
+        $this->entityNormalizer?->reset();
+    }
+
+    /**
      * Method for bundle config injection. Don't call in your code  (use @see AbstractAuthorizationService::configure() instead).
      */
     public function setConfig(array $config): void
