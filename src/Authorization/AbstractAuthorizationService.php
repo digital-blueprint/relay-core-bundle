@@ -13,9 +13,9 @@ use Symfony\Contracts\Service\Attribute\Required;
 
 abstract class AbstractAuthorizationService
 {
-    private UserAttributeService $userAttributeService;
     private AuthorizationExpressionChecker $authorizationExpressionChecker;
     private AuthorizationUser $currentAuthorizationUser;
+    private ?UserAttributeService $userAttributeService = null;
     private ?EntityNormalizer $entityNormalizer = null;
 
     public function __construct()
@@ -44,6 +44,7 @@ abstract class AbstractAuthorizationService
     public function clearRequestCaches(): void
     {
         $this->entityNormalizer?->reset();
+        $this->userAttributeService?->clearRequestCaches();
     }
 
     /**

@@ -37,7 +37,7 @@ class UserAttributeMuxer
     /**
      * Clears all caches. For testing purposes.
      */
-    public function clearCaches(): void
+    public function clearRequestCaches(): void
     {
         $this->additionallyAvailableAttributesCache = null;
         $this->valueCache = [];

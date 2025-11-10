@@ -14,6 +14,11 @@ readonly class UserAttributeService
     {
     }
 
+    public function clearRequestCaches(): void
+    {
+        $this->userAttributeMuxer->clearRequestCaches();
+    }
+
     public function getCurrentUserIdentifier(): ?string
     {
         if (!$this->currentUserSession->isAuthenticated()) {

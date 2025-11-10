@@ -9,6 +9,7 @@ use Dbp\Relay\CoreBundle\Authorization\Serializer\EntityNormalizer;
 use Dbp\Relay\CoreBundle\User\UserAttributeMuxer;
 use Dbp\Relay\CoreBundle\User\UserAttributeProviderProvider;
 use Dbp\Relay\CoreBundle\User\UserAttributeService;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class TestAuthorizationService extends AbstractAuthorizationService
@@ -41,5 +42,12 @@ class TestAuthorizationService extends AbstractAuthorizationService
 
         $authorizationService->__injectUserAttributeService($userAttributeService);
         $authorizationService->__injectEntityNormalizer(new EntityNormalizer());
+    }
+
+    public static function clearAuthorizationServiceRequestCaches(ContainerInterface $container, string $authorizationServiceId): void
+    {
+        /** @var AbstractAuthorizationService $authorizationService */
+        $authorizationService = $container->get($authorizationServiceId);
+        $authorizationService->clearRequestCaches();
     }
 }
