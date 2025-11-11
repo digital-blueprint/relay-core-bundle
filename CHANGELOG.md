@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.224
+
 - deprecate `UserAuthTrait` in favor of `TestClient`
 
 ## v0.1.223
