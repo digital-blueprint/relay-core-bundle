@@ -8,48 +8,39 @@ use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Authorization\TestApiAuthorizationService;
 use Dbp\Relay\CoreBundle\Tests\TestApi\TestResourceEntityManager;
 use Dbp\Relay\CoreBundle\TestUtils\AbstractApiTest;
-use Dbp\Relay\CoreBundle\TestUtils\Internal\TestAuthenticator;
 use Dbp\Relay\CoreBundle\TestUtils\TestClient;
-use Dbp\Relay\CoreBundle\TestUtils\UserAuthTrait;
 use Symfony\Component\HttpFoundation\Response;
 
 class ApiTest extends AbstractApiTest
 {
-    use UserAuthTrait;
-
     public function testIndex()
     {
-        $client = $this->withUser('foobar');
-        $response = $client->request('GET', '/');
+        $response = $this->testClient->get('/');
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
     }
 
     public function testError()
     {
-        $client = $this->withUser('foobar');
-        $response = $client->request('GET', '/errors/444');
+        $response = $this->testClient->get('/errors/444');
         $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
     }
 
     public function testJSONLD()
     {
-        $client = $this->withUser('foobar');
-        $response = $client->request('GET', '/', ['headers' => ['HTTP_ACCEPT' => 'application/ld+json']]);
+        $response = $this->testClient->get('/', ['headers' => ['Accept' => 'application/ld+json']]);
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
         $this->assertJson($response->getContent(false));
     }
 
     public function testSimpleProviderNoAuth()
     {
-        $client = $this->withUser('foobar');
-        $response = $client->request('GET', '/test/test-resources/foobar');
+        $response = $this->testClient->get('/test/test-resources/foobar', token: null);
         $this->assertSame(401, $response->getStatusCode());
     }
 
     public function testSimpleProviderAuth()
     {
-        $client = $this->withUser('foobar', token: TestAuthenticator::TEST_TOKEN);
-        $response = $client->request('GET', '/test/test-resources/foobar', ['headers' => ['Authorization' => 'Bearer '.TestAuthenticator::TEST_TOKEN]]);
+        $response = $this->testClient->get('/test/test-resources/foobar');
         $this->assertSame(200, $response->getStatusCode());
         $this->assertStringStartsWith('application/ld+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(), true, flags: JSON_THROW_ON_ERROR);
@@ -58,8 +49,7 @@ class ApiTest extends AbstractApiTest
 
     public function testGetCurrentUserNoAuth()
     {
-        $client = $this->withUser('someuser', ['myrole']);
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=GetCurrentUser');
+        $response = $this->testClient->get('/test/test-resources/foobar/custom_controller?test=GetCurrentUser', token: null);
         $this->assertSame(200, $response->getStatusCode());
         $content = json_decode($response->getContent(), true, flags: JSON_THROW_ON_ERROR);
         $content = json_decode($content['content'], true, flags: JSON_THROW_ON_ERROR);
@@ -70,20 +60,20 @@ class ApiTest extends AbstractApiTest
 
     public function testGetCurrentUserIdAuth()
     {
-        $client = $this->withUser('someuser', ['myrole'], 'xxx');
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=GetCurrentUser', ['headers' => ['Authorization' => 'Bearer xxx']]);
+        $this->testClient->setUpUser(TestClient::TEST_USER_IDENTIFIER, symfonyRoles: ['myrole']);
+        $response = $this->testClient->get('/test/test-resources/foobar/custom_controller?test=GetCurrentUser');
         $this->assertSame(200, $response->getStatusCode());
         $content = json_decode($response->getContent(), true, flags: JSON_THROW_ON_ERROR);
         $content = json_decode($content['content'], true, flags: JSON_THROW_ON_ERROR);
-        $this->assertSame($content['userIdentifier'], 'someuser');
+        $this->assertSame($content['userIdentifier'], TestClient::TEST_USER_IDENTIFIER);
         $this->assertSame($content['isAuthenticated'], true);
         $this->assertSame($content['userRoles'], ['myrole']);
     }
 
     public function testGetSystemUserAuth()
     {
-        $client = $this->withUser(null, ['myrole42'], 'xxx');
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=GetCurrentUser', ['headers' => ['Authorization' => 'Bearer xxx']]);
+        $this->testClient->setUpUser(null, symfonyRoles: ['myrole42']);
+        $response = $this->testClient->get('/test/test-resources/foobar/custom_controller?test=GetCurrentUser');
         $this->assertSame(200, $response->getStatusCode());
         $content = json_decode($response->getContent(), true, flags: JSON_THROW_ON_ERROR);
         $content = json_decode($content['content'], true, flags: JSON_THROW_ON_ERROR);
@@ -92,49 +82,25 @@ class ApiTest extends AbstractApiTest
         $this->assertSame($content['userRoles'], ['myrole42']);
     }
 
-    public function testNoUserSetup()
-    {
-        $client = self::createClient();
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=GetCurrentUser');
-        $this->assertSame(200, $response->getStatusCode());
-        $content = json_decode($response->getContent(), true, flags: JSON_THROW_ON_ERROR);
-        $content = json_decode($content['content'], true, flags: JSON_THROW_ON_ERROR);
-        $this->assertSame($content['userIdentifier'], null);
-        $this->assertSame($content['isAuthenticated'], false);
-        $this->assertSame($content['userRoles'], []);
-    }
-
     public function testNeedsAuthenticatedFully()
     {
-        $client = $this->withUser(null);
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=IS_AUTHENTICATED_FULLY');
+        $response = $this->testClient->get('/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=IS_AUTHENTICATED_FULLY', token: null);
         $this->assertSame(401, $response->getStatusCode());
 
-        $client = $this->withUser(null);
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=IS_AUTHENTICATED_FULLY', ['headers' => ['Authorization' => 'Bearer xxx']]);
+        $response = $this->testClient->get('/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=IS_AUTHENTICATED_FULLY', token: 'wrong');
         $this->assertSame(401, $response->getStatusCode());
 
-        $client = $this->withUser(null, [], 'xxx');
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=IS_AUTHENTICATED_FULLY');
-        $this->assertSame(401, $response->getStatusCode());
-
-        $client = $this->withUser(null, [], 'xxx');
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=IS_AUTHENTICATED_FULLY', ['headers' => ['Authorization' => 'Bearer wrong']]);
-        $this->assertSame(401, $response->getStatusCode());
-
-        $client = $this->withUser(null, [], 'xxx');
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=IS_AUTHENTICATED_FULLY', ['headers' => ['Authorization' => 'Bearer xxx']]);
+        $response = $this->testClient->get('/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=IS_AUTHENTICATED_FULLY');
         $this->assertSame(200, $response->getStatusCode());
     }
 
     public function testNeedsSymfonyRole()
     {
-        $client = $this->withUser(null, ['ROLE_FOO'], 'xxx');
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=ROLE_BAR', ['headers' => ['Authorization' => 'Bearer xxx']]);
+        $this->testClient->setUpUser(symfonyRoles: ['ROLE_FOO']);
+        $response = $this->testClient->get('/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=ROLE_BAR');
         $this->assertSame(403, $response->getStatusCode());
 
-        $client = $this->withUser(null, ['ROLE_FOO'], 'xxx');
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=ROLE_FOO', ['headers' => ['Authorization' => 'Bearer xxx']]);
+        $response = $this->testClient->get('/test/test-resources/foobar/custom_controller?test=denyAccessUnlessGranted&param=ROLE_FOO');
         $this->assertSame(200, $response->getStatusCode());
     }
 

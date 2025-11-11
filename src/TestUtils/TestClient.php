@@ -41,13 +41,22 @@ class TestClient
     /**
      * Setups up a user that can authenticate in subsequent requests using the given token.
      *
+     * Example to perform an unauthenticated request:
+     * $testClient->setUpUser(token: null);
+     * $testClient->get($url, token: null);
+     *
+     * Example to perform an authenticated request:
+     * $testClient->setUpUser();
+     * $testClient->get($url);
+     *
      * @param string|null $userIdentifier The user identifier
      * @param array       $userAttributes Associative array of user attributes used for authorization
      * @param array       $symfonyRoles   The symfony roles for the user
-     * @param string|null $token          The bearer token the user can be authenticated with on subsequent requests
+     * @param string|null $token          The bearer token the user can be authenticated with on subsequent requests.
+     *                                    Use null if you want to test unauthenticated requests.
      */
     public function setUpUser(?string $userIdentifier = self::TEST_USER_IDENTIFIER, array $userAttributes = [],
-        array $symfonyRoles = [], ?string $token = TestAuthenticator::TEST_TOKEN): void
+        array $symfonyRoles = [], ?string $token = self::TEST_TOKEN): void
     {
         $container = $this->client->getContainer();
 
@@ -73,7 +82,7 @@ class TestClient
      * @param array $options Array of request options to apply
      */
     public function get(string $url, array $query = [], array $options = [],
-        ?string $token = TestAuthenticator::TEST_TOKEN): ResponseInterface
+        ?string $token = self::TEST_TOKEN): ResponseInterface
     {
         $options['query'] = $query;
 
@@ -87,7 +96,7 @@ class TestClient
      * @param array $options Array of request options to apply
      */
     public function postJson(string $uri, mixed $data, array $options = [],
-        ?string $token = TestAuthenticator::TEST_TOKEN): ResponseInterface
+        ?string $token = self::TEST_TOKEN): ResponseInterface
     {
         $options['json'] = $data;
         $options['headers']['Content-Type'] = 'application/ld+json';
@@ -102,7 +111,7 @@ class TestClient
      * @param array $options Array of request options to apply
      */
     public function patchJson(string $url, mixed $data, array $options = [],
-        ?string $token = TestAuthenticator::TEST_TOKEN): ResponseInterface
+        ?string $token = self::TEST_TOKEN): ResponseInterface
     {
         $options['json'] = $data;
         $options['headers']['Content-Type'] = 'application/merge-patch+json';
@@ -116,16 +125,18 @@ class TestClient
      * @param array $options Array of request options to apply
      */
     public function delete(string $url, array $options = [],
-        ?string $token = TestAuthenticator::TEST_TOKEN): ResponseInterface
+        ?string $token = self::TEST_TOKEN): ResponseInterface
     {
         return $this->request('DELETE', $url, $options, $token);
     }
 
     public function request(string $method, string $url, array $options = [],
-        ?string $token = TestAuthenticator::TEST_TOKEN): ResponseInterface
+        ?string $token = self::TEST_TOKEN): ResponseInterface
     {
         try {
-            $options['headers']['Authorization'] = 'Bearer '.$token;
+            if ($token !== null) {
+                $options['headers']['Authorization'] = 'Bearer '.$token;
+            }
 
             return $this->client->request($method, $url, $options);
         } catch (TransportExceptionInterface $e) {

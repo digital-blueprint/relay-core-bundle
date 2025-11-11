@@ -4,34 +4,29 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\Authorization;
 
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Entity\TestResource;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Entity\TestSubResource;
 use Dbp\Relay\CoreBundle\Tests\TestApi\TestResourceEntityManager;
+use Dbp\Relay\CoreBundle\TestUtils\AbstractApiTest;
 use Dbp\Relay\CoreBundle\TestUtils\TestClient;
-use Dbp\Relay\CoreBundle\TestUtils\UserAuthTrait;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
-class EntityNormalizerApiTest extends ApiTestCase
+class EntityNormalizerApiTest extends AbstractApiTest
 {
-    use UserAuthTrait;
-
     private const TEST_CONTENT = TestResourceEntityManager::CONTENT_DEFAULT;
     private const TEST_SECRET = TestResourceEntityManager::SECRET_DEFAULT;
     private const TEST_IS_PUBLIC = TestResourceEntityManager::IS_PUBLIC_DEFAULT;
     private const TEST_PASSWORD = TestResourceEntityManager::PASSWORD_DEFAULT;
 
-    private ?TestClient $testClient = null;
     private ?TestResourceEntityManager $testResourceManager = null;
 
     protected function setUp(): void
     {
-        $this->testClient = new TestClient(ApiTestCase::createClient());
-        $this->getTestClient()->setUpUser(userIdentifier: TestClient::TEST_USER_IDENTIFIER, userAttributes: ['IS_ADMIN' => false]);
-        $this->getTestClient()->getClient()->disableReboot();
+        parent::setUp();
 
         $this->testResourceManager = new TestResourceEntityManager($this->testClient->getContainer());
+        $this->login(userAttributes: ['IS_ADMIN' => false]);
     }
 
     protected function getTestClient(

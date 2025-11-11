@@ -6,12 +6,9 @@ namespace Dbp\Relay\CoreBundle\Tests;
 
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\TestUtils\AbstractApiTest;
-use Dbp\Relay\CoreBundle\TestUtils\UserAuthTrait;
 
 class ApiErrorTest extends AbstractApiTest
 {
-    use UserAuthTrait;
-
     public function testBasics()
     {
         $error = new ApiError(400, 'foobar');
@@ -34,12 +31,12 @@ class ApiErrorTest extends AbstractApiTest
 
     public function testApiErrorDetailsJsonLd()
     {
-        $client = $this->withUser('user', [], '42');
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=ApiErrorDetails',
-            ['headers' => [
-                'Authorization' => 'Bearer 42',
-                'Accept' => 'application/ld+json',
-            ],
+        $response = $this->testClient->get(
+            '/test/test-resources/foobar/custom_controller?test=ApiErrorDetails',
+            options: [
+                'headers' => [
+                    'Accept' => 'application/ld+json',
+                ],
             ]);
         $this->assertSame(418, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
@@ -61,12 +58,12 @@ class ApiErrorTest extends AbstractApiTest
 
     public function testApiErrorDetailsJson()
     {
-        $client = $this->withUser('user', [], '42');
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller_json?test=ApiErrorDetails',
-            ['headers' => [
-                'Authorization' => 'Bearer 42',
-                'Accept' => 'application/json',
-            ],
+        $response = $this->testClient->get(
+            '/test/test-resources/foobar/custom_controller_json?test=ApiErrorDetails',
+            options: [
+                'headers' => [
+                    'Accept' => 'application/json',
+                ],
             ]);
         $this->assertSame(418, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
@@ -87,12 +84,12 @@ class ApiErrorTest extends AbstractApiTest
 
     public function testApiErrorDetailsDefaultJsonLd()
     {
-        $client = $this->withUser('user', [], '42');
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=ApiErrorDetailsDefault',
-            ['headers' => [
-                'Authorization' => 'Bearer 42',
-                'Accept' => 'application/ld+json',
-            ],
+        $response = $this->testClient->get(
+            '/test/test-resources/foobar/custom_controller?test=ApiErrorDetailsDefault',
+            options: [
+                'headers' => [
+                    'Accept' => 'application/ld+json',
+                ],
             ]);
         $this->assertSame(418, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
@@ -109,12 +106,12 @@ class ApiErrorTest extends AbstractApiTest
 
     public function testApiError()
     {
-        $client = $this->withUser('user', [], '42');
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=ApiError',
-            ['headers' => [
-                'Authorization' => 'Bearer 42',
-                'Accept' => 'application/ld+json',
-            ],
+        $response = $this->testClient->get(
+            '/test/test-resources/foobar/custom_controller?test=ApiError',
+            options: [
+                'headers' => [
+                    'Accept' => 'application/ld+json',
+                ],
             ]);
         $this->assertSame(418, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
@@ -129,12 +126,12 @@ class ApiErrorTest extends AbstractApiTest
 
     public function testApiError500()
     {
-        $client = $this->withUser('user', [], '42');
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=ApiError500',
-            ['headers' => [
-                'Authorization' => 'Bearer 42',
-                'Accept' => 'application/ld+json',
-            ],
+        $response = $this->testClient->get(
+            '/test/test-resources/foobar/custom_controller?test=ApiError500',
+            options: [
+                'headers' => [
+                    'Accept' => 'application/ld+json',
+                ],
             ]);
         $this->assertSame(500, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
@@ -147,12 +144,12 @@ class ApiErrorTest extends AbstractApiTest
 
     public function testHttpException418()
     {
-        $client = $this->withUser('user', [], '42');
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=HttpException418',
-            ['headers' => [
-                'Authorization' => 'Bearer 42',
-                'Accept' => 'application/ld+json',
-            ],
+        $response = $this->testClient->get(
+            '/test/test-resources/foobar/custom_controller?test=HttpException418',
+            options: [
+                'headers' => [
+                    'Accept' => 'application/ld+json',
+                ],
             ]);
         $this->assertSame(418, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
@@ -167,12 +164,12 @@ class ApiErrorTest extends AbstractApiTest
 
     public function testHttpException500()
     {
-        $client = $this->withUser('user', [], '42');
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=HttpException500',
-            ['headers' => [
-                'Authorization' => 'Bearer 42',
-                'Accept' => 'application/ld+json',
-            ],
+        $response = $this->testClient->get(
+            '/test/test-resources/foobar/custom_controller?test=HttpException500',
+            options: [
+                'headers' => [
+                    'Accept' => 'application/ld+json',
+                ],
             ]);
         $this->assertSame(500, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
@@ -187,11 +184,12 @@ class ApiErrorTest extends AbstractApiTest
 
     public function testUnhandledErrorDefaultOutputFormat()
     {
-        $client = $this->withUser('user', [], '42');
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=UnhandledError',
-            ['headers' => [
-                'Authorization' => 'Bearer 42',
-            ],
+        $response = $this->testClient->get(
+            '/test/test-resources/foobar/custom_controller?test=UnhandledError',
+            options: [
+                'headers' => [
+                    'Accept' => 'application/ld+json',
+                ],
             ]);
         $this->assertSame(500, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
@@ -206,12 +204,12 @@ class ApiErrorTest extends AbstractApiTest
 
     public function testUnhandledErrorJsonLd()
     {
-        $client = $this->withUser('user', [], '42');
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=UnhandledError',
-            ['headers' => [
-                'Authorization' => 'Bearer 42',
-                'Accept' => 'application/ld+json',
-            ],
+        $response = $this->testClient->get(
+            '/test/test-resources/foobar/custom_controller?test=UnhandledError',
+            options: [
+                'headers' => [
+                    'Accept' => 'application/ld+json',
+                ],
             ]);
         $this->assertSame(500, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
@@ -223,18 +221,18 @@ class ApiErrorTest extends AbstractApiTest
         $this->assertArrayNotHasKey('relay:errorId', $content);
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
 
-        $this->assertTrue($client->getKernel()->isDebug());
+        $this->assertTrue($this->testClient->getClient()->getKernel()->isDebug());
         $this->assertArrayHasKey('trace', $content);
     }
 
     public function testUnhandledErrorJson()
     {
-        $client = $this->withUser('user', [], '42');
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller_json?test=UnhandledError',
-            ['headers' => [
-                'Authorization' => 'Bearer 42',
-                'Accept' => 'application/json',
-            ],
+        $response = $this->testClient->get(
+            '/test/test-resources/foobar/custom_controller_json?test=UnhandledError',
+            options: [
+                'headers' => [
+                    'Accept' => 'application/json',
+                ],
             ]);
         $this->assertSame(500, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
@@ -245,25 +243,26 @@ class ApiErrorTest extends AbstractApiTest
         $this->assertArrayNotHasKey('relay:errorId', $content);
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
 
-        $this->assertTrue($client->getKernel()->isDebug());
+        $this->assertTrue($this->testClient->getClient()->getKernel()->isDebug());
         $this->assertArrayHasKey('trace', $content);
     }
 
     public function testUnhandledWithoutDebug()
     {
-        $client = $this->withUser('user', [], '42', kernelOptions: ['debug' => false]);
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=UnhandledError',
-            ['headers' => [
-                'Authorization' => 'Bearer 42',
-                'Accept' => 'application/ld+json',
-            ],
+        $this->setUpTestClient(['debug' => false]);
+        $response = $this->testClient->get(
+            '/test/test-resources/foobar/custom_controller?test=UnhandledError',
+            options: [
+                'headers' => [
+                    'Accept' => 'application/ld+json',
+                ],
             ]);
         $this->assertSame(500, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
 
         // No trace with debug
-        $this->assertFalse($client->getKernel()->isDebug());
+        $this->assertFalse($this->testClient->getClient()->getKernel()->isDebug());
         $this->assertArrayNotHasKey('trace', $content);
 
         // No details with 5xx and debug
@@ -275,19 +274,20 @@ class ApiErrorTest extends AbstractApiTest
 
     public function testHttpException500WithoutDebug()
     {
-        $client = $this->withUser('user', [], '42', kernelOptions: ['debug' => false]);
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=HttpException500',
-            ['headers' => [
-                'Authorization' => 'Bearer 42',
-                'Accept' => 'application/ld+json',
-            ],
+        $this->setUpTestClient(['debug' => false]);
+        $response = $this->testClient->get(
+            '/test/test-resources/foobar/custom_controller?test=HttpException500',
+            options: [
+                'headers' => [
+                    'Accept' => 'application/ld+json',
+                ],
             ]);
         $this->assertSame(500, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
 
         // No trace with debug
-        $this->assertFalse($client->getKernel()->isDebug());
+        $this->assertFalse($this->testClient->getClient()->getKernel()->isDebug());
         $this->assertArrayNotHasKey('trace', $content);
 
         // No details with 5xx and debug
@@ -299,19 +299,20 @@ class ApiErrorTest extends AbstractApiTest
 
     public function testHttpException400WithoutDebug()
     {
-        $client = $this->withUser('user', [], '42', kernelOptions: ['debug' => false]);
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=HttpException418',
-            ['headers' => [
-                'Authorization' => 'Bearer 42',
-                'Accept' => 'application/ld+json',
-            ],
+        $this->setUpTestClient(['debug' => false]);
+        $response = $this->testClient->get(
+            '/test/test-resources/foobar/custom_controller?test=HttpException418',
+            options: [
+                'headers' => [
+                    'Accept' => 'application/ld+json',
+                ],
             ]);
         $this->assertSame(418, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
 
         // No trace with debug
-        $this->assertFalse($client->getKernel()->isDebug());
+        $this->assertFalse($this->testClient->getClient()->getKernel()->isDebug());
         $this->assertArrayNotHasKey('trace', $content);
 
         // No details with 5xx and debug
@@ -323,12 +324,13 @@ class ApiErrorTest extends AbstractApiTest
 
     public function testApiError500NoDebug()
     {
-        $client = $this->withUser('user', [], '42', kernelOptions: ['debug' => false]);
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=ApiError500',
-            ['headers' => [
-                'Authorization' => 'Bearer 42',
-                'Accept' => 'application/ld+json',
-            ],
+        $this->setUpTestClient(['debug' => false]);
+        $response = $this->testClient->get(
+            '/test/test-resources/foobar/custom_controller?test=ApiError500',
+            options: [
+                'headers' => [
+                    'Accept' => 'application/ld+json',
+                ],
             ]);
         $this->assertSame(500, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaders(false)['content-type'][0]);
@@ -341,7 +343,7 @@ class ApiErrorTest extends AbstractApiTest
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
 
         // No trace with debug
-        $this->assertFalse($client->getKernel()->isDebug());
+        $this->assertFalse($this->testClient->getClient()->getKernel()->isDebug());
         $this->assertArrayNotHasKey('trace', $content);
     }
 }

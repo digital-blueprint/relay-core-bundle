@@ -11,8 +11,14 @@ use Dbp\Relay\CoreBundle\TestUtils\Internal\TestUser;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+/**
+ * @deprecated use Dbp\Relay\CoreBundle\TestUtils\TestClient instead
+ */
 trait UserAuthTrait
 {
+    /**
+     * @deprecated use Dbp\Relay\CoreBundle\TestUtils\TestClient::setUpUser instead
+     */
     public function withUser(?string $userIdentifier, array $symfonyRoles = [], ?string $token = null, array $kernelOptions = []): Client
     {
         KernelTestCase::ensureKernelShutdown();
@@ -28,6 +34,8 @@ trait UserAuthTrait
     }
 
     /**
+     * @deprecated use Dbp\Relay\CoreBundle\TestUtils\TestClient::setUpUser instead
+     *
      * Sets up a user with the given list of user attributes.
      * For the authentication in subsequent requests to work you have to add an 'Authorization' header with the value
      * TestAuthenticator::TEST_AUTHORIZATION_HEADER:
@@ -49,6 +57,9 @@ trait UserAuthTrait
         return $client;
     }
 
+    /**
+     * @deprecated use Dbp\Relay\CoreBundle\TestUtils\TestClient::setUpUser instead
+     */
     public function getUser(Client $client): ?UserInterface
     {
         $container = $client->getContainer();

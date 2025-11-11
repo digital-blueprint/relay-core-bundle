@@ -4,17 +4,13 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\Rest;
 
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
-use Dbp\Relay\CoreBundle\TestUtils\UserAuthTrait;
+use Dbp\Relay\CoreBundle\TestUtils\AbstractApiTest;
 
-class CustomControllerTest extends ApiTestCase
+class CustomControllerTest extends AbstractApiTest
 {
-    use UserAuthTrait;
-
     public function testCustomControllerRequiredAuthenticationAuthenticated()
     {
-        $client = $this->withUser('someuser', [], '42');
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=GetResourceAuthenticatedOnly', ['headers' => ['Authorization' => 'Bearer 42']]);
+        $response = $this->testClient->get('/test/test-resources/foobar/custom_controller?test=GetResourceAuthenticatedOnly');
         $this->assertSame(200, $response->getStatusCode());
         $content = json_decode($response->getContent(), true, flags: JSON_THROW_ON_ERROR);
         $this->assertSame($content['identifier'], 'foobar');
@@ -22,8 +18,8 @@ class CustomControllerTest extends ApiTestCase
 
     public function testCustomControllerRequiredAuthenticationUnauthenticated()
     {
-        $client = $this->withUser('someuser');
-        $response = $client->request('GET', '/test/test-resources/foobar/custom_controller?test=GetResourceAuthenticatedOnly');
+        $response = $this->testClient->get(
+            '/test/test-resources/foobar/custom_controller?test=GetResourceAuthenticatedOnly', token: null);
         $this->assertSame(401, $response->getStatusCode());
     }
 }

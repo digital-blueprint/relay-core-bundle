@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- deprecate `UserAuthTrait` and `UserAuthWebTrait` in favor of `TestClient`
+
 ## v0.1.223
 
 - Inject the `EntityNormalizer` into `AbstractAuthorizationService` for testing to avoid null references

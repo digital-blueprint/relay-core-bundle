@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\TestUtils;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 abstract class AbstractApiTest extends ApiTestCase
 {
@@ -23,7 +24,13 @@ abstract class AbstractApiTest extends ApiTestCase
 
     protected function setUp(): void
     {
-        $this->testClient = new TestClient(self::createClient());
+        $this->setUpTestClient();
+    }
+
+    protected function setUpTestClient(array $kernelOptions = []): void
+    {
+        KernelTestCase::ensureKernelShutdown();
+        $this->testClient = new TestClient(self::createClient($kernelOptions));
         $this->testClient->getClient()->disableReboot(); // allow multiple requests in one test
         $this->login();
     }
