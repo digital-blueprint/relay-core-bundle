@@ -12,14 +12,8 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-/**
- * @deprecated use Dbp\Relay\CoreBundle\TestUtils\TestClient instead
- */
 trait UserAuthWebTrait
 {
-    /**
-     * @deprecated use Dbp\Relay\CoreBundle\TestUtils\TestClient::setUpUser instead
-     */
     public function withUser(?string $id, array $roles = []): KernelBrowser
     {
         KernelTestCase::ensureKernelShutdown();
@@ -36,9 +30,6 @@ trait UserAuthWebTrait
         return $client;
     }
 
-    /**
-     * @deprecated
-     */
     public function getUser(KernelBrowser $client): UserInterface
     {
         $tokenStorage = $client->getContainer()->get(TokenStorageInterface::class);

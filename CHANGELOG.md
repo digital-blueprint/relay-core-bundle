@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- deprecate `UserAuthTrait` and `UserAuthWebTrait` in favor of `TestClient`
+- deprecate `UserAuthTrait` in favor of `TestClient`
 
 ## v0.1.223
 
