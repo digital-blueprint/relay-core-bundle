@@ -18,7 +18,7 @@ jobs:
         composer-command: ['install']
         include:
           - php-versions: '8.2'
-            composer-command: 'update --prefer-lowest --prefer-dist --prefer-stable --no-interaction'
+            composer-command: 'update --prefer-lowest --prefer-dist --prefer-stable --no-interaction --no-audit'
             name: prefer-lowest
     steps:
     - name: Set up php${{ matrix.php-versions }}
