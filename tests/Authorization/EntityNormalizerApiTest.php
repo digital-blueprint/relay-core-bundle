@@ -33,7 +33,7 @@ class EntityNormalizerApiTest extends AbstractApiTest
         string $userIdentifier = TestClient::TEST_USER_IDENTIFIER,
         array $userAttributes = ['IS_ADMIN' => false]): TestClient
     {
-        $this->testClient->setUpUser($userIdentifier, $userAttributes);
+        $this->login($userIdentifier, $userAttributes);
 
         return $this->testClient;
     }

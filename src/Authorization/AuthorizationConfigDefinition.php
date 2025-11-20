@@ -12,9 +12,6 @@ class AuthorizationConfigDefinition
 {
     /* config array keys */
     public const AUTHORIZATION_CONFIG_NODE = 'authorization';
-    /* @deprecated Since v0.1.188, use roles, or resource_actions (for resource dependent permissions) instead */
-    public const POLICIES_CONFIG_NODE = 'policies';
-
     public const ROLES_CONFIG_NODE = 'roles';
     public const RESOURCE_PERMISSIONS_CONFIG_NODE = 'resource_permissions';
     public const ATTRIBUTES_CONFIG_NODE = 'attributes';
@@ -33,16 +30,6 @@ class AuthorizationConfigDefinition
     public static function create(): AuthorizationConfigDefinition
     {
         return new AuthorizationConfigDefinition();
-    }
-
-    /**
-     * @deprecated Since v0.1.188, use roles, or resource_actions (for resource dependent permissions) instead
-     */
-    public function addPolicy(string $policyName, string $defaultExpression = 'false', string $info = ''): AuthorizationConfigDefinition
-    {
-        Tools::pushToSubarray($this->configDefinition, self::POLICIES_KEY, [$policyName, $defaultExpression, $info]);
-
-        return $this;
     }
 
     public function addRole(string $roleName, string $defaultExpression = 'false', string $info = ''): AuthorizationConfigDefinition
@@ -69,16 +56,6 @@ class AuthorizationConfigDefinition
     public function getNodeDefinition(): NodeDefinition
     {
         $treeBuilder = new TreeBuilder(self::AUTHORIZATION_CONFIG_NODE);
-
-        $rightsNodeChildBuilder = $treeBuilder->getRootNode()->children()->arrayNode(self::POLICIES_CONFIG_NODE)
-            ->addDefaultsIfNotSet()
-            ->children();
-        foreach ($this->configDefinition[self::POLICIES_KEY] ?? [] as $policyDefinition) {
-            $rightsNodeChildBuilder->scalarNode($policyDefinition[0])
-                ->defaultValue($policyDefinition[1] ?? 'false')
-                ->info($policyDefinition[2] ?? '')
-                ->end();
-        }
 
         $rightsNodeChildBuilder = $treeBuilder->getRootNode()->children()->arrayNode(self::ROLES_CONFIG_NODE)
             ->addDefaultsIfNotSet()

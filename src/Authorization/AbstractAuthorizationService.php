@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Authorization;
 
-use Dbp\Relay\CoreBundle\Authorization\Serializer\EntityNormalizer;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\User\UserAttributeException;
 use Dbp\Relay\CoreBundle\User\UserAttributeService;
@@ -16,7 +15,6 @@ abstract class AbstractAuthorizationService
     private AuthorizationExpressionChecker $authorizationExpressionChecker;
     private AuthorizationUser $currentAuthorizationUser;
     private ?UserAttributeService $userAttributeService = null;
-    private ?EntityNormalizer $entityNormalizer = null;
 
     public function __construct()
     {
@@ -30,21 +28,13 @@ abstract class AbstractAuthorizationService
         $this->userAttributeService = $userAttributeService;
     }
 
-    #[Required]
-    public function __injectEntityNormalizer(EntityNormalizer $entityNormalizer): void
-    {
-        $this->entityNormalizer = $entityNormalizer;
-
-        $this->setUpInputAndOutputGroups();
-    }
-
     /**
-     * for testing purposes.
+     * Resets the internal state (e.g. request caches).
+     * Should be called between requests when performing multiple requests in a single test case.
      */
-    public function clearRequestCaches(): void
+    public function reset(): void
     {
-        $this->entityNormalizer?->reset();
-        $this->userAttributeService?->clearRequestCaches();
+        $this->userAttributeService?->reset();
     }
 
     /**
@@ -55,18 +45,9 @@ abstract class AbstractAuthorizationService
         if ($authorizationConfig = $config[AuthorizationConfigDefinition::AUTHORIZATION_CONFIG_NODE] ?? null) {
             $this->setUpAccessControlPolicies(
                 $authorizationConfig[AuthorizationConfigDefinition::ROLES_CONFIG_NODE] ?? [],
-                array_merge($authorizationConfig[AuthorizationConfigDefinition::RESOURCE_PERMISSIONS_CONFIG_NODE] ?? [],
-                    $authorizationConfig[AuthorizationConfigDefinition::POLICIES_CONFIG_NODE] ?? []),
+                $authorizationConfig[AuthorizationConfigDefinition::RESOURCE_PERMISSIONS_CONFIG_NODE] ?? [],
                 $authorizationConfig[AuthorizationConfigDefinition::ATTRIBUTES_CONFIG_NODE] ?? []);
         }
-    }
-
-    /**
-     * @deprecated Since v0.1.188, use setUp instead.
-     */
-    public function configure(array $policies = [], array $attributes = []): void
-    {
-        $this->setUpAccessControlPolicies([], $policies, $attributes);
     }
 
     public function setUpAccessControlPolicies(array $roles = [], array $resourcePermissions = [], array $attributes = []): void
@@ -263,57 +244,6 @@ abstract class AbstractAuthorizationService
     }
 
     /**
-     * @param ?callable(string): bool $condition Condition for the groups to be added. The default is true.
-     */
-    protected function showOutputGroupsForEntityClassIf(string $entityClass, array $outputGroups, ?callable $condition = null): void
-    {
-        $this->entityNormalizer->registerGetOutputGroupsToAddForEntityClassCallback($entityClass,
-            function (string $entityClass) use ($condition, $outputGroups) {
-                return $condition === null || $condition($entityClass) ? $outputGroups : [];
-            });
-    }
-
-    protected function showOutputGroupsForEntityClassIfGrantedRoles(string $entityClass, array $outputGroups, array $requiredRoles): void
-    {
-        $this->entityNormalizer->registerGetOutputGroupsToAddForEntityClassCallback($entityClass,
-            function () use ($requiredRoles, $outputGroups) {
-                foreach ($requiredRoles as $requiredRole) {
-                    if (!$this->isGrantedRole($requiredRole)) {
-                        return [];
-                    }
-                }
-
-                return $outputGroups;
-            });
-    }
-
-    /**
-     * @param callable(object, string): bool $condition
-     */
-    protected function showOutputGroupsForEntityInstanceIf(string $entityClass, array $outputGroups, callable $condition): void
-    {
-        $this->entityNormalizer->registerGetOutputGroupsToAddForEntityInstanceCallback($entityClass,
-            function (object $entityInstance, string $entityClass) use ($condition, $outputGroups) {
-                return $condition($entityInstance, $entityClass) ? $outputGroups : [];
-            });
-    }
-
-    protected function showOutputGroupsForEntityInstanceIfGrantedResourcePermissions(
-        string $entityClass, array $outputGroups, array $requiredResourcePermissions): void
-    {
-        $this->entityNormalizer->registerGetOutputGroupsToAddForEntityInstanceCallback($entityClass,
-            function (object $entityInstance) use ($requiredResourcePermissions, $outputGroups) {
-                foreach ($requiredResourcePermissions as $requiredResourcePermission) {
-                    if (!$this->isGrantedResourcePermission($requiredResourcePermission, $entityInstance)) {
-                        return [];
-                    }
-                }
-
-                return $outputGroups;
-            });
-    }
-
-    /**
      * @throws AuthorizationException
      */
     private function getAttributeInternal(string $attributeName, $defaultValue = null)
@@ -335,9 +265,5 @@ abstract class AbstractAuthorizationService
     private function isGrantedResourcePermissionInternal(string $resourcePermission, mixed $resource): bool
     {
         return $this->authorizationExpressionChecker->isGrantedResourcePermission($this->currentAuthorizationUser, $resourcePermission, $resource);
-    }
-
-    protected function setUpInputAndOutputGroups(): void
-    {
     }
 }

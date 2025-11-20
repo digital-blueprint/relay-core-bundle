@@ -14,9 +14,13 @@ readonly class UserAttributeService
     {
     }
 
-    public function clearRequestCaches(): void
+    /**
+     * Resets the internal state (e.g. request caches).
+     * Should be called between requests when performing multiple requests in a single test case.
+     */
+    public function reset(): void
     {
-        $this->userAttributeMuxer->clearRequestCaches();
+        $this->userAttributeMuxer->reset();
     }
 
     public function getCurrentUserIdentifier(): ?string

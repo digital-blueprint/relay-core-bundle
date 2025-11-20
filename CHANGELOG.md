@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- don't ship all subclasses of `AbstractAuthorizationService` with an `EntityNormalizer`
+- implement `ResetInterface::reset` where possible for kernel testing
+- offer `TestAuthorizationService::reset` for manual reset of request caches for non-kernel tests
+- remove deprecate `policies` from authorization config in favor of `roles` and `resource_permissions` (deprecated since v0.1.188)
+
 ## v0.1.224
 
 - deprecate `UserAuthTrait` in favor of `TestClient`

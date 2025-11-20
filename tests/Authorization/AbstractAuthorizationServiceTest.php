@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\Authorization;
 
+use Dbp\Relay\CoreBundle\Authorization\AbstractAuthorizationService;
 use Dbp\Relay\CoreBundle\Authorization\AuthorizationException;
+use Dbp\Relay\CoreBundle\Authorization\Serializer\EntityNormalizer;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Tests\Rest\TestEntity;
+use Dbp\Relay\CoreBundle\Tests\TestApi\Authorization\TestApiAuthorizationService;
 use Dbp\Relay\CoreBundle\TestUtils\TestAuthorizationService;
 use Dbp\Relay\CoreBundle\User\UserAttributeException;
 use PHPUnit\Framework\TestCase;
@@ -316,14 +319,16 @@ class AbstractAuthorizationServiceTest extends TestCase
         $this->assertEquals('USER_ATTRIBUTE_UNDEFINED', $attributeNames[3]);
     }
 
-    private function getTestAuthorizationService(?string $userIdentifier = null, bool $isAuthenticated = true): TestAuthorizationService
+    private function getTestAuthorizationService(?string $userIdentifier = null, bool $isAuthenticated = true): AbstractAuthorizationService
     {
-        $authorizationService = TestAuthorizationService::create($userIdentifier, [
-            self::IS_USER_USER_ATTRIBUTE => $userIdentifier === TestAuthorizationService::TEST_USER_IDENTIFIER,
-            self::IS_ADMIN_USER_ATTRIBUTE => $userIdentifier === TestAuthorizationService::ADMIN_USER_IDENTIFIER,
-            'EMAIL' => 'test@example.com',
-            'NULL' => null,
-        ], isAuthenticated: $isAuthenticated);
+        $authorizationService = new TestApiAuthorizationService(new EntityNormalizer());
+        TestAuthorizationService::setUp($authorizationService,
+            $userIdentifier, [
+                self::IS_USER_USER_ATTRIBUTE => $userIdentifier === TestAuthorizationService::TEST_USER_IDENTIFIER,
+                self::IS_ADMIN_USER_ATTRIBUTE => $userIdentifier === TestAuthorizationService::ADMIN_USER_IDENTIFIER,
+                'EMAIL' => 'test@example.com',
+                'NULL' => null,
+            ], isAuthenticated: $isAuthenticated);
         $authorizationService->setUpAccessControlPolicies([
             'MAY_USE' => 'user.get("'.self::IS_USER_USER_ATTRIBUTE.'") || user.get("'.self::IS_ADMIN_USER_ATTRIBUTE.'")',
             'MAY_MANAGE' => 'user.get("'.self::IS_ADMIN_USER_ATTRIBUTE.'")',

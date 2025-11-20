@@ -7,7 +7,6 @@ namespace Dbp\Relay\CoreBundle\TestUtils;
 use ApiPlatform\Symfony\Bundle\Test\Client;
 use Dbp\Relay\CoreBundle\TestUtils\Internal\TestAuthenticator;
 use Dbp\Relay\CoreBundle\TestUtils\Internal\TestUser;
-use Dbp\Relay\CoreBundle\User\UserAttributeMuxer;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
@@ -69,10 +68,6 @@ class TestClient
         assert($userAttributeProviderProvider instanceof TestUserAttributeProviderProvider);
         $userAttributeProviderProvider->setDefaultAttributes($userAttributes);
         $userAttributeProviderProvider->addUser($userIdentifier, $userAttributes);
-
-        $userAttributeMuxer = $container->get(UserAttributeMuxer::class);
-        assert($userAttributeMuxer instanceof UserAttributeMuxer);
-        $userAttributeMuxer->clearRequestCaches();
     }
 
     /**

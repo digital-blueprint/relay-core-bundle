@@ -7,11 +7,12 @@ namespace Dbp\Relay\CoreBundle\User;
 use Dbp\Relay\CoreBundle\User\Event\GetAvailableUserAttributesEvent;
 use Dbp\Relay\CoreBundle\User\Event\GetUserAttributeEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\Service\ResetInterface;
 
 /**
  * @internal
  */
-class UserAttributeMuxer
+class UserAttributeMuxer implements ResetInterface
 {
     /** @var iterable<UserAttributeProviderInterface> */
     private iterable $userAttributeProviders;
@@ -35,12 +36,15 @@ class UserAttributeMuxer
     }
 
     /**
-     * Clears all caches. For testing purposes.
+     * Resets the internal state (e.g. request caches).
+     * For kernel tests, this is called automatically before requests.
+     * Should be called between requests when performing multiple requests in a single non-kernel test case.
      */
-    public function clearRequestCaches(): void
+    public function reset(): void
     {
         $this->additionallyAvailableAttributesCache = null;
         $this->valueCache = [];
+        $this->attributeStack = [];
     }
 
     /**

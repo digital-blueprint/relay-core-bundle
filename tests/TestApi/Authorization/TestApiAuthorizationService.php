@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Tests\TestApi\Authorization;
 
 use Dbp\Relay\CoreBundle\Authorization\AbstractAuthorizationService;
+use Dbp\Relay\CoreBundle\Authorization\Serializer\EntityNormalizer;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Entity\TestResource;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Entity\TestSubResource;
 
@@ -20,32 +21,43 @@ class TestApiAuthorizationService extends AbstractAuthorizationService
         self::IS_VIEWER_USER_ATTRIBUTE => false,
     ];
 
-    protected function setUpInputAndOutputGroups(): void
+    public function __construct(private readonly EntityNormalizer $entityNormalizer)
     {
-        $this->showOutputGroupsForEntityClassIf(TestResource::class, ['TestResource:output:admin'],
-            function () {
-                return $this->getUserIdentifier() === 'king_arthur';
-            });
-        $this->showOutputGroupsForEntityClassIfGrantedRoles(TestResource::class, ['TestResource:output:admin'], ['ROLE_ADMIN']);
-        $this->showOutputGroupsForEntityClassIf(TestResource::class, ['TestResource:output:admin'],
-            function () {
-                return $this->getUserIdentifier() === 'king_arthur';
-            });
-        $this->showOutputGroupsForEntityClassIfGrantedRoles(TestResource::class, ['TestResource:output:admin'], ['ROLE_ADMIN']);
-        $this->showOutputGroupsForEntityInstanceIfGrantedResourcePermissions(TestResource::class,
-            ['TestResource:output:admin'], ['READ_TEST_RESOURCE']);
-        $this->showOutputGroupsForEntityInstanceIf(TestResource::class,
-            ['TestResource:output:admin'], function (TestResource $testResource) {
-                return $testResource->getIsPublic();
-            });
-        $this->showOutputGroupsForEntityInstanceIfGrantedResourcePermissions(TestResource::class,
-            ['TestResource:output:admin'], ['READ_TEST_RESOURCE']);
-        $this->showOutputGroupsForEntityInstanceIf(TestResource::class,
-            ['TestResource:output:admin'], function (TestResource $testResource) {
-                return $testResource->getIsPublic();
-            });
+        parent::__construct();
 
-        $this->showOutputGroupsForEntityInstanceIf(TestSubResource::class,
+        $this->setUpInputAndOutputGroups();
+    }
+
+    public function setUpInputAndOutputGroups(): void
+    {
+        $this->entityNormalizer->showOutputGroupsForEntityClassIf(TestResource::class, ['TestResource:output:admin'],
+            function () {
+                return $this->getUserIdentifier() === 'king_arthur';
+            });
+        $this->entityNormalizer->showOutputGroupsForEntityClassIfGrantedRoles(
+            TestResource::class, ['TestResource:output:admin'], ['ROLE_ADMIN'], $this);
+        $this->entityNormalizer->showOutputGroupsForEntityClassIf(
+            TestResource::class, ['TestResource:output:admin'],
+            function () {
+                return $this->getUserIdentifier() === 'king_arthur';
+            });
+        $this->entityNormalizer->showOutputGroupsForEntityClassIfGrantedRoles(
+            TestResource::class, ['TestResource:output:admin'], ['ROLE_ADMIN'], $this);
+        $this->entityNormalizer->showOutputGroupsForEntityInstanceIfGrantedResourcePermissions(
+            TestResource::class, ['TestResource:output:admin'], ['READ_TEST_RESOURCE'], $this);
+        $this->entityNormalizer->showOutputGroupsForEntityInstanceIf(
+            TestResource::class, ['TestResource:output:admin'],
+            function (TestResource $testResource) {
+                return $testResource->getIsPublic();
+            });
+        $this->entityNormalizer->showOutputGroupsForEntityInstanceIfGrantedResourcePermissions(
+            TestResource::class, ['TestResource:output:admin'], ['READ_TEST_RESOURCE'], $this);
+        $this->entityNormalizer->showOutputGroupsForEntityInstanceIf(
+            TestResource::class, ['TestResource:output:admin'],
+            function (TestResource $testResource) {
+                return $testResource->getIsPublic();
+            });
+        $this->entityNormalizer->showOutputGroupsForEntityInstanceIf(TestSubResource::class,
             ['TestSubResource:output:admin'], function (TestSubResource $testSubResource) {
                 return $testSubResource->getIsPublic();
             });

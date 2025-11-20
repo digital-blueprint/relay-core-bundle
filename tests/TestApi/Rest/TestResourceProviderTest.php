@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\TestApi\Rest;
 
+use Dbp\Relay\CoreBundle\Authorization\Serializer\EntityNormalizer;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Authorization\TestApiAuthorizationService;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Entity\TestResource;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Service\TestResourceService;
@@ -23,7 +24,7 @@ class TestResourceProviderTest extends WebTestCase
         $kernel = self::bootKernel();
         $this->testEntityManager = new TestResourceEntityManager($kernel->getContainer());
 
-        $authorizationService = new TestApiAuthorizationService();
+        $authorizationService = new TestApiAuthorizationService(new EntityNormalizer());
         TestAuthorizationService::setUp($authorizationService);
 
         $this->testResourceProvider = new TestResourceProvider(
