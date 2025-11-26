@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.225
+
 - don't ship all subclasses of `AbstractAuthorizationService` with an `EntityNormalizer`
 - implement `ResetInterface::reset` where possible for kernel testing
 - offer `TestAuthorizationService::reset` for manual reset of request caches for non-kernel tests
