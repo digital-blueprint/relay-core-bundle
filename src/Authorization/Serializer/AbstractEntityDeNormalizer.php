@@ -76,11 +76,9 @@ class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements
     }
 
     /**
-     * @return array|string|int|float|bool|\ArrayObject|null
-     *
      * @throws ExceptionInterface
      */
-    public function normalize($object, $format = null, array $context = [])
+    public function normalize($object, $format = null, array $context = []): float|int|bool|\ArrayObject|array|string|null
     {
         $entityClassName = get_class($object);
         $mapEntry = $this->entityClassNameToReadAttributeNamesMapping[$entityClassName];
@@ -118,11 +116,9 @@ class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements
     }
 
     /**
-     * @return mixed
-     *
      * @throws ExceptionInterface
      */
-    public function denormalize($data, string $type, ?string $format = null, array $context = [])
+    public function denormalize($data, string $type, ?string $format = null, array $context = []): mixed
     {
         $entityClassName = $type;
         $mapEntry = $this->entityClassNameToWriteAttributeNamesMapping[$entityClassName];
@@ -214,5 +210,10 @@ class AbstractEntityDeNormalizer extends AbstractAuthorizationService implements
     private static function getUniqueDenormalizerAlreadyCalledKeyForEntity(string $entityClassName): string
     {
         return self::class.$entityClassName.'denoormalizer';
+    }
+
+    public function getSupportedTypes(?string $format): array
+    {
+        return $this->normalizer->getSupportedTypes($format);
     }
 }

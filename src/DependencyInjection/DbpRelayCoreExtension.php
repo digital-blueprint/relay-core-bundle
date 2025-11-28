@@ -249,7 +249,6 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
             ],
             'debug' => '%kernel.debug%',
             'strict_variables' => '%kernel.debug%',
-            'exception_controller' => null,
         ]);
 
         // In case another bundle wants to inject twig globals
