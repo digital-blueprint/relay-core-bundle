@@ -20,7 +20,7 @@ class Configuration implements ConfigurationInterface
                 ->end()
                 ->scalarNode('build_info_url')
                     ->info('Some URL identifying the current build (URL to the commit on some git web interface)')
-                    ->example('https://gitlab.example.com/project/-/commit/deadbeef')
+                    ->example('https://github.example.com/project/-/commit/deadbeef')
                 ->end()
                 ->scalarNode('logo_path')
                     ->info('Path to the logo (256x256) of the API frontend')

@@ -522,5 +522,5 @@ AbstractDataProvider::isCurrentUserGrantedOperationAccess that can be overridden
 ## v0.1.39
 
 - The core bundle will now set the Symfony locale based on the "Accept-Language" HTTP header.
-- Moved the documentation to https://gitlab.tugraz.at/dbp/handbook to avoid
+- Moved the documentation to https://github.com/digital-blueprint/handbook to avoid
   general documentation being split/duplicated in two places.
