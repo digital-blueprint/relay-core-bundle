@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## v0.1.226
+
+- Add support for Symfony 7.4
+- Add support for symfony/monolog-bundle 4
+- Remove various deprecated classes and methods:
+  - AbstractEntityDeNormalizer
+  - AbstractGetAttributeSubscriber
+  - Tools::decodeJSON
+  - Tools::dumpTrace
+  - AbstractStateProvider
+  - NamedEntityInterface
+
 ## v0.1.225
 
 - don't ship all subclasses of `AbstractAuthorizationService` with an `EntityNormalizer`
