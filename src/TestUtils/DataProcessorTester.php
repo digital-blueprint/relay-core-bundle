@@ -13,8 +13,6 @@ use Symfony\Component\HttpFoundation\Request;
 
 class DataProcessorTester extends AbstractRestTester
 {
-    private const IDENTIFIER_NAME = 'identifier';
-
     /**
      * Use this to set up the given data processor (i.e. inject all required services and set up a test user)
      * and create a new data provider tester instance for it.
@@ -41,32 +39,61 @@ class DataProcessorTester extends AbstractRestTester
 
     private function __construct(
         private readonly AbstractDataProcessor $dataProcessor, string $resourceClass,
-        array $denormalizationGroups, string $identifierName)
+        array $denormalizationGroups, string $identifierName = self::DEFAULT_IDENTIFIER_NAME)
     {
-        parent::__construct($resourceClass, denormalizationGroups: $denormalizationGroups, identifierName: $identifierName);
+        parent::__construct($resourceClass,
+            denormalizationGroups: $denormalizationGroups,
+            identifierName: $identifierName);
     }
 
-    public function addItem(mixed $data, array $filters = []): mixed
+    /**
+     * Simulates a POST request.
+     */
+    public function addItem(mixed $data, array $filters = [], array $uriVariables = []): mixed
     {
-        return $this->dataProcessor->process($data, new Post(), [],
-            $this->createContext(Request::METHOD_POST, null, $filters, null));
+        return $this->dataProcessor->process($data, new Post(), $uriVariables,
+            $this->createContext(Request::METHOD_POST, null, $filters));
     }
 
-    public function replaceItem(mixed $identifier, mixed $data, mixed $previousData, array $filters = []): mixed
+    /**
+     * Simulates a PUT request.
+     */
+    public function replaceItem(?string $identifier, mixed $data, mixed $previousData,
+        array $filters = [], array $uriVariables = []): mixed
     {
-        return $this->dataProcessor->process($data, new Put(), [$this->identifierName => $identifier],
+        if ($identifier !== null) {
+            $uriVariables[$this->identifierName] = $identifier;
+        }
+
+        return $this->dataProcessor->process($data, new Put(), $uriVariables,
             $this->createContext(Request::METHOD_PUT, $identifier, $filters, $previousData));
     }
 
-    public function updateItem(mixed $identifier, mixed $data, mixed $previousData, array $filters = []): mixed
+    /**
+     * Simulates a PATCH request.
+     */
+    public function updateItem(?string $identifier, mixed $data, mixed $previousData,
+        array $filters = [], array $uriVariables = []): mixed
     {
-        return $this->dataProcessor->process($data, new Patch(), [$this->identifierName => $identifier],
+        if ($identifier !== null) {
+            $uriVariables[$this->identifierName] = $identifier;
+        }
+
+        return $this->dataProcessor->process($data, new Patch(), $uriVariables,
             $this->createContext(Request::METHOD_PATCH, $identifier, $filters, $previousData));
     }
 
-    public function removeItem(mixed $identifier, mixed $data, array $filters = []): void
+    /**
+     * Simulates a DELETE request.
+     */
+    public function removeItem(?string $identifier, mixed $data,
+        array $filters = [], array $uriVariables = []): void
     {
-        $this->dataProcessor->process($data, new Delete(), [$this->identifierName => $identifier],
+        if ($identifier !== null) {
+            $uriVariables[$this->identifierName] = $identifier;
+        }
+
+        $this->dataProcessor->process($data, new Delete(), $uriVariables,
             $this->createContext(Request::METHOD_DELETE, $identifier, $filters, null));
     }
 }

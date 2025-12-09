@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- TestUtils: allow passing the URI variables of the current request to
+DataProviderTester and DataProcessorTester
+
 ## v0.1.226
 
 - Add support for Symfony 7.4

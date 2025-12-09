@@ -9,6 +9,8 @@ use Symfony\Component\HttpFoundation\Request;
 
 class AbstractRestTester
 {
+    protected const DEFAULT_IDENTIFIER_NAME = 'identifier';
+
     /**
      * Use this to set up a test user with the given user attributes.
      */
@@ -27,7 +29,7 @@ class AbstractRestTester
         protected readonly string $resourceClass,
         protected readonly array $normalizationGroups = [],
         protected readonly array $denormalizationGroups = [],
-        protected readonly string $identifierName = 'identifier')
+        protected readonly string $identifierName = self::DEFAULT_IDENTIFIER_NAME)
     {
     }
 

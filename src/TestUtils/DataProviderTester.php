@@ -51,25 +51,36 @@ class DataProviderTester extends AbstractRestTester
         private readonly AbstractDataProvider $dataProvider,
         string $resourceClass,
         array $normalizationGroups,
-        string $identifierName)
+        string $identifierName = 'identifier')
     {
-        parent::__construct($resourceClass, normalizationGroups: $normalizationGroups, identifierName: $identifierName);
+        parent::__construct(
+            $resourceClass,
+            normalizationGroups: $normalizationGroups,
+            identifierName: $identifierName);
     }
 
-    public function getItem(?string $identifier, array $filters = []): ?object
+    public function getItem(?string $identifier = null, array $filters = [], array $uriVariables = []): ?object
     {
-        $uriVariables = $identifier !== null ? [$this->identifierName => $identifier] : [];
+        if ($identifier !== null) {
+            $uriVariables[$this->identifierName] = $identifier;
+        }
 
         /** @var object|null */
-        return $this->dataProvider->provide(new Get(), $uriVariables,
-            $this->createContext(Request::METHOD_GET, $identifier, $filters));
+        return $this->dataProvider->provide(
+            new Get(),
+            $uriVariables,
+            $this->createContext(Request::METHOD_GET, $identifier, $filters)
+        );
     }
 
-    public function getCollection(array $filters = []): array
+    public function getCollection(array $filters = [], array $uriVariables = []): array
     {
         /** @var PartialPaginator $partialPaginator */
-        $partialPaginator = $this->dataProvider->provide(new GetCollection(), [],
-            $this->createContext(Request::METHOD_GET, filters: $filters));
+        $partialPaginator = $this->dataProvider->provide(
+            new GetCollection(),
+            $uriVariables,
+            $this->createContext(Request::METHOD_GET, filters: $filters)
+        );
 
         return $partialPaginator->getItems();
     }
@@ -77,13 +88,14 @@ class DataProviderTester extends AbstractRestTester
     /**
      * @param int $pageNumber One-based page number
      */
-    public function getPage(int $pageNumber = 1, int $maxNumItemsPerPage = 30, array $filters = []): array
+    public function getPage(int $pageNumber = 1, int $maxNumItemsPerPage = 30,
+        array $filters = [], array $uriVariables = []): array
     {
         $filters = array_merge($filters, [
             'page' => $pageNumber,
             'perPage' => $maxNumItemsPerPage,
         ]);
 
-        return $this->getCollection($filters);
+        return $this->getCollection($filters, $uriVariables);
     }
 }
