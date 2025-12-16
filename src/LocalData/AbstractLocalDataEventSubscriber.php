@@ -68,9 +68,8 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
 
     public function setConfig(array $config): void
     {
-        $configNode = $config[self::ROOT_CONFIG_NODE] ?? [];
-
-        foreach ($configNode as $configMappingEntry) {
+        $this->attributeMapping = [];
+        foreach ($config[self::ROOT_CONFIG_NODE] ?? [] as $configMappingEntry) {
             $localDataAttributeName = $configMappingEntry[self::LOCAL_DATA_ATTRIBUTE_CONFIG_NODE];
 
             if (isset($this->attributeMapping[$localDataAttributeName])) {
