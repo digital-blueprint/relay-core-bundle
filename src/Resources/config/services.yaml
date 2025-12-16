@@ -64,6 +64,12 @@ services:
     autowire: true
     autoconfigure: true
 
+  Dbp\Relay\CoreBundle\HealthCheck\Checks\CronCheck:
+    autowire: true
+    autoconfigure: true
+    calls:
+      - setCache: [ '@dbp.relay.core.cache.cron' ]
+
   Dbp\Relay\CoreBundle\Auth\ProxyAuthenticator:
     autowire: true
     autoconfigure: true
