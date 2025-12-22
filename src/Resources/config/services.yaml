@@ -81,24 +81,12 @@ services:
   Dbp\Relay\CoreBundle\API\UserSessionInterface:
     '@Dbp\Relay\CoreBundle\Auth\UserSession'
 
-  Dbp\Relay\CoreBundle\LocalData\LocalDataAwareEventDispatcher:
-    autowire: true
-    autoconfigure: true
-
-  Dbp\Relay\CoreBundle\LocalData\LocalDataAwareEvent:
-    autowire: true
-    autoconfigure: true
-
   Dbp\Relay\CoreBundle\Routing\RoutingLoader:
     tags: ['routing.loader']
     autowire: true
     autoconfigure: true
     arguments:
       $env: ~
-
-  Dbp\Relay\CoreBundle\Pagination\Pagination:
-    autowire: true
-    autoconfigure: true
 
   Dbp\Relay\CoreBundle\DB\MigrateCommand:
     autowire: true
