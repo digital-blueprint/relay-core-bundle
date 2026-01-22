@@ -25,8 +25,8 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
     protected const LOCAL_DATA_ATTRIBUTE_CONFIG_NODE = 'local_data_attribute';
     protected const IS_ARRAY_CONFIG_NODE = 'is_array';
 
-    private const SOURCE_ATTRIBUTE_KEY = 'source';
-    private const IS_ARRAY_KEY = 'is_array';
+    protected const SOURCE_ATTRIBUTE_KEY = 'source';
+    protected const IS_ARRAY_KEY = 'is_array';
 
     /**
      * @var array<string, array{source: string, is_array: bool}>
@@ -137,9 +137,9 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
      *
      * @param array{source: string, is_array: bool} $attributeMapEntry
      */
-    protected function getAttributeValue(LocalDataPostEvent $event, array $attributeMapEntry): mixed
+    protected function getAttributeValue(LocalDataPostEvent $postEvent, array $attributeMapEntry): mixed
     {
-        $attributeValue = $event->getSourceData()[$attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY]] ?? null;
+        $attributeValue = $postEvent->getSourceData()[$attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY]] ?? null;
         if ($attributeValue !== null) {
             $is_array_attribute = $attributeMapEntry[self::IS_ARRAY_KEY];
             if (is_array($attributeValue)) {
