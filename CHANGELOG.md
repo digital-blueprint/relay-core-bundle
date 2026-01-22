@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- AbstractLocalDataEventSubscriber: allow overriding the getting of the local data attribute value, e.g. for attributes
+that can be provided by a data connector, but whose values are not included in the source system's standard set of attributes.
+
 ## v0.1.227
 
 - TestUtils: allow passing the URI variables of the current request to

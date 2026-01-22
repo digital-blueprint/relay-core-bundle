@@ -28,6 +28,9 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
     private const SOURCE_ATTRIBUTE_KEY = 'source';
     private const IS_ARRAY_KEY = 'is_array';
 
+    /**
+     * @var array<string, array{source: string, is_array: bool}>
+     */
     private array $attributeMapping = [];
 
     public static function getLocalDataMappingConfigNodeDefinition(): NodeDefinition
@@ -102,17 +105,10 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
             $localDataAttributes = [];
             foreach ($event->getPendingRequestedAttributes() as $localDataAttributeName) {
                 if (($attributeMapEntry = $this->attributeMapping[$localDataAttributeName] ?? null) !== null) {
-                    $attributeValue = $event->getSourceData()[$attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY]] ?? null;
-                    if ($attributeValue !== null) {
-                        $is_array_attribute = $attributeMapEntry[self::IS_ARRAY_KEY];
-                        if (is_array($attributeValue)) {
-                            $attributeValue = $is_array_attribute ? $attributeValue : ($attributeValue[0] ?? null);
-                        } else {
-                            $attributeValue = $is_array_attribute ? [$attributeValue] : $attributeValue;
-                        }
-                    }
-
-                    $localDataAttributes[$localDataAttributeName] = $attributeValue;
+                    $localDataAttributes[$localDataAttributeName] = $this->getAttributeValue(
+                        $event,
+                        $attributeMapEntry,
+                    );
                 }
             }
 
@@ -125,12 +121,34 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
     }
 
     /**
-     * Override this if you want to modify the local data attribute values before they are set in the entity.
+     * Override this if you want to set requested local attributes (not handled by this subscriber) or
+     * modify the local data attribute values before they are set in the entity.
      *
      * @param array $localDataAttributes A reference to the associative array of local data attributes
      *                                   (keys: local data attribute names, values: local data attribute values)
      */
     protected function onPostEvent(LocalDataPostEvent $postEvent, array &$localDataAttributes): void
     {
+    }
+
+    /**
+     * Gets the source attribute value for a requested local data attribute.
+     * Feel free to override if the attribute value is not contained in the entity's source data.
+     *
+     * @param array{source: string, is_array: bool} $attributeMapEntry
+     */
+    protected function getAttributeValue(LocalDataPostEvent $event, array $attributeMapEntry): mixed
+    {
+        $attributeValue = $event->getSourceData()[$attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY]] ?? null;
+        if ($attributeValue !== null) {
+            $is_array_attribute = $attributeMapEntry[self::IS_ARRAY_KEY];
+            if (is_array($attributeValue)) {
+                $attributeValue = $is_array_attribute ? $attributeValue : ($attributeValue[0] ?? null);
+            } else {
+                $attributeValue = $is_array_attribute ? [$attributeValue] : $attributeValue;
+            }
+        }
+
+        return $attributeValue;
     }
 }
