@@ -399,7 +399,7 @@
         },
         {
             "name": "api-platform/metadata",
-            "version": "v4.2.13",
+            "version": "v4.2.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/api-platform/metadata.git",
@@ -491,22 +491,22 @@
                 "swagger"
             ],
             "support": {
-                "source": "https://github.com/api-platform/metadata/tree/v4.2.13"
+                "source": "https://github.com/api-platform/metadata/tree/v4.2.14"
             },
             "time": "2026-01-12T13:36:15+00:00"
         },
         {
             "name": "api-platform/openapi",
-            "version": "v4.2.13",
+            "version": "v4.2.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/api-platform/openapi.git",
-                "reference": "3600d57bf2729c8fa82d831edbdd21244037ee1b"
+                "reference": "39ed78187a4a8e7c1c1fc9b5a3ef3913e3e914e3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/api-platform/openapi/zipball/3600d57bf2729c8fa82d831edbdd21244037ee1b",
-                "reference": "3600d57bf2729c8fa82d831edbdd21244037ee1b",
+                "url": "https://api.github.com/repos/api-platform/openapi/zipball/39ed78187a4a8e7c1c1fc9b5a3ef3913e3e914e3",
+                "reference": "39ed78187a4a8e7c1c1fc9b5a3ef3913e3e914e3",
                 "shasum": ""
             },
             "require": {
@@ -581,9 +581,9 @@
                 "swagger"
             ],
             "support": {
-                "source": "https://github.com/api-platform/openapi/tree/v4.2.13"
+                "source": "https://github.com/api-platform/openapi/tree/v4.2.14"
             },
-            "time": "2026-01-16T15:43:25+00:00"
+            "time": "2026-01-17T19:34:53+00:00"
         },
         {
             "name": "api-platform/serializer",
@@ -680,7 +680,7 @@
         },
         {
             "name": "api-platform/state",
-            "version": "v4.2.13",
+            "version": "v4.2.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/api-platform/state.git",
@@ -771,22 +771,22 @@
                 "swagger"
             ],
             "support": {
-                "source": "https://github.com/api-platform/state/tree/v4.2.13"
+                "source": "https://github.com/api-platform/state/tree/v4.2.14"
             },
             "time": "2026-01-12T13:36:15+00:00"
         },
         {
             "name": "api-platform/symfony",
-            "version": "v4.2.13",
+            "version": "v4.2.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/api-platform/symfony.git",
-                "reference": "4ff4ef66768fa2b9d7d124a2096b095bad0289d4"
+                "reference": "31539dc26bd88f54e43d2d8a24613ff988307da1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/api-platform/symfony/zipball/4ff4ef66768fa2b9d7d124a2096b095bad0289d4",
-                "reference": "4ff4ef66768fa2b9d7d124a2096b095bad0289d4",
+                "url": "https://api.github.com/repos/api-platform/symfony/zipball/31539dc26bd88f54e43d2d8a24613ff988307da1",
+                "reference": "31539dc26bd88f54e43d2d8a24613ff988307da1",
                 "shasum": ""
             },
             "require": {
@@ -899,9 +899,9 @@
                 "symfony"
             ],
             "support": {
-                "source": "https://github.com/api-platform/symfony/tree/v4.2.13"
+                "source": "https://github.com/api-platform/symfony/tree/v4.2.14"
             },
-            "time": "2026-01-16T16:29:22+00:00"
+            "time": "2026-01-23T14:24:03+00:00"
         },
         {
             "name": "api-platform/validator",
