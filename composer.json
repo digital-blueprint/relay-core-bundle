@@ -52,7 +52,7 @@
         "symfony/security-core": "^6.4 || ^7.4",
         "symfony/security-http": "^6.4 || ^7.4",
         "symfony/serializer": "^6.4 || ^7.4",
-        "symfony/service-contracts": "^2.5 || ^3",
+        "symfony/service-contracts": "^7",
         "symfony/twig-bundle": "^6.4 || ^7.4",
         "symfony/uid": "^6.4 || ^7.4",
         "symfony/web-link": "^6.4 || ^7.4",
