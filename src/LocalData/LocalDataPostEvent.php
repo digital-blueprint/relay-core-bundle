@@ -13,14 +13,13 @@ class LocalDataPostEvent extends Event implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    private LocalDataAwareInterface $entity;
-    private array $sourceData;
     private array $requestedAttributes = [];
 
-    public function __construct(LocalDataAwareInterface $entity, array $sourceData)
+    public function __construct(
+        private readonly LocalDataAwareInterface $entity,
+        private readonly array $sourceData,
+        private readonly array $options = [])
     {
-        $this->entity = $entity;
-        $this->sourceData = $sourceData;
     }
 
     public function getSourceData(): array
@@ -31,6 +30,11 @@ class LocalDataPostEvent extends Event implements LoggerAwareInterface
     public function getEntity(): LocalDataAwareInterface
     {
         return $this->entity;
+    }
+
+    public function getOptions(): array
+    {
+        return $this->options;
     }
 
     /**
