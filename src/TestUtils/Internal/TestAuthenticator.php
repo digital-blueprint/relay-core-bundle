@@ -55,16 +55,15 @@ class TestAuthenticator extends AbstractAuthenticator
 
         if ($this->token === null) {
             throw new BadCredentialsException('Invalid token');
-        } else {
-            $auth = $request->headers->get('Authorization', '');
-            if ($auth === '') {
-                throw new BadCredentialsException('Token is not present in the request headers');
-            }
-            $token = trim(preg_replace('/^(?:\s+)?Bearer\s/', '', $auth));
+        }
+        $auth = $request->headers->get('Authorization', '');
+        if ($auth === '') {
+            throw new BadCredentialsException('Token is not present in the request headers');
+        }
+        $token = trim(preg_replace('/^(?:\s+)?Bearer\s/', '', $auth));
 
-            if ($token !== $this->token) {
-                throw new BadCredentialsException('Invalid token');
-            }
+        if ($token !== $this->token) {
+            throw new BadCredentialsException('Invalid token');
         }
 
         $passport = new SelfValidatingPassport(new UserBadge($this->token, function ($token) {
