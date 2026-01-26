@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\LocalData;
 
+use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Rest\Options;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterException;
@@ -13,6 +14,7 @@ use Dbp\Relay\CoreBundle\Tests\Rest\TestEntity;
 use Dbp\Relay\CoreBundle\TestUtils\DataProviderTester;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\HttpFoundation\Response;
 
 class LocalDataTest extends TestCase
 {
@@ -40,6 +42,26 @@ class LocalDataTest extends TestCase
                 'IS_USER' => true,
                 'IS_ADMIN' => false,
             ]);
+    }
+
+    public function testLocalDataUndefined()
+    {
+        try {
+            $this->getTestEntityWithLocalData('foo', []);
+            $this->fail('Expected ApiError exception not thrown.');
+        } catch (ApiError $e) {
+            $this->assertEquals(Response::HTTP_BAD_REQUEST, $e->getStatusCode());
+        }
+    }
+
+    public function testLocalDataDefinedButForOtherEntity()
+    {
+        try {
+            $this->getTestEntityWithLocalData('other_entity_attribute', []);
+            $this->fail('Expected ApiError exception not thrown.');
+        } catch (ApiError $e) {
+            $this->assertEquals(Response::HTTP_BAD_REQUEST, $e->getStatusCode());
+        }
     }
 
     public function testScalarLocalDataMappingWithScalarSourceValue()
@@ -214,6 +236,11 @@ class LocalDataTest extends TestCase
             ],
             [
                 'local_data_attribute' => 'array_attribute_1',
+                'read_policy' => 'true',
+            ],
+            [
+                'local_data_attribute' => 'other_entity_attribute',
+                'entity_short_name' => 'OtherTestEntity',
                 'read_policy' => 'true',
             ],
         ];

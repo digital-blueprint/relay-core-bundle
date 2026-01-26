@@ -243,7 +243,8 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     private function createFilter(mixed $filterParameters, callable $getAvailableAttributePaths, bool $removeForbiddenLocalDataAttributeConditions = true): Filter
     {
         if (is_array($filterParameters) === false) {
-            throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, '\''.Parameters::FILTER.'\' parameter must be an array. Square brackets missing.', ErrorIds::FILTER_PARAMETER_MUST_BE_AN_ARRAY);
+            throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, '\''.Parameters::FILTER.
+                '\' parameter must be an array. Square brackets missing.', ErrorIds::FILTER_PARAMETER_MUST_BE_AN_ARRAY);
         }
         try {
             $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
@@ -449,7 +450,8 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
                 throw new \RuntimeException($exception->getMessage());
             }
 
-            foreach ($this->localDataAccessChecker->getConfiguredLocalDataAttributeNames() as $localDataAttributeName) {
+            foreach ($this->localDataAccessChecker->getConfiguredLocalDataAttributeNames(
+                $this->currentOperation->getShortName()) as $localDataAttributeName) {
                 $this->availableAttributePaths[] = LocalData::getAttributePath($localDataAttributeName);
             }
         }

@@ -18,11 +18,10 @@ class LocalDataAccessChecker
     private const LOCAL_DATA_CONFIG_NODE = 'local_data';
     private const LOCAL_DATA_ATTRIBUTE_NAME_CONFIG_NODE = 'local_data_attribute';
     private const READ_POLICY_CONFIG_NODE = 'read_policy';
+    private const ENTITY_SHORT_NAME_CONFIG_NODE = 'entity';
 
-    /*
-     * @deprecated since version 0.1.119
-     */
-    private const ALLOW_LOCAL_QUERY_CONFIG_NODE = 'allow_query';
+    // private const IS_FILTERABLE_CONFIG_NODE = 'is_filterable';
+    // private const IS_SORTABLE_CONFIG_NODE = 'is_sortable';
 
     private const READ_POLICY_PREFIX = '@read-local-data:';
 
@@ -46,11 +45,18 @@ class LocalDataAccessChecker
             ->defaultValue('false')
             ->info('A boolean expression evaluable by the Symfony Expression Language determining whether the current user may read the local data attribute. Available parameters: user.')
             ->end()
-            ->booleanNode(self::ALLOW_LOCAL_QUERY_CONFIG_NODE)
-            ->defaultValue(false)
-            ->info('Indicates whether the local data attribute can be used in local queries.')
-            ->setDeprecated('dbp/relay-core-bundle', '0.1.119')
+            ->scalarNode(self::ENTITY_SHORT_NAME_CONFIG_NODE)
+            ->defaultNull()
+            ->info('The short name of the entity the local data attribute is defined for. It can be omitted, if the local data attribute is defined for all entities or there is only one entity.')
             ->end()
+            //            ->booleanNode(self::IS_FILTERABLE_CONFIG_NODE) // TODO: implement
+            //            ->defaultValue(false)
+            //            ->info('Indicates whether the local data attribute can be filtered by, given that '.self::READ_POLICY_CONFIG_NODE.' evaluates to true for the current user.')
+            //            ->end()
+            //            ->booleanNode(self::IS_SORTABLE_CONFIG_NODE) // TODO: implement
+            //            ->defaultValue(false)
+            //            ->info('Indicates whether the local data attribute can be sorted by, given that '.self::READ_POLICY_CONFIG_NODE.' evaluates to true for the current user.')
+            //            ->end()
             ->end()
             ->end()
         ;
@@ -66,8 +72,7 @@ class LocalDataAccessChecker
             if (isset($this->attributeConfig[$localDataAttributeName])) {
                 throw new \RuntimeException(sprintf('multiple config entries for local data attribute \'%s\'', $localDataAttributeName));
             }
-            $attributeConfigEntry = [];
-            $this->attributeConfig[$localDataAttributeName] = $attributeConfigEntry;
+            $this->attributeConfig[$localDataAttributeName] = $configEntry;
 
             // the name of the local data attribute is used as name for the right to view that attribute
             // the attribute is not readable by default
@@ -75,9 +80,16 @@ class LocalDataAccessChecker
         }
     }
 
-    public function getConfiguredLocalDataAttributeNames(): array
+    /**
+     * @return string[]
+     */
+    public function getConfiguredLocalDataAttributeNames(?string $entityShortName): array
     {
-        return array_keys($this->attributeConfig);
+        return array_keys(array_filter($this->attributeConfig,
+            function (array $configEntry) use ($entityShortName) {
+                return null === $entityShortName
+                    || $entityShortName === ($configEntry[self::ENTITY_SHORT_NAME_CONFIG_NODE] ?? $entityShortName);
+            }));
     }
 
     public function getPolicies(): array

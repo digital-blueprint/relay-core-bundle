@@ -39,11 +39,15 @@ class DataProcessorTester extends AbstractRestTester
 
     private function __construct(
         private readonly AbstractDataProcessor $dataProcessor, string $resourceClass,
-        array $denormalizationGroups, string $identifierName = self::DEFAULT_IDENTIFIER_NAME)
+        array $denormalizationGroups,
+        string $identifierName = self::DEFAULT_IDENTIFIER_NAME,
+        ?string $entityShortName = null)
     {
         parent::__construct($resourceClass,
             denormalizationGroups: $denormalizationGroups,
-            identifierName: $identifierName);
+            identifierName: $identifierName,
+            entityShortName: $entityShortName
+        );
     }
 
     /**
@@ -51,8 +55,12 @@ class DataProcessorTester extends AbstractRestTester
      */
     public function addItem(mixed $data, array $filters = [], array $uriVariables = []): mixed
     {
-        return $this->dataProcessor->process($data, new Post(), $uriVariables,
-            $this->createContext(Request::METHOD_POST, null, $filters));
+        return $this->dataProcessor->process(
+            $data,
+            new Post(shortName: $this->entityShortName),
+            $uriVariables,
+            $this->createContext(Request::METHOD_POST, null, $filters)
+        );
     }
 
     /**
@@ -65,8 +73,12 @@ class DataProcessorTester extends AbstractRestTester
             $uriVariables[$this->identifierName] = $identifier;
         }
 
-        return $this->dataProcessor->process($data, new Put(), $uriVariables,
-            $this->createContext(Request::METHOD_PUT, $identifier, $filters, $previousData));
+        return $this->dataProcessor->process(
+            $data,
+            new Put(shortName: $this->entityShortName),
+            $uriVariables,
+            $this->createContext(Request::METHOD_PUT, $identifier, $filters, $previousData)
+        );
     }
 
     /**
@@ -79,8 +91,12 @@ class DataProcessorTester extends AbstractRestTester
             $uriVariables[$this->identifierName] = $identifier;
         }
 
-        return $this->dataProcessor->process($data, new Patch(), $uriVariables,
-            $this->createContext(Request::METHOD_PATCH, $identifier, $filters, $previousData));
+        return $this->dataProcessor->process(
+            $data,
+            new Patch(shortName: $this->entityShortName),
+            $uriVariables,
+            $this->createContext(Request::METHOD_PATCH, $identifier, $filters, $previousData)
+        );
     }
 
     /**
@@ -93,7 +109,11 @@ class DataProcessorTester extends AbstractRestTester
             $uriVariables[$this->identifierName] = $identifier;
         }
 
-        $this->dataProcessor->process($data, new Delete(), $uriVariables,
-            $this->createContext(Request::METHOD_DELETE, $identifier, $filters, null));
+        $this->dataProcessor->process(
+            $data,
+            new Delete(shortName: $this->entityShortName),
+            $uriVariables,
+            $this->createContext(Request::METHOD_DELETE, $identifier, $filters, null)
+        );
     }
 }

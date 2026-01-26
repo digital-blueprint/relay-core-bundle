@@ -23,11 +23,12 @@ class DataProviderTester extends AbstractRestTester
      * @param string[] $normalizationGroups the normalization groups of the entity that this data provider provides
      */
     public static function create(AbstractDataProvider $dataProvider, string $resourceClass, array $normalizationGroups = [],
-        string $identifierName = 'identifier'): DataProviderTester
+        string $identifierName = 'identifier', ?string $entityShortName = null): DataProviderTester
     {
         self::setUp($dataProvider);
 
-        return new DataProviderTester($dataProvider, $resourceClass, $normalizationGroups, $identifierName);
+        return new DataProviderTester(
+            $dataProvider, $resourceClass, $normalizationGroups, $identifierName, $entityShortName);
     }
 
     /**
@@ -51,12 +52,14 @@ class DataProviderTester extends AbstractRestTester
         private readonly AbstractDataProvider $dataProvider,
         string $resourceClass,
         array $normalizationGroups,
-        string $identifierName = 'identifier')
+        string $identifierName = 'identifier',
+        ?string $entityShortName = null)
     {
         parent::__construct(
             $resourceClass,
             normalizationGroups: $normalizationGroups,
-            identifierName: $identifierName);
+            identifierName: $identifierName,
+            entityShortName: $entityShortName);
     }
 
     public function getItem(?string $identifier = null, array $filters = [], array $uriVariables = []): ?object
@@ -67,7 +70,7 @@ class DataProviderTester extends AbstractRestTester
 
         /** @var object|null */
         return $this->dataProvider->provide(
-            new Get(),
+            new Get(shortName: $this->entityShortName),
             $uriVariables,
             $this->createContext(Request::METHOD_GET, $identifier, $filters)
         );
@@ -77,7 +80,7 @@ class DataProviderTester extends AbstractRestTester
     {
         /** @var PartialPaginator $partialPaginator */
         $partialPaginator = $this->dataProvider->provide(
-            new GetCollection(),
+            new GetCollection(shortName: $this->entityShortName),
             $uriVariables,
             $this->createContext(Request::METHOD_GET, filters: $filters)
         );

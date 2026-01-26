@@ -29,7 +29,8 @@ class AbstractRestTester
         protected readonly string $resourceClass,
         protected readonly array $normalizationGroups = [],
         protected readonly array $denormalizationGroups = [],
-        protected readonly string $identifierName = self::DEFAULT_IDENTIFIER_NAME)
+        protected readonly string $identifierName = self::DEFAULT_IDENTIFIER_NAME,
+        protected readonly ?string $entityShortName = null)
     {
     }
 
