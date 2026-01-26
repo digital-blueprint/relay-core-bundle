@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- LocalData: add optional entity_short_name attribute to local data configuration to specify the entity the local data
+- LocalData: add optional entity_short_name attribute to local data and local data subscriber configuration to specify the entity the local data
 attribute is defined for. It can be omitted if the local data attribute is defined for all entities or there is only one entity using
 local data attributes.
 - AbstractLocalDataEventSubscriber: allow overriding the getting of the local data attribute value, e.g. for attributes

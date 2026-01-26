@@ -24,6 +24,7 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
     protected const SOURCE_ATTRIBUTE_CONFIG_NODE = 'source_attribute';
     protected const LOCAL_DATA_ATTRIBUTE_CONFIG_NODE = 'local_data_attribute';
     protected const IS_ARRAY_CONFIG_NODE = 'is_array';
+    protected const ENTITY_SHORT_NAME_CONFIG_NODE = 'entity_short_name';
 
     protected const SOURCE_ATTRIBUTE_KEY = 'source';
     protected const IS_ARRAY_KEY = 'is_array';
@@ -33,24 +34,30 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
      */
     private array $attributeMapping = [];
 
+    protected ?string $entityShortName = null;
+
     public static function getLocalDataMappingConfigNodeDefinition(): NodeDefinition
     {
         $treeBuilder = new TreeBuilder(self::ROOT_CONFIG_NODE);
 
         return $treeBuilder->getRootNode()
             ->arrayPrototype()
-            ->children()
-            ->scalarNode(self::LOCAL_DATA_ATTRIBUTE_CONFIG_NODE)
-            ->info('The name of the local data attribute.')
-            ->end()
-            ->scalarNode(self::SOURCE_ATTRIBUTE_CONFIG_NODE)
-            ->info('The source attribute to map to the local data attribute. If the source attribute is not found, the default value is used.')
-            ->end()
-            ->booleanNode(self::IS_ARRAY_CONFIG_NODE)
-            ->info('Specifies whether the local data attribute is expected to be of array type. The value of the local data attribute is converted accordingly, if required.')
-            ->defaultValue(false)
-            ->end()
-            ->end()
+                ->children()
+                    ->scalarNode(self::LOCAL_DATA_ATTRIBUTE_CONFIG_NODE)
+                    ->info('The name of the local data attribute.')
+                    ->end()
+                    ->scalarNode(self::SOURCE_ATTRIBUTE_CONFIG_NODE)
+                    ->info('The source attribute to map to the local data attribute. If the source attribute is not found, the default value is used.')
+                    ->end()
+                    ->booleanNode(self::IS_ARRAY_CONFIG_NODE)
+                    ->info('Specifies whether the local data attribute is expected to be of array type. The value of the local data attribute is converted accordingly, if required.')
+                    ->defaultValue(false)
+                    ->end()
+                    ->scalarNode(self::ENTITY_SHORT_NAME_CONFIG_NODE)
+                    ->defaultNull()
+                    ->info('The short name of the entity the local data attribute is defined for. It can be omitted, if the local data attribute is defined for all entities or there is only one entity.')
+                    ->end()
+                ->end()
             ->end();
     }
 
@@ -69,10 +76,19 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
         throw new \RuntimeException(sprintf('child classes must override the static \'%s\' method', __METHOD__));
     }
 
+    public function __construct(?string $entityShortName = null)
+    {
+        $this->entityShortName = $entityShortName;
+    }
+
     public function setConfig(array $config): void
     {
         $this->attributeMapping = [];
         foreach ($config[self::ROOT_CONFIG_NODE] ?? [] as $configMappingEntry) {
+            if ($this->entityShortName !== null
+                && $this->entityShortName !== ($configMappingEntry[self::ENTITY_SHORT_NAME_CONFIG_NODE] ?? $this->entityShortName)) {
+                continue;
+            }
             $localDataAttributeName = $configMappingEntry[self::LOCAL_DATA_ATTRIBUTE_CONFIG_NODE];
 
             if (isset($this->attributeMapping[$localDataAttributeName])) {

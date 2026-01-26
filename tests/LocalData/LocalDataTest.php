@@ -6,7 +6,6 @@ namespace Dbp\Relay\CoreBundle\Tests\LocalData;
 
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Rest\Options;
-use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterException;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTreeBuilder;
 use Dbp\Relay\CoreBundle\Tests\Rest\TestDataProvider;
@@ -25,7 +24,7 @@ class LocalDataTest extends TestCase
     {
         parent::setUp();
 
-        $localDataEventSubscriber = new TestEntityLocalDataEventSubscriber();
+        $localDataEventSubscriber = new TestEntityLocalDataEventSubscriber('TestEntity');
         $localDataEventSubscriber->setConfig(self::createSubscriberConfig());
 
         $eventDispatcher = new EventDispatcher();
@@ -58,6 +57,16 @@ class LocalDataTest extends TestCase
     {
         try {
             $this->getTestEntityWithLocalData('other_entity_attribute', []);
+            $this->fail('Expected ApiError exception not thrown.');
+        } catch (ApiError $e) {
+            $this->assertEquals(Response::HTTP_BAD_REQUEST, $e->getStatusCode());
+        }
+    }
+
+    public function testLocalDataMappingDefinedButForOtherEntity()
+    {
+        try {
+            $this->getTestEntityWithLocalData('attribute_4', ['src_attribute_4' => 'value_4']);
             $this->fail('Expected ApiError exception not thrown.');
         } catch (ApiError $e) {
             $this->assertEquals(Response::HTTP_BAD_REQUEST, $e->getStatusCode());
@@ -221,22 +230,27 @@ class LocalDataTest extends TestCase
             [
                 'local_data_attribute' => 'attribute_1',
                 'read_policy' => 'true',
+                'entity_short_name' => 'TestEntity',
             ],
             [
                 'local_data_attribute' => 'attribute_2',
                 'read_policy' => 'true',
+                'entity_short_name' => 'TestEntity',
             ],
             [
                 'local_data_attribute' => 'attribute_3',
                 'read_policy' => 'false',
+                // no entity_short_name defined here, so applies to all entities
             ],
             [
                 'local_data_attribute' => 'attribute_4',
                 'read_policy' => 'true',
+                'entity_short_name' => 'TestEntity',
             ],
             [
                 'local_data_attribute' => 'array_attribute_1',
                 'read_policy' => 'true',
+                'entity_short_name' => 'TestEntity',
             ],
             [
                 'local_data_attribute' => 'other_entity_attribute',
@@ -255,23 +269,33 @@ class LocalDataTest extends TestCase
             [
                 'local_data_attribute' => 'attribute_1',
                 'source_attribute' => 'src_attribute_1',
+                'entity_short_name' => 'TestEntity',
             ],
             [
                 'local_data_attribute' => 'attribute_2',
                 'source_attribute' => 'src_attribute_2',
+                'entity_short_name' => 'TestEntity',
             ],
             [
                 'local_data_attribute' => 'attribute_3',
                 'source_attribute' => 'src_attribute_3',
+                // no entity_short_name defined here, so applies to all entities
             ],
             [
                 'local_data_attribute' => 'attribute_4',
                 'source_attribute' => 'src_attribute_4',
+                'entity_short_name' => 'OtherTestEntity',
             ],
             [
                 'local_data_attribute' => 'array_attribute_1',
                 'source_attribute' => 'array_src_attribute_1',
                 'is_array' => true,
+                'entity_short_name' => 'TestEntity',
+            ],
+            [
+                'local_data_attribute' => 'other_entity_attribute',
+                'source_attribute' => 'other_entity_src_attribute',
+                'entity_short_name' => 'OtherTestEntity',
             ],
         ];
 
