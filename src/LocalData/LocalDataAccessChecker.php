@@ -18,7 +18,7 @@ class LocalDataAccessChecker
     private const LOCAL_DATA_CONFIG_NODE = 'local_data';
     private const LOCAL_DATA_ATTRIBUTE_NAME_CONFIG_NODE = 'local_data_attribute';
     private const READ_POLICY_CONFIG_NODE = 'read_policy';
-    private const ENTITY_SHORT_NAME_CONFIG_NODE = 'entity';
+    private const ENTITY_SHORT_NAME_CONFIG_NODE = 'entity_short_name';
 
     // private const IS_FILTERABLE_CONFIG_NODE = 'is_filterable';
     // private const IS_SORTABLE_CONFIG_NODE = 'is_sortable';
