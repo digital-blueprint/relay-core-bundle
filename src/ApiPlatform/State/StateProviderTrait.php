@@ -25,8 +25,8 @@ trait StateProviderTrait
 
         if ($operation instanceof CollectionOperationInterface) {
             return $this->getCollectionInternal($context);
-        } else {
-            return $this->getItemInternal($uriVariables[static::$identifierName] ?? self::NO_ID, $context);
         }
+
+        return $this->getItemInternal($uriVariables[static::$identifierName] ?? self::NO_ID, $context);
     }
 }

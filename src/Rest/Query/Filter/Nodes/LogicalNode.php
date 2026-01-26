@@ -90,11 +90,10 @@ abstract class LogicalNode extends Node
                     // A && false => false
                     $childNodes = [$childNode];
                     break;
-                } else {
-                    // A || false => A
-                    // A && true => A
-                    $appendChild = false;
                 }
+                // A || false => A
+                // A && true => A
+                $appendChild = false;
             }
 
             if ($appendChild) {

@@ -172,9 +172,9 @@ class ExpressionExtension
         $matches = [];
         if (preg_match($pattern, $subject, $matches)) {
             return vsprintf($formatString, $matches);
-        } else {
-            return $default;
         }
+
+        return $default;
     }
 
     public function map(?iterable $iterable, string $expression): ?array

@@ -305,20 +305,17 @@ class FromQueryFilterCreator
             }
 
             return $convertedArray;
-        } else {
-            if ($value === 'true') {
-                return true;
-            } elseif ($value === 'false') {
-                return false;
-            } elseif (is_numeric($value)) {
-                return $value + 0;
-            } else {
-                if (preg_match('/^"(.+)"$/', $value, $matches)) {
-                    return $matches[1]; // The string without the quotes
-                } else {
-                    throw new FilterException('string values must be quoted', FilterException::CONDITION_VALUE_ERROR);
-                }
-            }
         }
+        if ($value === 'true') {
+            return true;
+        } elseif ($value === 'false') {
+            return false;
+        } elseif (is_numeric($value)) {
+            return $value + 0;
+        }
+        if (preg_match('/^"(.+)"$/', $value, $matches)) {
+            return $matches[1]; // The string without the quotes
+        }
+        throw new FilterException('string values must be quoted', FilterException::CONDITION_VALUE_ERROR);
     }
 }
