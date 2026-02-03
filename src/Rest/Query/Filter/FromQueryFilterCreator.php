@@ -69,23 +69,8 @@ class FromQueryFilterCreator
     private const I_ENDS_WITH_OPERATOR = 'I_ENDS_WITH';
     private const I_STARTS_WITH_OPERATOR = 'I_STARTS_WITH';
     private const IN_ARRAY_OPERATOR = 'IN';
+    private const HAS_OPERATOR = 'HAS';
     private const IS_NULL_OPERATOR = 'IS_NULL';
-
-    /**
-     * The allowed condition operators.
-     *
-     * @var string[]
-     */
-    private static array $allowedOperators = [
-        self::EQUALS_OPERATOR,
-        self::LESS_THAN_OR_EQUAL_OPERATOR,
-        self::GREATER_THAN_OR_EQUAL_OPERATOR,
-        self::I_CONTAINS_OPERATOR,
-        self::I_ENDS_WITH_OPERATOR,
-        self::I_STARTS_WITH_OPERATOR,
-        self::IN_ARRAY_OPERATOR,
-        self::IS_NULL_OPERATOR,
-    ];
 
     private const ITEM_ID_KEY = 'id';
 
@@ -285,6 +270,7 @@ class FromQueryFilterCreator
             self::I_CONTAINS_OPERATOR => OperatorType::I_CONTAINS_OPERATOR,
             self::I_ENDS_WITH_OPERATOR => OperatorType::I_ENDS_WITH_OPERATOR,
             self::IN_ARRAY_OPERATOR => OperatorType::IN_ARRAY_OPERATOR,
+            self::HAS_OPERATOR => OperatorType::HAS_OPERATOR,
             self::IS_NULL_OPERATOR => OperatorType::IS_NULL_OPERATOR,
             default => throw new FilterException('undefined condition operator: '.$operator,
                 FilterException::CONDITION_OPERATOR_UNDEFINED),

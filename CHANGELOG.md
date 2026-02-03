@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Rest\Query\Filter: add operator type 'HAS' to check if an array contains a certain value
+
 ## v0.1.228
 
 - LocalDataPostEvent: add options for, e.g. localized local data attributes

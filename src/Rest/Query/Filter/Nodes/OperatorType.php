@@ -8,41 +8,82 @@ class OperatorType
 {
     /**
      * Equality operator (case-sensitive for strings).
+     *
+     * Passes if the field is equal to the value.
+     *
+     * The value and the field must be of the same type.
      */
     public const EQUALS_OPERATOR = 'EQUALS';
 
     /**
-     * Numeric less than or equal operator. The value must be of a numeric type.
+     * Numeric less than or equal operator.
+     *
+     * Passes if the field is less than or equal to the value.
+     *
+     * The value and the field must be of a numeric type.
      */
     public const LESS_THAN_OR_EQUAL_OPERATOR = 'LTE';
 
     /**
-     * Numeric greater than or equal operator. The value must be of a numeric type.
+     * Numeric greater than or equal operator.
+     *
+     * Passes if the field is greater than or equal to the value.
+     *
+     * The value and the field must be of a numeric type.
      */
     public const GREATER_THAN_OR_EQUAL_OPERATOR = 'GTE';
 
     /**
-     * Case-insensitive string contains operator. The value must be of type string.
+     * Case-insensitive string contains operator.
+     *
+     * Passes if the field contains the value.
+     *
+     * The value and the field must be of type string.
      */
     public const I_CONTAINS_OPERATOR = 'I_CONTAINS';
 
     /**
-     * Case-insensitive string ends with operator. The value must be of type string.
+     * Case-insensitive string ends with operator.
+     *
+     * Passes if the field ends with the value.
+     *
+     * The value and the field must be of type string.
      */
     public const I_ENDS_WITH_OPERATOR = 'I_ENDS_WITH';
 
     /**
-     * Case-insensitive string starts with operator. The value must be of type string.
+     * Case-insensitive string starts with operator.
+     *
+     * Passes if the field starts with the value.
+     *
+     * The value and the field must be of type string.
      */
     public const I_STARTS_WITH_OPERATOR = 'I_STARTS_WITH';
 
     /*
-     * In array operator. The value must be of array type.
+     * In array operator.
+     *
+     * Passes if the field equal one of the array items.
+     *
+     * The value must be of array type. The field must be of a scalar type.
      */
     public const IN_ARRAY_OPERATOR = 'IN';
 
     /*
-     * Is null operator. The value is ignored.
+     * Has operator.
+     *
+     * Passes if the field contains a value that matches the value.
+     *
+     * The value must be of a scalar type. The field must be of array type.
+     */
+    public const HAS_OPERATOR = 'HAS';
+
+    /*
+     * Is null operator.
+     *
+     * Passes if the field is null.
+     *
+     * No value must be given.
      */
     public const IS_NULL_OPERATOR = 'IS_NULL';
 
@@ -54,6 +95,7 @@ class OperatorType
         self::I_ENDS_WITH_OPERATOR,
         self::I_STARTS_WITH_OPERATOR,
         self::IN_ARRAY_OPERATOR,
+        self::HAS_OPERATOR,
         self::IS_NULL_OPERATOR,
     ];
 

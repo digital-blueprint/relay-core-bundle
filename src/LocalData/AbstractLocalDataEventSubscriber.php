@@ -117,6 +117,7 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
                 FilterTools::mapConditionPaths($filter, $pathMapping);
                 $event->setOptions($options);
             }
+            $this->onPreEvent($event);
         } elseif ($event instanceof LocalDataPostEvent) {
             $localDataAttributes = [];
             foreach ($event->getPendingRequestedAttributes() as $localDataAttributeName) {
@@ -134,6 +135,13 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
                 $event->setLocalDataAttribute($localDataAttributeName, $localDataAttributeValue);
             }
         }
+    }
+
+    /**
+     * Feel free to override this if you want to modify the options before the request.
+     */
+    protected function onPreEvent(LocalDataPreEvent $preEvent): void
+    {
     }
 
     /**

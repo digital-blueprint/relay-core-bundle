@@ -40,7 +40,7 @@ class ConditionNode extends Node
             }
         } elseif ($value === null) {
             throw new FilterException('Filters using the "'.$operator.
-                '"" operator must provide a value.', FilterException::CONDITION_VALUE_ERROR);
+                '"" operator require a value.', FilterException::CONDITION_VALUE_ERROR);
         }
 
         if (OperatorType::isStringOperator($operator) && false === is_string($value)) {
@@ -48,7 +48,10 @@ class ConditionNode extends Node
                 '"" operator require a non-empty string value', FilterException::CONDITION_VALUE_ERROR);
         } elseif ($operator === OperatorType::IN_ARRAY_OPERATOR && false === is_array($value)) {
             throw new FilterException('Filters using the "'.$operator.
-                '"" operator must provide an array value.', FilterException::CONDITION_VALUE_ERROR);
+                '"" operator require an array value.', FilterException::CONDITION_VALUE_ERROR);
+        } elseif ($operator === OperatorType::HAS_OPERATOR && false === is_scalar($value)) {
+            throw new FilterException('Filters using the "'.$operator.
+                '"" operator require a scalar value', FilterException::CONDITION_VALUE_ERROR);
         }
 
         $this->path = $path;
