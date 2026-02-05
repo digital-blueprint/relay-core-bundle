@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Rest\Query\Filter: fix mapConditionNodes for ConstantNode nodes
 - Rest\Query\Filter: add operator type 'HAS' to check if an array contains a certain value
 
 ## v0.1.228

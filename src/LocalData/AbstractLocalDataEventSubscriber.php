@@ -108,14 +108,12 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
     public function onEvent(Event $event): void
     {
         if ($event instanceof LocalDataPreEvent) {
-            $options = $event->getOptions();
-            if ($filter = Options::getFilter($options)) {
+            if ($filter = Options::getFilter($event->getOptions())) {
                 $pathMapping = [];
                 foreach ($this->attributeMapping as $localDataAttributeName => $attributeMapEntry) {
                     $pathMapping[LocalData::getAttributePath($localDataAttributeName)] = $attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY];
                 }
                 FilterTools::mapConditionPaths($filter, $pathMapping);
-                $event->setOptions($options);
             }
             $this->onPreEvent($event);
         } elseif ($event instanceof LocalDataPostEvent) {

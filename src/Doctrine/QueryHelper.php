@@ -82,7 +82,12 @@ class QueryHelper
      */
     public static function addFilter(QueryBuilder $queryBuilder, Filter $filter, ?string $entityAlias = null): QueryBuilder
     {
-        return $queryBuilder->andWhere(self::createExpression($queryBuilder, $filter->getRootNode(), $entityAlias ? $entityAlias.'.' : null));
+        if ($filter->isEmpty()) {
+            return $queryBuilder;
+        }
+
+        return $queryBuilder->andWhere(self::createExpression(
+            $queryBuilder, $filter->getRootNode(), $entityAlias ? $entityAlias.'.' : null));
     }
 
     private static function getEntitiesInternal(string $entityClassName, EntityManager $entityManager,

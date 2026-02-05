@@ -8,6 +8,8 @@ use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterException;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTreeBuilder;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\ConditionNode;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\ConstantNode;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\NotNode;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\OperatorType;
 use PHPUnit\Framework\TestCase;
 
@@ -102,6 +104,45 @@ class FilterTest extends TestCase
         $this->assertEquals($filter->toArray(), $filter1->toArray());
     }
 
+    public function testMapConditionNodes(): void
+    {
+        $filter = FilterTreeBuilder::create()
+            ->iContains('field_1', 'foo')
+            ->equals('field_2', 2)
+            ->or()
+                ->iContains('field_1', 'bar')
+                ->equals('field_4', 1.2)
+            ->end()
+            ->createFilter();
+
+        $filter->mapConditionNodes(function (ConditionNode $conditionNode) {
+            $node = $conditionNode;
+            if ($node->getPath() === 'field_1') {
+                $node->setPath('field_1_mapped');
+            }
+            if ($node->getPath() === 'field_4') {
+                $notNode = new NotNode();
+                $notNode->appendChild($conditionNode);
+                $node = $notNode;
+            }
+
+            return $node;
+        });
+
+        $expectedFilter = FilterTreeBuilder::create()
+            ->iContains('field_1_mapped', 'foo')
+            ->equals('field_2', 2)
+            ->or()
+                ->iContains('field_1_mapped', 'bar')
+                ->not()
+                    ->equals('field_4', 1.2)
+                ->end()
+            ->end()
+            ->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
     /**
      * @throws FilterException
      * @throws \Exception
@@ -133,6 +174,23 @@ class FilterTest extends TestCase
         $filter->simplify();
 
         $this->assertEquals($desiredResultFilter->toArray(), $filter->toArray());
+    }
+
+    /**
+     * @throws FilterException
+     * @throws \Exception
+     */
+    public function testSimplifyEmpty()
+    {
+        $filter = FilterTreeBuilder::create()
+            ->or()
+            ->appendChild(new ConstantNode(true))
+            ->end()
+            ->createFilter();
+
+        $filter->simplify();
+
+        $this->assertEquals(FilterTreeBuilder::create()->createFilter()->toArray(), $filter->toArray());
     }
 
     public function testEmptyFilter()

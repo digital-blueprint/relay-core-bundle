@@ -126,11 +126,15 @@ abstract class LogicalNode extends Node
         $childNodes = [];
         foreach ($this->childNodes as $childNode) {
             if ($childNode instanceof ConditionNode) {
-                $childNodes[] = $mapConditionNode($childNode);
+                $childNode = $mapConditionNode($childNode);
+                $childNodes[] = $childNode;
             } elseif ($childNode instanceof LogicalNode) {
                 $childNode->mapConditionNodesRecursively($mapConditionNode);
                 $childNodes[] = $childNode;
+            } elseif ($childNode instanceof ConstantNode) {
+                $childNodes[] = $childNode;
             }
+            $childNode->setParent($this);
         }
         $this->childNodes = $childNodes;
     }
