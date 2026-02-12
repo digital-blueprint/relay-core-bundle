@@ -16,6 +16,15 @@ class LocalDataEventDispatcher
 
     private EventDispatcherInterface $eventDispatcher;
 
+    public static function areRequestedLocalDataAttributesIdentical(
+        LocalDataAwareInterface $entity, array $requestedLocalDataAttributes): bool
+    {
+        $availableAttributes = array_keys($entity->getLocalData() ?? []);
+
+        return count($requestedLocalDataAttributes) === count($availableAttributes)
+            && empty(array_diff($requestedLocalDataAttributes, $availableAttributes));
+    }
+
     /**
      * @param EventDispatcherInterface $eventDispatcher The inner event dispatcher that this event dispatcher decorates
      */
@@ -53,10 +62,7 @@ class LocalDataEventDispatcher
      */
     public function checkRequestedAttributesIdentical(LocalDataAwareInterface $entity): bool
     {
-        $availableAttributes = $entity->getLocalData() ? array_keys($entity->getLocalData()) : [];
-
-        return count($this->localDataAttributes) === count($availableAttributes)
-            && empty(array_diff($this->localDataAttributes, $availableAttributes));
+        return self::areRequestedLocalDataAttributesIdentical($entity, $this->localDataAttributes);
     }
 
     /**

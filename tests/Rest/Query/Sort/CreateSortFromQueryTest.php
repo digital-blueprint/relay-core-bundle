@@ -21,7 +21,7 @@ class CreateSortFromQueryTest extends TestCase
             'direction' => 'DESC',
         ]];
 
-        $sort = FromQuerySortCreator::createSortFromQueryParameters($queryParameters, ['field0']);
+        $sort = self::createSortFromQueryParameters($queryParameters, ['field0']);
 
         $sortFields = $sort->getSortFields();
         $this->assertCount(1, $sortFields);
@@ -51,7 +51,7 @@ class CreateSortFromQueryTest extends TestCase
     {
         $querySting = 'sort[sort-field0][path]=field0';
 
-        $sort = FromQuerySortCreator::createSortFromQueryParameters(
+        $sort = self::createSortFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'sort'), ['field0']);
 
         $sortFields = $sort->getSortFields();
@@ -68,7 +68,7 @@ class CreateSortFromQueryTest extends TestCase
     {
         $querySting = 'sort[sort-field0][path]=field0&sort[sort-field0][direction]=ASC';
 
-        $sort = FromQuerySortCreator::createSortFromQueryParameters(
+        $sort = self::createSortFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'sort'), ['field0']);
 
         $sortFields = $sort->getSortFields();
@@ -85,7 +85,7 @@ class CreateSortFromQueryTest extends TestCase
     {
         $querySting = 'sort[sort-field0][path]=field0&sort[sort-field0][direction]=DESC';
 
-        $sort = FromQuerySortCreator::createSortFromQueryParameters(
+        $sort = self::createSortFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'sort'), ['field0']);
 
         $sortFields = $sort->getSortFields();
@@ -102,7 +102,7 @@ class CreateSortFromQueryTest extends TestCase
     {
         $querySting = 'sort=field0';
 
-        $sort = FromQuerySortCreator::createSortFromQueryParameters(
+        $sort = self::createSortFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'sort'), ['field0']);
 
         $sortFields = $sort->getSortFields();
@@ -119,7 +119,7 @@ class CreateSortFromQueryTest extends TestCase
     {
         $querySting = 'sort=-field0';
 
-        $sort = FromQuerySortCreator::createSortFromQueryParameters(
+        $sort = self::createSortFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'sort'), ['field0']);
 
         $sortFields = $sort->getSortFields();
@@ -136,7 +136,7 @@ class CreateSortFromQueryTest extends TestCase
     {
         $querySting = 'sort[sort-field0][path]=field0&sort[sort-field0][direction]=DESC&sort[sort-field1][path]=field1&sort[sort-field1][direction]=ASC';
 
-        $sort = FromQuerySortCreator::createSortFromQueryParameters(
+        $sort = self::createSortFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'sort'), ['field0', 'field1']);
 
         $sortFields = $sort->getSortFields();
@@ -155,7 +155,7 @@ class CreateSortFromQueryTest extends TestCase
     {
         $querySting = 'sort[sort-field0][path]=field0&sort[sort-field1][path]=field1&sort[sort-field1][direction]=DESC';
 
-        $sort = FromQuerySortCreator::createSortFromQueryParameters(
+        $sort = self::createSortFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'sort'), ['field0', 'field1']);
 
         $sortFields = $sort->getSortFields();
@@ -174,7 +174,7 @@ class CreateSortFromQueryTest extends TestCase
     {
         $querySting = 'sort[sort-field0][path]=field0&sort[sort-field1][path]=field1';
 
-        $sort = FromQuerySortCreator::createSortFromQueryParameters(
+        $sort = self::createSortFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'sort'), ['field0', 'field1']);
 
         $sortFields = $sort->getSortFields();
@@ -184,5 +184,15 @@ class CreateSortFromQueryTest extends TestCase
         $this->assertEquals(Sort::ASCENDING_DIRECTION, Sort::getDirection($sortFields[0]));
         $this->assertEquals('field1', Sort::getPath($sortFields[1]));
         $this->assertEquals(Sort::ASCENDING_DIRECTION, Sort::getDirection($sortFields[1]));
+    }
+
+    private static function createSortFromQueryParameters(mixed $sortQueryParameters, array $definedAttributePaths): Sort
+    {
+        return FromQuerySortCreator::createSortFromQueryParameters(
+            $sortQueryParameters,
+            function (string $path) use ($definedAttributePaths): bool {
+                return in_array($path, $definedAttributePaths, true);
+            }
+        );
     }
 }

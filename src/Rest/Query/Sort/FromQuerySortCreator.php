@@ -25,11 +25,12 @@ class FromQuerySortCreator
     /**
      * Creates a Sort object from a query parameter.
      *
-     * @param mixed $sortQueryParameters The `sort` query parameter from the Symfony request object
+     * @param mixed                  $sortQueryParameters    The `sort` query parameter from the Symfony request object
+     * @param callable(string): bool $isAttributePathDefined
      *
      * @throws SortException
      */
-    public static function createSortFromQueryParameters(mixed $sortQueryParameters, array $availableAttributePaths): Sort
+    public static function createSortFromQueryParameters(mixed $sortQueryParameters, callable $isAttributePathDefined): Sort
     {
         // Expand a JSON:API compliant sort into a more expressive sort parameter.
         if (is_string($sortQueryParameters)) {
@@ -42,7 +43,7 @@ class FromQuerySortCreator
         // Expand any defaults into the sort array.
         $expanded = [];
         foreach ($sortQueryParameters as $sortIndex => $sortItem) {
-            $expanded[] = static::expandItem($sortItem, $availableAttributePaths);
+            $expanded[] = static::expandItem($sortItem, $isAttributePathDefined);
         }
 
         return new Sort($expanded);
@@ -75,13 +76,14 @@ class FromQuerySortCreator
     /**
      * Expands a sort item in case a shortcut was used.
      *
-     * @param array $sortItem The raw sort item
+     * @param array                  $sortItem               The raw sort item
+     * @param callable(string): bool $isAttributePathDefined
      *
      * @return array The expanded sort item
      *
      * @throws SortException
      */
-    protected static function expandItem(array $sortItem, array $availableAttributePaths): array
+    protected static function expandItem(array $sortItem, callable $isAttributePathDefined): array
     {
         $defaults = [
             self::DIRECTION_KEY => 'ASC',
@@ -91,7 +93,7 @@ class FromQuerySortCreator
         if ($attributePath === null) {
             throw new SortException('Sort parameter is missing a \''.self::PATH_KEY.'\' key.', SortException::ATTRIBUTE_PATH_MISSING);
         }
-        if (!in_array($attributePath, $availableAttributePaths, true)) {
+        if (false === $isAttributePathDefined($attributePath)) {
             throw new SortException('Undefined attribute path: '.$attributePath, SortException::ATTRIBUTE_PATH_UNDEFINED);
         }
 
@@ -102,7 +104,7 @@ class FromQuerySortCreator
 
         $expanded = array_merge($defaults, $sortItem);
 
-        // Verify correct sort keys.
+        // Verify the correct sort keys.
         if (!empty(array_diff($expected_keys, array_keys($expanded)))) {
             throw new SortException('You have provided an invalid set of sort keys.', SortException::SORT_KEYS_UNDEFINED);
         }

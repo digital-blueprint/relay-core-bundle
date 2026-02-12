@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Throw a 403 forbidden error if the user doesn't have read access to a local data attribute 
+instead of setting it null.
+
 ## v0.1.229
 
 - Rest\Query\Filter: fix mapConditionNodes for ConstantNode nodes

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Tests\Rest\Query\Filter;
 
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTreeBuilder;
-use Dbp\Relay\CoreBundle\Rest\Query\Filter\FromQueryFilterCreator;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\PreparedFilters;
 use Dbp\Relay\CoreBundle\Rest\Query\Parameters;
 use PHPUnit\Framework\TestCase;
@@ -82,7 +81,7 @@ class PreparedFilterTest extends TestCase
         $preparedFilterQueryString = $this->preparedFilterProvider->getPreparedFilterQueryString('filter0');
         $this->assertNotNull($preparedFilterQueryString);
 
-        $preparedFilter = FromQueryFilterCreator::createFilterFromQueryParameters(
+        $preparedFilter = CreateFilterFromQueryTest::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($preparedFilterQueryString, Parameters::FILTER), ['field0']);
 
         $expectedFilter = FilterTreeBuilder::create()->iContains('field0', 'value0')->createFilter();
@@ -98,7 +97,7 @@ class PreparedFilterTest extends TestCase
         $preparedFilterQueryString = $this->preparedFilterProvider->getPreparedFilterQueryString('filterShortcut');
         $this->assertNotNull($preparedFilterQueryString);
 
-        $preparedFilter = FromQueryFilterCreator::createFilterFromQueryParameters(
+        $preparedFilter = CreateFilterFromQueryTest::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($preparedFilterQueryString, Parameters::FILTER), ['field0']);
 
         $expectedFilter = FilterTreeBuilder::create()->equals('field0', 'value0')->createFilter();

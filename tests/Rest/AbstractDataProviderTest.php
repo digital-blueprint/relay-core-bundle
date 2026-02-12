@@ -547,7 +547,12 @@ class AbstractDataProviderTest extends TestCase
         parse_str('filter[localData.forbiddenAttribute]="value0"', $queryParameters);
 
         $this->testDataProvider->setSourceData([[]]);
-        $this->assertEmpty($this->testDataProviderTester->getPage(filters: $queryParameters));
+        try {
+            $this->testDataProviderTester->getPage(filters: $queryParameters);
+            $this->fail('exception not thrown as expected');
+        } catch (ApiError $exception) {
+            $this->assertEquals(Response::HTTP_FORBIDDEN, $exception->getStatusCode());
+        }
     }
 
     /**
@@ -566,7 +571,12 @@ class AbstractDataProviderTest extends TestCase
         parse_str($querySting, $queryParameters);
 
         $this->testDataProvider->setSourceData([[]]);
-        $this->assertEmpty($this->testDataProviderTester->getPage(filters: $queryParameters));
+        try {
+            $this->testDataProviderTester->getPage(filters: $queryParameters);
+            $this->fail('exception not thrown as expected');
+        } catch (ApiError $exception) {
+            $this->assertEquals(Response::HTTP_FORBIDDEN, $exception->getStatusCode());
+        }
     }
 
     /**
@@ -580,13 +590,12 @@ class AbstractDataProviderTest extends TestCase
         parse_str($querySting, $queryParameters);
 
         $this->testDataProvider->setSourceData([[]]);
-        $this->testDataProviderTester->getPage(filters: $queryParameters);
-        $filter = Options::getFilter($this->testDataProvider->getOptions());
-
-        $expectedFilter = FilterTreeBuilder::create()
-            ->iContains('field0', 'value0')->createFilter();
-
-        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+        try {
+            $this->testDataProviderTester->getPage(filters: $queryParameters);
+            $this->fail('exception not thrown as expected');
+        } catch (ApiError $exception) {
+            $this->assertEquals(Response::HTTP_FORBIDDEN, $exception->getStatusCode());
+        }
     }
 
     public function testForcedFilterWithGetItem(): void

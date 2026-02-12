@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Rest\Query\Filter;
 
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\ConditionNode;
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\Node;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\OperatorType;
 
 /**
@@ -84,11 +85,13 @@ class FromQueryFilterCreator
     /**
      * Creates a Filter object from an query parameter.
      *
+     * @param callable(string): bool $isAttributePathDefined
+     *
      * @throws FilterException
      */
-    public static function createFilterFromQueryParameters(array $filterQueryParameters, array $availableAttributePaths, ?array &$usedAttributePaths = null): Filter
+    public static function createFilterFromQueryParameters(array $filterQueryParameters, callable $isAttributePathDefined): Filter
     {
-        return self::buildFilter(self::expand($filterQueryParameters), $availableAttributePaths, $usedAttributePaths);
+        return self::buildFilter(self::expand($filterQueryParameters), $isAttributePathDefined);
     }
 
     /**
@@ -159,13 +162,15 @@ class FromQueryFilterCreator
     }
 
     /**
+     * @param callable(string): bool $isAttributePathDefined
+     *
      * @throws FilterException
      */
-    private static function buildFilter(array $items, array $availableAttributePaths, ?array &$usedAttributePaths = null): Filter
+    private static function buildFilter(array $items, callable $isAttributePathDefined): Filter
     {
         // filter tree builder appends an AND root node automatically
         $filterTreeBuilder = FilterTreeBuilder::create();
-        self::appendGroupMembers(self::ROOT_ID, $filterTreeBuilder, $items, $availableAttributePaths, $usedAttributePaths);
+        self::appendGroupMembers(self::ROOT_ID, $filterTreeBuilder, $items, $isAttributePathDefined);
 
         return $filterTreeBuilder->createFilter();
     }
@@ -173,7 +178,8 @@ class FromQueryFilterCreator
     /**
      * @throws FilterException
      */
-    private static function appendGroup(array $groupItem, FilterTreeBuilder $filterTreeBuilder, array $items, array $availableAttributePaths, ?array &$usedAttributePaths): void
+    private static function appendGroup(
+        array $groupItem, FilterTreeBuilder $filterTreeBuilder, array $items, callable $isAttributePathDefined): void
     {
         $groupId = $groupItem[self::ITEM_ID_KEY];
         $groupConjunction = $groupItem[self::GROUP_KEY][self::CONJUNCTION_KEY];
@@ -197,7 +203,7 @@ class FromQueryFilterCreator
                 throw new FilterException('conjunction undefined: '.$groupConjunction, FilterException::CONJUNCTION_UNDEFINED);
         }
 
-        self::appendGroupMembers($groupId, $filterTreeBuilder, $items, $availableAttributePaths, $usedAttributePaths);
+        self::appendGroupMembers($groupId, $filterTreeBuilder, $items, $isAttributePathDefined);
 
         switch ($groupConjunction) {
             case self::AND_CONJUNCTION:
@@ -213,16 +219,19 @@ class FromQueryFilterCreator
     }
 
     /**
+     * @param callable(string): bool $isAttributePathDefined
+     *
      * @throws FilterException
      */
-    private static function appendGroupMembers(string $groupId, FilterTreeBuilder $filterTreeBuilder, array $items, array $availableAttributePaths, ?array &$usedAttributePaths): void
+    private static function appendGroupMembers(
+        string $groupId, FilterTreeBuilder $filterTreeBuilder, array $items, callable $isAttributePathDefined): void
     {
         foreach ($items as $item) {
             if ($item[self::MEMBER_OF_KEY] === $groupId) {
                 if (isset($item[self::GROUP_KEY])) {
-                    self::appendGroup($item, $filterTreeBuilder, $items, $availableAttributePaths, $usedAttributePaths);
+                    self::appendGroup($item, $filterTreeBuilder, $items, $isAttributePathDefined);
                 } elseif (isset($item[self::CONDITION_KEY])) {
-                    self::appendConditionNode($item[self::CONDITION_KEY], $filterTreeBuilder, $availableAttributePaths, $usedAttributePaths);
+                    self::appendConditionNode($item[self::CONDITION_KEY], $filterTreeBuilder, $isAttributePathDefined);
                 } else {
                     throw new FilterException('invalid filter item', FilterException::FILTER_ITEM_INVALID);
                 }
@@ -233,9 +242,11 @@ class FromQueryFilterCreator
     /**
      * Creates a ConditionNode from a query parameter.
      *
+     * @param callable(string): bool $isAttributePathDefined
+     *
      * @throws FilterException
      */
-    private static function appendConditionNode(array $condition, FilterTreeBuilder $filterTreeBuilder, array $availableAttributePaths, ?array &$usedAttributePaths = null): void
+    private static function appendConditionNode(array $condition, FilterTreeBuilder $filterTreeBuilder, callable $isAttributePathDefined): void
     {
         $attributePath = $condition[self::PATH_KEY] ?? null;
         if ($attributePath === null) {
@@ -245,12 +256,8 @@ class FromQueryFilterCreator
         $value = $condition[self::VALUE_KEY] ?? null;
         $operator = $condition[self::OPERATOR_KEY] ?? null;
 
-        if (false === in_array($attributePath, $availableAttributePaths, true)) {
-            throw new FilterException('Undefined attribute: '.$attributePath, FilterException::ATTRIBUTE_PATH_UNDEFINED);
-        }
-
-        if ($usedAttributePaths !== null && false === in_array($attributePath, $usedAttributePaths, true)) {
-            $usedAttributePaths[] = $attributePath;
+        if (false === $isAttributePathDefined($attributePath)) {
+            throw new FilterException('Undefined attribute path: '.$attributePath, FilterException::ATTRIBUTE_PATH_UNDEFINED);
         }
 
         $filterTreeBuilder->appendChild(new ConditionNode($attributePath,

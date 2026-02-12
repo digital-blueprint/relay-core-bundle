@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\Rest\Query\Filter;
 
+use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterException;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTreeBuilder;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FromQueryFilterCreator;
@@ -23,7 +24,7 @@ class CreateFilterFromQueryTest extends TestCase
             'value' => '"value0"',
         ]]];
 
-        $filter = FromQueryFilterCreator::createFilterFromQueryParameters($queryParameters, ['field0']);
+        $filter = self::createFilterFromQueryParameters($queryParameters, ['field0']);
 
         $expectedFilter = FilterTreeBuilder::create()->iContains('field0', 'value0')->createFilter();
 
@@ -53,10 +54,8 @@ class CreateFilterFromQueryTest extends TestCase
     {
         $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]="value0"';
 
-        $usedAttributePaths = [];
-        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
-            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0'], $usedAttributePaths);
-        $this->assertEquals(['field0'], $usedAttributePaths);
+        $filter = self::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
 
         $expectedFilter = FilterTreeBuilder::create()->iContains('field0', 'value0')->createFilter();
 
@@ -67,9 +66,8 @@ class CreateFilterFromQueryTest extends TestCase
     {
         $querySting = 'filter[field0]=true';
 
-        $usedAttributePaths = [];
-        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
-            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0'], $usedAttributePaths);
+        $filter = self::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
 
         $expectedFilter = FilterTreeBuilder::create()->equals('field0', true)->createFilter();
 
@@ -77,9 +75,8 @@ class CreateFilterFromQueryTest extends TestCase
 
         $querySting = 'filter[field0]=false';
 
-        $usedAttributePaths = [];
-        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
-            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0'], $usedAttributePaths);
+        $filter = self::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
 
         $expectedFilter = FilterTreeBuilder::create()->equals('field0', false)->createFilter();
 
@@ -90,9 +87,8 @@ class CreateFilterFromQueryTest extends TestCase
     {
         $querySting = 'filter[field0]=10';
 
-        $usedAttributePaths = [];
-        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
-            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0'], $usedAttributePaths);
+        $filter = self::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
 
         $expectedFilter = FilterTreeBuilder::create()->equals('field0', 10)->createFilter();
 
@@ -100,9 +96,8 @@ class CreateFilterFromQueryTest extends TestCase
 
         $querySting = 'filter[field0]=0.42';
 
-        $usedAttributePaths = [];
-        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
-            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0'], $usedAttributePaths);
+        $filter = self::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
 
         $expectedFilter = FilterTreeBuilder::create()->equals('field0', 0.42)->createFilter();
 
@@ -113,9 +108,8 @@ class CreateFilterFromQueryTest extends TestCase
     {
         $querySting = 'filter[field0]="10"';
 
-        $usedAttributePaths = [];
-        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
-            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0'], $usedAttributePaths);
+        $filter = self::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
 
         $expectedFilter = FilterTreeBuilder::create()->equals('field0', '10')->createFilter();
 
@@ -123,9 +117,8 @@ class CreateFilterFromQueryTest extends TestCase
 
         $querySting = 'filter[field0]="true"';
 
-        $usedAttributePaths = [];
-        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
-            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0'], $usedAttributePaths);
+        $filter = self::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
 
         $expectedFilter = FilterTreeBuilder::create()->equals('field0', 'true')->createFilter();
 
@@ -137,7 +130,7 @@ class CreateFilterFromQueryTest extends TestCase
         $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=IN&'.
             'filter[foo][condition][value][0]=10&filter[foo][condition][value][1]=11';
 
-        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
+        $filter = self::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
 
         $expectedFilter = FilterTreeBuilder::create()->inArray('field0', [10, 11])->createFilter();
@@ -147,7 +140,7 @@ class CreateFilterFromQueryTest extends TestCase
         $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=IN&'.
             'filter[foo][condition][value][0]=false&filter[foo][condition][value][1]=true';
 
-        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
+        $filter = self::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
 
         $expectedFilter = FilterTreeBuilder::create()->inArray('field0', [false, true])->createFilter();
@@ -166,10 +159,8 @@ class CreateFilterFromQueryTest extends TestCase
             'filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]="value1"&'.
             'filter[bar][condition][memberOf]=test_group';
 
-        $usedAttributePaths = [];
-        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
-            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0', 'field1'], $usedAttributePaths);
-        $this->assertEquals(['field0', 'field1'], $usedAttributePaths);
+        $filter = self::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0', 'field1']);
 
         $expectedFilter = FilterTreeBuilder::create()
             ->and()
@@ -192,10 +183,8 @@ class CreateFilterFromQueryTest extends TestCase
             'filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]="value1"&'.
             'filter[bar][condition][memberOf]=test_group';
 
-        $usedAttributePaths = [];
-        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
-            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0', 'field1'], $usedAttributePaths);
-        $this->assertEquals(['field0', 'field1'], $usedAttributePaths);
+        $filter = self::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0', 'field1']);
 
         $expectedFilter = FilterTreeBuilder::create()
             ->or()
@@ -218,10 +207,8 @@ class CreateFilterFromQueryTest extends TestCase
             'filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]="value1"&'.
             'filter[bar][condition][memberOf]=test_group';
 
-        $usedAttributePaths = [];
-        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
-            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0', 'field1'], $usedAttributePaths);
-        $this->assertEquals(['field0', 'field1'], $usedAttributePaths);
+        $filter = self::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0', 'field1']);
 
         $expectedFilter = FilterTreeBuilder::create()
             ->not()
@@ -242,10 +229,8 @@ class CreateFilterFromQueryTest extends TestCase
     {
         $querySting = 'filter[test_group][group][conjunction]=NOT_OR&filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]="value0"&&filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=field1&filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]="value1"&&filter[bar][condition][memberOf]=test_group';
 
-        $usedAttributePaths = [];
-        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
-            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0', 'field1'], $usedAttributePaths);
-        $this->assertEquals(['field0', 'field1'], $usedAttributePaths);
+        $filter = self::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0', 'field1']);
 
         $expectedFilter = FilterTreeBuilder::create()
             ->not()
@@ -266,7 +251,7 @@ class CreateFilterFromQueryTest extends TestCase
     {
         $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][value]="value0"';
 
-        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
+        $filter = self::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
 
         $expectedFilter = FilterTreeBuilder::create()->equals('field0', 'value0')->createFilter();
@@ -281,7 +266,7 @@ class CreateFilterFromQueryTest extends TestCase
     {
         $querySting = 'filter[field0][value]="value0"';
 
-        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
+        $filter = self::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
 
         $expectedFilter = FilterTreeBuilder::create()->equals('field0', 'value0')->createFilter();
@@ -296,7 +281,7 @@ class CreateFilterFromQueryTest extends TestCase
     {
         $querySting = 'filter[field0]="value0"';
 
-        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
+        $filter = self::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
 
         $expectedFilter = FilterTreeBuilder::create()->equals('field0', 'value0')->createFilter();
@@ -312,7 +297,7 @@ class CreateFilterFromQueryTest extends TestCase
         $querySting = 'filter[field0]="value0"';
 
         try {
-            FromQueryFilterCreator::createFilterFromQueryParameters(
+            self::createFilterFromQueryParameters(
                 Parameters::getQueryParametersFromQueryString($querySting, 'filter'), []);
         } catch (FilterException $exception) {
             $this->assertEquals(FilterException::ATTRIBUTE_PATH_UNDEFINED, $exception->getCode());
@@ -327,7 +312,7 @@ class CreateFilterFromQueryTest extends TestCase
         $querySting = 'filter[foo][condition][value]=1';
 
         try {
-            FromQueryFilterCreator::createFilterFromQueryParameters(
+            self::createFilterFromQueryParameters(
                 Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
         } catch (FilterException $exception) {
             $this->assertEquals(FilterException::CONDITION_PATH_MISSING, $exception->getCode());
@@ -342,7 +327,7 @@ class CreateFilterFromQueryTest extends TestCase
         $querySting = 'filter[foo][condition][path]=field0';
 
         try {
-            FromQueryFilterCreator::createFilterFromQueryParameters(
+            self::createFilterFromQueryParameters(
                 Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
         } catch (FilterException $exception) {
             $this->assertEquals(FilterException::CONDITION_VALUE_ERROR, $exception->getCode());
@@ -353,7 +338,7 @@ class CreateFilterFromQueryTest extends TestCase
     {
         $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=IS_NULL';
 
-        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
+        $filter = self::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
 
         $expectedFilter = FilterTreeBuilder::create()->isNull('field0')->createFilter();
@@ -369,7 +354,7 @@ class CreateFilterFromQueryTest extends TestCase
         $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=IS_NULL&filter[foo][condition][value]="value0"';
 
         try {
-            FromQueryFilterCreator::createFilterFromQueryParameters(
+            self::createFilterFromQueryParameters(
                 Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
         } catch (FilterException $exception) {
             $this->assertEquals(FilterException::CONDITION_VALUE_ERROR, $exception->getCode());
@@ -383,7 +368,7 @@ class CreateFilterFromQueryTest extends TestCase
     {
         $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=IN&filter[foo][condition][value][0]="value0"&filter[foo][condition][value][1]="value1"';
 
-        $filter = FromQueryFilterCreator::createFilterFromQueryParameters(
+        $filter = self::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
 
         $expectedFilter = FilterTreeBuilder::create()->inArray('field0', ['value0', 'value1'])->createFilter();
@@ -399,7 +384,7 @@ class CreateFilterFromQueryTest extends TestCase
         $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=IN&filter[foo][condition][value]="value0"';
 
         try {
-            FromQueryFilterCreator::createFilterFromQueryParameters(
+            self::createFilterFromQueryParameters(
                 Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
         } catch (FilterException $exception) {
             $this->assertEquals(FilterException::CONDITION_VALUE_ERROR, $exception->getCode());
@@ -414,7 +399,7 @@ class CreateFilterFromQueryTest extends TestCase
         $querySting = 'filter[foo][bar]=1';
 
         try {
-            FromQueryFilterCreator::createFilterFromQueryParameters(
+            self::createFilterFromQueryParameters(
                 Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
         } catch (FilterException $exception) {
             $this->assertEquals(FilterException::FILTER_ITEM_INVALID, $exception->getCode());
@@ -429,7 +414,7 @@ class CreateFilterFromQueryTest extends TestCase
         $querySting = 'filter[foo][condition][path]=field0&filter[foo][condition][operator]=foobar&filter[foo][condition][value]="value0"';
 
         try {
-            FromQueryFilterCreator::createFilterFromQueryParameters(
+            self::createFilterFromQueryParameters(
                 Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
         } catch (FilterException $exception) {
             $this->assertEquals(FilterException::CONDITION_OPERATOR_UNDEFINED, $exception->getCode());
@@ -444,7 +429,7 @@ class CreateFilterFromQueryTest extends TestCase
         $querySting = 'filter[@root][condition][path]=field0&filter[@root][condition][operator]=EQ&filter[@root][condition][value]="value0"';
 
         try {
-            FromQueryFilterCreator::createFilterFromQueryParameters(
+            self::createFilterFromQueryParameters(
                 Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
         } catch (FilterException $exception) {
             $this->assertEquals(FilterException::RESERVED_FILTER_ITEM_ID, $exception->getCode());
@@ -459,10 +444,18 @@ class CreateFilterFromQueryTest extends TestCase
         $querySting = 'filter[or_group][group][conjunction]=ORISH&filter[foo][condition][path]=field0&filter[foo][condition][operator]=EQ&filter[foo][condition][value]="value0"&filter[bar][condition][path]=field0&filter[bar][condition][operator]=EQ&filter[bar][condition][value]="value1"';
 
         try {
-            FromQueryFilterCreator::createFilterFromQueryParameters(
+            self::createFilterFromQueryParameters(
                 Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
         } catch (FilterException $exception) {
             $this->assertEquals(FilterException::CONJUNCTION_UNDEFINED, $exception->getCode());
         }
+    }
+
+    public static function createFilterFromQueryParameters(array $parameters, array $availablePaths): Filter
+    {
+        return FromQueryFilterCreator::createFilterFromQueryParameters($parameters,
+            function (string $attributePath) use ($availablePaths): bool {
+                return in_array($attributePath, $availablePaths, true);
+            });
     }
 }

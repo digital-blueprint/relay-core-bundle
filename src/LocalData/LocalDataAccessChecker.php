@@ -31,6 +31,11 @@ class LocalDataAccessChecker
     /** @var string[] */
     private array $policies = [];
 
+    /**
+     * @var string[]
+     */
+    private array $readAccessGrantedRequestCache = [];
+
     public static function getConfigNodeDefinition(): NodeDefinition
     {
         $treeBuilder = new TreeBuilder(self::LOCAL_DATA_CONFIG_NODE);
@@ -97,22 +102,40 @@ class LocalDataAccessChecker
         return $this->policies;
     }
 
-    public function isGrantedReadAccess(string $localDataAttributeName, AbstractAuthorizationService $authorizationService): bool
+    /**
+     * @throws ApiError
+     */
+    public function assertCurrentUserIsGrantedReadAccess(
+        string $localDataAttributeName, AbstractAuthorizationService $authorizationService): void
     {
-        return $authorizationService->isGrantedRole(self::getReadPolicyName($localDataAttributeName));
+        if (false === in_array($localDataAttributeName, $this->readAccessGrantedRequestCache, true)) {
+            if (false === $this->isCurrentUserGrantedReadAccess($localDataAttributeName, $authorizationService)) {
+                throw ApiError::withDetails(Response::HTTP_FORBIDDEN,
+                    sprintf('Access to local data attribute "%s" denied', $localDataAttributeName));
+            }
+            $this->readAccessGrantedRequestCache[] = $localDataAttributeName;
+        }
     }
 
     /**
      * @throws ApiError
      */
-    public function assertLocalDataAttributesAreDefined(array $localDataAttributes): void
+    public function assertAttributeIsDefined(string $localDataAttributeName): void
     {
-        foreach ($localDataAttributes as $localDataAttributeName) {
-            $attributeConfigEntry = $this->attributeConfig[$localDataAttributeName] ?? null;
-            if ($attributeConfigEntry === null) {
-                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, sprintf('local data attribute \'%s\' undefined', $localDataAttributeName));
-            }
+        if (false === $this->isAttributeDefined($localDataAttributeName)) {
+            throw ApiError::withDetails(Response::HTTP_BAD_REQUEST,
+                sprintf('local data attribute \'%s\' undefined', $localDataAttributeName));
         }
+    }
+
+    public function isAttributeDefined(string $localDataAttributeName): bool
+    {
+        return null !== ($this->attributeConfig[$localDataAttributeName] ?? null);
+    }
+
+    private function isCurrentUserGrantedReadAccess(string $localDataAttributeName, AbstractAuthorizationService $authorizationService): bool
+    {
+        return $authorizationService->isGrantedRole(self::getReadPolicyName($localDataAttributeName));
     }
 
     private static function getReadPolicyName(string $localDataAttributeName): string
