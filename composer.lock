@@ -399,7 +399,7 @@
         },
         {
             "name": "api-platform/metadata",
-            "version": "v4.2.16",
+            "version": "v4.2.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/api-platform/metadata.git",
@@ -491,13 +491,13 @@
                 "swagger"
             ],
             "support": {
-                "source": "https://github.com/api-platform/metadata/tree/v4.2.16"
+                "source": "https://github.com/api-platform/metadata/tree/v4.2.17"
             },
             "time": "2026-02-13T15:07:33+00:00"
         },
         {
             "name": "api-platform/openapi",
-            "version": "v4.2.16",
+            "version": "v4.2.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/api-platform/openapi.git",
@@ -581,7 +581,7 @@
                 "swagger"
             ],
             "support": {
-                "source": "https://github.com/api-platform/openapi/tree/v4.2.16"
+                "source": "https://github.com/api-platform/openapi/tree/v4.2.17"
             },
             "time": "2026-01-26T15:38:30+00:00"
         },
@@ -680,16 +680,16 @@
         },
         {
             "name": "api-platform/state",
-            "version": "v4.2.16",
+            "version": "v4.2.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/api-platform/state.git",
-                "reference": "0fcd612696acac4632a626bb5dfc6bd99ec3b44a"
+                "reference": "1b6f69c75579ab0f132cd45e45d5f43ed19a15a5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/api-platform/state/zipball/0fcd612696acac4632a626bb5dfc6bd99ec3b44a",
-                "reference": "0fcd612696acac4632a626bb5dfc6bd99ec3b44a",
+                "url": "https://api.github.com/repos/api-platform/state/zipball/1b6f69c75579ab0f132cd45e45d5f43ed19a15a5",
+                "reference": "1b6f69c75579ab0f132cd45e45d5f43ed19a15a5",
                 "shasum": ""
             },
             "require": {
@@ -771,22 +771,22 @@
                 "swagger"
             ],
             "support": {
-                "source": "https://github.com/api-platform/state/tree/v4.2.16"
+                "source": "https://github.com/api-platform/state/tree/v4.2.17"
             },
-            "time": "2026-02-13T15:07:33+00:00"
+            "time": "2026-02-17T09:18:17+00:00"
         },
         {
             "name": "api-platform/symfony",
-            "version": "v4.2.16",
+            "version": "v4.2.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/api-platform/symfony.git",
-                "reference": "769f5bc29ce59a5c68006ca5876c409072340e92"
+                "reference": "04052b61e26a1c059bb595b78670302ad4517b7f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/api-platform/symfony/zipball/769f5bc29ce59a5c68006ca5876c409072340e92",
-                "reference": "769f5bc29ce59a5c68006ca5876c409072340e92",
+                "url": "https://api.github.com/repos/api-platform/symfony/zipball/04052b61e26a1c059bb595b78670302ad4517b7f",
+                "reference": "04052b61e26a1c059bb595b78670302ad4517b7f",
                 "shasum": ""
             },
             "require": {
@@ -899,9 +899,9 @@
                 "symfony"
             ],
             "support": {
-                "source": "https://github.com/api-platform/symfony/tree/v4.2.16"
+                "source": "https://github.com/api-platform/symfony/tree/v4.2.17"
             },
-            "time": "2026-02-13T17:30:49+00:00"
+            "time": "2026-02-18T14:55:07+00:00"
         },
         {
             "name": "api-platform/validator",
@@ -8048,16 +8048,16 @@
     "packages-dev": [
         {
             "name": "captainhook/captainhook",
-            "version": "5.28.2",
+            "version": "5.28.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/captainhook-git/captainhook.git",
-                "reference": "2adbc8fea26823ecf52578998de5daf57846872f"
+                "reference": "5d35b249f3843ef36ead119f4347e649278ad6d8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/captainhook-git/captainhook/zipball/2adbc8fea26823ecf52578998de5daf57846872f",
-                "reference": "2adbc8fea26823ecf52578998de5daf57846872f",
+                "url": "https://api.github.com/repos/captainhook-git/captainhook/zipball/5d35b249f3843ef36ead119f4347e649278ad6d8",
+                "reference": "5d35b249f3843ef36ead119f4347e649278ad6d8",
                 "shasum": ""
             },
             "require": {
@@ -8120,7 +8120,7 @@
             ],
             "support": {
                 "issues": "https://github.com/captainhook-git/captainhook/issues",
-                "source": "https://github.com/captainhook-git/captainhook/tree/5.28.2"
+                "source": "https://github.com/captainhook-git/captainhook/tree/5.28.3"
             },
             "funding": [
                 {
@@ -8128,7 +8128,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-02-15T14:36:43+00:00"
+            "time": "2026-02-16T14:08:58+00:00"
         },
         {
             "name": "captainhook/secrets",
@@ -9695,16 +9695,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "11.5.53",
+            "version": "11.5.55",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "a997a653a82845f1240d73ee73a8a4e97e4b0607"
+                "reference": "adc7262fccc12de2b30f12a8aa0b33775d814f00"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/a997a653a82845f1240d73ee73a8a4e97e4b0607",
-                "reference": "a997a653a82845f1240d73ee73a8a4e97e4b0607",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/adc7262fccc12de2b30f12a8aa0b33775d814f00",
+                "reference": "adc7262fccc12de2b30f12a8aa0b33775d814f00",
                 "shasum": ""
             },
             "require": {
@@ -9777,7 +9777,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/11.5.53"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/11.5.55"
             },
             "funding": [
                 {
@@ -9801,7 +9801,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-02-10T12:28:25+00:00"
+            "time": "2026-02-18T12:37:06+00:00"
         },
         {
             "name": "react/cache",
