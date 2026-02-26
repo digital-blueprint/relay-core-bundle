@@ -40,4 +40,24 @@ class OpenApiDecoratorTest extends TestCase
         $this->assertEquals('header', $langParam->getIn());
         $this->assertEquals(['de', 'en'], $langParam->getSchema()['enum']);
     }
+
+    public function testPathsToHide()
+    {
+        $mockFactory = $this->createMock(OpenApiFactoryInterface::class);
+        $paths = new Paths();
+        $paths->addPath('/test', new PathItem(get: new Operation(operationId: 'test')));
+
+        $openApi = new OpenApi(
+            info: new Info(title: 'Test', version: '1.0'),
+            servers: [],
+            paths: $paths
+        );
+
+        $mockFactory->method('__invoke')->willReturn($openApi);
+        $decorator = new OpenApiDecorator($mockFactory);
+        $decorator->setPathsToHide([['/test', 'GET']]);
+
+        $result = $decorator();
+        $this->assertNull($result->getPaths()->getPath('/test')->getGet());
+    }
 }

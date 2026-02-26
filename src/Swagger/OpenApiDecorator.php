@@ -52,6 +52,7 @@ final class OpenApiDecorator implements OpenApiFactoryInterface
             }
             $newPaths->addPath($path, $pathItem);
         }
+        $paths = $newPaths;
 
         // Add an "Accept-Language" header to each method
         $langParam = new Parameter(
