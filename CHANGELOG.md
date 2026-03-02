@@ -2,8 +2,12 @@
 
 ## Unreleased
 
+## v0.1.230
+
 - Throw a 403 forbidden error if the user doesn't have read access to a local data attribute 
 instead of setting it null.
+- Fix ExtensionTrait::addPathToHide not having any effect.
+- doctrine: add DateImmutableUtcType and DateTimeImmutableUtcType for UTC date/datetime handling
 
 ## v0.1.229
 
