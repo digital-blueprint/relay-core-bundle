@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.231
+
 - Rest/Query/Filter: Update filter syntax group → logical, conjunction → operator
 - Rest/Query/Filter: Add condition operators NOT_EQUALS and IS_NOT_NULL
 - Rest/Query/Sort: Replace array storage of sort fields by SortField objects
