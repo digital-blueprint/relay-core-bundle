@@ -8,11 +8,12 @@ use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Rest\ErrorIds;
 use Dbp\Relay\CoreBundle\Rest\Options;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTreeBuilder;
-use Dbp\Relay\CoreBundle\Rest\Query\Sort\Sort;
+use Dbp\Relay\CoreBundle\Rest\Query\Sort\SortField;
 use Dbp\Relay\CoreBundle\TestUtils\DataProviderTester;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class AbstractDataProviderTest extends TestCase
 {
@@ -216,7 +217,7 @@ class AbstractDataProviderTest extends TestCase
             $this->testDataProvider->setSourceData(['1' => [], '2' => []]);
             $this->testDataProviderTester->getPage(filters: [TestDataProvider::INCLUDE_ADMIN_ONLY_ENTITIES_FILTER => true]);
             $this->fail('403 forbidden exception not thrown as expected');
-        } catch (ApiError $exception) {
+        } catch (HttpException $exception) {
             $this->assertEquals(403, $exception->getStatusCode());
         }
 
@@ -515,9 +516,8 @@ class AbstractDataProviderTest extends TestCase
             $this->testDataProvider->setSourceData([[]]);
             $this->testDataProviderTester->getPage(filters: ['preparedFilter' => 'filterUseAdminOnly']);
             $this->fail('exception not thrown as expected');
-        } catch (ApiError $exception) {
+        } catch (HttpException $exception) {
             $this->assertEquals(Response::HTTP_FORBIDDEN, $exception->getStatusCode());
-            $this->assertEquals(ErrorIds::PREPARED_FILTER_ACCESS_DENIED, $exception->getErrorId());
         }
     }
 
@@ -562,11 +562,11 @@ class AbstractDataProviderTest extends TestCase
     {
         // condition with forbidden attribute evaluates to constant 'false' -> parent AND group evaluates to 'false'
         $querySting =
-            'filter[test_group][group][conjunction]=AND&filter[foo][condition][path]=field0&'.
+            'filter[test_group][logical][operator]=AND&filter[foo][condition][path]=field0&'.
             'filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]="value0"&&'.
-            'filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=localData.forbiddenAttribute&'.
+            'filter[foo][condition][childOf]=test_group&filter[bar][condition][path]=localData.forbiddenAttribute&'.
             'filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]="value1"&&'.
-            'filter[bar][condition][memberOf]=test_group';
+            'filter[bar][condition][childOf]=test_group';
         $queryParameters = [];
         parse_str($querySting, $queryParameters);
 
@@ -585,7 +585,7 @@ class AbstractDataProviderTest extends TestCase
     public function testFilterWithForbiddenLocalDataAttributeInOrGroup()
     {
         // condition with forbidden attribute evaluates to constant 'false', which is to be removed from the parent OR group
-        $querySting = 'filter[test_group][group][conjunction]=OR&filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]="value0"&&filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=localData.forbiddenAttribute&filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]="value1"&&filter[bar][condition][memberOf]=test_group';
+        $querySting = 'filter[test_group][logical][operator]=OR&filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]="value0"&&filter[foo][condition][childOf]=test_group&filter[bar][condition][path]=localData.forbiddenAttribute&filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]="value1"&&filter[bar][condition][childOf]=test_group';
         $queryParameters = [];
         parse_str($querySting, $queryParameters);
 
@@ -630,8 +630,8 @@ class AbstractDataProviderTest extends TestCase
         $sortFields = $sort->getSortFields();
 
         $this->assertCount(1, $sortFields);
-        $this->assertEquals('field0', Sort::getPath($sortFields[0]));
-        $this->assertEquals(Sort::ASCENDING_DIRECTION, Sort::getDirection($sortFields[0]));
+        $this->assertEquals('field0', $sortFields[0]->getPath());
+        $this->assertEquals(SortField::ASCENDING_DIRECTION, $sortFields[0]->getDirection());
     }
 
     public function testSortQueryParameterNotEnabled(): void

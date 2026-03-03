@@ -13,7 +13,6 @@ use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Helpers\Tools;
 use Dbp\Relay\CoreBundle\LocalData\LocalData;
 use Dbp\Relay\CoreBundle\LocalData\LocalDataAccessChecker;
-use Dbp\Relay\CoreBundle\LocalData\LocalDataAwareInterface;
 use Dbp\Relay\CoreBundle\Locale\Locale;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Filter;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterException;
@@ -29,6 +28,7 @@ use Dbp\Relay\CoreBundle\Rest\Query\Sort\SortException;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Contracts\Service\Attribute\Required;
 
 /**
@@ -156,13 +156,14 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $this->resourceClass = $context[self::RESOURCE_CLASS_CONTEXT_KEY] ?? null;
         $this->deserializationGroups = $context[self::GROUPS_CONTEXT_KEY] ?? [];
 
-        $preparedFilter = $this->createPreparedFilter(null);
-        if ($preparedFilter !== null) {
-            $this->setFilterOption($options, $preparedFilter);
+        [$filter] = $this->getFilterAndSort($filters);
+
+        if ($filter !== null) {
+            $this->setFilterOption($options, $filter);
         }
 
         $item = null;
-        if (true !== $preparedFilter?->isAlwaysFalse()) {
+        if (true !== $filter?->isAlwaysFalse()) {
             $item = $this->getItemById($id, $filters, $options);
             if ($item !== null) {
                 $this->forbidCurrentUserToAccessItemUnlessAuthorized(self::GET_ITEM_OPERATION, $item, $filters);
@@ -223,6 +224,15 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     }
 
     /**
+     * Override for alternative local data attribute read access policies.
+     * Returning false causes a 403 Forbidden error to be thrown.
+     */
+    protected function isGrantedReadAccessToLocalDataAttribute(string $localDataAttributeName): bool
+    {
+        return $this->localDataAccessChecker->isCurrentUserGrantedReadAccess($localDataAttributeName, $this);
+    }
+
+    /**
      * @throws ApiError
      */
     private function createOptions(array $filters): array
@@ -235,7 +245,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
             $requestedLocalDataAttributes = LocalData::getLocalDataAttributesFromQueryParameter($includeLocalParameter);
             foreach ($requestedLocalDataAttributes as $localDataAttributeName) {
                 $this->localDataAccessChecker->assertAttributeIsDefined($localDataAttributeName);
-                $this->localDataAccessChecker->assertCurrentUserIsGrantedReadAccess($localDataAttributeName, $this);
+                $this->assertIsGrantedReadAccessToLocalDataAttribute($localDataAttributeName);
             }
             Options::setLocalDataAttributes($options, $requestedLocalDataAttributes);
         }
@@ -280,23 +290,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     private function forbidCurrentUserToGetCollectionUnlessAuthorized(array $filters): void
     {
         if (!$this->isCurrentUserAuthorizedToGetCollection($filters)) {
-            throw ApiError::withDetails(Response::HTTP_FORBIDDEN, 'forbidden');
-        }
-    }
-
-    private function addForbiddenLocalDataAttributesWithNullValue(array $items, array $options, array $filters): void
-    {
-        if ($includeLocalParameter = Parameters::getIncludeLocal($filters)) {
-            $requestedLocalDataAttributes = LocalData::getLocalDataAttributesFromQueryParameter($includeLocalParameter);
-            $localDataAttributesGrantedReadAccess = Options::getLocalDataAttributes($options);
-
-            foreach (array_diff($requestedLocalDataAttributes, $localDataAttributesGrantedReadAccess) as $forbiddenLocalDataAttribute) {
-                foreach ($items as $item) {
-                    if ($item instanceof LocalDataAwareInterface) {
-                        $item->setLocalDataValue($forbiddenLocalDataAttribute, null);
-                    }
-                }
-            }
+            throw new AccessDeniedHttpException();
         }
     }
 
@@ -358,8 +352,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
             }
             if (false === $this->evaluateCustomExpression(
                 $this->preparedFiltersController->getUsePolicies()[$requestedFilterIdentifier])) {
-                throw ApiError::withDetails(Response::HTTP_FORBIDDEN,
-                    'Access to prepared filter denied', ErrorIds::PREPARED_FILTER_ACCESS_DENIED);
+                throw new AccessDeniedHttpException();
             }
 
             $filtersToApplyIdentifiers[] = $requestedFilterIdentifier;
@@ -427,6 +420,13 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         }
         if (false === $filter->isAlwaysTrue()) {
             Options::setFilter($options, $filter);
+        }
+    }
+
+    private function assertIsGrantedReadAccessToLocalDataAttribute(mixed $localDataAttributeName): void
+    {
+        if (false === $this->isGrantedReadAccessToLocalDataAttribute($localDataAttributeName)) {
+            throw new AccessDeniedHttpException();
         }
     }
 }

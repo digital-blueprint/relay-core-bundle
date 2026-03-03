@@ -162,6 +162,18 @@ class FilterTreeBuilder
      *
      * @throws FilterException
      */
+    public function notEquals(string $field, $value): FilterTreeBuilder
+    {
+        $this->currentNode->appendChild(new ConditionNode($field, OperatorType::NOT_EQUALS_OPERATOR, $value));
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     *
+     * @throws FilterException
+     */
     public function greaterThanOrEqual(string $string, int $int): FilterTreeBuilder
     {
         $this->currentNode->appendChild(new ConditionNode($string, OperatorType::GREATER_THAN_OR_EQUAL_OPERATOR, $int));
@@ -206,6 +218,18 @@ class FilterTreeBuilder
     public function isNull(string $field): FilterTreeBuilder
     {
         $this->currentNode->appendChild(new ConditionNode($field, OperatorType::IS_NULL_OPERATOR, null));
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     *
+     * @throws FilterException
+     */
+    public function isNotNull(string $field): FilterTreeBuilder
+    {
+        $this->currentNode->appendChild(new ConditionNode($field, OperatorType::IS_NOT_NULL_OPERATOR, null));
 
         return $this;
     }

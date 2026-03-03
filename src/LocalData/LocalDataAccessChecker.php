@@ -108,13 +108,19 @@ class LocalDataAccessChecker
     public function assertCurrentUserIsGrantedReadAccess(
         string $localDataAttributeName, AbstractAuthorizationService $authorizationService): void
     {
-        if (false === in_array($localDataAttributeName, $this->readAccessGrantedRequestCache, true)) {
-            if (false === $this->isCurrentUserGrantedReadAccess($localDataAttributeName, $authorizationService)) {
-                throw ApiError::withDetails(Response::HTTP_FORBIDDEN,
-                    sprintf('Access to local data attribute "%s" denied', $localDataAttributeName));
-            }
-            $this->readAccessGrantedRequestCache[] = $localDataAttributeName;
+        if (false === $this->isCurrentUserGrantedReadAccessInternal($localDataAttributeName, $authorizationService)) {
+            throw ApiError::withDetails(Response::HTTP_FORBIDDEN,
+                sprintf('Access to local data attribute "%s" denied', $localDataAttributeName));
         }
+    }
+
+    /**
+     * @throws ApiError
+     */
+    public function isCurrentUserGrantedReadAccess(
+        string $localDataAttributeName, AbstractAuthorizationService $authorizationService): bool
+    {
+        return $this->isCurrentUserGrantedReadAccessInternal($localDataAttributeName, $authorizationService);
     }
 
     /**
@@ -133,9 +139,15 @@ class LocalDataAccessChecker
         return null !== ($this->attributeConfig[$localDataAttributeName] ?? null);
     }
 
-    private function isCurrentUserGrantedReadAccess(string $localDataAttributeName, AbstractAuthorizationService $authorizationService): bool
+    private function isCurrentUserGrantedReadAccessInternal(
+        string $localDataAttributeName, AbstractAuthorizationService $authorizationService): bool
     {
-        return $authorizationService->isGrantedRole(self::getReadPolicyName($localDataAttributeName));
+        if (false === in_array($localDataAttributeName, $this->readAccessGrantedRequestCache, true)) {
+            $this->readAccessGrantedRequestCache[$localDataAttributeName] =
+                $authorizationService->isGrantedRole(self::getReadPolicyName($localDataAttributeName));
+        }
+
+        return $this->readAccessGrantedRequestCache[$localDataAttributeName];
     }
 
     private static function getReadPolicyName(string $localDataAttributeName): string

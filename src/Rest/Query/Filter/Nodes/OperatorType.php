@@ -16,6 +16,15 @@ class OperatorType
     public const EQUALS_OPERATOR = 'EQUALS';
 
     /**
+     * Not equality operator (case-sensitive for strings).
+     *
+     * Passes if the field is equal to the value.
+     *
+     * The value and the field must be of the same type.
+     */
+    public const NOT_EQUALS_OPERATOR = 'NOT_EQUALS';
+
+    /**
      * Numeric less than or equal operator.
      *
      * Passes if the field is less than or equal to the value.
@@ -87,8 +96,18 @@ class OperatorType
      */
     public const IS_NULL_OPERATOR = 'IS_NULL';
 
+    /*
+     * Is not null operator.
+     *
+     * Passes if the field is not null.
+     *
+     * No value must be given.
+     */
+    public const IS_NOT_NULL_OPERATOR = 'IS_NOT_NULL';
+
     private const ALL = [
         self::EQUALS_OPERATOR,
+        self::NOT_EQUALS_OPERATOR,
         self::LESS_THAN_OR_EQUAL_OPERATOR,
         self::GREATER_THAN_OR_EQUAL_OPERATOR,
         self::I_CONTAINS_OPERATOR,
@@ -97,6 +116,7 @@ class OperatorType
         self::IN_ARRAY_OPERATOR,
         self::HAS_OPERATOR,
         self::IS_NULL_OPERATOR,
+        self::IS_NOT_NULL_OPERATOR,
     ];
 
     private const STRING_OPERATORS = [

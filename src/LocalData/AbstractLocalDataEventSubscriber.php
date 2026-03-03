@@ -6,6 +6,7 @@ namespace Dbp\Relay\CoreBundle\LocalData;
 
 use Dbp\Relay\CoreBundle\Rest\Options;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTools;
+use Dbp\Relay\CoreBundle\Rest\Query\Sort\SortTools;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -108,12 +109,14 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
     public function onEvent(Event $event): void
     {
         if ($event instanceof LocalDataPreEvent) {
+            $pathMapping = null;
             if ($filter = Options::getFilter($event->getOptions())) {
-                $pathMapping = [];
-                foreach ($this->attributeMapping as $localDataAttributeName => $attributeMapEntry) {
-                    $pathMapping[LocalData::getAttributePath($localDataAttributeName)] = $attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY];
-                }
+                $pathMapping = $this->createPathMapping();
                 FilterTools::mapConditionPaths($filter, $pathMapping);
+            }
+            if ($sort = Options::getSort($event->getOptions())) {
+                $pathMapping ??= $this->createPathMapping();
+                SortTools::mapSortPaths($sort, $pathMapping);
             }
             $this->onPreEvent($event);
         } elseif ($event instanceof LocalDataPostEvent) {
@@ -172,5 +175,15 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
         }
 
         return $attributeValue;
+    }
+
+    private function createPathMapping(): array
+    {
+        $pathMapping = [];
+        foreach ($this->attributeMapping as $localDataAttributeName => $attributeMapEntry) {
+            $pathMapping[LocalData::getAttributePath($localDataAttributeName)] = $attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY];
+        }
+
+        return $pathMapping;
     }
 }

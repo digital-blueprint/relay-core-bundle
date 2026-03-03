@@ -22,48 +22,49 @@ class FromQueryFilterCreator
     private const ROOT_ID = '@root';
 
     /**
-     * Key in the filter[<key>] parameter for conditions.
+     * Key in the filter[<id>] parameter for condition nodes.
      *
      * @var string
      */
     private const CONDITION_KEY = 'condition';
 
     /**
-     * Key in the filter[<key>] parameter for groups.
+     * Key in the filter[<id>] parameter for logical nodes.
      *
      * @var string
      */
-    private const GROUP_KEY = 'group';
+    private const LOGICAL_KEY = 'logical';
 
     /**
-     * Key in the filter[<id>][<key>] parameter for group membership.
+     * Key in the filter[<id>][condition] to define a child relationship.
      *
      * @var string
      */
-    private const MEMBER_OF_KEY = 'memberOf';
+    private const CHILD_OF_KEY = 'childOf';
 
     /**
-     * The field key in the filter condition: filter[lorem][condition][<field>].
+     * Key in the filter condition filter[<id>>][condition] to the define the attribute path.
      *
      * @var string
      */
     private const PATH_KEY = 'path';
 
     /**
-     * The value key in the filter condition: filter[lorem][condition][<value>].
+     * Key in the filter condition filter[<id>>][condition] to the define the filter value.
      *
      * @var string
      */
     private const VALUE_KEY = 'value';
 
     /**
-     * The operator key in the condition: filter[lorem][condition][<operator>].
+     * Key in the filter condition filter[<id>>][condition] to the define the filter operator.
      *
      * @var string
      */
     private const OPERATOR_KEY = 'operator';
 
     private const EQUALS_OPERATOR = 'EQUALS';
+    private const NOT_EQUALS_OPERATOR = 'NOT_EQUALS';
     private const LESS_THAN_OR_EQUAL_OPERATOR = 'LTE';
     private const GREATER_THAN_OR_EQUAL_OPERATOR = 'GTE';
     private const I_CONTAINS_OPERATOR = 'I_CONTAINS';
@@ -72,15 +73,13 @@ class FromQueryFilterCreator
     private const IN_ARRAY_OPERATOR = 'IN';
     private const HAS_OPERATOR = 'HAS';
     private const IS_NULL_OPERATOR = 'IS_NULL';
+    private const IS_NOT_NULL_OPERATOR = 'IS_NOT_NULL';
 
     private const ITEM_ID_KEY = 'id';
 
-    private const CONJUNCTION_KEY = 'conjunction';
-
-    private const AND_CONJUNCTION = 'AND';
-    private const OR_CONJUNCTION = 'OR';
-    private const NOT_AND_CONJUNCTION = 'NOT_AND';
-    private const NOT_OR_CONJUNCTION = 'NOT_OR';
+    private const LOGICAL_AND = 'AND';
+    private const LOGICAL_OR = 'OR';
+    private const LOGICAL_NOT = 'NOT';
 
     /**
      * Creates a Filter object from an query parameter.
@@ -117,14 +116,14 @@ class FromQueryFilterCreator
             }
 
             // Add a memberOf key to all items.
-            if (isset($item[self::CONDITION_KEY][self::MEMBER_OF_KEY])) {
-                $item[self::MEMBER_OF_KEY] = $item[self::CONDITION_KEY][self::MEMBER_OF_KEY];
-                unset($item[self::CONDITION_KEY][self::MEMBER_OF_KEY]);
-            } elseif (isset($item[self::GROUP_KEY][self::MEMBER_OF_KEY])) {
-                $item[self::MEMBER_OF_KEY] = $item[self::GROUP_KEY][self::MEMBER_OF_KEY];
-                unset($item[self::GROUP_KEY][self::MEMBER_OF_KEY]);
+            if (isset($item[self::CONDITION_KEY][self::CHILD_OF_KEY])) {
+                $item[self::CHILD_OF_KEY] = $item[self::CONDITION_KEY][self::CHILD_OF_KEY];
+                unset($item[self::CONDITION_KEY][self::CHILD_OF_KEY]);
+            } elseif (isset($item[self::LOGICAL_KEY][self::CHILD_OF_KEY])) {
+                $item[self::CHILD_OF_KEY] = $item[self::LOGICAL_KEY][self::CHILD_OF_KEY];
+                unset($item[self::LOGICAL_KEY][self::CHILD_OF_KEY]);
             } else {
-                $item[self::MEMBER_OF_KEY] = self::ROOT_ID;
+                $item[self::CHILD_OF_KEY] = self::ROOT_ID;
             }
 
             // Add the filter id to all items.
@@ -170,7 +169,7 @@ class FromQueryFilterCreator
     {
         // filter tree builder appends an AND root node automatically
         $filterTreeBuilder = FilterTreeBuilder::create();
-        self::appendGroupMembers(self::ROOT_ID, $filterTreeBuilder, $items, $isAttributePathDefined);
+        self::appendChildren(self::ROOT_ID, $filterTreeBuilder, $items, $isAttributePathDefined);
 
         return $filterTreeBuilder->createFilter();
     }
@@ -182,37 +181,28 @@ class FromQueryFilterCreator
         array $groupItem, FilterTreeBuilder $filterTreeBuilder, array $items, callable $isAttributePathDefined): void
     {
         $groupId = $groupItem[self::ITEM_ID_KEY];
-        $groupConjunction = $groupItem[self::GROUP_KEY][self::CONJUNCTION_KEY];
+        $groupConjunction = $groupItem[self::LOGICAL_KEY][self::OPERATOR_KEY] ?? null;
 
         switch ($groupConjunction) {
-            case self::AND_CONJUNCTION:
+            case self::LOGICAL_AND:
                 $filterTreeBuilder->and();
                 break;
-            case self::OR_CONJUNCTION:
+            case self::LOGICAL_OR:
                 $filterTreeBuilder->or();
                 break;
-            case self::NOT_AND_CONJUNCTION:
+            case self::LOGICAL_NOT:
                 $filterTreeBuilder->not();
-                $filterTreeBuilder->and();
-                break;
-            case self::NOT_OR_CONJUNCTION:
-                $filterTreeBuilder->not();
-                $filterTreeBuilder->or();
                 break;
             default:
-                throw new FilterException('conjunction undefined: '.$groupConjunction, FilterException::CONJUNCTION_UNDEFINED);
+                throw new FilterException('invalid logical operator: '.$groupConjunction, FilterException::CONJUNCTION_UNDEFINED);
         }
 
-        self::appendGroupMembers($groupId, $filterTreeBuilder, $items, $isAttributePathDefined);
+        self::appendChildren($groupId, $filterTreeBuilder, $items, $isAttributePathDefined);
 
         switch ($groupConjunction) {
-            case self::AND_CONJUNCTION:
-            case self::OR_CONJUNCTION:
-                $filterTreeBuilder->end();
-                break;
-            case self::NOT_AND_CONJUNCTION:
-            case self::NOT_OR_CONJUNCTION:
-                $filterTreeBuilder->end();
+            case self::LOGICAL_AND:
+            case self::LOGICAL_OR:
+            case self::LOGICAL_NOT:
                 $filterTreeBuilder->end();
                 break;
         }
@@ -223,12 +213,12 @@ class FromQueryFilterCreator
      *
      * @throws FilterException
      */
-    private static function appendGroupMembers(
-        string $groupId, FilterTreeBuilder $filterTreeBuilder, array $items, callable $isAttributePathDefined): void
+    private static function appendChildren(
+        string $parentId, FilterTreeBuilder $filterTreeBuilder, array $items, callable $isAttributePathDefined): void
     {
         foreach ($items as $item) {
-            if ($item[self::MEMBER_OF_KEY] === $groupId) {
-                if (isset($item[self::GROUP_KEY])) {
+            if ($item[self::CHILD_OF_KEY] === $parentId) {
+                if (isset($item[self::LOGICAL_KEY])) {
                     self::appendGroup($item, $filterTreeBuilder, $items, $isAttributePathDefined);
                 } elseif (isset($item[self::CONDITION_KEY])) {
                     self::appendConditionNode($item[self::CONDITION_KEY], $filterTreeBuilder, $isAttributePathDefined);
@@ -271,6 +261,7 @@ class FromQueryFilterCreator
     {
         return match ($operator) {
             self::EQUALS_OPERATOR => OperatorType::EQUALS_OPERATOR,
+            self::NOT_EQUALS_OPERATOR => OperatorType::NOT_EQUALS_OPERATOR,
             self::LESS_THAN_OR_EQUAL_OPERATOR => OperatorType::LESS_THAN_OR_EQUAL_OPERATOR,
             self::GREATER_THAN_OR_EQUAL_OPERATOR => OperatorType::GREATER_THAN_OR_EQUAL_OPERATOR,
             self::I_STARTS_WITH_OPERATOR => OperatorType::I_STARTS_WITH_OPERATOR,
@@ -279,6 +270,7 @@ class FromQueryFilterCreator
             self::IN_ARRAY_OPERATOR => OperatorType::IN_ARRAY_OPERATOR,
             self::HAS_OPERATOR => OperatorType::HAS_OPERATOR,
             self::IS_NULL_OPERATOR => OperatorType::IS_NULL_OPERATOR,
+            self::IS_NOT_NULL_OPERATOR => OperatorType::IS_NOT_NULL_OPERATOR,
             default => throw new FilterException('undefined condition operator: '.$operator,
                 FilterException::CONDITION_OPERATOR_UNDEFINED),
         };

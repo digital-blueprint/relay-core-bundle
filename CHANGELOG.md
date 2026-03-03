@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Rest/Query/Filter: Update filter syntax group → logical, conjunction → operator
+- Rest/Query/Filter: Add condition operators NOT_EQUALS and IS_NOT_NULL
+- Rest/Query/Sort: Replace array storage of sort fields by SortField objects
+- LocalData/AbstractLocalDataEventSubscriber: Apply local data attribute path mapping to sort attribute paths (like for filter attribute paths)
+
 ## v0.1.230
 
 - Throw a 403 forbidden error if the user doesn't have read access to a local data attribute 

@@ -12,6 +12,8 @@ use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\Node as FilterNode;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\NodeType as FilterNodeType;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\OperatorType as FilterOperatorType;
 use Dbp\Relay\CoreBundle\Rest\Query\Pagination\Pagination;
+use Dbp\Relay\CoreBundle\Rest\Query\Sort\Sort;
+use Dbp\Relay\CoreBundle\Rest\Query\Sort\SortField;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
@@ -90,6 +92,18 @@ class QueryHelper
             $queryBuilder, $filter->getRootNode(), $entityAlias ? $entityAlias.'.' : null));
     }
 
+    public static function addSort(QueryBuilder $queryBuilder, Sort $sort, ?string $entityAlias = null): QueryBuilder
+    {
+        foreach ($sort->getSortFields() as $sortField) {
+            $queryBuilder->addOrderBy(
+                ($entityAlias ? $entityAlias.'.' : '').$sortField->getPath(),
+                $sortField->getDirection() === SortField::DESCENDING_DIRECTION ? 'DESC' : 'ASC'
+            );
+        }
+
+        return $queryBuilder;
+    }
+
     private static function getEntitiesInternal(string $entityClassName, EntityManager $entityManager,
         int $currentPageStartIndex, int $maxNumItemsPerPage, ?Filter $filter = null): array
     {
@@ -145,8 +159,11 @@ class QueryHelper
                 case FilterOperatorType::I_CONTAINS_OPERATOR:
                     return $queryBuilder->expr()->like($attributePath,
                         $queryBuilder->expr()->literal('%'.$value.'%'));
-                case FilterOperatorType::EQUALS_OPERATOR: // TODO: case-sensitivity post-precessing required
+                case FilterOperatorType::EQUALS_OPERATOR:
                     return $queryBuilder->expr()->eq($attributePath,
+                        $queryBuilder->expr()->literal($value));
+                case FilterOperatorType::NOT_EQUALS_OPERATOR:
+                    return $queryBuilder->expr()->neq($attributePath,
                         $queryBuilder->expr()->literal($value));
                 case FilterOperatorType::I_STARTS_WITH_OPERATOR:
                     return $queryBuilder->expr()->like($attributePath,
@@ -169,6 +186,8 @@ class QueryHelper
                     return $queryBuilder->expr()->in($attributePath, $value);
                 case FilterOperatorType::IS_NULL_OPERATOR:
                     return $queryBuilder->expr()->isNull($attributePath);
+                case FilterOperatorType::IS_NOT_NULL_OPERATOR:
+                    return $queryBuilder->expr()->isNotNull($attributePath);
                 default:
                     throw new \Exception('unsupported filter condition operator: '.$filterNode->getOperator());
             }

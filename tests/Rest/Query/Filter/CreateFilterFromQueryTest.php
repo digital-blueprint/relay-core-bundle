@@ -151,13 +151,13 @@ class CreateFilterFromQueryTest extends TestCase
     /**
      * @throws \Exception
      */
-    public function testAndGroup()
+    public function testLogicalAnd()
     {
-        $querySting = 'filter[test_group][group][conjunction]=AND&filter[foo][condition][path]=field0&'.
+        $querySting = 'filter[test_group][logical][operator]=AND&filter[foo][condition][path]=field0&'.
             'filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]="value0"&'.
-            'filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=field1&'.
+            'filter[foo][condition][childOf]=test_group&filter[bar][condition][path]=field1&'.
             'filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]="value1"&'.
-            'filter[bar][condition][memberOf]=test_group';
+            'filter[bar][condition][childOf]=test_group';
 
         $filter = self::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0', 'field1']);
@@ -175,13 +175,13 @@ class CreateFilterFromQueryTest extends TestCase
     /**
      * @throws \Exception
      */
-    public function testOrGroup()
+    public function testLogicalOr()
     {
-        $querySting = 'filter[test_group][group][conjunction]=OR&filter[foo][condition][path]=field0&'.
+        $querySting = 'filter[test_group][logical][operator]=OR&filter[foo][condition][path]=field0&'.
             'filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]="value0"&'.
-            'filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=field1&'.
+            'filter[foo][condition][childOf]=test_group&filter[bar][condition][path]=field1&'.
             'filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]="value1"&'.
-            'filter[bar][condition][memberOf]=test_group';
+            'filter[bar][condition][childOf]=test_group';
 
         $filter = self::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0', 'field1']);
@@ -196,22 +196,25 @@ class CreateFilterFromQueryTest extends TestCase
         $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
     }
 
-    /**
-     * @throws \Exception
-     */
-    public function testNotAndGroup()
+    public function testLogicalAndAndOrCombined()
     {
-        $querySting = 'filter[test_group][group][conjunction]=NOT_AND&filter[foo][condition][path]=field0&'.
-            'filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]="value0"&'.
-            'filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=field1&'.
-            'filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]="value1"&'.
-            'filter[bar][condition][memberOf]=test_group';
+        $querySting = 'filter[logical_or][logical][operator]=OR&'.
+            'filter[logical_and][logical][operator]=AND&'.
+            'filter[logical_and][logical][childOf]=logical_or&'.
+            'filter[foo][condition][path]=field0&'.
+            'filter[foo][condition][operator]=I_CONTAINS&'.
+            'filter[foo][condition][value]="value0"&'.
+            'filter[foo][condition][childOf]=logical_and&'.
+            'filter[bar][condition][path]=field1&'.
+            'filter[bar][condition][operator]=EQUALS&'.
+            'filter[bar][condition][value]="value1"&'.
+            'filter[bar][condition][childOf]=logical_and';
 
         $filter = self::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0', 'field1']);
 
         $expectedFilter = FilterTreeBuilder::create()
-            ->not()
+            ->or()
             ->and()
             ->iContains('field0', 'value0')
             ->equals('field1', 'value1')
@@ -225,16 +228,50 @@ class CreateFilterFromQueryTest extends TestCase
     /**
      * @throws \Exception
      */
-    public function testNotOrGroup()
+    public function testLogicalNot()
     {
-        $querySting = 'filter[test_group][group][conjunction]=NOT_OR&filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]="value0"&&filter[foo][condition][memberOf]=test_group&filter[bar][condition][path]=field1&filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]="value1"&&filter[bar][condition][memberOf]=test_group';
+        $querySting = 'filter[test_group][logical][operator]=NOT&'.
+            'filter[foo][condition][path]=field0&'.
+            'filter[foo][condition][operator]=I_CONTAINS&'.
+            'filter[foo][condition][value]="value0"&'.
+            'filter[foo][condition][childOf]=test_group';
+
+        $filter = self::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
+
+        $expectedFilter = FilterTreeBuilder::create()
+            ->not()
+            ->iContains('field0', 'value0')
+            ->end()
+            ->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testLogicalNotWithChildAnd()
+    {
+        // $querySting = 'filter[test_group][logical][operator]=NOT&filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]="value0"&&filter[foo][condition][childOf]=test_group&filter[bar][condition][path]=field1&filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]="value1"&&filter[bar][condition][childOf]=test_group';
+        $querySting = 'filter[logical_not][logical][operator]=NOT&'.
+            'filter[logical_and][logical][operator]=AND&'.
+            'filter[logical_and][logical][childOf]=logical_not&'.
+            'filter[foo][condition][path]=field0&'.
+            'filter[foo][condition][operator]=I_CONTAINS&'.
+            'filter[foo][condition][value]="value0"&'.
+            'filter[foo][condition][childOf]=logical_and&'.
+            'filter[bar][condition][path]=field1&'.
+            'filter[bar][condition][operator]=EQUALS&'.
+            'filter[bar][condition][value]="value1"&'.
+            'filter[bar][condition][childOf]=logical_and';
 
         $filter = self::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0', 'field1']);
 
         $expectedFilter = FilterTreeBuilder::create()
             ->not()
-            ->or()
+            ->and()
             ->iContains('field0', 'value0')
             ->equals('field1', 'value1')
             ->end()
@@ -441,7 +478,7 @@ class CreateFilterFromQueryTest extends TestCase
      */
     public function testConjunctionUndefined()
     {
-        $querySting = 'filter[or_group][group][conjunction]=ORISH&filter[foo][condition][path]=field0&filter[foo][condition][operator]=EQ&filter[foo][condition][value]="value0"&filter[bar][condition][path]=field0&filter[bar][condition][operator]=EQ&filter[bar][condition][value]="value1"';
+        $querySting = 'filter[or_group][logical][operator]=ORISH&filter[foo][condition][path]=field0&filter[foo][condition][operator]=EQ&filter[foo][condition][value]="value0"&filter[bar][condition][path]=field0&filter[bar][condition][operator]=EQ&filter[bar][condition][value]="value1"';
 
         try {
             self::createFilterFromQueryParameters(

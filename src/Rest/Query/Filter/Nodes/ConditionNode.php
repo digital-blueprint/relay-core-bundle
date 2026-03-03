@@ -33,7 +33,10 @@ class ConditionNode extends Node
             throw new FilterException('undefined condition operator: '.$operator, FilterException::CONDITION_OPERATOR_UNDEFINED);
         }
 
-        if ($operator === OperatorType::IS_NULL_OPERATOR) {
+        if (in_array($operator, [
+            OperatorType::IS_NULL_OPERATOR,
+            OperatorType::IS_NOT_NULL_OPERATOR,
+        ], true)) {
             if ($value !== null) {
                 throw new FilterException('Filters using the "'.$operator.
                     '" operator must not provide a value.', FilterException::CONDITION_VALUE_ERROR);
@@ -126,6 +129,24 @@ class ConditionNode extends Node
                 return \str_contains(strtolower($columnValue), strtolower($this->value));
             case OperatorType::EQUALS_OPERATOR:
                 return $columnValue === $this->value;
+            case OperatorType::NOT_EQUALS_OPERATOR:
+                return $columnValue !== $this->value;
+            case OperatorType::I_STARTS_WITH_OPERATOR:
+                return str_starts_with(strtolower($columnValue), strtolower($this->value));
+            case OperatorType::I_ENDS_WITH_OPERATOR:
+                return str_ends_with(strtolower($columnValue), strtolower($this->value));
+            case OperatorType::GREATER_THAN_OR_EQUAL_OPERATOR:
+                return $columnValue >= $this->value;
+            case OperatorType::LESS_THAN_OR_EQUAL_OPERATOR:
+                return $columnValue <= $this->value;
+            case OperatorType::IN_ARRAY_OPERATOR:
+                return is_array($this->value) && in_array($columnValue, $this->value, true);
+            case OperatorType::HAS_OPERATOR:
+                return is_array($columnValue) && in_array($this->value, $columnValue, true);
+            case OperatorType::IS_NULL_OPERATOR:
+                return $columnValue === null;
+            case OperatorType::IS_NOT_NULL_OPERATOR:
+                return $columnValue !== null;
             default:
                 throw new \UnexpectedValueException('unimplemented condition operator: '.$this->operator);
         }

@@ -30,7 +30,6 @@ class FilterTest extends TestCase
                 ->equals('field_4', '4')
             ->end()->createFilter();
 
-        $this->assertInstanceOf(Filter::class, $filter);
         $this->assertTrue($filter->isValid());
 
         $filterArray = $filter->toArray();
@@ -193,6 +192,9 @@ class FilterTest extends TestCase
         $this->assertEquals(FilterTreeBuilder::create()->createFilter()->toArray(), $filter->toArray());
     }
 
+    /**
+     * @throws FilterException
+     */
     public function testEmptyFilter()
     {
         $filter = Filter::create();

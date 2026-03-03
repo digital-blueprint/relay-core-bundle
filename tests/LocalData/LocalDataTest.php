@@ -14,6 +14,7 @@ use Dbp\Relay\CoreBundle\TestUtils\DataProviderTester;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class LocalDataTest extends TestCase
 {
@@ -141,7 +142,7 @@ class LocalDataTest extends TestCase
         try {
             $this->getTestEntityWithLocalData($localDataAttributeName, $sourceData);
             $this->fail('Expected ApiError exception not thrown.');
-        } catch (ApiError $e) {
+        } catch (HttpException $e) {
             $this->assertEquals(Response::HTTP_FORBIDDEN, $e->getStatusCode());
         }
     }
@@ -160,7 +161,7 @@ class LocalDataTest extends TestCase
                 '2' => $sourceData,
             ]);
             $this->fail('Expected ApiError exception not thrown.');
-        } catch (ApiError $e) {
+        } catch (HttpException $e) {
             $this->assertEquals(Response::HTTP_FORBIDDEN, $e->getStatusCode());
         }
     }

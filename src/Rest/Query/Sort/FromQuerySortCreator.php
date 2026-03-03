@@ -35,18 +35,17 @@ class FromQuerySortCreator
         // Expand a JSON:API compliant sort into a more expressive sort parameter.
         if (is_string($sortQueryParameters)) {
             $sortQueryParameters = static::expandFieldString($sortQueryParameters);
-        } elseif (!is_array($sortQueryParameters)) {
+        } elseif (false === is_array($sortQueryParameters)) {
             throw new SortException('Invalid sort parameter type: Must be string or array. ',
                 SortException::INVALID_QUERY_PARAMETER);
         }
 
-        // Expand any defaults into the sort array.
-        $expanded = [];
-        foreach ($sortQueryParameters as $sortIndex => $sortItem) {
-            $expanded[] = static::expandItem($sortItem, $isAttributePathDefined);
+        $sortFieldsNodes = [];
+        foreach ($sortQueryParameters as $sortItem) {
+            $sortFieldsNodes[] = static::createSortFieldNode($sortItem, $isAttributePathDefined);
         }
 
-        return new Sort($expanded);
+        return new Sort($sortFieldsNodes);
     }
 
     /**
@@ -79,36 +78,22 @@ class FromQuerySortCreator
      * @param array                  $sortItem               The raw sort item
      * @param callable(string): bool $isAttributePathDefined
      *
-     * @return array The expanded sort item
-     *
      * @throws SortException
      */
-    protected static function expandItem(array $sortItem, callable $isAttributePathDefined): array
+    protected static function createSortFieldNode(array $sortItem, callable $isAttributePathDefined): SortField
     {
-        $defaults = [
-            self::DIRECTION_KEY => 'ASC',
-        ];
-
-        $attributePath = $sortItem[self::PATH_KEY] ?? null;
-        if ($attributePath === null) {
+        $expectedKeys = [self::PATH_KEY, self::DIRECTION_KEY];
+        if (false === empty(array_diff(array_keys($sortItem), $expectedKeys))) {
+            throw new SortException('You have provided an invalid set of sort keys.', SortException::SORT_KEY_UNDEFINED);
+        }
+        if (null === ($attributePath = $sortItem[self::PATH_KEY] ?? null)) {
             throw new SortException('Sort parameter is missing a \''.self::PATH_KEY.'\' key.', SortException::ATTRIBUTE_PATH_MISSING);
         }
         if (false === $isAttributePathDefined($attributePath)) {
             throw new SortException('Undefined attribute path: '.$attributePath, SortException::ATTRIBUTE_PATH_UNDEFINED);
         }
+        $direction = $sortItem[self::DIRECTION_KEY] ?? SortField::ASCENDING_DIRECTION;
 
-        $expected_keys = [
-            self::PATH_KEY,
-            self::DIRECTION_KEY,
-        ];
-
-        $expanded = array_merge($defaults, $sortItem);
-
-        // Verify the correct sort keys.
-        if (!empty(array_diff($expected_keys, array_keys($expanded)))) {
-            throw new SortException('You have provided an invalid set of sort keys.', SortException::SORT_KEYS_UNDEFINED);
-        }
-
-        return $expanded;
+        return new SortField($attributePath, $direction);
     }
 }
