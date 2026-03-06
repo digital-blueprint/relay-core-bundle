@@ -126,6 +126,12 @@ services:
     arguments:
       $debug: '%kernel.debug%'
 
+  Dbp\Relay\CoreBundle\Serializer\DateTimeUtcNormalizer:
+    autowire: true
+    autoconfigure: true
+    tags:
+      - { name: serializer.normalizer, priority: -900 }
+
   Dbp\Relay\CoreBundle\Authorization\Serializer\EntityNormalizer:
     autowire: true
     autoconfigure: true
