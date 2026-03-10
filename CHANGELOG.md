@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## v0.1.232
+
+- Add DateTimeUtcNormalizer normalizer/datetimenormalizer which is more strict
+  than the builtin one for parsing, always converts to UTC, and outputs strings
+  with milliseconds by default.
+
 ## v0.1.231
 
 - Rest/Query/Filter: Update filter syntax group → logical, conjunction → operator
