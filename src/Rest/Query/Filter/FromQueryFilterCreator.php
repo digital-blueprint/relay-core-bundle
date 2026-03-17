@@ -106,16 +106,13 @@ class FromQueryFilterCreator
     {
         $expanded = [];
         foreach ($queryParameters as $key => $item) {
-            $item = self::expandShortcut($key, $item);
+            $item = self::tryExpandConditionShortcut($key, $item);
 
-            // Throw an exception if the query uses the reserved filter id for the
-            // root group.
             if ($key === self::ROOT_ID) {
                 $msg = sprintf("'%s' is a reserved filter id.", self::ROOT_ID);
                 throw new FilterException($msg, FilterException::RESERVED_FILTER_ITEM_ID);
             }
 
-            // Add a memberOf key to all items.
             if (isset($item[self::CONDITION_KEY][self::CHILD_OF_KEY])) {
                 $item[self::CHILD_OF_KEY] = $item[self::CONDITION_KEY][self::CHILD_OF_KEY];
                 unset($item[self::CONDITION_KEY][self::CHILD_OF_KEY]);
@@ -126,9 +123,7 @@ class FromQueryFilterCreator
                 $item[self::CHILD_OF_KEY] = self::ROOT_ID;
             }
 
-            // Add the filter id to all items.
             $item[self::ITEM_ID_KEY] = $key;
-
             $expanded[$key] = $item;
         }
 
@@ -138,22 +133,24 @@ class FromQueryFilterCreator
     /**
      * Expands a filter item in case a shortcut was used.
      */
-    private static function expandShortcut(string $key, $item): array
+    private static function tryExpandConditionShortcut(string $key, mixed $item): array
     {
-        if (!is_array($item)) { // the case for `filter[foo]=bar`
+        if (false === is_array($item)) { // the case for 'filter[path]=value0'
             $item = [self::CONDITION_KEY => [
                 self::VALUE_KEY => $item,
                 self::PATH_KEY => $key,
             ]];
-        } elseif (isset($item[self::VALUE_KEY])) { // the case for filter[foo][value]=bar'
+        } elseif (isset($item[self::VALUE_KEY])) { // the case for 'filter[path][value]=value0'
             $item = [self::CONDITION_KEY => [
                 self::VALUE_KEY => $item[self::VALUE_KEY],
                 self::PATH_KEY => $key,
+                self::OPERATOR_KEY => $item[self::OPERATOR_KEY] ?? null,
             ]];
         }
 
-        // for condition items, add default operator if not set
-        if (isset($item[self::CONDITION_KEY]) && !isset($item[self::CONDITION_KEY][self::OPERATOR_KEY])) {
+        if (isset($item[self::CONDITION_KEY]) // the case for 'filter[label][condition][value]=value0'
+            && false === isset($item[self::CONDITION_KEY][self::OPERATOR_KEY])) {
+            // if there is no operator, use the equals operator by default
             $item[self::CONDITION_KEY][self::OPERATOR_KEY] = self::EQUALS_OPERATOR;
         }
 
@@ -177,13 +174,13 @@ class FromQueryFilterCreator
     /**
      * @throws FilterException
      */
-    private static function appendGroup(
+    private static function appendLogicalNode(
         array $groupItem, FilterTreeBuilder $filterTreeBuilder, array $items, callable $isAttributePathDefined): void
     {
         $groupId = $groupItem[self::ITEM_ID_KEY];
-        $groupConjunction = $groupItem[self::LOGICAL_KEY][self::OPERATOR_KEY] ?? null;
+        $logicalOperator = $groupItem[self::LOGICAL_KEY][self::OPERATOR_KEY] ?? null;
 
-        switch ($groupConjunction) {
+        switch ($logicalOperator) {
             case self::LOGICAL_AND:
                 $filterTreeBuilder->and();
                 break;
@@ -194,18 +191,13 @@ class FromQueryFilterCreator
                 $filterTreeBuilder->not();
                 break;
             default:
-                throw new FilterException('invalid logical operator: '.$groupConjunction, FilterException::CONJUNCTION_UNDEFINED);
+                throw new FilterException('logical operator undefined: '.$logicalOperator,
+                    FilterException::LOGICAL_OPERATOR_UNDEFINED);
         }
 
         self::appendChildren($groupId, $filterTreeBuilder, $items, $isAttributePathDefined);
 
-        switch ($groupConjunction) {
-            case self::LOGICAL_AND:
-            case self::LOGICAL_OR:
-            case self::LOGICAL_NOT:
-                $filterTreeBuilder->end();
-                break;
-        }
+        $filterTreeBuilder->end();
     }
 
     /**
@@ -219,7 +211,7 @@ class FromQueryFilterCreator
         foreach ($items as $item) {
             if ($item[self::CHILD_OF_KEY] === $parentId) {
                 if (isset($item[self::LOGICAL_KEY])) {
-                    self::appendGroup($item, $filterTreeBuilder, $items, $isAttributePathDefined);
+                    self::appendLogicalNode($item, $filterTreeBuilder, $items, $isAttributePathDefined);
                 } elseif (isset($item[self::CONDITION_KEY])) {
                     self::appendConditionNode($item[self::CONDITION_KEY], $filterTreeBuilder, $isAttributePathDefined);
                 } else {

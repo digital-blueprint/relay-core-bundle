@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add Tools::createAddressArray to standardize the format of address objects provided over the API
+- Rest/Query/Filter: fix the condition operator being ignored for condition shortcuts
+
 ## v0.1.232
 
 - Add DateTimeUtcNormalizer normalizer/datetimenormalizer which is more strict

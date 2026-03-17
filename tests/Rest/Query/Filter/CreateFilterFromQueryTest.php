@@ -299,7 +299,7 @@ class CreateFilterFromQueryTest extends TestCase
     /**
      * @throws \Exception
      */
-    public function testCreateFromShortcut()
+    public function testCreateFromShortcutWithDefaultOperator()
     {
         $querySting = 'filter[field0][value]="value0"';
 
@@ -314,9 +314,39 @@ class CreateFilterFromQueryTest extends TestCase
     /**
      * @throws \Exception
      */
+    public function testCreateFromShortcutWithOperator()
+    {
+        $querySting = 'filter[field0][value]="value0"&filter[field0][operator]=I_CONTAINS';
+
+        $filter = self::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
+
+        $expectedFilter = FilterTreeBuilder::create()->iContains('field0', 'value0')->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function testCreateFromUltraShortcut()
     {
         $querySting = 'filter[field0]="value0"';
+
+        $filter = self::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
+
+        $expectedFilter = FilterTreeBuilder::create()->equals('field0', 'value0')->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testCreateFromConditionWithDefaultOperator()
+    {
+        $querySting = 'filter[f][condition][value]="value0"&filter[f][condition][path]=field0';
 
         $filter = self::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
@@ -484,10 +514,13 @@ class CreateFilterFromQueryTest extends TestCase
             self::createFilterFromQueryParameters(
                 Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
         } catch (FilterException $exception) {
-            $this->assertEquals(FilterException::CONJUNCTION_UNDEFINED, $exception->getCode());
+            $this->assertEquals(FilterException::LOGICAL_OPERATOR_UNDEFINED, $exception->getCode());
         }
     }
 
+    /**
+     * @throws FilterException
+     */
     public static function createFilterFromQueryParameters(array $parameters, array $availablePaths): Filter
     {
         return FromQueryFilterCreator::createFilterFromQueryParameters($parameters,

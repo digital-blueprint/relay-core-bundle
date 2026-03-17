@@ -62,4 +62,26 @@ class Tools
 
         return $targetArray;
     }
+
+    /**
+     * Creates a standardized, associative address array with the given parameters.
+     *
+     * @return string[]
+     */
+    public static function createAddressArray(string $street, string $postalAddress, string $city, string $country,
+        ?string $additionalInformation = null, bool $includeNullValues = false): array
+    {
+        $addressArray = [
+            'street' => $street,
+            'postalAddress' => $postalAddress,
+            'city' => $city,
+            'country' => $country,
+        ];
+
+        if ($includeNullValues || null !== $additionalInformation) {
+            $addressArray['additionalInformation'] = $additionalInformation;
+        }
+
+        return $addressArray;
+    }
 }
