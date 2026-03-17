@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.233
+
 - Add Tools::createAddressArray to standardize the format of address objects provided over the API
 - Rest/Query/Filter: fix the condition operator being ignored for condition shortcuts
 
