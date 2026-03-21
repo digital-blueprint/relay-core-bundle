@@ -399,7 +399,7 @@
         },
         {
             "name": "api-platform/metadata",
-            "version": "v4.3.0",
+            "version": "v4.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/api-platform/metadata.git",
@@ -491,13 +491,13 @@
                 "swagger"
             ],
             "support": {
-                "source": "https://github.com/api-platform/metadata/tree/v4.3.0"
+                "source": "https://github.com/api-platform/metadata/tree/v4.3.1"
             },
             "time": "2026-03-13T14:49:56+00:00"
         },
         {
             "name": "api-platform/openapi",
-            "version": "v4.3.0",
+            "version": "v4.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/api-platform/openapi.git",
@@ -582,7 +582,7 @@
                 "swagger"
             ],
             "support": {
-                "source": "https://github.com/api-platform/openapi/tree/v4.3.0"
+                "source": "https://github.com/api-platform/openapi/tree/v4.3.1"
             },
             "time": "2026-03-06T15:07:49+00:00"
         },
@@ -682,16 +682,16 @@
         },
         {
             "name": "api-platform/state",
-            "version": "v4.3.0",
+            "version": "v4.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/api-platform/state.git",
-                "reference": "663c00f610f076f5cac8b13755805d9b5d97ff4c"
+                "reference": "fc42812fb601b7c83aa43216d4329e89df79fe82"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/api-platform/state/zipball/663c00f610f076f5cac8b13755805d9b5d97ff4c",
-                "reference": "663c00f610f076f5cac8b13755805d9b5d97ff4c",
+                "url": "https://api.github.com/repos/api-platform/state/zipball/fc42812fb601b7c83aa43216d4329e89df79fe82",
+                "reference": "fc42812fb601b7c83aa43216d4329e89df79fe82",
                 "shasum": ""
             },
             "require": {
@@ -705,7 +705,7 @@
             },
             "require-dev": {
                 "api-platform/serializer": "^4.3",
-                "api-platform/validator": "^4.3",
+                "api-platform/validator": "^4.3.1",
                 "phpunit/phpunit": "^12.2",
                 "symfony/http-foundation": "^6.4.14 || ^7.0 || ^8.0",
                 "symfony/object-mapper": "^7.4 || ^8.0",
@@ -773,22 +773,22 @@
                 "swagger"
             ],
             "support": {
-                "source": "https://github.com/api-platform/state/tree/v4.3.0"
+                "source": "https://github.com/api-platform/state/tree/v4.3.1"
             },
-            "time": "2026-03-13T13:27:59+00:00"
+            "time": "2026-03-17T15:43:29+00:00"
         },
         {
             "name": "api-platform/symfony",
-            "version": "v4.3.0",
+            "version": "v4.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/api-platform/symfony.git",
-                "reference": "3b9b39f03250494ac4f3415c3d43c5678082b4d0"
+                "reference": "c416366b799f9da731bb053af0f2a120b4554259"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/api-platform/symfony/zipball/3b9b39f03250494ac4f3415c3d43c5678082b4d0",
-                "reference": "3b9b39f03250494ac4f3415c3d43c5678082b4d0",
+                "url": "https://api.github.com/repos/api-platform/symfony/zipball/c416366b799f9da731bb053af0f2a120b4554259",
+                "reference": "c416366b799f9da731bb053af0f2a120b4554259",
                 "shasum": ""
             },
             "require": {
@@ -801,7 +801,7 @@
                 "api-platform/openapi": "^4.3",
                 "api-platform/serializer": "^4.3",
                 "api-platform/state": "^4.3",
-                "api-platform/validator": "^4.3",
+                "api-platform/validator": "^4.3.1",
                 "php": ">=8.2",
                 "symfony/asset": "^6.4 || ^7.0 || ^8.0",
                 "symfony/finder": "^6.4 || ^7.0 || ^8.0",
@@ -901,22 +901,22 @@
                 "symfony"
             ],
             "support": {
-                "source": "https://github.com/api-platform/symfony/tree/v4.3.0"
+                "source": "https://github.com/api-platform/symfony/tree/v4.3.1"
             },
-            "time": "2026-03-13T11:03:46+00:00"
+            "time": "2026-03-20T10:54:28+00:00"
         },
         {
             "name": "api-platform/validator",
-            "version": "v4.3.0",
+            "version": "v4.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/api-platform/validator.git",
-                "reference": "c66b272ad9d19f67e8a402e61b34ea65b2df9b91"
+                "reference": "3c0d486a12d7ab9b8fcfb727437b5322dc619663"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/api-platform/validator/zipball/c66b272ad9d19f67e8a402e61b34ea65b2df9b91",
-                "reference": "c66b272ad9d19f67e8a402e61b34ea65b2df9b91",
+                "url": "https://api.github.com/repos/api-platform/validator/zipball/3c0d486a12d7ab9b8fcfb727437b5322dc619663",
+                "reference": "3c0d486a12d7ab9b8fcfb727437b5322dc619663",
                 "shasum": ""
             },
             "require": {
@@ -977,9 +977,9 @@
                 "validator"
             ],
             "support": {
-                "source": "https://github.com/api-platform/validator/tree/v4.3.0"
+                "source": "https://github.com/api-platform/validator/tree/v4.3.1"
             },
-            "time": "2026-03-06T15:07:49+00:00"
+            "time": "2026-03-17T15:23:21+00:00"
         },
         {
             "name": "doctrine/collections",
