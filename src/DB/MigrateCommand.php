@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\DB;
 
+use Doctrine\Migrations\Metadata\Storage\TableMetadataStorageConfiguration;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
@@ -26,10 +29,15 @@ final class MigrateCommand extends Command implements LoggerAwareInterface
 
     private array $entityManagers = [];
 
+    private readonly TableMetadataStorageConfiguration $migrationStorageConfig;
+
     public function __construct(
         private readonly KernelInterface $appKernel,
-        private readonly EventDispatcherInterface $eventDispatcher)
-    {
+        private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly ManagerRegistry $registry,
+        ?TableMetadataStorageConfiguration $migrationStorageConfig = null,
+    ) {
+        $this->migrationStorageConfig = $migrationStorageConfig ?? new TableMetadataStorageConfiguration();
         parent::__construct();
         $this->logger = new NullLogger();
     }
@@ -95,6 +103,31 @@ final class MigrateCommand extends Command implements LoggerAwareInterface
         });
     }
 
+    /**
+     * Returns all migrations currently recorded in the migrations table for the given entity manager's connection.
+     *
+     * @return string[] list of migration version strings
+     */
+    private function getExecutedMigrations(string $em): array
+    {
+        $entityManager = $this->registry->getManager($em);
+        assert($entityManager instanceof EntityManagerInterface);
+        $connection = $entityManager->getConnection();
+        $schemaManager = $connection->createSchemaManager();
+        $tableName = $this->migrationStorageConfig->getTableName();
+        $versionColumn = $this->migrationStorageConfig->getVersionColumnName();
+        if (!$schemaManager->tablesExist([$tableName])) {
+            return [];
+        }
+
+        $platform = $connection->getDatabasePlatform();
+
+        return $connection->createQueryBuilder()
+            ->select($platform->quoteSingleIdentifier($versionColumn))
+            ->from($platform->quoteSingleIdentifier($tableName))
+            ->fetchFirstColumn();
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $app = $this->getApplication();
@@ -120,12 +153,16 @@ final class MigrateCommand extends Command implements LoggerAwareInterface
                 $output->writeln('  '.$em);
             }
         }
+        $newlyExecutedMigrations = [];
         foreach ($this->entityManagers as $em) {
+            $before = $this->getExecutedMigrations($em);
             $output->writeln("Migrating $em:");
-            $this->runConsoleCommand(['doctrine:migrations:migrate', '--em',  $em], $input, $output);
+            $this->runConsoleCommand(['doctrine:migrations:migrate', '--em', $em], $input, $output);
+            $after = $this->getExecutedMigrations($em);
+            $newlyExecutedMigrations[$em] = array_values(array_diff($after, $before));
         }
 
-        $migratePostEvent = new MigratePostEvent($output);
+        $migratePostEvent = new MigratePostEvent($output, $newlyExecutedMigrations);
         $this->eventDispatcher->dispatch($migratePostEvent);
 
         return Command::SUCCESS;

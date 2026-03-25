@@ -16,6 +16,7 @@
         "doctrine/dbal": "^4.2",
         "doctrine/migrations": "^3.9",
         "doctrine/orm": "^3.3",
+        "doctrine/persistence": "^4.0",
         "dragonmantank/cron-expression": "^3.3.3",
         "guzzlehttp/guzzle": "^7.5",
         "kekos/multipart-form-data-parser": "^1.1",

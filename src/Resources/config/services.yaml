@@ -91,6 +91,8 @@ services:
   Dbp\Relay\CoreBundle\DB\MigrateCommand:
     autowire: true
     autoconfigure: true
+    arguments:
+      $migrationStorageConfig: '@?doctrine.migrations.storage.table_storage'
 
   Dbp\Relay\CoreBundle\Authorization\DebugCommand:
     autowire: true

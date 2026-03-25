@@ -9,12 +9,28 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class MigratePostEvent extends Event
 {
-    public function __construct(private readonly OutputInterface $output)
-    {
+    /**
+     * @param array<string, string[]> $executedMigrations Migrations executed during this run, keyed by entity manager name.
+     *                                                    Each value is an array of migration version strings.
+     */
+    public function __construct(
+        private readonly OutputInterface $output,
+        private readonly array $executedMigrations = [],
+    ) {
     }
 
     public function getOutput(): OutputInterface
     {
         return $this->output;
+    }
+
+    /**
+     * Returns the migrations that were executed during this run, grouped by entity manager name.
+     *
+     * @return array<string, string[]>
+     */
+    public function getExecutedMigrations(): array
+    {
+        return $this->executedMigrations;
     }
 }
