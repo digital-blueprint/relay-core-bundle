@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## v0.1.234
+
+- MigratePostEvent gained an array of migrations that were run, keyed by entity manager name.
+- The "core:check-health" CLI command gained a --skip option to skip specific health checks.
+
 ## v0.1.233
 
 - Add Tools::createAddressArray to standardize the format of address objects provided over the API
