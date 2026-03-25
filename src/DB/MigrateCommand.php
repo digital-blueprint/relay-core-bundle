@@ -34,7 +34,7 @@ final class MigrateCommand extends Command implements LoggerAwareInterface
     public function __construct(
         private readonly KernelInterface $appKernel,
         private readonly EventDispatcherInterface $eventDispatcher,
-        private readonly ManagerRegistry $registry,
+        private readonly ?ManagerRegistry $registry,
         ?TableMetadataStorageConfiguration $migrationStorageConfig = null,
     ) {
         $this->migrationStorageConfig = $migrationStorageConfig ?? new TableMetadataStorageConfiguration();
@@ -110,6 +110,9 @@ final class MigrateCommand extends Command implements LoggerAwareInterface
      */
     private function getExecutedMigrations(string $em): array
     {
+        if ($this->registry === null) {
+            throw new \RuntimeException('doctrine bundle not loaded');
+        }
         $entityManager = $this->registry->getManager($em);
         assert($entityManager instanceof EntityManagerInterface);
         $connection = $entityManager->getConnection();
