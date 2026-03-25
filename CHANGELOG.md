@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.1.235
+
+- Fix a missing service error in case there is no doctrine bundle loaded.
+
 ## v0.1.234
 
 - MigratePostEvent gained an array of migrations that were run, keyed by entity manager name.
