@@ -49,6 +49,12 @@ class HealthCheckCommand extends Command implements LoggerAwareInterface
             InputOption::VALUE_NONE,
             'List all available health checks'
         );
+        $this->addOption(
+            'skip',
+            null,
+            InputOption::VALUE_REQUIRED,
+            'Skip specific health checks (comma-separated list)'
+        );
     }
 
     /**
@@ -74,45 +80,70 @@ class HealthCheckCommand extends Command implements LoggerAwareInterface
 
     private function determineChecksToRun(InputInterface $input, SymfonyStyle $io): ?array
     {
-        $onlyOption = $input->getOption('only');
-
-        if ($onlyOption === null) {
-            return $this->checks;
-        }
-
-        $requestedCheckNames = array_map('trim', explode(',', $onlyOption));
-        $requestedCheckNames = array_filter($requestedCheckNames);
-
-        if ($requestedCheckNames === []) {
-            $io->error('No health checks specified in --only option.');
-
-            return null;
-        }
-
         $availableChecks = [];
         foreach ($this->checks as $check) {
             $availableChecks[$check->getName()] = $check;
         }
 
-        $checksToRun = [];
-        $invalidChecks = [];
+        $onlyOption = $input->getOption('only');
 
-        foreach ($requestedCheckNames as $checkName) {
-            if (isset($availableChecks[$checkName])) {
-                $checksToRun[] = $availableChecks[$checkName];
-            } else {
-                $invalidChecks[] = $checkName;
+        if ($onlyOption === null) {
+            $checksToRun = $this->checks;
+        } else {
+            $requestedCheckNames = array_filter(array_map('trim', explode(',', $onlyOption)));
+
+            if ($requestedCheckNames === []) {
+                $io->error('No health checks specified in --only option.');
+
+                return null;
+            }
+
+            $checksToRun = [];
+            $invalidChecks = [];
+
+            foreach ($requestedCheckNames as $checkName) {
+                if (isset($availableChecks[$checkName])) {
+                    $checksToRun[] = $availableChecks[$checkName];
+                } else {
+                    $invalidChecks[] = $checkName;
+                }
+            }
+
+            if (!empty($invalidChecks)) {
+                $io->error(sprintf(
+                    'Invalid health check(s): %s. Available checks: %s',
+                    implode(', ', $invalidChecks),
+                    implode(', ', array_keys($availableChecks))
+                ));
+
+                return null;
             }
         }
 
-        if (!empty($invalidChecks)) {
-            $io->error(sprintf(
-                'Invalid health check(s): %s. Available checks: %s',
-                implode(', ', $invalidChecks),
-                implode(', ', array_keys($availableChecks))
-            ));
+        $skipOption = $input->getOption('skip');
 
-            return null;
+        if ($skipOption !== null) {
+            $skipCheckNames = array_filter(array_map('trim', explode(',', $skipOption)));
+
+            if ($skipCheckNames === []) {
+                $io->error('No health checks specified in --skip option.');
+
+                return null;
+            }
+
+            $invalidSkips = array_filter($skipCheckNames, fn ($name) => !isset($availableChecks[$name]));
+
+            if (!empty($invalidSkips)) {
+                $io->error(sprintf(
+                    'Invalid health check(s) in --skip: %s. Available checks: %s',
+                    implode(', ', $invalidSkips),
+                    implode(', ', array_keys($availableChecks))
+                ));
+
+                return null;
+            }
+
+            $checksToRun = array_values(array_filter($checksToRun, fn ($check) => !in_array($check->getName(), $skipCheckNames, true)));
         }
 
         return $checksToRun;

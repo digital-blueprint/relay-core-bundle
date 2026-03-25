@@ -14,6 +14,7 @@ use Dbp\Relay\CoreBundle\HealthCheck\HealthCheckCommand;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\Lock\LockFactory;
@@ -34,6 +35,37 @@ class HealthCheckTest extends KernelTestCase
         $this->assertSame(1, $commandTester->getStatusCode());
         $output = $commandTester->getDisplay();
         $this->assertStringContainsString('Dummy Check', $output);
+    }
+
+    public function testSkipOption(): void
+    {
+        self::bootKernel();
+        $application = new Application(self::$kernel);
+
+        $command = $application->find('dbp:relay:core:check-health');
+        assert($command instanceof HealthCheckCommand);
+        $command->setChecks([new DummyCheck()]);
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(['--skip' => 'Dummy Check']);
+        // All checks skipped → no failures
+        $this->assertSame(0, $commandTester->getStatusCode());
+        $output = $commandTester->getDisplay();
+        $this->assertStringNotContainsString('Dummy Check', $output);
+    }
+
+    public function testSkipInvalidOption(): void
+    {
+        self::bootKernel();
+        $application = new Application(self::$kernel);
+
+        $command = $application->find('dbp:relay:core:check-health');
+        assert($command instanceof HealthCheckCommand);
+        $command->setChecks([new DummyCheck()]);
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(['--skip' => 'nonexistent.check']);
+        $this->assertSame(Command::FAILURE, $commandTester->getStatusCode());
+        $output = $commandTester->getDisplay();
+        $this->assertStringContainsString('nonexistent.check', $output);
     }
 
     public function testCacheCheck(): void
