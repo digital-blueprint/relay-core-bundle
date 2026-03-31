@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.236
+
 - Add a workaround to the data providers for situations where they are called by a IriConverterInterface.getResourceFromIri(...), 
   where resource_class and groups are not set in the context
 
