@@ -9,6 +9,10 @@ use ApiPlatform\Metadata\Operation;
 
 trait StateTrait
 {
+    private const FILTERS_CONTEXT_KEY = 'filters';
+    private const GROUPS_CONTEXT_KEY = 'groups';
+    private const RESOURCE_CLASS_CONTEXT_KEY = 'resource_class';
+
     protected static string $identifierName = 'identifier';
     private ?Operation $currentOperation = null;
     private array $currentUriVariables = [];

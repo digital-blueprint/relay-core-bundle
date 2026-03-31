@@ -14,6 +14,28 @@ use Dbp\Relay\CoreBundle\Tests\TestApi\Service\TestResourceService;
  */
 class TestResourceProvider extends AbstractDataProvider
 {
+    public static function getTestConfig(): array
+    {
+        return [
+            'rest' => [
+                'query' => [
+                    'filter' => [
+                        'enable_query_filters' => true,
+                        'enable_prepared_filters' => true,
+                        'prepared_filters' => [
+                            [
+                                'id' => 'public-only',
+                                'use_policy' => 'true',
+                                'force_use_policy' => 'user.get("FORCE_USE_PREPARED_FILTER")',
+                                'filter' => 'filter[isPublic]=true',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
     public function __construct(
         private readonly TestResourceService $testResourceService,
         private readonly TestApiAuthorizationService $authorizationService)

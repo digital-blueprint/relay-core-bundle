@@ -16,8 +16,6 @@ abstract class AbstractDataProcessor extends AbstractAuthorizationService implem
     use DataOperationTrait;
     use StateProcessorTrait;
 
-    private const FILTERS_CONTEXT_KEY = 'filters';
-
     protected const ADD_ITEM_OPERATION = 1;
     protected const REPLACE_ITEM_OPERATION = 2;
     protected const UPDATE_ITEM_OPERATION = 3;

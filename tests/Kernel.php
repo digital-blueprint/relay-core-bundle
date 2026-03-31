@@ -53,7 +53,8 @@ class Kernel extends BaseKernel
         $container->services()->set(TestResourceService::class)->public()->autoconfigure()->autowire();
         $container->services()->set(TestResourceItemController::class)->public()->autoconfigure()->autowire();
         $container->services()->set(TestResourceProcessor::class)->public()->autoconfigure()->autowire();
-        $container->services()->set(TestResourceProvider::class)->public()->autoconfigure()->autowire();
+        $container->services()->set(TestResourceProvider::class)->public()->autoconfigure()->autowire()
+            ->call('setConfig', [TestResourceProvider::getTestConfig()]);
         $container->services()->set(TestSubResourceProcessor::class)->public()->autoconfigure()->autowire();
         $container->services()->set(TestSubResourceProvider::class)->public()->autoconfigure()->autowire();
 

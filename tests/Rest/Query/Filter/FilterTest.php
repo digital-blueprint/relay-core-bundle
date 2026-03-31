@@ -291,4 +291,32 @@ class FilterTest extends TestCase
         $filter = FilterTreeBuilder::create()->inArray('field', [])->createFilter();
         $this->assertTrue($filter->isAlwaysFalse());
     }
+
+    public function testIsReflectedDirectly(): void
+    {
+        $filterTreeBuilder = FilterTreeBuilder::create();
+        $condition = new ConditionNode('foo', OperatorType::EQUALS_OPERATOR, 'bar');
+        $filterTreeBuilder->appendChild($condition);
+        $filterTreeBuilder->createFilter();
+        $this->assertTrue($condition->isReflectedDirectly());
+
+        $filterTreeBuilder = FilterTreeBuilder::create()
+            ->or();
+        $condition = new ConditionNode('foo', OperatorType::EQUALS_OPERATOR, 'bar');
+        $filterTreeBuilder->appendChild($condition);
+        $filterTreeBuilder
+            ->isNotNull('baz')
+            ->end();
+        $filterTreeBuilder->createFilter();
+        $this->assertFalse($condition->isReflectedDirectly());
+
+        $filterTreeBuilder = FilterTreeBuilder::create()
+            ->not();
+        $condition = new ConditionNode('foo', OperatorType::EQUALS_OPERATOR, 'bar');
+        $filterTreeBuilder->appendChild($condition);
+        $filterTreeBuilder
+            ->end();
+        $filterTreeBuilder->createFilter();
+        $this->assertFalse($condition->isReflectedDirectly());
+    }
 }

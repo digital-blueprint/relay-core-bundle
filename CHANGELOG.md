@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add a workaround to the data providers for situations where they are called by a IriConverterInterface.getResourceFromIri(...), 
+  where resource_class and groups are not set in the context
+
 ## v0.1.235
 
 - Fix a missing service error in case there is no doctrine bundle loaded.

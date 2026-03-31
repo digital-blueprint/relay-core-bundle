@@ -121,6 +121,22 @@ class ConditionNode extends Node
         return true;
     }
 
+    /**
+     * Indicates whether this condition node is reflected directly (unconditionally) in the filtered results,
+     * i.e., there are neither OR nor NOT nodes in its ancestry.
+     */
+    public function isReflectedDirectly(): bool
+    {
+        $currentNode = $this;
+        while ($currentNode = $currentNode->getParent()) {
+            if (false === ($currentNode instanceof AndNode)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public function apply(array $rowData): bool
     {
         $columnValue = $rowData[$this->path] ?? null;

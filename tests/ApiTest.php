@@ -4,14 +4,10 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests;
 
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
-use Dbp\Relay\CoreBundle\Tests\TestApi\Authorization\TestApiAuthorizationService;
-use Dbp\Relay\CoreBundle\Tests\TestApi\TestResourceEntityManager;
-use Dbp\Relay\CoreBundle\TestUtils\AbstractApiTest;
 use Dbp\Relay\CoreBundle\TestUtils\TestClient;
 use Symfony\Component\HttpFoundation\Response;
 
-class ApiTest extends AbstractApiTest
+class ApiTest extends AbstractApiTestCase
 {
     public function testIndex()
     {
@@ -40,7 +36,8 @@ class ApiTest extends AbstractApiTest
 
     public function testSimpleProviderAuth()
     {
-        $response = $this->testClient->get('/test/test-resources/foobar');
+        // getTestClient() used because TestResourceProvider needs user attributes to be defined
+        $response = $this->getTestClient()->get('/test/test-resources/foobar');
         $this->assertSame(200, $response->getStatusCode());
         $this->assertStringStartsWith('application/ld+json', $response->getHeaders(false)['content-type'][0]);
         $content = json_decode($response->getContent(), true, flags: JSON_THROW_ON_ERROR);
@@ -106,10 +103,8 @@ class ApiTest extends AbstractApiTest
 
     public function testHydraPrefixesInGetCollectionResponse(): void
     {
-        $testClient = new TestClient(ApiTestCase::createClient());
-        $testClient->setUpUser(userAttributes: TestApiAuthorizationService::DEFAULT_USER_ATTRIBUTES);
-        TestResourceEntityManager::setUp($testClient->getContainer());
-        $response = $testClient->get('/test/test-resources');
+        // getTestClient() used because TestResourceProvider needs user attributes to be defined
+        $response = $this->getTestClient()->get('/test/test-resources');
         $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
         $content = json_decode($response->getContent(), true, flags: JSON_THROW_ON_ERROR);
         $this->assertArrayHasKey('hydra:member', $content);

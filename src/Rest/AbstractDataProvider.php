@@ -45,10 +45,6 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     protected const GET_ITEM_OPERATION = 2;
     protected const NO_ID = '';
 
-    private const FILTERS_CONTEXT_KEY = 'filters';
-    private const GROUPS_CONTEXT_KEY = 'groups';
-    private const RESOURCE_CLASS_CONTEXT_KEY = 'resource_class';
-
     private Locale $locale;
     private PreparedFilters $preparedFiltersController;
     private LocalDataAccessChecker $localDataAccessChecker;

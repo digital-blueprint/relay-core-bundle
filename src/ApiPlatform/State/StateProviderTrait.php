@@ -23,6 +23,19 @@ trait StateProviderTrait
         $this->currentOperation = $operation;
         $this->currentUriVariables = $uriVariables;
 
+        /**
+         * Resource class and normalization groups are not set in the context when the provider is called by
+         * IriConverterInterface.getResourceByIri(...).
+         * WORKAROUND: copy the respective values from the operation.
+         * Maybe this is generally the better source for getting those values?
+         */
+        if (false === isset($context[self::RESOURCE_CLASS_CONTEXT_KEY])) {
+            $context[self::RESOURCE_CLASS_CONTEXT_KEY] = $operation->getClass();
+        }
+        if (false === isset($context[self::GROUPS_CONTEXT_KEY])) {
+            $context[self::GROUPS_CONTEXT_KEY] = $operation->getNormalizationContext()['groups'] ?? [];
+        }
+
         if ($operation instanceof CollectionOperationInterface) {
             return $this->getCollectionInternal($context);
         }
