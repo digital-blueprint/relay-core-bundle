@@ -14,6 +14,9 @@ class AuthorizationExpressionChecker
     private const USER_VARIABLE_NAME = 'user';
     private const RESOURCE_VARIABLE_NAME = 'resource';
 
+    /** @var string[] Names reserved by the built-in expression context */
+    private const RESERVED_VARIABLE_NAMES = [self::USER_VARIABLE_NAME, self::RESOURCE_VARIABLE_NAME];
+
     private ExpressionLanguage $expressionLanguage;
 
     /** @var string[] */
@@ -34,9 +37,41 @@ class AuthorizationExpressionChecker
     /** @var string[] */
     private array $attributeExpressionStack = [];
 
+    /** @var AuthorizationExpressionVariableProviderInterface[] */
+    private array $expressionVariableProviders = [];
+
     public function __construct()
     {
         $this->expressionLanguage = new ExpressionLanguage();
+    }
+
+    public function addExpressionVariableProvider(AuthorizationExpressionVariableProviderInterface $provider): void
+    {
+        $this->expressionVariableProviders[] = $provider;
+    }
+
+    /**
+     * Collects the current values from all registered variable providers.
+     * Validates name uniqueness and reserved name constraints on every call
+     * (names are cheap to check; values must be fetched fresh per evaluation).
+     *
+     * @throws \LogicException on reserved or duplicate variable names
+     */
+    private function getExtraVariables(): array
+    {
+        $variables = [];
+        foreach ($this->expressionVariableProviders as $provider) {
+            $name = $provider->getName();
+            if (in_array($name, self::RESERVED_VARIABLE_NAMES, true)) {
+                throw new \LogicException(sprintf("'%s' is a reserved authz expression variable name and cannot be used by a provider", $name));
+            }
+            if (array_key_exists($name, $variables)) {
+                throw new \LogicException(sprintf("Duplicate authz expression variable name: '%s'. Each provider must use a unique name.", $name));
+            }
+            $variables[$name] = $provider->getValue();
+        }
+
+        return $variables;
     }
 
     public function addExpressions(array $roleExpressions, array $resourcePermissionExpressions, array $attributeExpressions): void
@@ -56,9 +91,9 @@ class AuthorizationExpressionChecker
 
         try {
             if (($expression = $this->attributeExpressions[$expressionName] ?? null) !== null) {
-                $result = $this->expressionLanguage->evaluate($expression, [
-                    'user' => $currentAuthorizationUser,
-                ]);
+                $variables = $this->getExtraVariables();
+                $variables[self::USER_VARIABLE_NAME] = $currentAuthorizationUser;
+                $result = $this->expressionLanguage->evaluate($expression, $variables);
             } else {
                 throw new AuthorizationException(sprintf('expression \'%s\' undefined', $expressionName), AuthorizationException::ATTRIBUTE_UNDEFINED);
             }
@@ -90,9 +125,8 @@ class AuthorizationExpressionChecker
                 return false;
             }
 
-            $variables = [
-                self::USER_VARIABLE_NAME => $currentAuthorizationUser,
-            ];
+            $variables = $this->getExtraVariables();
+            $variables[self::USER_VARIABLE_NAME] = $currentAuthorizationUser;
 
             return $this->expressionLanguage->evaluate($roleExpression, $variables);
         } finally {
@@ -128,10 +162,9 @@ class AuthorizationExpressionChecker
                 return false;
             }
 
-            $variables = [
-                self::USER_VARIABLE_NAME => $currentAuthorizationUser,
-                self::RESOURCE_VARIABLE_NAME => $resource,
-            ];
+            $variables = $this->getExtraVariables();
+            $variables[self::USER_VARIABLE_NAME] = $currentAuthorizationUser;
+            $variables[self::RESOURCE_VARIABLE_NAME] = $resource;
 
             return $this->expressionLanguage->evaluate($resourcePermissionExpression, $variables);
         } finally {
@@ -142,9 +175,12 @@ class AuthorizationExpressionChecker
     public function evaluateCustomExpression(AuthorizationUser $currentAuthorizationUser,
         string $expression, array $variables = [], mixed $defaultValue = null): mixed
     {
-        $variables[self::USER_VARIABLE_NAME] = $currentAuthorizationUser;
+        // Extra variables from providers are the base; caller-supplied variables and the
+        // built-in 'user' variable take precedence over any provider-supplied values.
+        $allVariables = array_merge($this->getExtraVariables(), $variables);
+        $allVariables[self::USER_VARIABLE_NAME] = $currentAuthorizationUser;
 
-        return $this->expressionLanguage->evaluate($expression, $variables) ?? $defaultValue;
+        return $this->expressionLanguage->evaluate($expression, $allVariables) ?? $defaultValue;
     }
 
     public function isAttributeExpressionDefined(string $attributeExpressionName): bool

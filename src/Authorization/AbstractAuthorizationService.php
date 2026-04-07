@@ -55,6 +55,11 @@ abstract class AbstractAuthorizationService
         $this->authorizationExpressionChecker->addExpressions($roles, $resourcePermissions, $attributes);
     }
 
+    public function addExpressionVariableProvider(AuthorizationExpressionVariableProviderInterface $provider): void
+    {
+        $this->authorizationExpressionChecker->addExpressionVariableProvider($provider);
+    }
+
     public function isAttributeDefined(string $attributeName): bool
     {
         return $this->authorizationExpressionChecker->isAttributeExpressionDefined($attributeName);

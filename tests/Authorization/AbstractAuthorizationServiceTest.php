@@ -6,6 +6,7 @@ namespace Dbp\Relay\CoreBundle\Tests\Authorization;
 
 use Dbp\Relay\CoreBundle\Authorization\AbstractAuthorizationService;
 use Dbp\Relay\CoreBundle\Authorization\AuthorizationException;
+use Dbp\Relay\CoreBundle\Authorization\AuthorizationExpressionVariableProviderInterface;
 use Dbp\Relay\CoreBundle\Authorization\Serializer\EntityNormalizer;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Tests\Rest\TestEntity;
@@ -317,6 +318,61 @@ class AbstractAuthorizationServiceTest extends TestCase
         $this->assertEquals('NULL_ATTRIBUTE', $attributeNames[1]);
         $this->assertEquals('INFINITE_ATTRIBUTE', $attributeNames[2]);
         $this->assertEquals('USER_ATTRIBUTE_UNDEFINED', $attributeNames[3]);
+    }
+
+    public function testExpressionVariableProvider(): void
+    {
+        $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
+        $authorizationService->addExpressionVariableProvider($this->makeProvider('tenant', new class {
+            public function getId(): string
+            {
+                return 'acme';
+            }
+        }));
+        $authorizationService->setUpAccessControlPolicies([], ['SAME_TENANT' => 'tenant.getId() === resource.getIdentifier()'], []);
+
+        $this->assertTrue($authorizationService->isGrantedResourcePermission('SAME_TENANT', new TestEntity('acme')));
+        $this->assertFalse($authorizationService->isGrantedResourcePermission('SAME_TENANT', new TestEntity('other')));
+    }
+
+    public function testExpressionVariableProviderReservedNameThrowsLogicException(): void
+    {
+        $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
+        $authorizationService->addExpressionVariableProvider($this->makeProvider('user', new \stdClass()));
+        $authorizationService->setUpAccessControlPolicies(['SOME_ROLE' => 'user.isAuthenticated()'], [], []);
+
+        $this->expectException(\LogicException::class);
+        $authorizationService->isGrantedRole('SOME_ROLE');
+    }
+
+    public function testExpressionVariableProviderDuplicateNameThrowsLogicException(): void
+    {
+        $authorizationService = $this->getTestAuthorizationService(TestAuthorizationService::TEST_USER_IDENTIFIER);
+        $authorizationService->addExpressionVariableProvider($this->makeProvider('ctx', new \stdClass()));
+        $authorizationService->addExpressionVariableProvider($this->makeProvider('ctx', new \stdClass()));
+        $authorizationService->setUpAccessControlPolicies(['SOME_ROLE' => 'user.isAuthenticated()'], [], []);
+
+        $this->expectException(\LogicException::class);
+        $authorizationService->isGrantedRole('SOME_ROLE');
+    }
+
+    private function makeProvider(string $name, mixed $value): AuthorizationExpressionVariableProviderInterface
+    {
+        return new class($name, $value) implements AuthorizationExpressionVariableProviderInterface {
+            public function __construct(private readonly string $name, private readonly mixed $value)
+            {
+            }
+
+            public function getName(): string
+            {
+                return $this->name;
+            }
+
+            public function getValue(): mixed
+            {
+                return $this->value;
+            }
+        };
     }
 
     private function getTestAuthorizationService(?string $userIdentifier = null, bool $isAuthenticated = true): AbstractAuthorizationService
