@@ -250,7 +250,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     }
 
     /**
-     * @throws ApiError
+     * @throws \Exception
      */
     private function createFilter(mixed $filterParameters, bool $isQueryFilter): Filter
     {
@@ -262,7 +262,12 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
             return FromQueryFilterCreator::createFilterFromQueryParameters(
                 $filterParameters, [$this, $isQueryFilter ? 'isAttributePathDefinedQuery' : 'isAttributePathDefinedBackend']);
         } catch (FilterException $exception) {
-            throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, $exception->getMessage(), ErrorIds::FILTER_INVALID, [$exception->getCode(), $exception->getMessage()]);
+            if ($isQueryFilter) {
+                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, $exception->getMessage(),
+                    ErrorIds::FILTER_INVALID, [$exception->getCode(), $exception->getMessage()]);
+            }
+            // config error
+            throw new \Exception('creating filter from filter parameters failed: '.$exception->getMessage());
         }
     }
 

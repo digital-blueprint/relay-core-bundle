@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- AbstractDataProvider: throw 500 instead of 400 in case of a filter exception occurs on creation
+  of a filter from a prepared filter (defined in bundle config).
+
 ## v0.1.236
 
 - Add a workaround to the data providers for situations where they are called by a IriConverterInterface.getResourceFromIri(...), 
