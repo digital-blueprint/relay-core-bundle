@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.237
+
 - AbstractDataProvider: throw 500 instead of 400 in case of a filter exception occurs on creation
   of a filter from a prepared filter (defined in bundle config).
 
