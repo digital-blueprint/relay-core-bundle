@@ -164,8 +164,9 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
      */
     protected function getAttributeValue(LocalDataPostEvent $postEvent, array $attributeMapEntry): mixed
     {
-        $attributeValue = $postEvent->getSourceData()[$attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY]] ?? null;
-        if ($attributeValue !== null) {
+        if ($attributeValue = self::getValueByPath(
+            $postEvent->getSourceData(),
+            $attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY])) {
             $is_array_attribute = $attributeMapEntry[self::IS_ARRAY_KEY];
             if (is_array($attributeValue)) {
                 $attributeValue = $is_array_attribute ? $attributeValue : ($attributeValue[0] ?? null);
@@ -185,5 +186,16 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
         }
 
         return $pathMapping;
+    }
+
+    private static function getValueByPath(array $sourceData, string $sourceAttributePath): mixed
+    {
+        return array_reduce(
+            explode('.', $sourceAttributePath),
+            function (mixed $carry, string $key): mixed {
+                return is_array($carry) ? $carry[$key] ?? null : null;
+            },
+            $sourceData
+        );
     }
 }

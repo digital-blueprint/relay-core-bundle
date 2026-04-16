@@ -104,6 +104,15 @@ class LocalDataTest extends TestCase
         $this->assertEquals(['value_1'], $testEntity->getLocalDataValue($localDataAttributeName));
     }
 
+    public function testArrayLocalDataMappingWithMultidimensionalArraySourceValue()
+    {
+        $localDataAttributeName = 'array_attribute_1';
+        $sourceData = ['array_src_attribute_1' => ['value_1' => ['localizedNames' => ['en' => 'Value', 'de' => 'Wert']]]];
+        $this->testDataProvider->setSourceData($sourceData);
+        $testEntity = $this->getTestEntityWithLocalData($localDataAttributeName, $sourceData);
+        $this->assertEquals(['value_1' => ['localizedNames' => ['en' => 'Value', 'de' => 'Wert']]], $testEntity->getLocalDataValue($localDataAttributeName));
+    }
+
     public function testArrayLocalDataMappingWithScalarSourceValue()
     {
         // array attribute, array source attribute -> return array with scalar source value as only element
@@ -132,6 +141,26 @@ class LocalDataTest extends TestCase
         $this->testDataProvider->setSourceData($sourceData);
         $testEntity = $this->getTestEntityWithLocalData($localDataAttributeName, $sourceData);
         $this->assertNull($testEntity->getLocalDataValue($localDataAttributeName));
+    }
+
+    public function testLocalDataMappingWithNestedSourceAttribute()
+    {
+        // source attribute is nested -> return value of nested source attribute
+        $localDataAttributeName = 'attribute_5';
+        $sourceData = ['src_attribute_5' => ['sub_attribute' => ['sub_sub_attribute' => 'value_5']]];
+        $this->testDataProvider->setSourceData($sourceData);
+        $testEntity = $this->getTestEntityWithLocalData($localDataAttributeName, $sourceData);
+        $this->assertEquals('value_5', $testEntity->getLocalDataValue($localDataAttributeName));
+
+        $sourceData = ['src_attribute_5' => ['sub_attribute' => ['another_sub_attribute' => 'value_6']]];
+        $this->testDataProvider->setSourceData($sourceData);
+        $testEntity = $this->getTestEntityWithLocalData($localDataAttributeName, $sourceData);
+        $this->assertEquals(null, $testEntity->getLocalDataValue($localDataAttributeName));
+
+        $sourceData = ['src_attribute_5' => ['sub_attribute' => ['sub_sub_attribute' => null]]];
+        $this->testDataProvider->setSourceData($sourceData);
+        $testEntity = $this->getTestEntityWithLocalData($localDataAttributeName, $sourceData);
+        $this->assertEquals(null, $testEntity->getLocalDataValue($localDataAttributeName));
     }
 
     public function testLocalDataAttributeUnauthorized()
@@ -221,6 +250,11 @@ class LocalDataTest extends TestCase
                 'entity_short_name' => 'TestEntity',
             ],
             [
+                'local_data_attribute' => 'attribute_5',
+                'read_policy' => 'true',
+                'entity_short_name' => 'TestEntity',
+            ],
+            [
                 'local_data_attribute' => 'attribute_3',
                 'read_policy' => 'false',
                 // no entity_short_name defined here, so applies to all entities
@@ -257,6 +291,11 @@ class LocalDataTest extends TestCase
             [
                 'local_data_attribute' => 'attribute_2',
                 'source_attribute' => 'src_attribute_2',
+                'entity_short_name' => 'TestEntity',
+            ],
+            [
+                'local_data_attribute' => 'attribute_5',
+                'source_attribute' => 'src_attribute_5.sub_attribute.sub_sub_attribute',
                 'entity_short_name' => 'TestEntity',
             ],
             [

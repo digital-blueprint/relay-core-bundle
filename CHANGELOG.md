@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- AbstractLocalDataEventSubscriber: allow to access nested attributes of the source data using keys with dot notation
+  (e.g. "user.email")
+
 ## v0.1.238
 
 - Add routePrefix support to addExposeHeader/addAllowHeader
