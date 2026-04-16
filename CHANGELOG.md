@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.239
+
 - AbstractLocalDataEventSubscriber: allow to access nested attributes of the source data using keys with dot notation
   (e.g. "user.email")
 
