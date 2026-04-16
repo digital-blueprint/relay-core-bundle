@@ -216,31 +216,15 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
             ],
         ]);
 
-        $exposeHeaders = ['Link'];
-        $exposeHeadersKey = 'dbp_api.expose_headers';
-        // Allow other bundles to add more exposed headers
-        if ($container->hasParameter($exposeHeadersKey)) {
-            $exposeHeaders = array_merge($exposeHeaders, $container->getParameter($exposeHeadersKey));
-        }
-
-        $allowHeaders = ['Content-Type', 'Authorization'];
-        $allowHeadersKey = 'dbp_api.allow_headers';
-        // Allow other bundles to add more allowed headers
-        if ($container->hasParameter($allowHeadersKey)) {
-            $allowHeaders = array_merge($allowHeaders, $container->getParameter($allowHeadersKey));
-        }
+        // Collect expose/allow header tuples: each entry is [headerName, routePrefix].
+        // Entries with a null prefix are global; entries with a string prefix are path-scoped.
+        $exposeEntries = $container->hasParameter('dbp_api.expose_headers')
+            ? $container->getParameter('dbp_api.expose_headers') : [];
+        $allowEntries = $container->hasParameter('dbp_api.allow_headers')
+            ? $container->getParameter('dbp_api.allow_headers') : [];
 
         $container->loadFromExtension('nelmio_cors', [
-            'paths' => [
-                '^/' => [
-                    'origin_regex' => true,
-                    'allow_origin' => ['^.+$'],
-                    'allow_methods' => ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD'],
-                    'allow_headers' => $allowHeaders,
-                    'expose_headers' => $exposeHeaders,
-                    'max_age' => 3600,
-                ],
-            ],
+            'paths' => self::buildNelmioCorsPathsConfig($exposeEntries, $allowEntries),
         ]);
 
         $container->loadFromExtension('twig', [
@@ -328,5 +312,84 @@ class DbpRelayCoreExtension extends ConfigurableExtension implements PrependExte
         // Since the core bundle should always be called last we can use this to detect if
         // things are called after this by checking if this exist.
         $container->setParameter('dbp_api._prepend_done', true);
+    }
+
+    /**
+     * Builds the nelmio_cors 'paths' configuration array from accumulated header tuples.
+     *
+     * Each entry in $exposeEntries / $allowEntries is a [headerName, routePrefix|null] tuple,
+     * as stored by addExposeHeader() / addAllowHeader().
+     *
+     * The global catch-all '/' is treated as just another prefix, pre-seeded with the
+     * hardcoded defaults. Prefixes are sorted longest-first so that nelmio's first-match-wins
+     * evaluation applies the most specific rule first. A longer prefix Q also inherits the
+     * headers of every shorter prefix P where str_starts_with(Q, P) — because requests to Q
+     * are also matched by P's nelmio rule, so Q must expose at least as many headers as P.
+     *
+     * @param array<array{string, string}> $exposeEntries
+     * @param array<array{string, string}> $allowEntries
+     *
+     * @return array<string, mixed>
+     */
+    public static function buildNelmioCorsPathsConfig(array $exposeEntries, array $allowEntries): array
+    {
+        // '/' is the catch-all prefix and is pre-seeded with the hardcoded defaults.
+        // null entries (global headers) map to '/'.
+        // $prefixHeaders['<prefix>'] = ['expose' => [...], 'allow' => [...]]
+        $prefixHeaders = [
+            '/' => [
+                'expose' => ['Link'],
+                'allow' => ['Content-Type', 'Authorization'],
+            ],
+        ];
+
+        foreach ($exposeEntries as [$header, $prefix]) {
+            if (!str_starts_with($prefix, '/')) {
+                throw new \InvalidArgumentException("routePrefix must start with '/', got '$prefix'");
+            }
+            $prefixHeaders[$prefix]['expose'][] = $header;
+        }
+        foreach ($allowEntries as [$header, $prefix]) {
+            if (!str_starts_with($prefix, '/')) {
+                throw new \InvalidArgumentException("routePrefix must start with '/', got '$prefix'");
+            }
+            $prefixHeaders[$prefix]['allow'][] = $header;
+        }
+
+        // Sort prefixes longest-first so more specific paths are emitted before less specific
+        // ones. Nelmio uses first-match-wins, so without this a shorter prefix like '/foo'
+        // would shadow a longer one like '/foo/bar', making the longer entry unreachable.
+        $sortedPrefixes = array_keys($prefixHeaders);
+        usort($sortedPrefixes, fn (string $a, string $b) => strlen($b) - strlen($a));
+
+        $corsAllowMethods = ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD'];
+        $corsPaths = [];
+
+        foreach ($sortedPrefixes as $prefix) {
+            // Collect headers registered directly for this prefix.
+            $ownExposeHeaders = $prefixHeaders[$prefix]['expose'] ?? [];
+            $ownAllowHeaders = $prefixHeaders[$prefix]['allow'] ?? [];
+
+            // Also collect headers from every shorter prefix Q that is a string-prefix of P,
+            // because requests to P are also matched by Q's nelmio rule.
+            foreach ($sortedPrefixes as $otherPrefix) {
+                if ($otherPrefix !== $prefix && str_starts_with($prefix, $otherPrefix)) {
+                    $ownExposeHeaders = array_merge($ownExposeHeaders, $prefixHeaders[$otherPrefix]['expose'] ?? []);
+                    $ownAllowHeaders = array_merge($ownAllowHeaders, $prefixHeaders[$otherPrefix]['allow'] ?? []);
+                }
+            }
+
+            $escapedPrefix = preg_quote($prefix, null);
+            $corsPaths['^'.$escapedPrefix] = [
+                'origin_regex' => true,
+                'allow_origin' => ['^.+$'],
+                'allow_methods' => $corsAllowMethods,
+                'allow_headers' => array_values(array_unique($ownAllowHeaders)),
+                'expose_headers' => array_values(array_unique($ownExposeHeaders)),
+                'max_age' => 3600,
+            ];
+        }
+
+        return $corsPaths;
     }
 }

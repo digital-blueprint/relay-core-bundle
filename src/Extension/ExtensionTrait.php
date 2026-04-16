@@ -57,26 +57,32 @@ trait ExtensionTrait
     /**
      * Adds a header to Access-Control-Expose-Headers, so that scripts in browsers can access them.
      *
+     * $routePrefix limits the header to requests whose path starts with that prefix (e.g. '/my-bundle').
+     * The prefix is matched as a plain string (not a regex). The default '/' applies to all routes.
+     *
      * See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers
      */
-    public function addExposeHeader(ContainerBuilder $container, string $headerName)
+    public function addExposeHeader(ContainerBuilder $container, string $headerName, string $routePrefix = '/'): void
     {
         self::ensureInPrepend($container);
         self::extendArrayParameter(
-            $container, 'dbp_api.expose_headers', [$headerName]
+            $container, 'dbp_api.expose_headers', [[$headerName, $routePrefix]]
         );
     }
 
     /**
      * Adds a header to Access-Control-Allow-Headers, so that scripts in browsers can send those headers.
      *
+     * $routePrefix limits the header to requests whose path starts with that prefix (e.g. '/my-bundle').
+     * The prefix is matched as a plain string (not a regex). The default '/' applies to all routes.
+     *
      * See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers
      */
-    public function addAllowHeader(ContainerBuilder $container, string $headerName)
+    public function addAllowHeader(ContainerBuilder $container, string $headerName, string $routePrefix = '/'): void
     {
         self::ensureInPrepend($container);
         self::extendArrayParameter(
-            $container, 'dbp_api.allow_headers', [$headerName]
+            $container, 'dbp_api.allow_headers', [[$headerName, $routePrefix]]
         );
     }
 
