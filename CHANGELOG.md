@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## v0.1.238
+
+- Add routePrefix support to addExposeHeader/addAllowHeader
+- Update frontend (API docs) dependencies
+
 ## v0.1.237
 
 - AbstractDataProvider: throw 500 instead of 400 in case of a filter exception occurs on creation
