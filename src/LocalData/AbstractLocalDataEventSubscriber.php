@@ -164,9 +164,11 @@ abstract class AbstractLocalDataEventSubscriber implements EventSubscriberInterf
      */
     protected function getAttributeValue(LocalDataPostEvent $postEvent, array $attributeMapEntry): mixed
     {
-        if ($attributeValue = self::getValueByPath(
+        $attributeValue = self::getValueByPath(
             $postEvent->getSourceData(),
-            $attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY])) {
+            $attributeMapEntry[self::SOURCE_ATTRIBUTE_KEY]);
+
+        if ($attributeValue !== null) {
             $is_array_attribute = $attributeMapEntry[self::IS_ARRAY_KEY];
             if (is_array($attributeValue)) {
                 $attributeValue = $is_array_attribute ? $attributeValue : ($attributeValue[0] ?? null);
