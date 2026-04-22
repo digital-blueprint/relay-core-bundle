@@ -10,7 +10,7 @@ use Dbp\Relay\CoreBundle\User\UserAttributeProviderProvider;
 use Dbp\Relay\CoreBundle\User\UserAttributeService;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
-class TestAuthorizationService
+class TestAuthorizationService extends AbstractAuthorizationService
 {
     public const TEST_USER_IDENTIFIER = 'testuser';
     public const ADMIN_USER_IDENTIFIER = 'admin';
@@ -32,14 +32,5 @@ class TestAuthorizationService
                 $userAttributeEventDispatcher));
 
         $authorizationService->__injectUserAttributeService($userAttributeService);
-    }
-
-    /**
-     * Resets the internal state (e.g. request caches).
-     * Should be called between requests when performing multiple requests in a single test case.
-     */
-    public static function reset(AbstractAuthorizationService $authorizationService): void
-    {
-        $authorizationService->reset();
     }
 }

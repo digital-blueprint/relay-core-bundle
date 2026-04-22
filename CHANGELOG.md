@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.1.241
+
+- Add functions to the authorization test utils
+
 ## v0.1.240
 
 - AbstractDataProvider: fix empty array source data value
