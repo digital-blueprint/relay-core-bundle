@@ -17,15 +17,19 @@ class TestAuthorizationService
 
     public static function setUp(AbstractAuthorizationService $authorizationService,
         ?string $currentUserIdentifier = self::TEST_USER_IDENTIFIER, array $currentUserAttributes = [], array $symfonyUserRoles = [],
-        bool $isAuthenticated = true, bool $isServiceAccount = false): void
+        bool $isAuthenticated = true, bool $isServiceAccount = false, ?EventDispatcher $userAttributeEventDispatcher = null): void
     {
+        $userAttributeEventDispatcher ??= new EventDispatcher();
+
         $userAttributeProvider = new TestUserAttributeProvider($currentUserAttributes);
         if ($isAuthenticated) {
             $userAttributeProvider->addUser($currentUserIdentifier, $currentUserAttributes);
         }
         $userAttributeService = new UserAttributeService(
             new TestUserSession($currentUserIdentifier, $symfonyUserRoles, $isAuthenticated, $isServiceAccount),
-            new UserAttributeMuxer(new UserAttributeProviderProvider([$userAttributeProvider]), new EventDispatcher()));
+            new UserAttributeMuxer(
+                new UserAttributeProviderProvider([$userAttributeProvider]),
+                $userAttributeEventDispatcher));
 
         $authorizationService->__injectUserAttributeService($userAttributeService);
     }
