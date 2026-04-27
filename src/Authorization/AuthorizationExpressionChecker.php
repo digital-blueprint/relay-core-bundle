@@ -69,7 +69,7 @@ class AuthorizationExpressionChecker
         }
     }
 
-    public function isGrantedRole(AuthorizationUser $currentAuthorizationUser, string $roleName)
+    public function isGrantedRole(AuthorizationUser $currentAuthorizationUser, string $roleName): bool
     {
         if (in_array($roleName, $this->roleExpressionStack, true)) {
             throw new AuthorizationException(sprintf('infinite loop caused by authorization role expression %s detected', $roleName),
@@ -94,7 +94,7 @@ class AuthorizationExpressionChecker
                 self::USER_VARIABLE_NAME => $currentAuthorizationUser,
             ];
 
-            return $this->expressionLanguage->evaluate($roleExpression, $variables);
+            return true === $this->expressionLanguage->evaluate($roleExpression, $variables);
         } finally {
             array_pop($this->roleExpressionStack);
         }
@@ -133,7 +133,7 @@ class AuthorizationExpressionChecker
                 self::RESOURCE_VARIABLE_NAME => $resource,
             ];
 
-            return $this->expressionLanguage->evaluate($resourcePermissionExpression, $variables);
+            return true === $this->expressionLanguage->evaluate($resourcePermissionExpression, $variables);
         } finally {
             array_pop($this->resourcePermissionExpressionStack);
         }

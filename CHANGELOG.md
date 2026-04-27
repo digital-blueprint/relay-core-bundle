@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Make sure AbstractAuthorizationService::isGrantedRole and isGrantedResourcePermission always return a boolean value
+
 ## v0.1.241
 
 - Add functions to the authorization test utils

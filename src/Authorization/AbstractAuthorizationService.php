@@ -246,7 +246,7 @@ abstract class AbstractAuthorizationService
     /**
      * @throws AuthorizationException
      */
-    private function getAttributeInternal(string $attributeName, $defaultValue = null)
+    private function getAttributeInternal(string $attributeName, $defaultValue = null): mixed
     {
         return $this->authorizationExpressionChecker->evalAttributeExpression($this->currentAuthorizationUser, $attributeName, $defaultValue);
     }
