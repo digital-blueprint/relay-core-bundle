@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.242
+
 - Make sure AbstractAuthorizationService::isGrantedRole and isGrantedResourcePermission always return a boolean value
 
 ## v0.1.241
