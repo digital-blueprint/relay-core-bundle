@@ -146,6 +146,11 @@ class FromQueryFilterCreator
                 self::PATH_KEY => $key,
                 self::OPERATOR_KEY => $item[self::OPERATOR_KEY] ?? null,
             ]];
+        } elseif (isset($item[self::OPERATOR_KEY])) { // the case for 'filter[path][operator]=IS_NULL', which doesn't have a value
+            $item = [self::CONDITION_KEY => [
+                self::OPERATOR_KEY => $item[self::OPERATOR_KEY],
+                self::PATH_KEY => $key,
+            ]];
         }
 
         if (isset($item[self::CONDITION_KEY]) // the case for 'filter[label][condition][value]=value0'

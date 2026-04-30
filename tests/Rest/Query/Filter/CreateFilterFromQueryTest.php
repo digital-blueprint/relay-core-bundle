@@ -314,6 +314,21 @@ class CreateFilterFromQueryTest extends TestCase
     /**
      * @throws \Exception
      */
+    public function testCreateFromShortcutWithOnlyPathAndOperator()
+    {
+        $querySting = 'filter[field0][operator]=IS_NULL';
+
+        $filter = self::createFilterFromQueryParameters(
+            Parameters::getQueryParametersFromQueryString($querySting, 'filter'), ['field0']);
+
+        $expectedFilter = FilterTreeBuilder::create()->isNull('field0')->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function testCreateFromShortcutWithOperator()
     {
         $querySting = 'filter[field0][value]="value0"&filter[field0][operator]=I_CONTAINS';
