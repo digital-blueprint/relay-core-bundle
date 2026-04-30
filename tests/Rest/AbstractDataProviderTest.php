@@ -90,6 +90,24 @@ class AbstractDataProviderTest extends TestCase
                 'use_policy' => 'true',
                 'force_use_policy' => 'user.get("IS_VIEWER")',
             ],
+            [
+                'id' => 'filterUndefinedAttribute',
+                'filter' => 'filter[undefinedAttribute]="value"',
+                'use_policy' => 'true',
+                'force_use_policy' => 'false',
+            ],
+            [
+                'id' => 'filterUndefinedLocalDataAttribute',
+                'filter' => 'filter[localData.undefinedAttribute]="value"',
+                'use_policy' => 'true',
+                'force_use_policy' => 'false',
+            ],
+            [
+                'id' => 'filterForbiddenLocalDataAttribute',
+                'filter' => 'filter[localData.forbiddenAttribute]="value"',
+                'use_policy' => 'true',
+                'force_use_policy' => 'false',
+            ],
         ];
         $config['rest']['query']['sort']['enable_sort'] = true;
 
@@ -348,20 +366,6 @@ class AbstractDataProviderTest extends TestCase
     /**
      * @throws \Exception
      */
-    public function testRequestedFilter()
-    {
-        $this->testDataProvider->setSourceData([[]]);
-        $this->testDataProviderTester->getPage(filters: ['preparedFilter' => 'filter0']);
-        $preparedFilter = Options::getFilter($this->testDataProvider->getOptions());
-
-        $expectedFilter = FilterTreeBuilder::create()->iContains('field0', 'value0')->createFilter();
-
-        $this->assertEquals($expectedFilter->toArray(), $preparedFilter->toArray());
-    }
-
-    /**
-     * @throws \Exception
-     */
     public function testForcedFilters()
     {
         // 'filterUseAdminOnly' and 'filterPublic' must be applied without being requested (forced)
@@ -382,7 +386,21 @@ class AbstractDataProviderTest extends TestCase
     /**
      * @throws \Exception
      */
-    public function testCombineRequestedFilterWithForcedFilters()
+    public function testPreparedFilter()
+    {
+        $this->testDataProvider->setSourceData([[]]);
+        $this->testDataProviderTester->getPage(filters: ['preparedFilter' => 'filter0']);
+        $preparedFilter = Options::getFilter($this->testDataProvider->getOptions());
+
+        $expectedFilter = FilterTreeBuilder::create()->iContains('field0', 'value0')->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $preparedFilter->toArray());
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testCombinePreparedFilterWithForcedFilters()
     {
         // 'filterUseAdminOnly' and 'filterPublic' must be applied without being requested (forced) and combined
         // with requested filter 'filter0'
@@ -408,7 +426,7 @@ class AbstractDataProviderTest extends TestCase
     /**
      * @throws \Exception
      */
-    public function testCombineRequestedFilterWithQueryFilter()
+    public function testCombinePreparedFilterWithQueryFilter()
     {
         $queryParameters = [];
         parse_str('filter[field0]="value0"', $queryParameters);
@@ -429,7 +447,7 @@ class AbstractDataProviderTest extends TestCase
     /**
      * @throws \Exception
      */
-    public function testCombineRequestedFilterWithQueryFilterAndForcedFilter()
+    public function testCombinePreparedFilterWithQueryFilterAndForcedFilter()
     {
         $this->loginViewer();
 
@@ -451,7 +469,7 @@ class AbstractDataProviderTest extends TestCase
         $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
     }
 
-    public function testCombineRequestedFilterWithQueryFilterAndForcedFilterRemoveDuplicateFilters()
+    public function testCombinePreparedFilterWithQueryFilterAndForcedFilterRemoveDuplicateFilters()
     {
         // 'filterPublic' is requested and forced -> must be present in the combined filter only once
         $this->loginViewer();
@@ -510,7 +528,7 @@ class AbstractDataProviderTest extends TestCase
     /**
      * @throws \Exception
      */
-    public function testRequestedFilterForbidden()
+    public function testPreparedFilterForbidden()
     {
         try {
             $this->testDataProvider->setSourceData([[]]);
@@ -521,10 +539,44 @@ class AbstractDataProviderTest extends TestCase
         }
     }
 
+    public function testPreparedFilterAttributeUndefined()
+    {
+        try {
+            $this->testDataProvider->setSourceData([[]]);
+            $this->testDataProviderTester->getPage(filters: ['preparedFilter' => 'filterUndefinedAttribute']);
+            $this->fail('exception not thrown as expected');
+        } catch (\Exception $exception) {
+            $this->assertNotInstanceOf(ApiError::class, $exception); // we don't want to leak details
+        }
+    }
+
+    public function testPreparedFilterLocalDataAttributeUndefined()
+    {
+        try {
+            $this->testDataProvider->setSourceData([[]]);
+            $this->testDataProviderTester->getPage(filters: ['preparedFilter' => 'filterUndefinedLocalDataAttribute']);
+            $this->fail('exception not thrown as expected');
+        } catch (\Exception $exception) {
+            $this->assertNotInstanceOf(ApiError::class, $exception); // we don't want to leak details
+        }
+    }
+
+    public function testPreparedFilterWithForbiddenLocalDataAttribute(): void
+    {
+        // NOTE: usage of forbidden attributes is allowed for prepared filters
+        $this->testDataProvider->setSourceData([[]]);
+        $this->testDataProviderTester->getPage(filters: ['preparedFilter' => 'filterForbiddenLocalDataAttribute']);
+        $filter = Options::getFilter($this->testDataProvider->getOptions());
+
+        $expectedFilter = FilterTreeBuilder::create()->equals('localData.forbiddenAttribute', 'value')->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
     /**
      * @throws \Exception
      */
-    public function testFilterWithLocalDataAttribute()
+    public function testQueryFilterWithLocalDataAttribute()
     {
         $queryParameters = [];
         parse_str('filter[localData.attribute0]="value0"', $queryParameters);
@@ -541,7 +593,7 @@ class AbstractDataProviderTest extends TestCase
     /**
      * @throws \Exception
      */
-    public function testFilterWithForbiddenLocalDataAttribute()
+    public function testQueryFilterWithForbiddenLocalDataAttribute()
     {
         $queryParameters = [];
         parse_str('filter[localData.forbiddenAttribute]="value0"', $queryParameters);
@@ -558,7 +610,40 @@ class AbstractDataProviderTest extends TestCase
     /**
      * @throws \Exception
      */
-    public function testFilterWithForbiddenLocalDataAttributeInAndGroup()
+    public function testQueryFilterWithUndefinedLocalDataAttribute(): void
+    {
+        $queryParameters = [];
+        parse_str('filter[localData.undefinedAttribute]="value0"', $queryParameters);
+
+        $this->testDataProvider->setSourceData([[]]);
+        try {
+            $this->testDataProviderTester->getPage(filters: $queryParameters);
+            $this->fail('exception not thrown as expected');
+        } catch (ApiError $exception) {
+            $this->assertEquals(Response::HTTP_BAD_REQUEST, $exception->getStatusCode());
+            $this->assertEquals(ErrorIds::FILTER_INVALID, $exception->getErrorId());
+        }
+    }
+
+    public function testQueryFilterWithUndefinedAttribute(): void
+    {
+        $queryParameters = [];
+        parse_str('filter[undefinedAttribute]="value0"', $queryParameters);
+
+        $this->testDataProvider->setSourceData([[]]);
+        try {
+            $this->testDataProviderTester->getPage(filters: $queryParameters);
+            $this->fail('exception not thrown as expected');
+        } catch (ApiError $exception) {
+            $this->assertEquals(Response::HTTP_BAD_REQUEST, $exception->getStatusCode());
+            $this->assertEquals(ErrorIds::FILTER_INVALID, $exception->getErrorId());
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testQueryFilterWithForbiddenLocalDataAttributeInAndGroup()
     {
         // condition with forbidden attribute evaluates to constant 'false' -> parent AND group evaluates to 'false'
         $querySting =
@@ -582,7 +667,7 @@ class AbstractDataProviderTest extends TestCase
     /**
      * @throws \Exception
      */
-    public function testFilterWithForbiddenLocalDataAttributeInOrGroup()
+    public function testQueryFilterWithForbiddenLocalDataAttributeInOrGroup()
     {
         // condition with forbidden attribute evaluates to constant 'false', which is to be removed from the parent OR group
         $querySting = 'filter[test_group][logical][operator]=OR&filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]="value0"&&filter[foo][condition][childOf]=test_group&filter[bar][condition][path]=localData.forbiddenAttribute&filter[bar][condition][operator]=EQUALS&filter[bar][condition][value]="value1"&&filter[bar][condition][childOf]=test_group';

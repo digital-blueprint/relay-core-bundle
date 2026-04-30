@@ -131,9 +131,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     public function isAttributePathDefinedBackend(string $attributePath): bool
     {
         if ($localDataAttributeName = LocalData::tryGetLocalDataAttributeName($attributePath)) {
-            $this->localDataAccessChecker->assertAttributeIsDefined($localDataAttributeName);
-
-            return true;
+            return $this->localDataAccessChecker->isAttributeDefined($localDataAttributeName);
         }
 
         return in_array($attributePath, $this->getAvailableAttributePaths(), true);
@@ -266,7 +264,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
                 throw ApiError::withDetails(Response::HTTP_BAD_REQUEST, $exception->getMessage(),
                     ErrorIds::FILTER_INVALID, [$exception->getCode(), $exception->getMessage()]);
             }
-            // config error
+            // config error -> don't leak details
             throw new \Exception('creating filter from filter parameters failed: '.$exception->getMessage());
         }
     }

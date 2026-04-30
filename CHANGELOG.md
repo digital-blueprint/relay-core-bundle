@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- AbstractDataProvider: throw 500 instead of 400 in case a filter exception occurs on creation
+  of a filter from a prepared filter (defined in bundle config).
+
 ## v0.1.242
 
 - Make sure AbstractAuthorizationService::isGrantedRole and isGrantedResourcePermission always return a boolean value
