@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.243
+
 - AbstractDataProvider: throw 500 instead of 400 in case a filter exception occurs on creation
   of a filter from a prepared filter (defined in bundle config).
 - Rest/Query/Filter: also allow filter shortcuts with only path and operator for operators that don't have/need a value:
