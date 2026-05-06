@@ -52,7 +52,7 @@ class UserAttributeMuxer implements ResetInterface
      */
     public function getAttribute(?string $userIdentifier, string $attributeName, mixed $defaultValue = null): mixed
     {
-        $valueKey = md5($userIdentifier.$attributeName);
+        $valueKey = hash('sha256', json_encode([$userIdentifier, $attributeName]));
 
         if (isset($this->valueCache[$valueKey])) {
             $value = $this->valueCache[$valueKey];
