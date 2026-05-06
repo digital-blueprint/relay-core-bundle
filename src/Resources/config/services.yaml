@@ -94,10 +94,6 @@ services:
     arguments:
       $migrationStorageConfig: '@?doctrine.migrations.storage.table_storage'
 
-  Dbp\Relay\CoreBundle\Authorization\DebugCommand:
-    autowire: true
-    autoconfigure: true
-
   Dbp\Relay\CoreBundle\Locale\Locale:
     autowire: true
     autoconfigure: true
