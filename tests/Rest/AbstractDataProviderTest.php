@@ -609,9 +609,9 @@ class AbstractDataProviderTest extends TestCase
             $this->testDataProvider->setSourceData([[]]);
             $this->testDataProviderTester->getPage(filters: ['preparedFilter' => 'filterBackendOnly']);
             $this->fail('exception not thrown as expected');
-        } catch (HttpException $exception) {
-            $this->assertEquals(Response::HTTP_BAD_REQUEST, $exception->getStatusCode());
-            $this->assertEquals(ErrorIds::PREPARED_FILTER_UNDEFINED, $exception->getErrorId());
+        } catch (ApiError $apiError) {
+            $this->assertEquals(Response::HTTP_BAD_REQUEST, $apiError->getStatusCode());
+            $this->assertEquals(ErrorIds::PREPARED_FILTER_UNDEFINED, $apiError->getErrorId());
         }
     }
 
