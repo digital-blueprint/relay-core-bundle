@@ -108,6 +108,18 @@ class AbstractDataProviderTest extends TestCase
                 'use_policy' => 'true',
                 'force_use_policy' => 'false',
             ],
+            [
+                'id' => 'filterBackendOnlyLocalDataAttribute',
+                'filter' => 'filter[localData.backendOnlyAttribute]="value"',
+                'use_policy' => 'true',
+                'force_use_policy' => 'false',
+            ],
+            [
+                'id' => 'filterBackendOnly',
+                'filter' => 'filter[field0]="value0"',
+                'use_policy' => null, // -> backend only
+                'force_use_policy' => 'user.get("IS_ADMIN")',
+            ],
         ];
         $config['rest']['query']['sort']['enable_sort'] = true;
 
@@ -119,6 +131,10 @@ class AbstractDataProviderTest extends TestCase
             [
                 'local_data_attribute' => 'forbiddenAttribute',
                 'read_policy' => 'false',
+            ],
+            [
+                'local_data_attribute' => 'backendOnlyAttribute',
+                'read_policy' => null,
             ],
         ];
 
@@ -571,6 +587,48 @@ class AbstractDataProviderTest extends TestCase
         $expectedFilter = FilterTreeBuilder::create()->equals('localData.forbiddenAttribute', 'value')->createFilter();
 
         $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    public function testPreparedFilterWithBackendOnlyLocalDataAttribute(): void
+    {
+        // NOTE: usage of backend only attributes is allowed for prepared filters
+        $this->testDataProvider->setSourceData([[]]);
+        $this->testDataProviderTester->getPage(filters: ['preparedFilter' => 'filterBackendOnlyLocalDataAttribute']);
+        $filter = Options::getFilter($this->testDataProvider->getOptions());
+
+        $expectedFilter = FilterTreeBuilder::create()->equals('localData.backendOnlyAttribute', 'value')->createFilter();
+
+        $this->assertEquals($expectedFilter->toArray(), $filter->toArray());
+    }
+
+    public function testPreparedFilterBackendOnly(): void
+    {
+        // NOTE: usage of backend only prepared filters is not allowed ->
+        // 400 (prepared filter undefined, as backend only prepared filters are not defined for the frontend)
+        try {
+            $this->testDataProvider->setSourceData([[]]);
+            $this->testDataProviderTester->getPage(filters: ['preparedFilter' => 'filterBackendOnly']);
+            $this->fail('exception not thrown as expected');
+        } catch (HttpException $exception) {
+            $this->assertEquals(Response::HTTP_BAD_REQUEST, $exception->getStatusCode());
+            $this->assertEquals(ErrorIds::PREPARED_FILTER_UNDEFINED, $exception->getErrorId());
+        }
+    }
+
+    public function testQueryFilterWithBackendOnlyLocalDataAttribute(): void
+    {
+        // NOTE: usage of backend only attributes is not allowed for query filters -> 400 (local data attribute undefined)
+        $queryParameters = [];
+        parse_str('filter[localData.backendOnlyAttribute]="value0"', $queryParameters);
+
+        try {
+            $this->testDataProvider->setSourceData([[]]);
+            $this->testDataProviderTester->getPage(filters: $queryParameters);
+            $this->fail('ApiError not thrown as expected');
+        } catch (ApiError $exception) {
+            $this->assertEquals(Response::HTTP_BAD_REQUEST, $exception->getStatusCode());
+            $this->assertEquals(ErrorIds::FILTER_INVALID, $exception->getErrorId());
+        }
     }
 
     /**

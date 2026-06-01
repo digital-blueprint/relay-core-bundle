@@ -117,7 +117,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     public function isAttributePathDefinedQuery(string $attributePath): bool
     {
         if ($localDataAttributeName = LocalData::tryGetLocalDataAttributeName($attributePath)) {
-            if (false === $this->localDataAccessChecker->isAttributeDefined($localDataAttributeName)) {
+            if (false === $this->localDataAccessChecker->isAttributeDefinedForFrontend($localDataAttributeName)) {
                 return false;
             }
             $this->localDataAccessChecker->assertCurrentUserIsGrantedReadAccess($localDataAttributeName, $this);
@@ -131,7 +131,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
     public function isAttributePathDefinedBackend(string $attributePath): bool
     {
         if ($localDataAttributeName = LocalData::tryGetLocalDataAttributeName($attributePath)) {
-            return $this->localDataAccessChecker->isAttributeDefined($localDataAttributeName);
+            return $this->localDataAccessChecker->isAttributeDefinedForBackend($localDataAttributeName);
         }
 
         return in_array($attributePath, $this->getAvailableAttributePaths(), true);
@@ -238,7 +238,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         if ($includeLocalParameter = Parameters::getIncludeLocal($filters)) {
             $requestedLocalDataAttributes = LocalData::getLocalDataAttributesFromQueryParameter($includeLocalParameter);
             foreach ($requestedLocalDataAttributes as $localDataAttributeName) {
-                $this->localDataAccessChecker->assertAttributeIsDefined($localDataAttributeName);
+                $this->localDataAccessChecker->assertAttributeIsDefinedForFrontend($localDataAttributeName);
                 $this->assertIsGrantedReadAccessToLocalDataAttribute($localDataAttributeName);
             }
             Options::setLocalDataAttributes($options, $requestedLocalDataAttributes);
@@ -345,7 +345,7 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
         $filtersToApplyIdentifiers = [];
 
         if ($requestedFilterIdentifier !== null) {
-            if (false === $this->preparedFiltersController->isPreparedFilterDefined($requestedFilterIdentifier)) {
+            if (false === $this->preparedFiltersController->isPreparedFilterDefinedForFrontend($requestedFilterIdentifier)) {
                 throw ApiError::withDetails(Response::HTTP_BAD_REQUEST,
                     'Prepared filter undefined', ErrorIds::PREPARED_FILTER_UNDEFINED);
             }

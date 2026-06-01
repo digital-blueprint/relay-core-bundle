@@ -39,7 +39,15 @@ class PreparedFilterTest extends TestCase
                 'force_use_policy' => 'user.get("IS_USER")',
             ],
             [
-                'id' => 'filterDefault',
+                'id' => 'filterBackendOnly',
+                'filter' => 'filter[field0]="value0"',
+                'use_policy' => null,
+                'force_use_policy' => 'user.get("IS_ADMIN")',
+            ],
+            [
+                'id' => 'filterFrontendOnly',
+                'use_policy' => 'user.get("IS_USER")',
+                'force_use_policy' => null,
             ],
         ]];
 
@@ -51,22 +59,22 @@ class PreparedFilterTest extends TestCase
     {
         $policies = $this->preparedFilterProvider->getUsePolicies();
 
-        $this->assertCount(count($this->config['prepared_filters']), $policies);
+        $this->assertCount(4, $policies);
         $this->assertEquals('user.get("IS_USER")', $policies['filter0']);
         $this->assertEquals('true', $policies['filterShortcut']);
         $this->assertEquals('user.get("IS_ADMIN")', $policies['filterShortcut2']);
-        $this->assertEquals('false', $policies['filterDefault']);
+        $this->assertEquals('user.get("IS_USER")', $policies['filterFrontendOnly']);
     }
 
     public function testGetForceUsePolicies()
     {
         $policies = $this->preparedFilterProvider->getForceUsePolicies();
 
-        $this->assertCount(count($this->config['prepared_filters']), $policies);
+        $this->assertCount(4, $policies);
         $this->assertEquals('true', $policies['filter0']);
         $this->assertEquals('user.get("IS_VIEWER")', $policies['filterShortcut']);
         $this->assertEquals('user.get("IS_USER")', $policies['filterShortcut2']);
-        $this->assertEquals('false', $policies['filterDefault']);
+        $this->assertEquals('user.get("IS_ADMIN")', $policies['filterBackendOnly']);
     }
 
     /**
@@ -74,12 +82,21 @@ class PreparedFilterTest extends TestCase
      */
     public function testPreparedFilter()
     {
-        $this->assertFalse($this->preparedFilterProvider->isPreparedFilterDefined('foo'));
-        $this->assertTrue($this->preparedFilterProvider->isPreparedFilterDefined('filter0'));
+        $this->assertFalse($this->preparedFilterProvider->isPreparedFilterDefinedForFrontend('foo'));
+        $this->assertTrue($this->preparedFilterProvider->isPreparedFilterDefinedForFrontend('filter0'));
+        $this->assertTrue($this->preparedFilterProvider->isPreparedFilterDefinedForFrontend('filterShortcut'));
+        $this->assertTrue($this->preparedFilterProvider->isPreparedFilterDefinedForFrontend('filterShortcut2'));
+        $this->assertFalse($this->preparedFilterProvider->isPreparedFilterDefinedForFrontend('filterBackendOnly'));
+        $this->assertTrue($this->preparedFilterProvider->isPreparedFilterDefinedForFrontend('filterFrontendOnly'));
 
         $this->assertNull($this->preparedFilterProvider->getPreparedFilterQueryString('foo'));
+        $this->assertNotNull($this->preparedFilterProvider->getPreparedFilterQueryString('filter0'));
+        $this->assertNotNull($this->preparedFilterProvider->getPreparedFilterQueryString('filterShortcut'));
+        $this->assertNotNull($this->preparedFilterProvider->getPreparedFilterQueryString('filterShortcut2'));
+        $this->assertNotNull($this->preparedFilterProvider->getPreparedFilterQueryString('filterBackendOnly'));
+        $this->assertNotNull($this->preparedFilterProvider->getPreparedFilterQueryString('filterFrontendOnly'));
+
         $preparedFilterQueryString = $this->preparedFilterProvider->getPreparedFilterQueryString('filter0');
-        $this->assertNotNull($preparedFilterQueryString);
 
         $preparedFilter = CreateFilterFromQueryTest::createFilterFromQueryParameters(
             Parameters::getQueryParametersFromQueryString($preparedFilterQueryString, Parameters::FILTER), ['field0']);

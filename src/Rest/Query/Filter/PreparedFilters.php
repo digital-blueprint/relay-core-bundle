@@ -40,11 +40,11 @@ class PreparedFilters
             ->info('The identifier of the prepared filter.')
             ->end()
             ->scalarNode(self::USE_POLICY_CONFIG_NODE)
-            ->defaultValue('false')
+            ->defaultNull()
             ->info('A boolean policy expression that determines whether the current user may apply the prepared filter. Available parameters: user.')
             ->end()
             ->scalarNode(self::FORCE_USE_POLICY_CONFIG_NODE)
-            ->defaultValue('false')
+            ->defaultNull()
             ->info('A boolean policy expression that determines whether the usage of the filter is forced for the current user. Available parameters: user.')
             ->end()
             ->scalarNode(self::FILTER_CONFIG_NODE)
@@ -72,10 +72,14 @@ class PreparedFilters
             $attributeConfigEntry[self::FILTER_CONFIG_KEY] = $configEntry[self::FILTER_CONFIG_NODE] ?? '';
             $this->config[$filterIdentifier] = $attributeConfigEntry;
 
-            // using the filter is forbidden by default
-            $this->usePolicies[$filterIdentifier] = $configEntry[self::USE_POLICY_CONFIG_NODE] ?? 'false';
-            // forcing the usage of the filter is disabled by default
-            $this->forceUsePolicies[$filterIdentifier] = $configEntry[self::FORCE_USE_POLICY_CONFIG_NODE] ?? 'false';
+            // if the use policy is not set, the filter is only available for backend usage
+            if (isset($configEntry[self::USE_POLICY_CONFIG_NODE])) {
+                $this->usePolicies[$filterIdentifier] = $configEntry[self::USE_POLICY_CONFIG_NODE];
+            }
+            // if the force use policy is not set, the filter is not forced to be used for any user
+            if (isset($configEntry[self::FORCE_USE_POLICY_CONFIG_NODE])) {
+                $this->forceUsePolicies[$filterIdentifier] = $configEntry[self::FORCE_USE_POLICY_CONFIG_NODE];
+            }
         }
     }
 
@@ -89,9 +93,9 @@ class PreparedFilters
         return $this->forceUsePolicies;
     }
 
-    public function isPreparedFilterDefined(string $filterIdentifier): bool
+    public function isPreparedFilterDefinedForFrontend(string $filterIdentifier): bool
     {
-        return isset($this->config[$filterIdentifier]);
+        return isset($this->usePolicies[$filterIdentifier]);
     }
 
     public function getPreparedFilterQueryString(string $filterIdentifier): ?string

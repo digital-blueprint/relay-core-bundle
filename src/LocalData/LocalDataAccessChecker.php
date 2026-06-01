@@ -47,7 +47,7 @@ class LocalDataAccessChecker
             ->info('The name of the local data attribute.')
             ->end()
             ->scalarNode(self::READ_POLICY_CONFIG_NODE)
-            ->defaultValue('false')
+            ->defaultNull()
             ->info('A boolean expression evaluable by the Symfony Expression Language determining whether the current user may read the local data attribute. Available parameters: user.')
             ->end()
             ->scalarNode(self::ENTITY_SHORT_NAME_CONFIG_NODE)
@@ -79,9 +79,11 @@ class LocalDataAccessChecker
             }
             $this->attributeConfig[$localDataAttributeName] = $configEntry;
 
-            // the name of the local data attribute is used as name for the right to view that attribute
-            // the attribute is not readable by default
-            $this->policies[self::getReadPolicyName($localDataAttributeName)] = $configEntry[self::READ_POLICY_CONFIG_NODE] ?? 'false';
+            // The name of the local data attribute is used as name for the right to view that attribute.
+            // If the read policy is not defined, the attribute may only be used in the backend.
+            if (isset($configEntry[self::READ_POLICY_CONFIG_NODE])) {
+                $this->policies[self::getReadPolicyName($localDataAttributeName)] = $configEntry[self::READ_POLICY_CONFIG_NODE];
+            }
         }
     }
 
@@ -126,17 +128,22 @@ class LocalDataAccessChecker
     /**
      * @throws ApiError
      */
-    public function assertAttributeIsDefined(string $localDataAttributeName): void
+    public function assertAttributeIsDefinedForFrontend(string $localDataAttributeName): void
     {
-        if (false === $this->isAttributeDefined($localDataAttributeName)) {
+        if (false === $this->isAttributeDefinedForFrontend($localDataAttributeName)) {
             throw ApiError::withDetails(Response::HTTP_BAD_REQUEST,
                 sprintf('local data attribute \'%s\' undefined', $localDataAttributeName));
         }
     }
 
-    public function isAttributeDefined(string $localDataAttributeName): bool
+    public function isAttributeDefinedForFrontend(string $localDataAttributeName): bool
     {
-        return null !== ($this->attributeConfig[$localDataAttributeName] ?? null);
+        return isset($this->attributeConfig[$localDataAttributeName][self::READ_POLICY_CONFIG_NODE]);
+    }
+
+    public function isAttributeDefinedForBackend(string $localDataAttributeName): bool
+    {
+        return isset($this->attributeConfig[$localDataAttributeName]);
     }
 
     private function isCurrentUserGrantedReadAccessInternal(
