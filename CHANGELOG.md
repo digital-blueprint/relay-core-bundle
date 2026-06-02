@@ -6,6 +6,9 @@
   (referencing it in a frontend will cause a 400 local data attribute undefined)
 - prepared filter config: if the use_policy is not provided for a prepared filter, it is assumed to be a backend only filter
   (referencing it in a frontend will cause a 400 filter undefined)
+- prepared filter config: provide "force_use_for_users" (list of user ids) for which the prepared filter should be force-used, 
+  as an alternative to "force_use_policy" for easier configuration and more efficient evaluation.
+
 
 ## v0.1.243
 

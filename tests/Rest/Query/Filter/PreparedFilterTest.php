@@ -4,16 +4,23 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\Rest\Query\Filter;
 
-use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTreeBuilder;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\PreparedFilters;
-use Dbp\Relay\CoreBundle\Rest\Query\Parameters;
+use Dbp\Relay\CoreBundle\TestUtils\TestAuthorizationService;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class PreparedFilterTest extends TestCase
 {
+    private const DEFAULT_USER_ATTRIBUTES = [
+        'IS_USER' => false,
+        'IS_VIEWER' => false,
+        'IS_ADMIN' => false,
+    ];
     private ?PreparedFilters $preparedFilterProvider = null;
 
     private ?array $config = null;
+    private ?TestAuthorizationService $authoriationService = null;
 
     protected function setUp(): void
     {
@@ -33,100 +40,128 @@ class PreparedFilterTest extends TestCase
                 'force_use_policy' => 'user.get("IS_VIEWER")',
             ],
             [
-                'id' => 'filterShortcut2',
-                'filter' => 'filter[field0]="value2"',
-                'use_policy' => 'user.get("IS_ADMIN")',
-                'force_use_policy' => 'user.get("IS_USER")',
-            ],
-            [
                 'id' => 'filterBackendOnly',
                 'filter' => 'filter[field0]="value0"',
                 'use_policy' => null,
-                'force_use_policy' => 'user.get("IS_ADMIN")',
+                'force_use_policy' => 'user.getIdentifier() === "my-client-id"',
             ],
             [
                 'id' => 'filterFrontendOnly',
                 'use_policy' => 'user.get("IS_USER")',
                 'force_use_policy' => null,
             ],
+            [
+                'id' => 'filterWithForceUseForUsers',
+                'filter' => 'filter[field0]="value0"',
+                'use_policy' => null,
+                'force_use_policy' => null,
+                'force_use_for_users' => ['my-client-id', 'other-client-id'],
+            ],
         ]];
 
         $this->preparedFilterProvider = new PreparedFilters();
         $this->preparedFilterProvider->loadConfig($this->config);
+        $this->authoriationService = new TestAuthorizationService();
+
+        $this->login();
     }
 
-    public function testGetUsePolicies()
+    public function testAssertCurrentUserMayUseFilterWithPolicy(): void
     {
-        $policies = $this->preparedFilterProvider->getUsePolicies();
-
-        $this->assertCount(4, $policies);
-        $this->assertEquals('user.get("IS_USER")', $policies['filter0']);
-        $this->assertEquals('true', $policies['filterShortcut']);
-        $this->assertEquals('user.get("IS_ADMIN")', $policies['filterShortcut2']);
-        $this->assertEquals('user.get("IS_USER")', $policies['filterFrontendOnly']);
+        try {
+            $this->preparedFilterProvider->assertCurrentUserMayUseFilter('filter0', $this->authoriationService);
+            $this->fail('Expected HttpException was not thrown.');
+        } catch (HttpException $httpException) {
+            $this->assertEquals(Response::HTTP_FORBIDDEN, $httpException->getStatusCode());
+        }
+        $userAttributes = self::DEFAULT_USER_ATTRIBUTES;
+        $userAttributes['IS_USER'] = true;
+        $this->login(userAttributes: $userAttributes);
+        $this->preparedFilterProvider->assertCurrentUserMayUseFilter('filter0', $this->authoriationService);
+        $this->assertTrue(true);
     }
 
-    public function testGetForceUsePolicies()
+    public function testAssertCurrentUserMayUseFilterWithPolicyTrue(): void
     {
-        $policies = $this->preparedFilterProvider->getForceUsePolicies();
+        $this->preparedFilterProvider->assertCurrentUserMayUseFilter('filterShortcut', $this->authoriationService);
+        $this->assertTrue(true);
+    }
 
-        $this->assertCount(4, $policies);
-        $this->assertEquals('true', $policies['filter0']);
-        $this->assertEquals('user.get("IS_VIEWER")', $policies['filterShortcut']);
-        $this->assertEquals('user.get("IS_USER")', $policies['filterShortcut2']);
-        $this->assertEquals('user.get("IS_ADMIN")', $policies['filterBackendOnly']);
+    public function testAssertCurrentUserMayUseFilterBackendOnly(): void
+    {
+        try {
+            $this->preparedFilterProvider->assertCurrentUserMayUseFilter('filterBackendOnly', $this->authoriationService);
+            $this->fail('Expected HttpException was not thrown.');
+        } catch (HttpException $httpException) {
+            $this->assertEquals(Response::HTTP_BAD_REQUEST, $httpException->getStatusCode());
+        }
+    }
+
+    public function testAssertCurrentUserMayUseFilterFrontendOnly(): void
+    {
+        try {
+            $this->preparedFilterProvider->assertCurrentUserMayUseFilter('filter0', $this->authoriationService);
+            $this->fail('Expected HttpException was not thrown.');
+        } catch (HttpException $httpException) {
+            $this->assertEquals(Response::HTTP_FORBIDDEN, $httpException->getStatusCode());
+        }
+        $userAttributes = self::DEFAULT_USER_ATTRIBUTES;
+        $userAttributes['IS_USER'] = true;
+        $this->login(userAttributes: $userAttributes);
+        $this->preparedFilterProvider->assertCurrentUserMayUseFilter('filter0', $this->authoriationService);
+        $this->assertTrue(true);
+    }
+
+    public function testGetFiltersToForceUseForCurrentUser(): void
+    {
+        $filtersToForce = $this->preparedFilterProvider->getFiltersToForceUseForCurrentUser($this->authoriationService);
+        $this->assertEquals(['filter0'], $filtersToForce);
+
+        $userAttributes = self::DEFAULT_USER_ATTRIBUTES;
+        $userAttributes['IS_VIEWER'] = true;
+        $this->login(userAttributes: $userAttributes);
+        $filtersToForce = $this->preparedFilterProvider->getFiltersToForceUseForCurrentUser($this->authoriationService);
+        $this->assertCount(2, $filtersToForce);
+        $this->assertContains('filter0', $filtersToForce);
+        $this->assertContains('filterShortcut', $filtersToForce);
+
+        $userAttributes = self::DEFAULT_USER_ATTRIBUTES;
+        $userAttributes['IS_VIEWER'] = true;
+        $this->login(userIdentifier: 'my-client-id', userAttributes: $userAttributes);
+        $filtersToForce = $this->preparedFilterProvider->getFiltersToForceUseForCurrentUser($this->authoriationService);
+        $this->assertCount(4, $filtersToForce);
+        $this->assertContains('filter0', $filtersToForce);
+        $this->assertContains('filterShortcut', $filtersToForce);
+        $this->assertContains('filterBackendOnly', $filtersToForce);
+        $this->assertContains('filterWithForceUseForUsers', $filtersToForce);
+
+        $this->login(userIdentifier: 'other-client-id');
+        $filtersToForce = $this->preparedFilterProvider->getFiltersToForceUseForCurrentUser($this->authoriationService);
+        $this->assertCount(2, $filtersToForce);
+        $this->assertContains('filter0', $filtersToForce);
+        $this->assertContains('filterWithForceUseForUsers', $filtersToForce);
     }
 
     /**
      * @throws \Exception
      */
-    public function testPreparedFilter()
+    public function testGetPreparedFilterQueryString(): void
     {
-        $this->assertFalse($this->preparedFilterProvider->isPreparedFilterDefinedForFrontend('foo'));
-        $this->assertTrue($this->preparedFilterProvider->isPreparedFilterDefinedForFrontend('filter0'));
-        $this->assertTrue($this->preparedFilterProvider->isPreparedFilterDefinedForFrontend('filterShortcut'));
-        $this->assertTrue($this->preparedFilterProvider->isPreparedFilterDefinedForFrontend('filterShortcut2'));
-        $this->assertFalse($this->preparedFilterProvider->isPreparedFilterDefinedForFrontend('filterBackendOnly'));
-        $this->assertTrue($this->preparedFilterProvider->isPreparedFilterDefinedForFrontend('filterFrontendOnly'));
-
-        $this->assertNull($this->preparedFilterProvider->getPreparedFilterQueryString('foo'));
-        $this->assertNotNull($this->preparedFilterProvider->getPreparedFilterQueryString('filter0'));
-        $this->assertNotNull($this->preparedFilterProvider->getPreparedFilterQueryString('filterShortcut'));
-        $this->assertNotNull($this->preparedFilterProvider->getPreparedFilterQueryString('filterShortcut2'));
-        $this->assertNotNull($this->preparedFilterProvider->getPreparedFilterQueryString('filterBackendOnly'));
-        $this->assertNotNull($this->preparedFilterProvider->getPreparedFilterQueryString('filterFrontendOnly'));
-
-        $preparedFilterQueryString = $this->preparedFilterProvider->getPreparedFilterQueryString('filter0');
-
-        $preparedFilter = CreateFilterFromQueryTest::createFilterFromQueryParameters(
-            Parameters::getQueryParametersFromQueryString($preparedFilterQueryString, Parameters::FILTER), ['field0']);
-
-        $expectedFilter = FilterTreeBuilder::create()->iContains('field0', 'value0')->createFilter();
-
-        $this->assertEquals($expectedFilter->toArray(), $preparedFilter->toArray());
+        $this->assertEquals(
+            'filter[foo][condition][path]=field0&filter[foo][condition][operator]=I_CONTAINS&filter[foo][condition][value]="value0"',
+            $this->preparedFilterProvider->getPreparedFilterQueryString('filter0'));
+        $this->assertEquals(
+            '',
+            $this->preparedFilterProvider->getPreparedFilterQueryString('filterFrontendOnly')
+        );
+        $this->expectException(\RuntimeException::class);
+        $this->preparedFilterProvider->getPreparedFilterQueryString('___');
     }
 
-    /**
-     * @throws \Exception
-     */
-    public function testPreparedFilterShortcut()
+    private function login(
+        ?string $userIdentifier = TestAuthorizationService::TEST_USER_IDENTIFIER,
+        array $userAttributes = self::DEFAULT_USER_ATTRIBUTES): void
     {
-        $preparedFilterQueryString = $this->preparedFilterProvider->getPreparedFilterQueryString('filterShortcut');
-        $this->assertNotNull($preparedFilterQueryString);
-
-        $preparedFilter = CreateFilterFromQueryTest::createFilterFromQueryParameters(
-            Parameters::getQueryParametersFromQueryString($preparedFilterQueryString, Parameters::FILTER), ['field0']);
-
-        $expectedFilter = FilterTreeBuilder::create()->equals('field0', 'value0')->createFilter();
-
-        $this->assertEquals($expectedFilter->toArray(), $preparedFilter->toArray());
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function testPreparedFilterUndefined()
-    {
-        $this->assertNull($this->preparedFilterProvider->getPreparedFilterQueryString('___'));
+        TestAuthorizationService::setUp($this->authoriationService, $userIdentifier, $userAttributes);
     }
 }

@@ -339,29 +339,20 @@ abstract class AbstractDataProvider extends AbstractAuthorizationService impleme
      * do not leak to the user.
      *
      * @throws ApiError
+     * @throws \Exception
      */
     private function createPreparedFilter(?string $requestedFilterIdentifier): ?Filter
     {
         $filtersToApplyIdentifiers = [];
-
         if ($requestedFilterIdentifier !== null) {
-            if (false === $this->preparedFiltersController->isPreparedFilterDefinedForFrontend($requestedFilterIdentifier)) {
-                throw ApiError::withDetails(Response::HTTP_BAD_REQUEST,
-                    'Prepared filter undefined', ErrorIds::PREPARED_FILTER_UNDEFINED);
-            }
-            if (false === $this->evaluateCustomExpression(
-                $this->preparedFiltersController->getUsePolicies()[$requestedFilterIdentifier])) {
-                throw new AccessDeniedHttpException();
-            }
-
+            $this->preparedFiltersController->assertCurrentUserMayUseFilter($requestedFilterIdentifier, $this);
             $filtersToApplyIdentifiers[] = $requestedFilterIdentifier;
         }
 
-        foreach ($this->preparedFiltersController->getForceUsePolicies() as $filterIdentifier => $forceUsePolicy) {
-            if (true === $this->evaluateCustomExpression($forceUsePolicy)) {
-                $filtersToApplyIdentifiers[] = $filterIdentifier;
-            }
-        }
+        $filtersToApplyIdentifiers = array_merge(
+            $filtersToApplyIdentifiers,
+            $this->preparedFiltersController->getFiltersToForceUseForCurrentUser($this)
+        );
 
         $filtersToApplyIdentifiers = array_unique($filtersToApplyIdentifiers);
 
