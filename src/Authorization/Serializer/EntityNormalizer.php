@@ -120,7 +120,8 @@ class EntityNormalizer implements NormalizerAwareInterface, NormalizerInterface
         // YET have to exclude paginators which seem to have the resource class of the items that they hold.
         return is_object($data)
             && false === $data instanceof PartialPaginatorInterface
-            && isset($this->getOutputGroupsToAddForEntityInstanceCallbacks[$context[self::RESOURCE_CLASS_CONTEXT_KEY] ?? null])
+            && isset($context[self::RESOURCE_CLASS_CONTEXT_KEY])
+            && isset($this->getOutputGroupsToAddForEntityInstanceCallbacks[$context[self::RESOURCE_CLASS_CONTEXT_KEY]])
             && false === $this->wasAlreadyNormalized($data, $context);
     }
 

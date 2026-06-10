@@ -31,12 +31,12 @@ class TestUserAttributeProvider implements UserAttributeProviderInterface
 
     public function addUser(?string $userIdentifier, array $userAttributes = []): void
     {
-        $this->userAttributes[$userIdentifier] = $userAttributes;
+        $this->userAttributes[$userIdentifier ?? ''] = $userAttributes;
     }
 
     public function getUserAttributes(?string $userIdentifier): array
     {
-        if (($userAttributes = $this->userAttributes[$userIdentifier] ?? null) === null) {
+        if (($userAttributes = $this->userAttributes[$userIdentifier ?? ''] ?? null) === null) {
             return $this->defaultAttributes;
         }
 
@@ -54,7 +54,7 @@ class TestUserAttributeProvider implements UserAttributeProviderInterface
      */
     public function getUserAttribute(?string $userIdentifier, string $name): mixed
     {
-        if ($userAttributes = $this->userAttributes[$userIdentifier] ?? null) {
+        if ($userAttributes = $this->userAttributes[$userIdentifier ?? ''] ?? null) {
             if (array_key_exists($name, $userAttributes)) {
                 return $userAttributes[$name];
             }
