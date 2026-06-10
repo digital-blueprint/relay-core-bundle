@@ -7,6 +7,8 @@ namespace Dbp\Relay\CoreBundle\Tests\Rest\Query\Filter;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\PreparedFilters;
 use Dbp\Relay\CoreBundle\TestUtils\TestAuthorizationService;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
@@ -156,6 +158,49 @@ class PreparedFilterTest extends TestCase
         );
         $this->expectException(\RuntimeException::class);
         $this->preparedFilterProvider->getPreparedFilterQueryString('___');
+    }
+
+    /**
+     * Exercises the config tree builder for PreparedFilters, including scalar-to-array
+     * normalisation of the force_use_for_users node.
+     */
+    public function testProcessConfiguration(): void
+    {
+        $treeBuilder = new TreeBuilder('test');
+        $treeBuilder->getRootNode()->append(PreparedFilters::getConfigNodeDefinition());
+        $tree = $treeBuilder->buildTree();
+
+        $processor = new Processor();
+        $result = $processor->process($tree, [['prepared_filters' => [
+            [
+                'id' => 'filter1',
+                'filter' => 'filter[field]="value"',
+                'force_use_for_users' => ['user1', 'user2'],
+            ],
+        ]]]);
+
+        $this->assertSame(['user1', 'user2'], $result['prepared_filters'][0]['force_use_for_users']);
+    }
+
+    /**
+     * Verifies that a bare string value for force_use_for_users is normalised into a single-element array.
+     */
+    public function testProcessConfigurationScalarWrapping(): void
+    {
+        $treeBuilder = new TreeBuilder('test');
+        $treeBuilder->getRootNode()->append(PreparedFilters::getConfigNodeDefinition());
+        $tree = $treeBuilder->buildTree();
+
+        $processor = new Processor();
+        $result = $processor->process($tree, [['prepared_filters' => [
+            [
+                'id' => 'filter1',
+                'filter' => 'filter[field]="value"',
+                'force_use_for_users' => 'only-user',
+            ],
+        ]]]);
+
+        $this->assertSame(['only-user'], $result['prepared_filters'][0]['force_use_for_users']);
     }
 
     private function login(
