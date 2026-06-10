@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## v0.1.245
+
+- Fix deprecation warnings with PHP 8.5
+- Fix usage of acceptAndWrap() which is only available in Symfony v7 while we still support v6
+
 ## v0.1.244
 
 - local data config: if the read_policy is not provided for a local data attribute, it is assumed to be a backend only attribute
