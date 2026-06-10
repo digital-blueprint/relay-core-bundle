@@ -50,7 +50,7 @@ class PreparedFilters
                         ->info('A boolean policy expression that determines whether the filter is force-used for the current user. If not set, it is never force-used. Available parameters: user.')
                     ->end()
                     ->arrayNode(self::FORCE_USE_FOR_USERS_NODE)
-                        ->acceptAndWrap(['string'])
+                        ->beforeNormalization()->ifString()->then(static fn ($v) => [$v])->end()
                         ->scalarPrototype()->end()
                         ->info('A list of user identifiers for which the filter is force-used.')
                     ->end()
