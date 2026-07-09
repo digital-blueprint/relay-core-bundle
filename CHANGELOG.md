@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Allow null address attributes for Helpers/Tools::createAddressArray()
+
 ## v0.1.245
 
 - Fix deprecation warnings with PHP 8.5

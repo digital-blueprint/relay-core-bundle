@@ -68,16 +68,22 @@ class Tools
      *
      * @return string[]
      */
-    public static function createAddressArray(string $street, string $postalCode, string $city, string $country,
+    public static function createAddressArray(?string $street, ?string $postalCode, ?string $city, ?string $country,
         ?string $additionalInformation = null, bool $includeNullValues = false): array
     {
-        $addressArray = [
-            'street' => $street,
-            'postalCode' => $postalCode,
-            'city' => $city,
-            'country' => $country,
-        ];
-
+        $addressArray = [];
+        if ($includeNullValues || null !== $street) {
+            $addressArray['street'] = $street;
+        }
+        if ($includeNullValues || null !== $postalCode) {
+            $addressArray['postalCode'] = $postalCode;
+        }
+        if ($includeNullValues || null !== $city) {
+            $addressArray['city'] = $city;
+        }
+        if ($includeNullValues || null !== $country) {
+            $addressArray['country'] = $country;
+        }
         if ($includeNullValues || null !== $additionalInformation) {
             $addressArray['additionalInformation'] = $additionalInformation;
         }
