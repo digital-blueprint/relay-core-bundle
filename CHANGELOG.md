@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.246
+
 - Allow null address attributes for Helpers/Tools::createAddressArray()
 
 ## v0.1.245
