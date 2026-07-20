@@ -14,8 +14,12 @@ class DoctrineConfiguration
 
     public const IN_MEMORY_DATABASE_URL = 'sqlite:///:memory:';
 
+    /**
+     * @param string[] $dependsOnEntityManagers Names of other entity managers that need to be migrated before this one
+     */
     public static function prependEntityManagerConfig(ContainerBuilder $containerBuilder, string $entityManagerId,
-        string $databaseUrl, string $entityDirectoryPath, string $entityNamespace, ?string $connectionId = null): void
+        string $databaseUrl, string $entityDirectoryPath, string $entityNamespace, ?string $connectionId = null,
+        array $dependsOnEntityManagers = []): void
     {
         self::ensureInPrepend($containerBuilder);
 
@@ -50,9 +54,13 @@ class DoctrineConfiguration
             ],
         ]);
 
-        self::extendArrayParameter(
-            $containerBuilder, 'dbp_api.entity_managers', [$entityManagerId]
-        );
+        $entityManagers = $containerBuilder->hasParameter('dbp_api.entity_managers') ?
+            $containerBuilder->getParameter('dbp_api.entity_managers') : [];
+        assert(is_array($entityManagers));
+        $entityManagers[$entityManagerId] = array_values(array_unique(
+            array_merge($entityManagers[$entityManagerId] ?? [], $dependsOnEntityManagers)
+        ));
+        $containerBuilder->setParameter('dbp_api.entity_managers', $entityManagers);
     }
 
     public static function prependMigrationsConfig(ContainerBuilder $containerBuilder,

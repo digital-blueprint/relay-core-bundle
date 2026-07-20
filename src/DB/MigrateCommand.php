@@ -27,6 +27,9 @@ final class MigrateCommand extends Command implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
+    /**
+     * @var array<string, string[]> Map of entity manager name to its dependency entity manager names
+     */
     private array $entityManagers = [];
 
     private readonly TableMetadataStorageConfiguration $migrationStorageConfig;
@@ -48,9 +51,52 @@ final class MigrateCommand extends Command implements LoggerAwareInterface
         $this->setDescription('Run all database migrations');
     }
 
+    /**
+     * @param array<string, string[]> $entityManagers Map of entity manager name to its dependency entity manager names
+     */
     public function setEntityManagers(array $entityManagers): void
     {
         $this->entityManagers = $entityManagers;
+    }
+
+    /**
+     * Returns the entity manager names sorted so that all dependencies come before the
+     * entity managers depending on them.
+     *
+     * @param array<string, string[]> $entityManagers Map of entity manager name to its dependency entity manager names
+     *
+     * @return string[]
+     */
+    public static function sortEntityManagers(array $entityManagers): array
+    {
+        $sorted = [];
+        $visiting = [];
+
+        $visit = function (string $em, array $path) use (&$visit, &$sorted, &$visiting, $entityManagers): void {
+            if (isset($sorted[$em])) {
+                return;
+            }
+            if (isset($visiting[$em])) {
+                $path[] = $em;
+                throw new \RuntimeException('Entity manager dependency cycle detected: '.implode(' -> ', $path));
+            }
+            $visiting[$em] = true;
+            foreach ($entityManagers[$em] as $dependency) {
+                if (!array_key_exists($dependency, $entityManagers)) {
+                    throw new \RuntimeException(
+                        "Entity manager '$em' depends on unregistered entity manager '$dependency'");
+                }
+                $visit($dependency, array_merge($path, [$em]));
+            }
+            unset($visiting[$em]);
+            $sorted[$em] = true;
+        };
+
+        foreach (array_keys($entityManagers) as $em) {
+            $visit($em, []);
+        }
+
+        return array_keys($sorted);
     }
 
     /**
@@ -147,17 +193,18 @@ final class MigrateCommand extends Command implements LoggerAwareInterface
         // The locking system might also create a DB table, but it doesn't expose an easy way
         // to handle it backend independent, so this isn't handled here.
 
-        // Then migrate all registered DBs
-        if (count($this->entityManagers) === 0) {
+        // Then migrate all registered DBs, making sure dependencies are migrated first
+        $entityManagers = self::sortEntityManagers($this->entityManagers);
+        if (count($entityManagers) === 0) {
             $output->writeln('No entity managers registered, nothing to migrate');
         } else {
             $output->writeln('Running migrations for:');
-            foreach ($this->entityManagers as $em) {
+            foreach ($entityManagers as $em) {
                 $output->writeln('  '.$em);
             }
         }
         $newlyExecutedMigrations = [];
-        foreach ($this->entityManagers as $em) {
+        foreach ($entityManagers as $em) {
             $before = $this->getExecutedMigrations($em);
             $output->writeln("Migrating $em:");
             $this->runConsoleCommand(['doctrine:migrations:migrate', '--em', $em], $input, $output);

@@ -88,13 +88,19 @@ trait ExtensionTrait
 
     /**
      * Registers a Doctrine entity manager name. This can be used for managing database migrations etc.
+     *
+     * @param string[] $dependsOnEntityManagers Names of other entity managers that need to be migrated before this one
      */
-    public function registerEntityManager(ContainerBuilder $container, string $entityManagerName): void
+    public function registerEntityManager(ContainerBuilder $container, string $entityManagerName, array $dependsOnEntityManagers = []): void
     {
         self::ensureInPrepend($container);
-        self::extendArrayParameter(
-            $container, 'dbp_api.entity_managers', [$entityManagerName]
-        );
+        $entityManagers = $container->hasParameter('dbp_api.entity_managers') ?
+            $container->getParameter('dbp_api.entity_managers') : [];
+        assert(is_array($entityManagers));
+        $entityManagers[$entityManagerName] = array_values(array_unique(
+            array_merge($entityManagers[$entityManagerName] ?? [], $dependsOnEntityManagers)
+        ));
+        $container->setParameter('dbp_api.entity_managers', $entityManagers);
     }
 
     private static function ensureInPrepend(ContainerBuilder $container): void
