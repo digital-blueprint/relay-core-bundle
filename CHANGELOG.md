@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.247
+
 - extension: registerEntityManager() and prependEntityManagerConfig() now accept an optional list of
   entity manager dependencies. MigrateCommand migrates dependencies before the entity managers depending
   on them.
