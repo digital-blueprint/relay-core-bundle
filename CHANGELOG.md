@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add support for guzzle 8
+- Http/ConnectionException: new type "other" (ConnectionException::OTHER_EXCEPTION), which is used for
+  request failures that don't match any of the other types. Previously such failures resulted in a TypeError.
+
 ## v0.1.247
 
 - extension: registerEntityManager() and prependEntityManagerConfig() now accept an optional list of

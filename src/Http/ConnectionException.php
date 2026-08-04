@@ -17,6 +17,7 @@ class ConnectionException extends \RuntimeException
     public const SERVER_EXCEPTION = 'server';           /* HTTP status codes 500 - 599 */
     public const NETWORK_EXCEPTION = 'network';
     public const JSON_EXCEPTION = 'json';
+    public const OTHER_EXCEPTION = 'other';      /* any other kind of request failure */
 
     /** @var RequestInterface|null */
     private $request;

@@ -7,9 +7,7 @@ namespace Dbp\Relay\CoreBundle\Http;
 use Dbp\Relay\CoreBundle\Helpers\Tools;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Exception\TooManyRedirectsException;
 use GuzzleHttp\HandlerStack;
@@ -20,6 +18,9 @@ use Kevinrob\GuzzleCache\CacheMiddleware;
 use Kevinrob\GuzzleCache\Storage\Psr6CacheStorage;
 use Kevinrob\GuzzleCache\Strategy\GreedyCacheStrategy;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Http\Client\NetworkExceptionInterface;
+use Psr\Http\Client\RequestExceptionInterface;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -187,11 +188,7 @@ class Connection implements LoggerAwareInterface
 
             return $client->request($method, $uri, $requestOptions);
         } catch (GuzzleException $exception) {
-            $request = null;
-            $response = null;
-            $type = null;
-            if ($exception instanceof ConnectException) {
-                $request = $exception->getRequest();
+            if ($exception instanceof NetworkExceptionInterface) {
                 $type = ConnectionException::NETWORK_EXCEPTION;
             } elseif ($exception instanceof ClientException) {
                 $type = ConnectionException::CLIENT_EXCEPTION;
@@ -199,14 +196,42 @@ class Connection implements LoggerAwareInterface
                 $type = ConnectionException::SERVER_EXCEPTION;
             } elseif ($exception instanceof TooManyRedirectsException) {
                 $type = ConnectionException::REDIRECTION_EXCEPTION;
+            } else {
+                $type = ConnectionException::OTHER_EXCEPTION;
             }
 
-            if ($exception instanceof RequestException) {
-                $request = $exception->getRequest();
-                $response = $exception->getResponse();
-            }
-            throw new ConnectionException($type, sprintf('HTTP %s request to %s failed. Message: \'%s\', Code: %s', $method, $this->baseUri.$uri, $exception->getMessage(), $exception->getCode()), $exception->getCode(), $exception, $request, $response);
+            throw new ConnectionException($type,
+                sprintf('HTTP %s request to %s failed. Message: \'%s\', Code: %s', $method, $this->baseUri.$uri, $exception->getMessage(), $exception->getCode()),
+                $exception->getCode(), $exception,
+                self::getRequestFromException($exception), self::getResponseFromException($exception));
         }
+    }
+
+    /**
+     * Note: NetworkExceptionInterface and RequestExceptionInterface are both implemented by guzzle 7 and 8.
+     */
+    private static function getRequestFromException(GuzzleException $exception): ?RequestInterface
+    {
+        return match (true) {
+            $exception instanceof NetworkExceptionInterface,
+            $exception instanceof RequestExceptionInterface => $exception->getRequest(),
+            default => null,
+        };
+    }
+
+    /**
+     * Note: Guzzle 8 provides the response via ResponseException, while guzzle 7 provides it via RequestException.
+     * Since there is no common base class or interface, the presence of the method is checked instead.
+     */
+    private static function getResponseFromException(GuzzleException $exception): ?ResponseInterface
+    {
+        if (method_exists($exception, 'getResponse')) {
+            $response = $exception->getResponse();
+
+            return $response instanceof ResponseInterface ? $response : null;
+        }
+
+        return null;
     }
 
     public function getClient(): Client
