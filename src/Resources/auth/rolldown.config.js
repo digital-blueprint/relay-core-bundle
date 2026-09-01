@@ -9,6 +9,9 @@ const prodBuild = (process.env.ROLLUP_WATCH !== 'true' && build !== 'test');
 
 export default (async () => {
     return {
+        transform: {
+            target: prodBuild ? ['chrome106', 'firefox110', 'safari16'] : 'esnext',
+        },
         input: (build != 'test') ? ['src/api-platform-auth.js'] : globSync('test/**/*.js'),
         output: {
             dir: (build != 'test') ? '../public/auth' : 'dist',
