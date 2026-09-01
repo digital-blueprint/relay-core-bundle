@@ -5,14 +5,11 @@
   "main": "src/index.js",
   "license": "LGPL-2.1-or-later",
   "devDependencies": {
-    "@eslint/js": "^10.0.0",
     "@web/test-runner": "^0.20.2",
     "@web/test-runner-playwright": "^0.11.1",
     "chai": "^6.2.0",
-    "eslint": "^10.0.0",
-    "eslint-plugin-jsdoc": "^62.0.0",
-    "globals": "^17.0.0",
     "mocha": "^11.1.0",
+    "oxlint": "^1.80.0",
     "playwright-core": "^1.32.3",
     "rolldown": "^1.0.0-beta.45",
     "rollup-plugin-copy": "^3.1.0",
@@ -30,6 +27,6 @@
     "build-test": "rolldown -c rolldown.config.js --environment BUILD:test",
     "watch": "rolldown -c rolldown.config.js --watch",
     "test": "npm run build-test && web-test-runner",
-    "lint": "eslint ."
+    "lint": "oxlint ."
   }
 }
