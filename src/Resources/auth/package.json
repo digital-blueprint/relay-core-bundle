@@ -26,9 +26,9 @@
   },
   "scripts": {
     "clean": "rm dist/*",
-    "build": "rolldown -c rollup.config.js",
-    "build-test": "rolldown -c rollup.config.js --environment BUILD:test",
-    "watch": "rolldown -c rollup.config.js --watch",
+    "build": "rolldown -c rolldown.config.js",
+    "build-test": "rolldown -c rolldown.config.js --environment BUILD:test",
+    "watch": "rolldown -c rolldown.config.js --watch",
     "test": "npm run build-test && web-test-runner",
     "lint": "eslint ."
   }
