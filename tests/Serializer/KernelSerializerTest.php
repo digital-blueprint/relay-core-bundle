@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\Serializer;
 
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 
-class KernelSerializerTest extends ApiTestCase
+class KernelSerializerTest extends KernelTestCase
 {
     private Serializer $serializer;
 
