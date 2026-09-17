@@ -2,7 +2,11 @@
 
 ## Unreleased
 
+## v0.1.249
+
 - Drop support for API Platform 4.1
+- Remove deprecated UserAuthTrait/UserAuthWebTrait
+- Various dependency updates for the api-docs frontend login code
 
 ## v0.1.248
 
