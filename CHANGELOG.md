@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Drop support for API Platform 4.1
+
 ## v0.1.248
 
 - Add support for guzzle 8
