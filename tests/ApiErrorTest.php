@@ -221,7 +221,7 @@ class ApiErrorTest extends AbstractApiTest
         $this->assertArrayNotHasKey('relay:errorId', $content);
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
 
-        $this->assertTrue($this->testClient->getClient()->getKernel()->isDebug());
+        $this->assertTrue($this->testClient->getKernelBrowser()->getKernel()->isDebug());
         $this->assertArrayHasKey('trace', $content);
     }
 
@@ -243,7 +243,7 @@ class ApiErrorTest extends AbstractApiTest
         $this->assertArrayNotHasKey('relay:errorId', $content);
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
 
-        $this->assertTrue($this->testClient->getClient()->getKernel()->isDebug());
+        $this->assertTrue($this->testClient->getKernelBrowser()->getKernel()->isDebug());
         $this->assertArrayHasKey('trace', $content);
     }
 
@@ -262,7 +262,7 @@ class ApiErrorTest extends AbstractApiTest
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
 
         // No trace with debug
-        $this->assertFalse($this->testClient->getClient()->getKernel()->isDebug());
+        $this->assertFalse($this->testClient->getKernelBrowser()->getKernel()->isDebug());
         $this->assertArrayNotHasKey('trace', $content);
 
         // No details with 5xx and debug
@@ -287,7 +287,7 @@ class ApiErrorTest extends AbstractApiTest
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
 
         // No trace with debug
-        $this->assertFalse($this->testClient->getClient()->getKernel()->isDebug());
+        $this->assertFalse($this->testClient->getKernelBrowser()->getKernel()->isDebug());
         $this->assertArrayNotHasKey('trace', $content);
 
         // No details with 5xx and debug
@@ -312,7 +312,7 @@ class ApiErrorTest extends AbstractApiTest
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
 
         // No trace with debug
-        $this->assertFalse($this->testClient->getClient()->getKernel()->isDebug());
+        $this->assertFalse($this->testClient->getKernelBrowser()->getKernel()->isDebug());
         $this->assertArrayNotHasKey('trace', $content);
 
         // No details with 5xx and debug
@@ -343,7 +343,7 @@ class ApiErrorTest extends AbstractApiTest
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
 
         // No trace with debug
-        $this->assertFalse($this->testClient->getClient()->getKernel()->isDebug());
+        $this->assertFalse($this->testClient->getKernelBrowser()->getKernel()->isDebug());
         $this->assertArrayNotHasKey('trace', $content);
     }
 }

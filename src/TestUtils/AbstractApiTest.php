@@ -4,23 +4,11 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\TestUtils;
 
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-abstract class AbstractApiTest extends ApiTestCase
+abstract class AbstractApiTest extends WebTestCase
 {
     protected ?TestClient $testClient = null;
-
-    /**
-     * WORKAROUND deprecation warning on self::createClient().
-     */
-    public static function setUpBeforeClass(): void
-    {
-        $reflection = new \ReflectionClass(ApiTestCase::class);
-        if ($reflection->hasProperty('alwaysBootKernel')) {
-            static::$alwaysBootKernel = true; // @phpstan-ignore-line
-        }
-    }
 
     protected function setUp(): void
     {
@@ -29,9 +17,9 @@ abstract class AbstractApiTest extends ApiTestCase
 
     protected function setUpTestClient(array $kernelOptions = []): void
     {
-        KernelTestCase::ensureKernelShutdown();
+        self::ensureKernelShutdown();
         $this->testClient = new TestClient(self::createClient($kernelOptions));
-        $this->testClient->getClient()->disableReboot(); // allow multiple requests in one test
+        $this->testClient->getKernelBrowser()->disableReboot(); // allow multiple requests in one test
         $this->login();
     }
 

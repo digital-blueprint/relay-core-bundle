@@ -30,7 +30,7 @@ abstract class AbstractApiTestCase extends AbstractApiTest
     {
         $this->setUpTestClient();
 
-        $this->testResourceManager = new TestResourceEntityManager($this->testClient->getContainer());
+        $this->testResourceManager = new TestResourceEntityManager(self::getContainer());
     }
 
     protected function getTestClient(
