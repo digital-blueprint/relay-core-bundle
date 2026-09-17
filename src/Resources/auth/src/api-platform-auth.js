@@ -4,7 +4,7 @@ import {ScopedElementsMixin} from '@dbp-toolkit/common';
 import {AuthKeycloak} from '@dbp-toolkit/auth/src/auth-keycloak';
 import {LoginButton} from '@dbp-toolkit/auth/src/login-button';
 import * as commonUtils from '@dbp-toolkit/common/utils';
-import {AdapterLitElement} from "@dbp-toolkit/common";
+import {AdapterLitElement} from '@dbp-toolkit/common';
 
 export class ApiPlatformAuth extends ScopedElementsMixin(AdapterLitElement) {
     constructor() {
@@ -20,28 +20,32 @@ export class ApiPlatformAuth extends ScopedElementsMixin(AdapterLitElement) {
 
     static get scopedElements() {
         return {
-          'dbp-auth-keycloak': AuthKeycloak,
-          'dbp-login-button': LoginButton,
+            'dbp-auth-keycloak': AuthKeycloak,
+            'dbp-login-button': LoginButton,
         };
     }
 
     static get properties() {
         return {
             ...super.properties,
-            auth: { type: Object },
-            lang: { type: String },
-            url: { type: String },
-            realm: { type: String },
-            clientId: { type: String, attribute: 'client-id' },
-            silentCheckSsoRedirectUri: { type: String, attribute: 'silent-check-sso-redirect-uri' },
-            entryPointUrl: { type: String, attribute: 'entry-point-url' },
+            auth: {type: Object},
+            lang: {type: String},
+            url: {type: String},
+            realm: {type: String},
+            clientId: {type: String, attribute: 'client-id'},
+            silentCheckSsoRedirectUri: {type: String, attribute: 'silent-check-sso-redirect-uri'},
+            entryPointUrl: {type: String, attribute: 'entry-point-url'},
         };
     }
 
     update(changedProperties) {
         changedProperties.forEach((oldValue, propName) => {
-            if (propName === "auth") {
-                const event = new CustomEvent("api-platform-auth-update", { "detail": this.auth, bubbles: true, composed: true });
+            if (propName === 'auth') {
+                const event = new CustomEvent('api-platform-auth-update', {
+                    detail: this.auth,
+                    bubbles: true,
+                    composed: true,
+                });
                 window.dispatchEvent(event);
             }
         });
@@ -51,14 +55,15 @@ export class ApiPlatformAuth extends ScopedElementsMixin(AdapterLitElement) {
 
     render() {
         return html`
-            <dbp-auth-keycloak subscribe="requested-login-status"
-                               lang="${this.lang}"
-                               entry-point-url="${this.entryPointUrl}"
-                               silent-check-sso-redirect-uri="${this.silentCheckSsoRedirectUri}"
-                               url="${this.url}"
-                               realm="${this.realm}"
-                               client-id="${this.clientId}"
-                               try-login></dbp-auth-keycloak>
+            <dbp-auth-keycloak
+                subscribe="requested-login-status"
+                lang="${this.lang}"
+                entry-point-url="${this.entryPointUrl}"
+                silent-check-sso-redirect-uri="${this.silentCheckSsoRedirectUri}"
+                url="${this.url}"
+                realm="${this.realm}"
+                client-id="${this.clientId}"
+                try-login></dbp-auth-keycloak>
             <dbp-login-button subscribe="auth" lang="${this.lang}"></dbp-login-button>
         `;
     }

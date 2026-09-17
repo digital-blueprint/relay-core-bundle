@@ -3,17 +3,17 @@ import copy from 'rollup-plugin-copy';
 import serve from 'rollup-plugin-serve';
 import process from 'node:process';
 
-const build = (typeof process.env.BUILD !== 'undefined') ? process.env.BUILD : 'local';
-console.log("build: " + build);
-const prodBuild = (process.env.ROLLUP_WATCH !== 'true' && build !== 'test');
+const build = typeof process.env.BUILD !== 'undefined' ? process.env.BUILD : 'local';
+console.log('build: ' + build);
+const prodBuild = process.env.ROLLUP_WATCH !== 'true' && build !== 'test';
 
 export default Promise.resolve({
     transform: {
         target: prodBuild ? ['chrome106', 'firefox110', 'safari16'] : 'esnext',
     },
-    input: (build != 'test') ? ['src/api-platform-auth.js'] : globSync('test/**/*.js'),
+    input: build != 'test' ? ['src/api-platform-auth.js'] : globSync('test/**/*.js'),
     output: {
-        dir: (build != 'test') ? '../public/auth' : 'dist',
+        dir: build != 'test' ? '../public/auth' : 'dist',
         entryFileNames: '[name].js',
         chunkFileNames: 'shared/[name].[hash].js',
         format: 'esm',
@@ -29,6 +29,8 @@ export default Promise.resolve({
                 {src: 'assets/silent-check-sso.html', dest: '../public/auth'},
             ],
         }),
-        (process.env.ROLLUP_WATCH === 'true') ? serve({contentBase: '../public/auth', host: '127.0.0.1', port: 8002}) : false
-    ]
+        process.env.ROLLUP_WATCH === 'true'
+            ? serve({contentBase: '../public/auth', host: '127.0.0.1', port: 8002})
+            : false,
+    ],
 });

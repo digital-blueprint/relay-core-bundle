@@ -327,14 +327,15 @@ if(super(e),this.it=R,e.type!==Le.CHILD)throw Error(this.constructor.directiveNa
                     </div>
                 </a>
             `}},un=class extends U(Pe){constructor(){super(),this.auth={},this.lang=`en`,this.url=``,this.realm=``,this.clientId=``,this.silentCheckSsoRedirectUri=``,this.entryPointUrl=``}static get scopedElements(){return{"dbp-auth-keycloak":cn,"dbp-login-button":ln}}static get properties(){return{...super.properties,auth:{type:Object},lang:{type:String},url:{type:String},realm:{type:String},clientId:{type:String,attribute:`client-id`},silentCheckSsoRedirectUri:{type:String,attribute:`silent-check-sso-redirect-uri`},entryPointUrl:{type:String,attribute:`entry-point-url`}}}update(e){e.forEach((e,t)=>{if(t===`auth`){let e=new CustomEvent(`api-platform-auth-update`,{detail:this.auth,bubbles:!0,composed:!0});window.dispatchEvent(e)}}),super.update(e)}render(){return I`
-            <dbp-auth-keycloak subscribe="requested-login-status"
-                               lang="${this.lang}"
-                               entry-point-url="${this.entryPointUrl}"
-                               silent-check-sso-redirect-uri="${this.silentCheckSsoRedirectUri}"
-                               url="${this.url}"
-                               realm="${this.realm}"
-                               client-id="${this.clientId}"
-                               try-login></dbp-auth-keycloak>
+            <dbp-auth-keycloak
+                subscribe="requested-login-status"
+                lang="${this.lang}"
+                entry-point-url="${this.entryPointUrl}"
+                silent-check-sso-redirect-uri="${this.silentCheckSsoRedirectUri}"
+                url="${this.url}"
+                realm="${this.realm}"
+                client-id="${this.clientId}"
+                try-login></dbp-auth-keycloak>
             <dbp-login-button subscribe="auth" lang="${this.lang}"></dbp-login-button>
         `}};Ce(`api-platform-auth`,un);export{un as ApiPlatformAuth};
 //# sourceMappingURL=api-platform-auth.js.map
