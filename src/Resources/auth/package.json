@@ -10,10 +10,12 @@
     "chai": "^6.2.2",
     "mocha": "^11.8.0",
     "oxlint": "^1.80.0",
+    "oxlint-tsgolint": "^7.0.2001",
     "playwright-core": "^1.62.1",
     "rolldown": "^1.2.6",
     "rollup-plugin-copy": "^3.5.0",
-    "rollup-plugin-serve": "^3.0.0"
+    "rollup-plugin-serve": "^3.0.0",
+    "typescript": "^7.0.0"
   },
   "dependencies": {
     "@dbp-toolkit/auth": "^0.3.9",
@@ -27,6 +29,8 @@
     "build-test": "rolldown -c rolldown.config.js --environment BUILD:test",
     "watch": "rolldown -c rolldown.config.js --watch",
     "test": "npm run build-test && web-test-runner",
-    "lint": "oxlint ."
+    "lint": "oxlint .",
+    "oxlint": "oxlint .",
+    "tsc": "tsc -p jsconfig.json"
   }
 }
