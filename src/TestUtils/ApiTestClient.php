@@ -4,40 +4,35 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\TestUtils;
 
-use ApiPlatform\Symfony\Bundle\Test\Client;
 use Dbp\Relay\CoreBundle\TestUtils\Internal\TestAuthenticator;
 use Dbp\Relay\CoreBundle\TestUtils\Internal\TestUser;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Component\HttpClient\HttpClientTrait;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
-/**
- * @deprecated Use ApiTestClient instead
- */
-class TestClient
+class ApiTestClient
 {
+    use HttpClientTrait;
+
     public const TEST_USER_IDENTIFIER = 'testuser';
     public const TEST_TOKEN = TestAuthenticator::TEST_TOKEN;
 
-    protected Client $client;
+    protected KernelBrowser $client;
 
     /**
-     * @param Client $client Create in your override of ApiPlatform\Symfony\Bundle\Test\ApiTestCase::setUp method like this:
-     *                       ApiTestCase::createClient()
+     * @param KernelBrowser $client A Symfony test client. Create it in your test's setUp() method like this:
+     *                              self::createClient() (inherited from Symfony's WebTestCase)
      */
-    public function __construct(Client $client)
+    public function __construct(KernelBrowser $client)
     {
+        $client->followRedirects(false);
         $this->client = $client;
     }
 
-    public function getClient(): Client
+    public function getKernelBrowser(): KernelBrowser
     {
         return $this->client;
-    }
-
-    public function getContainer(): ContainerInterface
-    {
-        return $this->client->getContainer();
     }
 
     /**
@@ -103,7 +98,7 @@ class TestClient
     }
 
     /**
-     * HTTP POST request with a body in JSON format.
+     * HTTP PATCH request with a body in JSON format.
      *
      * @param mixed $data    Data to JSON-encode and send (must be JSON encode-able)
      * @param array $options Array of request options to apply
@@ -128,17 +123,74 @@ class TestClient
         return $this->request('DELETE', $url, $options, $token);
     }
 
+    /**
+     * Performs an HTTP request against the test kernel.
+     *
+     * Supported options:
+     *  - 'query':   array<string, mixed>            Query parameters appended to the URL
+     *  - 'json':    mixed                           JSON-encoded and sent as the request body
+     *  - 'body':    string                          Raw request body (ignored if 'json' is set)
+     *  - 'headers': array<string, string|string[]>  Request headers
+     */
     public function request(string $method, string $url, array $options = [],
         ?string $token = self::TEST_TOKEN): ResponseInterface
     {
-        try {
-            if ($token !== null) {
-                $options['headers']['Authorization'] = 'Bearer '.$token;
+        if ($token !== null) {
+            $options['headers']['Authorization'] = 'Bearer '.$token;
+        }
+
+        $body = null;
+        if (array_key_exists('json', $options) && $options['json'] !== null) {
+            $body = json_encode($options['json'], JSON_THROW_ON_ERROR);
+            $options['headers']['Content-Type'] ??= 'application/json';
+        } elseif (isset($options['body'])) {
+            $body = $options['body'];
+        }
+
+        $server = $this->headersToServer($options['headers'] ?? []);
+
+        // Resolve the URL to an absolute one against a fixed base URI ("http://localhost"),
+        // merging any 'query' option into it.
+        [$parts] = self::prepareRequest(null, $url,
+            ['query' => $options['query'] ?? []],
+            ['base_uri' => 'http://localhost'] + HttpClientInterface::OPTIONS_DEFAULTS);
+        $url = implode('', $parts);
+
+        $this->client->request($method, $url, [], [], $server, $body);
+
+        return new ApiTestResponse(
+            $this->client->getResponse(),
+            $this->client->getInternalResponse(),
+            ['http_method' => $method, 'url' => $url]
+        );
+    }
+
+    /**
+     * Converts an associative array of HTTP headers into BrowserKit's $_SERVER format.
+     *
+     * Raw $_SERVER-style keys (e.g. 'HTTP_ACCEPT', 'CONTENT_TYPE') are passed through as-is.
+     *
+     * @param array<string, string|string[]> $headers
+     *
+     * @return array<string, string>
+     */
+    private function headersToServer(array $headers): array
+    {
+        $server = [];
+        foreach ($headers as $name => $value) {
+            $value = is_array($value) ? ($value[0] ?? '') : $value;
+
+            if (str_starts_with($name, 'HTTP_') || in_array($name, ['CONTENT_TYPE', 'REMOTE_ADDR'], true)) {
+                $server[$name] = $value;
+                continue;
             }
 
-            return $this->client->request($method, $url, $options);
-        } catch (TransportExceptionInterface $e) {
-            throw new \RuntimeException($e->getMessage());
+            $normalized = strtoupper(str_replace('-', '_', $name));
+            $server[in_array($normalized, ['CONTENT_TYPE', 'REMOTE_ADDR'], true)
+                ? $normalized
+                : 'HTTP_'.$normalized] = $value;
         }
+
+        return $server;
     }
 }

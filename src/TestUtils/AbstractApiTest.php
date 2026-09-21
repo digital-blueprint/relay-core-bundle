@@ -7,6 +7,9 @@ namespace Dbp\Relay\CoreBundle\TestUtils;
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
+/**
+ * @deprecated Use ApiTestCase instead
+ */
 abstract class AbstractApiTest extends ApiTestCase
 {
     protected ?TestClient $testClient = null;
