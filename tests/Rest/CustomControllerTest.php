@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests\Rest;
 
-use Dbp\Relay\CoreBundle\TestUtils\AbstractApiTest;
+use Dbp\Relay\CoreBundle\TestUtils\ApiTestCase;
 
-class CustomControllerTest extends AbstractApiTest
+class CustomControllerTest extends ApiTestCase
 {
+    protected function setUp(): void
+    {
+        $this->login();
+    }
+
     public function testCustomControllerRequiredAuthenticationAuthenticated()
     {
         $response = $this->testClient->get('/test/test-resources/foobar/custom_controller?test=GetResourceAuthenticatedOnly');

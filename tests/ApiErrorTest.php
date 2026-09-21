@@ -5,10 +5,15 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreBundle\Tests;
 
 use Dbp\Relay\CoreBundle\Exception\ApiError;
-use Dbp\Relay\CoreBundle\TestUtils\AbstractApiTest;
+use Dbp\Relay\CoreBundle\TestUtils\ApiTestCase;
 
-class ApiErrorTest extends AbstractApiTest
+class ApiErrorTest extends ApiTestCase
 {
+    protected function setUp(): void
+    {
+        $this->login();
+    }
+
     public function testBasics()
     {
         $error = new ApiError(400, 'foobar');
@@ -221,7 +226,7 @@ class ApiErrorTest extends AbstractApiTest
         $this->assertArrayNotHasKey('relay:errorId', $content);
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
 
-        $this->assertTrue($this->testClient->getClient()->getKernel()->isDebug());
+        $this->assertTrue($this->testClient->getKernelBrowser()->getKernel()->isDebug());
         $this->assertArrayHasKey('trace', $content);
     }
 
@@ -243,13 +248,14 @@ class ApiErrorTest extends AbstractApiTest
         $this->assertArrayNotHasKey('relay:errorId', $content);
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
 
-        $this->assertTrue($this->testClient->getClient()->getKernel()->isDebug());
+        $this->assertTrue($this->testClient->getKernelBrowser()->getKernel()->isDebug());
         $this->assertArrayHasKey('trace', $content);
     }
 
     public function testUnhandledWithoutDebug()
     {
-        $this->setUpTestClient(['debug' => false]);
+        $this->createTestClient(['debug' => false]);
+        $this->login();
         $response = $this->testClient->get(
             '/test/test-resources/foobar/custom_controller?test=UnhandledError',
             options: [
@@ -262,7 +268,7 @@ class ApiErrorTest extends AbstractApiTest
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
 
         // No trace with debug
-        $this->assertFalse($this->testClient->getClient()->getKernel()->isDebug());
+        $this->assertFalse($this->testClient->getKernelBrowser()->getKernel()->isDebug());
         $this->assertArrayNotHasKey('trace', $content);
 
         // No details with 5xx and debug
@@ -274,7 +280,8 @@ class ApiErrorTest extends AbstractApiTest
 
     public function testHttpException500WithoutDebug()
     {
-        $this->setUpTestClient(['debug' => false]);
+        $this->createTestClient(['debug' => false]);
+        $this->login();
         $response = $this->testClient->get(
             '/test/test-resources/foobar/custom_controller?test=HttpException500',
             options: [
@@ -287,7 +294,7 @@ class ApiErrorTest extends AbstractApiTest
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
 
         // No trace with debug
-        $this->assertFalse($this->testClient->getClient()->getKernel()->isDebug());
+        $this->assertFalse($this->testClient->getKernelBrowser()->getKernel()->isDebug());
         $this->assertArrayNotHasKey('trace', $content);
 
         // No details with 5xx and debug
@@ -299,7 +306,8 @@ class ApiErrorTest extends AbstractApiTest
 
     public function testHttpException400WithoutDebug()
     {
-        $this->setUpTestClient(['debug' => false]);
+        $this->createTestClient(['debug' => false]);
+        $this->login();
         $response = $this->testClient->get(
             '/test/test-resources/foobar/custom_controller?test=HttpException418',
             options: [
@@ -312,7 +320,7 @@ class ApiErrorTest extends AbstractApiTest
         $content = json_decode($response->getContent(false), true, flags: JSON_THROW_ON_ERROR);
 
         // No trace with debug
-        $this->assertFalse($this->testClient->getClient()->getKernel()->isDebug());
+        $this->assertFalse($this->testClient->getKernelBrowser()->getKernel()->isDebug());
         $this->assertArrayNotHasKey('trace', $content);
 
         // No details with 5xx and debug
@@ -324,7 +332,8 @@ class ApiErrorTest extends AbstractApiTest
 
     public function testApiError500NoDebug()
     {
-        $this->setUpTestClient(['debug' => false]);
+        $this->createTestClient(['debug' => false]);
+        $this->login();
         $response = $this->testClient->get(
             '/test/test-resources/foobar/custom_controller?test=ApiError500',
             options: [
@@ -343,7 +352,7 @@ class ApiErrorTest extends AbstractApiTest
         $this->assertArrayNotHasKey('relay:errorDetails', $content);
 
         // No trace with debug
-        $this->assertFalse($this->testClient->getClient()->getKernel()->isDebug());
+        $this->assertFalse($this->testClient->getKernelBrowser()->getKernel()->isDebug());
         $this->assertArrayNotHasKey('trace', $content);
     }
 }

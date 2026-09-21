@@ -7,12 +7,12 @@ namespace Dbp\Relay\CoreBundle\Tests;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Entity\TestResource;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Entity\TestSubResource;
 use Dbp\Relay\CoreBundle\Tests\TestApi\TestResourceEntityManager;
-use Dbp\Relay\CoreBundle\TestUtils\AbstractApiTest;
-use Dbp\Relay\CoreBundle\TestUtils\TestClient;
+use Dbp\Relay\CoreBundle\TestUtils\ApiTestCase;
+use Dbp\Relay\CoreBundle\TestUtils\ApiTestClient;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
-abstract class AbstractApiTestCase extends AbstractApiTest
+abstract class AbstractApiTestCase extends ApiTestCase
 {
     protected const TEST_CONTENT = TestResourceEntityManager::CONTENT_DEFAULT;
     protected const TEST_SECRET = TestResourceEntityManager::SECRET_DEFAULT;
@@ -21,21 +21,31 @@ abstract class AbstractApiTestCase extends AbstractApiTest
 
     protected const USER_ATTRIBUTE_DEFAULT_VALUES = [
         'IS_ADMIN' => false,
-        'FORCE_USE_PREPARED_FILTER' => false,
+        'FORCE_USE_PREPARED_FILTER' => true,
     ];
 
     protected ?TestResourceEntityManager $testResourceManager = null;
 
     protected function setUp(): void
     {
-        $this->setUpTestClient();
+        $this->login();
 
-        $this->testResourceManager = new TestResourceEntityManager($this->testClient->getContainer());
+        $this->testResourceManager = new TestResourceEntityManager(
+            $this->testClient->getKernelBrowser()->getContainer());
+    }
+
+    protected function login(
+        string $userIdentifier = ApiTestClient::TEST_USER_IDENTIFIER,
+        array $userAttributes = [],
+        ?string $token = ApiTestClient::TEST_TOKEN): void
+    {
+        parent::login($userIdentifier,
+            array_merge(self::USER_ATTRIBUTE_DEFAULT_VALUES, $userAttributes), $token);
     }
 
     protected function getTestClient(
-        string $userIdentifier = TestClient::TEST_USER_IDENTIFIER,
-        array $userAttributes = self::USER_ATTRIBUTE_DEFAULT_VALUES): TestClient
+        string $userIdentifier = ApiTestClient::TEST_USER_IDENTIFIER,
+        array $userAttributes = self::USER_ATTRIBUTE_DEFAULT_VALUES): ApiTestClient
     {
         $this->login($userIdentifier, $userAttributes);
 

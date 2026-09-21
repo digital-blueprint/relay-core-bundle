@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests;
 
-use Dbp\Relay\CoreBundle\TestUtils\TestClient;
+use Dbp\Relay\CoreBundle\TestUtils\ApiTestClient;
 use Symfony\Component\HttpFoundation\Response;
 
 class ApiTest extends AbstractApiTestCase
@@ -57,12 +57,12 @@ class ApiTest extends AbstractApiTestCase
 
     public function testGetCurrentUserIdAuth()
     {
-        $this->testClient->setUpUser(TestClient::TEST_USER_IDENTIFIER, symfonyRoles: ['myrole']);
+        $this->testClient->setUpUser(ApiTestClient::TEST_USER_IDENTIFIER, symfonyRoles: ['myrole']);
         $response = $this->testClient->get('/test/test-resources/foobar/custom_controller?test=GetCurrentUser');
         $this->assertSame(200, $response->getStatusCode());
         $content = json_decode($response->getContent(), true, flags: JSON_THROW_ON_ERROR);
         $content = json_decode($content['content'], true, flags: JSON_THROW_ON_ERROR);
-        $this->assertSame($content['userIdentifier'], TestClient::TEST_USER_IDENTIFIER);
+        $this->assertSame($content['userIdentifier'], ApiTestClient::TEST_USER_IDENTIFIER);
         $this->assertSame($content['isAuthenticated'], true);
         $this->assertSame($content['userRoles'], ['myrole']);
     }
