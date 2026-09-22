@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.1.250
+
+- Deprecate AbstractApiTest, use ApiTestCase instead (preparations for the api-plaform 5 update)
+
 ## v0.1.249
 
 - Drop support for API Platform 4.1
