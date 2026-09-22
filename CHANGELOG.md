@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.252
+
 - Remove deprecated AbstractApiTest
 - Add support for API Platform 5.0
 
