@@ -131,6 +131,8 @@ class ApiTestClient
      *  - 'json':    mixed                           JSON-encoded and sent as the request body
      *  - 'body':    string                          Raw request body (ignored if 'json' is set)
      *  - 'headers': array<string, string|string[]>  Request headers
+     *  - 'extra.parameters': array<string, mixed>   Form parameters
+     *  - 'extra.files':      array<string, mixed>   Uploaded files
      */
     public function request(string $method, string $url, array $options = [],
         ?string $token = self::TEST_TOKEN): ResponseInterface
@@ -156,7 +158,14 @@ class ApiTestClient
             ['base_uri' => 'http://localhost'] + HttpClientInterface::OPTIONS_DEFAULTS);
         $url = implode('', $parts);
 
-        $this->client->request($method, $url, [], [], $server, $body);
+        $this->client->request(
+            $method,
+            $url,
+            $options['extra']['parameters'] ?? [],
+            $options['extra']['files'] ?? [],
+            $server,
+            $body
+        );
 
         return new ApiTestResponse(
             $this->client->getResponse(),

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.1.251
+
+- ApiTestCase: restore form and file support
+
 ## v0.1.250
 
 - Deprecate AbstractApiTest, use ApiTestCase instead (preparations for the api-plaform 5 update)
