@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Remove deprecated AbstractApiTest
+
 ## v0.1.251
 
 - ApiTestCase: restore form and file support
