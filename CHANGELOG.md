@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.1.253
+
+- Add CoreTestKernelTrait for easier creation of test kernels
+
 ## v0.1.252
 
 - Remove deprecated AbstractApiTest
