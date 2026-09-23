@@ -28,7 +28,20 @@ trait CoreTestKernelTrait
         yield new MonologBundle();
         yield new ApiPlatformBundle();
         yield from $this->registerAdditionalBundles();
+
+        foreach ($this->getTestKernelExtensions() as $extension) {
+            yield from $extension->registerBundles();
+        }
+
         yield new DbpRelayCoreBundle();
+    }
+
+    /**
+     * @return iterable<TestKernelExtensionInterface>
+     */
+    protected function getTestKernelExtensions(): iterable
+    {
+        return [];
     }
 
     protected function registerAdditionalBundles(): iterable
@@ -39,6 +52,11 @@ trait CoreTestKernelTrait
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
         $routes->import('@DbpRelayCoreBundle/Resources/config/routing.yaml');
+
+        foreach ($this->getTestKernelExtensions() as $extension) {
+            $extension->configureRoutes($routes);
+        }
+
         $this->configureAdditionalRoutes($routes);
     }
 
@@ -54,6 +72,10 @@ trait CoreTestKernelTrait
             'secret' => 'something',
             'annotations' => false,
         ]);
+
+        foreach ($this->getTestKernelExtensions() as $extension) {
+            $extension->configureContainer($container);
+        }
 
         $this->configureAdditionalContainer($container);
     }
