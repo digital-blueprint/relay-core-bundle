@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.1.254
+
+- CoreTestKernelTrait: add extensions for base bundles
+
 ## v0.1.253
 
 - Add CoreTestKernelTrait for easier creation of test kernels
