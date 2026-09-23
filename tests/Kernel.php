@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreBundle\Tests;
 
-use ApiPlatform\Symfony\Bundle\ApiPlatformBundle;
-use Dbp\Relay\CoreBundle\DbpRelayCoreBundle;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Authorization\TestApiAuthorizationService;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceItemController;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestResourceProcessor;
@@ -14,39 +12,21 @@ use Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestSubResourceProcessor;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Rest\TestSubResourceProvider;
 use Dbp\Relay\CoreBundle\Tests\TestApi\Service\TestResourceService;
 use Dbp\Relay\CoreBundle\Tests\TestApi\TestApi;
+use Dbp\Relay\CoreBundle\TestUtils\CoreTestKernelTrait;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
-use Nelmio\CorsBundle\NelmioCorsBundle;
-use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
-use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
-use Symfony\Bundle\MonologBundle\MonologBundle;
-use Symfony\Bundle\SecurityBundle\SecurityBundle;
-use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
-use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
 class Kernel extends BaseKernel
 {
-    use MicroKernelTrait;
+    use CoreTestKernelTrait;
 
-    public function registerBundles(): iterable
+    protected function registerAdditionalBundles(): iterable
     {
-        yield new FrameworkBundle();
-        yield new SecurityBundle();
-        yield new TwigBundle();
-        yield new NelmioCorsBundle();
-        yield new MonologBundle();
-        yield new ApiPlatformBundle();
         yield new DoctrineBundle();
-        yield new DbpRelayCoreBundle();
     }
 
-    protected function configureRoutes(RoutingConfigurator $routes)
-    {
-        $routes->import('@DbpRelayCoreBundle/Resources/config/routing.yaml');
-    }
-
-    protected function configureContainer(ContainerConfigurator $container)
+    protected function configureAdditionalContainer(ContainerConfigurator $container): void
     {
         $container->services()->set(TestApiAuthorizationService::class)->public()->autoconfigure()->autowire()
             ->call('setConfig', [TestApiAuthorizationService::getTestConfig()]);
@@ -57,13 +37,6 @@ class Kernel extends BaseKernel
             ->call('setConfig', [TestResourceProvider::getTestConfig()]);
         $container->services()->set(TestSubResourceProcessor::class)->public()->autoconfigure()->autowire();
         $container->services()->set(TestSubResourceProvider::class)->public()->autoconfigure()->autowire();
-
-        $container->import('@DbpRelayCoreBundle/Resources/config/services_test.yaml');
-        $container->extension('framework', [
-            'test' => true,
-            'secret' => 'somesecret',
-            'annotations' => false,
-        ]);
 
         $container->extension('api_platform', [
             'mapping' => [
